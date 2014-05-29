@@ -1,0 +1,3 @@
+LIBRARY	"lever-3d_Mex"
+EXPORTS DllMain
+EXPORTS mexFunction
