@@ -110,7 +110,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>lever-3d_Mex.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
@@ -156,7 +156,7 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>lever-3d_Mex.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
@@ -168,15 +168,28 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <None Include="lever-3d_Mex.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="GraphicObject.cpp" />
     <ClCompile Include="Initialization.cpp" />
     <ClCompile Include="lever-3d_mex.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="MessageProcessor.cpp" />
+    <ClCompile Include="MeshPrimitive.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RendererPackage.cpp" />
+    <ClCompile Include="SingleColoredMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="GraphicObject.h" />
     <ClInclude Include="Initialization.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MessageProcessor.h" />
+    <ClInclude Include="MeshPrimitive.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RendererPackage.h" />
     <ClInclude Include="Vec.h" />
     <ClInclude Include="VecFuncs.h" />
   </ItemGroup>

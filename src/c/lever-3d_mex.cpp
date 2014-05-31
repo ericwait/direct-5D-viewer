@@ -34,19 +34,7 @@ void startThread()
 
 void termThread()
 {
-// 	if (g_hProcessingThread!=NULL)
-// 	{
-// 		DWORD waitTerm = WaitForSingleObject(g_hProcessingThread, 500);
-// 		if ( waitTerm == WAIT_TIMEOUT )
-// 			TerminateThread(g_hProcessingThread, -1000);
-// 
-// 		CloseHandle(g_hProcessingThread);
-// 		//CloseHandle(g_hProcessingTermEvent);
-// 		//CloseHandle(g_processingMutex);
-// 		g_hProcessingThread = NULL;
-// 		g_hProcessingTermEvent = NULL;
-// 		//g_processingMutex = NULL;
-// 	}
+
 
 	// Send thread a termination event
 	SetEvent(gTermEvent);
@@ -59,23 +47,11 @@ void termThread()
 	DWORD waitTerm = WaitForSingleObject(messageLoopHandle, 30000);
 	if ( waitTerm == WAIT_TIMEOUT )
 		TerminateThread(messageLoopHandle, -1000);
-// 
-// 	waitTerm = WaitForSingleObject(g_matlabReadMutex, 500);
-// 	if ( waitTerm == WAIT_TIMEOUT )
-// 		TerminateThread(g_matlabReadMutex, -1000);
-// 
-// 	waitTerm = WaitForSingleObject(gHullDataLoadMutex, 500);
-// 	if ( waitTerm == WAIT_TIMEOUT )
-// 		TerminateThread(gHullDataLoadMutex, -1000);
-// 
+
  	CloseHandle(messageLoopHandle);
  	CloseHandle(gTermEvent);
-// 	CloseHandle(g_matlabReadMutex);
-// 	CloseHandle(gHullDataLoadMutex);
  	messageLoopHandle = NULL;
  	gTermEvent = NULL;
-// 	g_matlabReadMutex = NULL;
-// 	gHullDataLoadMutex = NULL;
 }
 
 BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -249,7 +225,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	else if (_strcmpi("close",command)==0)
 	{
-		//termThread();
+		termThread();
 	}
 
 	else
