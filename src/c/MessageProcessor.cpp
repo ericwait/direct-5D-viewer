@@ -1,15 +1,23 @@
-#include "MessageProcessor.h"
 #include "Globals.h"
+#include "MessageProcessor.h"
 #include "Initialization.h"
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	return TRUE;
+	if (message==WM_DESTROY)
+		PostQuitMessage(0);
+
+	return DefWindowProc(hWnd,message,wParam,lParam);
 }
 
 HRESULT messageProcess( MSG& msg ) 
 {
  	HRESULT hr = S_OK;
+
+	if (msg.message==WM_QUIT)
+		return S_FALSE;
+
+	gRenderer->renderAll();
 
 	return hr;
 }
@@ -34,6 +42,9 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 		termWait = WaitForSingleObject(gTermEvent, 0);
 	}
+
+	SAFE_DELETE(gRootSceneNode);//TODO make sure this cleans up all the children too
+	SAFE_DELETE(gRenderer);
 
 	DestroyWindow(gWindowHandle);
 	UnregisterClass(szWndClassName, gDllInstance);

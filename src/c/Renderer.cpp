@@ -3,6 +3,8 @@
 #include "Defines.h"
 #include <d3dcompiler.h>
 #include "MeshPrimitive.h"
+#include "Camera.h"
+#include "RendererPackage.h"
 
 Renderer::Renderer()
 {
@@ -21,17 +23,29 @@ Renderer::Renderer()
 	rasterizerStateNoClip = NULL;
 	rasterizerStateWireClip = NULL;
 	rasterizerStateFillClip = NULL;
+
+	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 }
 
 Renderer::~Renderer()
 {
-	//TODO Ensure that everything has been cleaned up
-	releaseDepthStencils();
-	releaseRenderTarget();
-
 	clearRenderList(Pre);
 	clearRenderList(Main);
 	clearRenderList(Post);
+
+	clearVertexShaderList();
+	clearPixelShaderList();
+	
+	SAFE_RELEASE(vertexShaderConstBuffer);
+
+	releaseRasterizerStates();
+	releaseRenderTarget();
+	releaseDepthStencils();
+	releaseSwapChain();
+
+
+	CloseHandle(mutexDevice);
+	//TODO Ensure that everything has been cleaned up
 }
 
 HRESULT Renderer::init()
@@ -48,7 +62,7 @@ HRESULT Renderer::init()
 	if (initRasterizerStates() == S_FALSE)
 		return S_FALSE;
 
-	return S_OK;
+	return createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
 }
 
 HRESULT Renderer::initSwapChain()
@@ -99,7 +113,23 @@ HRESULT Renderer::initSwapChain()
 			break;
 	}
 
+	D3D11_VIEWPORT vp;
+	vp.Width = gWindowWidth;
+	vp.Height = gWindowHeight;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	immediateContext->RSSetViewports( 1, &vp );
+
 	return hr;
+}
+
+void Renderer::releaseSwapChain()
+{
+	SAFE_RELEASE(swapChain);
+	SAFE_RELEASE(d3dDevice);
+	SAFE_RELEASE(immediateContext);
 }
 
 HRESULT Renderer::initDepthStencils()
@@ -116,7 +146,7 @@ HRESULT Renderer::initDepthStencils()
 	D3D11_TEXTURE2D_DESC descDepth;
 
 	descDepth.Width = gWindowWidth;
-	descDepth.Height = gWindowWidth;
+	descDepth.Height = gWindowHeight;
 	descDepth.MipLevels = 1;
 	descDepth.ArraySize = 1;
 	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
@@ -222,20 +252,6 @@ void Renderer::releaseRenderTarget()
 	SAFE_RELEASE(renderTargetView);
 }
 
-HRESULT Renderer::resetViewPort()
-{
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)gWindowWidth;
-	vp.Height = (float)gWindowHeight;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	immediateContext->RSSetViewports( 1, &vp );
-
-	return S_OK;
-}
-
 HRESULT Renderer::initRasterizerStates()
 {
 	D3D11_RASTERIZER_DESC d3d11rd;
@@ -273,6 +289,13 @@ HRESULT Renderer::initRasterizerStates()
 	ReleaseMutex(mutexDevice);
 
 	return S_OK;
+}
+
+void Renderer::releaseRasterizerStates()
+{
+	SAFE_RELEASE(rasterizerStateNoClip);
+	SAFE_RELEASE(rasterizerStateWireClip);
+	SAFE_RELEASE(rasterizerStateFillClip);
 }
 
 HRESULT CompileShaderFromFile( LPCWSTR szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
@@ -330,8 +353,8 @@ HRESULT Renderer::compileVertexShader(const wchar_t* fileName, const char* shade
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -347,7 +370,7 @@ HRESULT Renderer::compilePixelShader(const wchar_t* fileName, const char* shader
 {
 	ID3DBlob* shaderBlob = NULL;
 
-	HRESULT hr = CompileShaderFromFile(fileName, shaderFunctionName,"vs_4_0", &shaderBlob);
+	HRESULT hr = CompileShaderFromFile(fileName, shaderFunctionName,"ps_4_0", &shaderBlob);
 
 	if( FAILED( hr ) )
 	{
@@ -456,7 +479,7 @@ HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOu
 	return d3dDevice->CreateBuffer(&bufferDesc, NULL, constBufferOut);
 }
 
-void Renderer::updateShaderParams(void* params, ID3D11Buffer* buffer)
+void Renderer::updateShaderParams(const void* params, ID3D11Buffer* buffer)
 {
 	immediateContext->UpdateSubresource(buffer,0,NULL,params,0,0);
 }
@@ -544,63 +567,209 @@ HRESULT Renderer::addToRenderList(RendererPackage* rendererPackage, Section sect
 	return S_OK;
 }
 
-HRESULT Renderer::removeFromRenderList(RendererPackage* rendererPackage, Section section)
+HRESULT Renderer::removeFromRenderList(RendererPackage* rendererPackage)
 {
 	if (rendererPackage==NULL)
 		return S_FALSE;
 	int idx = -1;
 
-	switch (section)
+	if (0==renderPreListMap.count(rendererPackage))
 	{
-	case Renderer::Pre:
-		if (0==renderPreListMap.count(rendererPackage))
-			break;
-
 		idx = renderPreListMap[rendererPackage];
 		renderPreList.erase(renderPreList.begin()+idx);
-
 		renderPreListMap.erase(rendererPackage);
-		break;
-	case Renderer::Main:
-		if (0==renderMainListMap.count(rendererPackage))
-			break;
+	}
 
+	if (0==renderMainListMap.count(rendererPackage))
+	{
 		idx = renderMainListMap[rendererPackage];
 		renderMainList.erase(renderMainList.begin()+idx);
 		renderMainListMap.erase(rendererPackage);
-		break;
-	case Renderer::Post:
-		if (0==renderPostListMap.count(rendererPackage))
-			break;
+	}
 
+	if (0!=renderPostListMap.count(rendererPackage))
+	{
 		idx = renderPostListMap[rendererPackage];
 		renderPostList.erase(renderPostList.begin()+idx);
 		renderPostListMap.erase(rendererPackage);
-		break;
-	default:
-		return S_FALSE;
-		break;
 	}
 
 	return S_OK;
 }
 
-HRESULT Renderer::clearRenderList(Section section)
+void Renderer::clearRenderList(Section section)
 {
 	switch (section)
 	{
 	case Renderer::Pre:
 		renderPreList.clear();
+		renderPreListMap.clear();
 		break;
 	case Renderer::Main:
 		renderMainList.clear();
+		renderMainListMap.clear();
 		break;
 	case Renderer::Post:
+		renderPostList.clear();
 		renderPostList.clear();
 		break;
 	default:
 		break;
 	}
+}
 
-	return S_OK;
+void Renderer::clearVertexShaderList()
+{
+	for (int i = 0; i<vertexShaderList.size(); ++i)
+		SAFE_RELEASE(vertexShaderList[i]);
+
+	vertexShaderList.clear();
+
+	for (int i = 0; i<vertexLayoutList.size(); ++i)
+		SAFE_RELEASE(vertexLayoutList[i]);
+
+	vertexLayoutList.clear();
+
+	vertexShaderMap.clear();
+}
+
+void Renderer::clearPixelShaderList()
+{
+	for (int i = 0; i<pixelShaderList.size(); ++i)
+		SAFE_RELEASE(pixelShaderList[i]);
+	
+	pixelShaderList.clear();
+	pixelShaderMap.clear();
+}
+
+void Renderer::renderAll()
+{
+	startRender();
+	preRenderLoop();
+	mainRenderLoop();
+	postRenderLoop();
+	endRender();
+}
+
+void Renderer::preRenderLoop()
+{
+	for (int i=0; i<renderPreList.size(); ++i)
+	{
+		if (renderPreList[i]->isRenderable())
+			renderPackage(renderPreList[i]);
+	}
+}
+
+void Renderer::mainRenderLoop()
+{
+	for (int i=0; i<renderMainList.size(); ++i)
+	{
+		if (renderMainList[i]->isRenderable())
+			renderPackage(renderMainList[i]);
+	}
+}
+
+void Renderer::postRenderLoop()
+{
+	for (int i=0; i<renderPostList.size(); ++i)
+	{
+		if (renderPostList[i]->isRenderable())
+			renderPackage(renderPostList[i]);
+	}
+}
+
+void Renderer::startRender()
+{
+	//TODO get mutex
+	float ClearColor[4] = {backgroundColor.x, backgroundColor.y, backgroundColor.z};
+	immediateContext->ClearRenderTargetView(renderTargetView, ClearColor);
+	immediateContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
+	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+}
+
+void Renderer::endRender()
+{
+	swapChain->Present( 0, 0 );
+	//TODO release mutex
+}
+
+void Renderer::renderPackage(RendererPackage* package)
+{
+
+	//Vertex Shader setup
+	VertexShaderConstBuffer vcb;
+	Camera* camera = package->getCamera();
+	vcb.projectionTransform = DirectX::XMMatrixTranspose(camera->getProjectionTransform());
+	vcb.viewTransform = DirectX::XMMatrixTranspose(camera->getViewTransform());
+	vcb.worldTransform = DirectX::XMMatrixTranspose(package->getLocalToWorld());
+	updateShaderParams(&vcb,vertexShaderConstBuffer);
+	setVertexShader(package->getMeshPrimitive()->shaderIdx);
+
+	setGeometry(package->getMeshPrimitive()->vertexBuffer,package->getMeshPrimitive()->indexBuffer);
+
+	//Rasterizer setup
+	setRasterizerState(package->getMaterial()->wireframe);
+
+	//Pixel Shader setup
+	package->getMaterial()->updateParams();
+	package->getMaterial()->setShaderConsts();//TODO this needs tweeking
+	setPixelShader(package->getMaterial()->shaderIdx);
+
+	setDepthStencilState(package->getMaterial()->testDepth);
+
+	drawTriangles(package->getMeshPrimitive()->numFaces);
+}
+
+void Renderer::setVertexShader(int vertexShaderListIdx)
+{
+	if (vertexShaderListIdx>vertexShaderList.size()-1)
+		throw std::runtime_error("Write a default vertex Shader and implement it on this line!(Eric)");
+
+	immediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	immediateContext->VSSetShader(vertexShaderList[vertexShaderListIdx],NULL,0);
+	immediateContext->IASetInputLayout(vertexLayoutList[vertexShaderListIdx]);
+	immediateContext->VSSetConstantBuffers(0,1,&vertexShaderConstBuffer);
+}
+
+void Renderer::setRasterizerState(bool wireframe)
+{
+	if (wireframe)
+		immediateContext->RSSetState(rasterizerStateWireClip);
+	else
+		immediateContext->RSSetState(rasterizerStateNoClip);
+}
+
+void Renderer::setPixelShader(int pixelShaderListIdx)
+{
+	if (pixelShaderListIdx>pixelShaderList.size()-1)
+		throw std::runtime_error("Write a default pixel Shader and implement it on this line!(Eric)");
+
+	immediateContext->PSSetShader(pixelShaderList[pixelShaderListIdx],NULL,0);
+}
+
+void Renderer::setDepthStencilState(bool depthTest)
+{
+	if (depthTest)
+		immediateContext->OMSetDepthStencilState(depthStencilStateCompareLess,0);
+	else
+		immediateContext->OMSetDepthStencilState(depthStencilStateCompareAlways,0);
+}
+
+void Renderer::setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer)
+{
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	immediateContext->IASetIndexBuffer(indexBuffer,DXGI_FORMAT_R32_UINT,0);
+	immediateContext->IASetVertexBuffers(0,1,&vertexBuffer,&stride,&offset);
+}
+
+void Renderer::drawTriangles(size_t numFaces)
+{
+	immediateContext->DrawIndexed(3*numFaces,0,0);
+}
+
+void Renderer::setPixelShaderConsts(ID3D11Buffer* buffer)
+{
+	immediateContext->PSSetConstantBuffers(1,1,&buffer);
 }

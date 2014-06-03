@@ -13,6 +13,9 @@ public:
 
 	void updateProjectionTransform();
 
+	DirectX::XMMATRIX getProjectionTransform(){return projectionTransform;}
+	DirectX::XMMATRIX getViewTransform(){return viewTransform;}
+
 protected:
 	Camera(){renderer = NULL;}
 	DirectX::XMMATRIX viewTransform;

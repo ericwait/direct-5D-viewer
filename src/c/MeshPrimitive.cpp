@@ -18,11 +18,13 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	shaderIdx = -1;
 
-	if (!renderer->createVertexBuffer(vert,&vertexBuffer))
+	if (S_FALSE == renderer->createVertexBuffer(vert,&vertexBuffer))
 		throw std::runtime_error("Could not create the vertex buffer!");
 
-	if (!renderer->createIndexBuffer(faces,&indexBuffer))
+	if (S_FALSE == renderer->createIndexBuffer(faces,&indexBuffer))
 		throw std::runtime_error("Could not create the index buffer!");
+
+	numFaces = faces.size();
 
 	shaderIdx = renderer->getVertexShader(VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
 }
@@ -45,11 +47,13 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	shaderIdx = -1;
 
-	if (!renderer->createVertexBuffer(vert,&vertexBuffer))
+	if (S_FALSE == renderer->createVertexBuffer(vert,&vertexBuffer))
 		throw std::runtime_error("Could not create the vertex buffer!");
 
-	if (!renderer->createIndexBuffer(faces,&indexBuffer))
+	if (S_FALSE == renderer->createIndexBuffer(faces,&indexBuffer))
 		throw std::runtime_error("Could not create the index buffer!");
+
+	numFaces = faces.size();
 
 	shaderIdx = renderer->getVertexShader(VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
 }

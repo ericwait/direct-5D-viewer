@@ -1,6 +1,8 @@
-#include "Initialization.h"
 #include "Globals.h"
+#include "Initialization.h"
 #include "MessageProcessor.h"
+#include "Renderer.h"
+#include "SceneNode.h"
 
 HWND gWindowHandle = NULL;
 const TCHAR szWndClassName[] = TEXT("LEVER 3-D");
@@ -9,8 +11,14 @@ unsigned int gWindowHeight = 1280;
 unsigned int gWindowWidth = 720;
 
 HFONT gFont = NULL;
+Renderer* gRenderer = NULL;
+SceneNode* gRootSceneNode = NULL;
+Camera* gDefaultMeshCamera = NULL;
+std::vector<Vec<unsigned int>> gFacesDebug;
+std::vector<Vec<float>> gVertsDebug;
+std::vector<Vec<float>> gNormsDebug;
 
-HRESULT MyRegisterClass(HINSTANCE hInstance, int nCmdShow)
+HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 {
 	WNDCLASSEX wcx;
 
@@ -24,8 +32,8 @@ HRESULT MyRegisterClass(HINSTANCE hInstance, int nCmdShow)
 		wcx.cbWndExtra		= 0;
 		wcx.hInstance		= hInstance;
 		wcx.hIcon			= LoadIcon(hInstance, IDI_APPLICATION);
-		//wcx.hCursor			= LoadCursor(NULL, IDC_ARROW);
-		wcx.hCursor			= LoadCursor(hInstance, NULL);
+		wcx.hCursor			= LoadCursor(NULL, IDC_ARROW);
+		//wcx.hCursor			= LoadCursor(hInstance, NULL);
 		wcx.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 		wcx.lpszMenuName	= NULL;
 		wcx.lpszClassName	= szWndClassName;
@@ -52,7 +60,7 @@ HRESULT MyRegisterClass(HINSTANCE hInstance, int nCmdShow)
 		// TODO error
 		return E_FAIL;
 	}
-	SetCapture( gWindowHandle );
+	//SetCapture( gWindowHandle );
 
 	ShowWindow( gWindowHandle, nCmdShow );
 	UpdateWindow(gWindowHandle);
@@ -60,9 +68,32 @@ HRESULT MyRegisterClass(HINSTANCE hInstance, int nCmdShow)
 	return S_OK;
 }
 
+HRESULT createRenderResources()
+{
+	Vec<float> eye = Vec<float>(0.0f,0.0f,-1.0f);
+	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
+	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
+	
+	gRenderer = new Renderer();
+	gRenderer->init();
+
+	gRootSceneNode = new SceneNode();
+	gDefaultMeshCamera = new Camera(gRenderer,eye,look,up);
+
+	CellHullObject* cho = new CellHullObject(gRenderer,gFacesDebug,gVertsDebug,gNormsDebug);
+
+	GraphicObjectNode* gon = new GraphicObjectNode(cho);
+
+	cho->addToRenderList(Renderer::Main,gDefaultMeshCamera);
+	gRootSceneNode->attachChildNode(gon);
+	cho->setColor(Vec<float>(1.0f,0.5f,0.0f),1.0f);
+
+	return S_OK;
+}
+
 HRESULT windowInit(HINSTANCE hInstance, int nCmdShow)
 {
-	if ( FAILED(MyRegisterClass(hInstance,nCmdShow)) )
+	if ( FAILED(registerWindowClass(hInstance,nCmdShow)) )
 		return E_FAIL;
 
 	gFont = CreateFont(18,//Height
@@ -80,5 +111,5 @@ HRESULT windowInit(HINSTANCE hInstance, int nCmdShow)
 		DEFAULT_PITCH|FF_DONTCARE, //Pitch and Family
 		"Arial");
 
-	return S_OK;
+	return createRenderResources();
 }

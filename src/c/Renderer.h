@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <DirectXMath.h>
 
 class MeshPrimitive;
 class Material;
@@ -33,16 +34,24 @@ public:
 		End
 	};
 
+	struct VertexShaderConstBuffer
+	{
+		DirectX::XMMATRIX worldTransform;
+		DirectX::XMMATRIX viewTransform;
+		DirectX::XMMATRIX projectionTransform;
+	};
+
 	Renderer();
 	~Renderer();
 
 	HRESULT init();
-	void render();
+	void renderAll();
 
 	HRESULT addToRenderList(RendererPackage* rendererPackage, Section section);
-	HRESULT removeFromRenderList(RendererPackage* rendererPackage, Section section);
-	HRESULT clearRenderList(Section section);
-
+	HRESULT removeFromRenderList(RendererPackage* rendererPackage);
+	void clearRenderList(Section section);
+	void clearVertexShaderList();
+	void clearPixelShaderList();
 
 	HRESULT createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut);
 	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
@@ -53,29 +62,43 @@ public:
 	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 		VertexShaders shader);
 
-	void updateShaderParams(void* params, ID3D11Buffer* buffer);
+	void updateShaderParams(const void* params, ID3D11Buffer* buffer);
+	void setPixelShaderConsts(ID3D11Buffer* buffer);
 
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
 	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction);
 
+	void preRenderLoop();
+	void mainRenderLoop();
+	void postRenderLoop();
+	void startRender();
+	void endRender();
+
 private:
-	void initTranforms();
 	HRESULT initSwapChain();
 	HRESULT initDepthStencils();
 	HRESULT initRenderTarget();
 	HRESULT resetViewPort();
-	void initShaders();
 	HRESULT initRasterizerStates();
-	void initMeshes();
-	void createTexture();
 
 	void releaseDepthStencils();
 	void releaseRenderTarget();
+	void releaseRasterizerStates();
+	void releaseSwapChain();
+
+	void setVertexShader(int vertexShaderListIdx);
+	void setRasterizerState(bool wireframe);
+	void setPixelShader(int pixelShaderListIdx);
+	void setDepthStencilState(bool depthTest);
+	void setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer);
+	void drawTriangles(size_t numFaces);
 
 	HRESULT compileVertexShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
 	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
 
+	void renderPackage(RendererPackage* package);
 
+	Vec<float> backgroundColor;
 
 	HANDLE mutexDevice;
 	IDXGISwapChain*	swapChain;
@@ -91,6 +114,8 @@ private:
 	ID3D11RasterizerState* rasterizerStateNoClip;
 	ID3D11RasterizerState* rasterizerStateWireClip;
 	ID3D11RasterizerState* rasterizerStateFillClip;
+
+	ID3D11Buffer* vertexShaderConstBuffer;
 
 	std::vector<MeshPrimitive*> meshPrimitives;
 	
@@ -110,5 +135,5 @@ private:
 	std::map<RendererPackage*,int> renderPostListMap;
 };
 
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::End] = {"Test1.fx", "Test2.fx"};
-const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::End] = {"Test1", "Test2"};
+const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::End] = {"DefaultMeshShaders.fx"};
+const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::End] = {"DefaultMeshVertexShader"};

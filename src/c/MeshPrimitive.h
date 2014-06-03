@@ -25,4 +25,5 @@ private:
 	
 	Renderer* renderer;
 	int shaderIdx;
+	size_t numFaces;
 };

@@ -14,14 +14,17 @@ protected:
 	Material(){}
 	Material(Renderer* rendererIn);
 
-	virtual void updateParams(){}
+	virtual void updateParams() = 0;
 	void setShader(const std::string& shaderFilename, const std::string& shaderFunction);
+	virtual void setShaderConsts() = 0;
 	
 	Renderer* renderer;
 
 private:
 	int shaderIdx;
 	bool wireframe;
+	bool cullBackFace;
+	bool testDepth;
 };
 
 
@@ -35,6 +38,7 @@ public:
 
 	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
+	void setShaderConsts();
 
 	void updateParams();
 

@@ -17,6 +17,14 @@ public:
 
 	void setLocalToWorld(const DirectX::XMMATRIX& localToWorldIn){localToWorld = localToWorldIn;}
 
+	void setCamera(Camera* newCamera){camera = newCamera;}
+
+	Camera* getCamera(){return camera;}
+	Material* getMaterial(){return material;}
+	MeshPrimitive* getMeshPrimitive(){return meshPrimitive;}
+	DirectX::XMMATRIX getLocalToWorld(){return localToWorld;}
+	bool isRenderable(){return renderable;}
+
 private:
 	RendererPackage(){}
 

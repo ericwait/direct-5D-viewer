@@ -5,6 +5,8 @@ Material::Material(Renderer* rendererIn)
 	renderer = rendererIn;
 	shaderIdx = -1;
 	wireframe = false;
+	cullBackFace = true;
+	testDepth = true;
 }
 
 Material::~Material()
@@ -22,4 +24,9 @@ void Material::setWireframe(bool wireframe)
 void Material::setShader(const std::string& shaderFilename, const std::string& shaderFunction)
 {
 	shaderIdx = renderer->getPixelShader(shaderFilename,shaderFunction);
+}
+
+void SingleColoredMaterial::setShaderConsts()
+{
+	renderer->setPixelShaderConsts(constBuffer);
 }

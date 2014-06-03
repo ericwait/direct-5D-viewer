@@ -3,7 +3,7 @@
 GraphicObject::GraphicObject()
 {
 	renderer = NULL;
-	hasRenderResources = false;
+	rendererPackage = NULL;
 }
 
 GraphicObject::GraphicObject(Renderer* renderer)
@@ -11,20 +11,46 @@ GraphicObject::GraphicObject(Renderer* renderer)
 	this->renderer = renderer;
 }
 
-DirectX::XMMATRIX GraphicObject::makeWorldTransform()
-{
-	DirectX::XMMATRIX worldTrans = DirectX::XMMatrixTranslation(worldPosition.x,worldPosition.y,worldPosition.z);
-	DirectX::XMMATRIX worldRot = DirectX::XMMatrixRotationRollPitchYaw(worldRotation.x,worldRotation.y,worldRotation.z);
-
-	return worldRot * worldTrans;
-}
-
 GraphicObject::~GraphicObject()
 {
-	SAFE_DELETE(rendererPackage);
+	removeRendererResources();
 	renderer = NULL;
+}
 
-	hasRenderResources = false;
+HRESULT GraphicObject::addToRenderList(Renderer::Section section, Camera* camera)
+{
+	initalizeRendererResources(camera);
+
+	rendererPackage->setCamera(camera);
+
+	renderer->addToRenderList(rendererPackage,section);
+
+	return S_OK;
+}
+
+void GraphicObject::removeFromRenderList()
+{
+	if (rendererPackage!=NULL)
+		rendererPackage->setRenderableFlag(false);
+}
+
+HRESULT GraphicObject::removeRendererResources()
+{
+	HRESULT hr = renderer->removeFromRenderList(rendererPackage);
+	SAFE_DELETE(rendererPackage);
+
+	return hr;
+}
+
+void GraphicObject::setLocalToWorld(DirectX::XMMATRIX localToWorld)
+{
+	if (rendererPackage!=NULL)
+		rendererPackage->setLocalToWorld(localToWorld);
+}
+
+void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
+{
+	setLocalToWorld(parentToWorld);
 }
 
 CellHullObject::CellHullObject()
@@ -42,9 +68,11 @@ CellHullObject::~CellHullObject()
 	faces.clear();
 	vertices.clear();
 	normals.clear();
+
+	GraphicObject::~GraphicObject();
 }
 
-CellHullObject::CellHullObject(Renderer* renderer, Camera* camera, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
+CellHullObject::CellHullObject(Renderer* renderer, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 	std::vector<Vec<float>>& normals) : GraphicObject(renderer)
 {
 	meshPrimitive = NULL;
@@ -55,9 +83,10 @@ CellHullObject::CellHullObject(Renderer* renderer, Camera* camera, std::vector<V
 	this->normals = normals;
 }
 
-HRESULT CellHullObject::addToRenderList(Renderer::Section section, Camera* camera)
+
+void CellHullObject::initalizeRendererResources(Camera* camera)
 {
-	if (!hasRenderResources)
+	if (rendererPackage==NULL)
 	{
 		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,Renderer::VertexShaders::Default);
 		material = new SingleColoredMaterial(renderer);
@@ -67,10 +96,16 @@ HRESULT CellHullObject::addToRenderList(Renderer::Section section, Camera* camer
 		rendererPackage->setMaterial(material);
 		rendererPackage->setRenderableFlag(true);
 	}
+}
 
-	rendererPackage->setLocalToWorld(makeWorldTransform());
+void CellHullObject::setColor(Vec<float> color, float alpha)
+{
+	if (material!=NULL)
+		material->setColor(color,alpha);
+}
 
-	renderer->addToRenderList(rendererPackage,section);
-
-	return S_OK;
+void CellHullObject::setColorMod(Vec<float> colorMod, float alpha)
+{
+	if (material!=NULL)
+		material->setColorModifier(colorMod,alpha);
 }

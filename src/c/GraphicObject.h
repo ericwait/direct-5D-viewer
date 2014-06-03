@@ -12,35 +12,34 @@ public:
 	GraphicObject(Renderer* renderer);
 	virtual ~GraphicObject();
 
+	HRESULT addToRenderList(Renderer::Section section, Camera* camera);
+	void removeFromRenderList();
+	HRESULT removeRendererResources();
+
+	virtual void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
+
 protected:
 	GraphicObject();
-	DirectX::XMMATRIX makeWorldTransform();
 
-	Vec<float> worldPosition;
-	Vec<float> worldRotation; // Roll, Pitch, Yaw
+	void setLocalToWorld(DirectX::XMMATRIX localToWorld);
+	virtual void initalizeRendererResources(Camera* camera) = 0;
 
 	Renderer* renderer;
-	bool hasRenderResources;
 	RendererPackage* rendererPackage;
 };
 
 class CellHullObject : public GraphicObject
 {
 public:
-	CellHullObject(Renderer* renderer, Camera* camera, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
+	CellHullObject(Renderer* renderer, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 		std::vector<Vec<float>>& normals);
 	~CellHullObject();
 
-	HRESULT addToRenderList(Renderer::Section section, Camera* camera);
-	HRESULT removeFromRenderList();
-	HRESULT removeRendererResources(){;/*TODO*/}
-
-	void setColor(Vec<float> color);
 	void setColor(Vec<float> color, float alpha);
-	void setAlpha(float alpha);
-	void setColorMod(Vec<float> colorMod);
 	void setColorMod(Vec<float> colorMod, float alpha);
-	void setAlphaMod(float alphaMod);
+
+protected:
+		void initalizeRendererResources(Camera* camera);
 
 private:
 	CellHullObject();

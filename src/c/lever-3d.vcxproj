@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>lever-3d_Mex.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>lever-3d.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -154,7 +154,7 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>lever-3d_Mex.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>lever-3d.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -165,7 +165,7 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="lever-3d_Mex.def" />
+    <None Include="lever-3d.def" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -176,7 +176,6 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClCompile Include="MessageProcessor.cpp" />
     <ClCompile Include="MeshPrimitive.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="RendererPackage.cpp" />
     <ClCompile Include="SingleColoredMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +189,7 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClInclude Include="MeshPrimitive.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererPackage.h" />
+    <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Vec.h" />
     <ClInclude Include="VecFuncs.h" />
   </ItemGroup>
