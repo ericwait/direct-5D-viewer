@@ -19,11 +19,11 @@ public:
 
 	void setCamera(Camera* newCamera){camera = newCamera;}
 
-	Camera* getCamera(){return camera;}
-	Material* getMaterial(){return material;}
-	MeshPrimitive* getMeshPrimitive(){return meshPrimitive;}
-	DirectX::XMMATRIX getLocalToWorld(){return localToWorld;}
-	bool isRenderable(){return renderable;}
+	const Camera* getCamera() const{return camera;}
+	Material* getMaterial() const {return material;}
+	const MeshPrimitive* getMeshPrimitive() const{return meshPrimitive;}
+	DirectX::XMMATRIX getLocalToWorld() const{return localToWorld;}
+	bool isRenderable() const{return renderable;}
 
 private:
 	RendererPackage(){}

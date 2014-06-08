@@ -7,6 +7,47 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	if (message==WM_DESTROY)
 		PostQuitMessage(0);
 
+	// Current mouse position
+	int iMouseX = (short)LOWORD( lParam );
+	int iMouseY = (short)HIWORD( lParam );
+	HMENU hmenu = GetMenu(hWnd);
+
+	static bool leftButtonDown = false;
+	static int previousMouseX = 0;
+	static int previousMouseY = 0;
+	static DirectX::XMMATRIX previousWorldRotation;
+
+	switch (message)
+	{
+	case WM_NULL:
+		break;
+	case WM_CREATE:
+		break;
+	case WM_MOVE:
+		break;
+	case WM_SIZE:
+		break;
+	case WM_MOUSEMOVE:
+		if (leftButtonDown)
+		{
+			DirectX::XMMATRIX rotX,rotY;
+			rotX=DirectX::XMMatrixRotationY(((float)(iMouseX-previousMouseX)/gWindowWidth)*DirectX::XM_2PI);
+			rotY=DirectX::XMMatrixRotationX((-(float)(iMouseY-previousMouseY)/gWindowHeight)*DirectX::XM_2PI);
+
+			gRenderer->setRootWorldTransform(previousWorldRotation*rotX*rotY);
+		}
+		break;
+	case WM_LBUTTONDOWN:
+		leftButtonDown = true;
+		previousMouseX = iMouseX;
+		previousMouseY = iMouseY;
+		previousWorldRotation = gRenderer->getRootWorldTransorm();
+		break;
+	case WM_LBUTTONUP:
+		leftButtonDown = false;
+		break;
+	}
+
 	return DefWindowProc(hWnd,message,wParam,lParam);
 }
 
@@ -25,31 +66,37 @@ HRESULT messageProcess( MSG& msg )
 DWORD WINAPI messageLoop(LPVOID lpParam)
 {
 	HRESULT hr = windowInit(gDllInstance,true);
-
+	
 	MSG msg = {0};
 
-	DWORD termWait = WaitForSingleObject(gTermEvent, 0);
-
-	while ( termWait != WAIT_OBJECT_0 && hr==S_OK)
+	if (hr==S_OK)
 	{
-		if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )
+		gRendererInit = true;
+
+		DWORD termWait = WaitForSingleObject(gTermEvent, 0);
+
+		while ( termWait != WAIT_OBJECT_0 && hr==S_OK)
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+
+			hr = messageProcess(msg);
+
+			termWait = WaitForSingleObject(gTermEvent, 0);
 		}
-
-		hr = messageProcess(msg);
-
-		termWait = WaitForSingleObject(gTermEvent, 0);
 	}
 
-	SAFE_DELETE(gRootSceneNode);//TODO make sure this cleans up all the children too
 	SAFE_DELETE(gRenderer);
 
 	DestroyWindow(gWindowHandle);
 	UnregisterClass(szWndClassName, gDllInstance);
 
 	//TODO cleanUp();
+
+	gRendererInit = true;
 
 	return ((int)msg.wParam);
 }

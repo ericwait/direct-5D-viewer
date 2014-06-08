@@ -1,9 +1,9 @@
 #pragma once
 #include "Vec.h"
-#include <d3d11.h>
-#include <vector>
 #include "Defines.h"
 #include "Renderer.h"
+#include <d3d11.h>
+#include <vector>
 
 class MeshPrimitive
 {

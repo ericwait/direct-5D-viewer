@@ -124,4 +124,14 @@ DEVICE_PREFIX double EuclideanDistanceTo(const EXTERN_TYPE<T>& other)
 	return sqrt((double)(SQR(x-other.x) + SQR(y-other.y) + SQR(z-other.z)));
 }
 
+DEVICE_PREFIX VEC_THIS_CLASS<T> cross(const EXTERN_TYPE<T>& other)
+{
+	VEC_THIS_CLASS<T> outVec;
+	outVec.x = this->y*other.z - this->z*other.y;
+	outVec.y = -(this->x*other.z - this->z*other.x);
+	outVec.z = this->x*other.y - this->y*other.x;
+
+	return outVec;
+}
+
 #endif

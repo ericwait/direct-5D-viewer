@@ -7,13 +7,14 @@
 HWND gWindowHandle = NULL;
 const TCHAR szWndClassName[] = TEXT("LEVER 3-D");
 
-unsigned int gWindowHeight = 1280;
-unsigned int gWindowWidth = 720;
+unsigned int gWindowHeight = 720;
+unsigned int gWindowWidth = 1280;
 
 HFONT gFont = NULL;
 Renderer* gRenderer = NULL;
-SceneNode* gRootSceneNode = NULL;
 Camera* gDefaultMeshCamera = NULL;
+OrthoCamera* gWidgetCamera = NULL;
+Camera* gTextureVolumeCamera = NULL;
 std::vector<Vec<unsigned int>> gFacesDebug;
 std::vector<Vec<float>> gVertsDebug;
 std::vector<Vec<float>> gNormsDebug;
@@ -70,23 +71,28 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 
 HRESULT createRenderResources()
 {
-	Vec<float> eye = Vec<float>(0.0f,0.0f,-1.0f);
+	Vec<float> eye = Vec<float>(0.0f,0.0f,-5.0f);
 	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	
 	gRenderer = new Renderer();
 	gRenderer->init();
 
-	gRootSceneNode = new SceneNode();
-	gDefaultMeshCamera = new Camera(gRenderer,eye,look,up);
+	gDefaultMeshCamera = new Camera(eye,look,up);
+	gWidgetCamera = new OrthoCamera(eye,look,up);
 
-	CellHullObject* cho = new CellHullObject(gRenderer,gFacesDebug,gVertsDebug,gNormsDebug);
-
-	GraphicObjectNode* gon = new GraphicObjectNode(cho);
-
-	cho->addToRenderList(Renderer::Main,gDefaultMeshCamera);
-	gRootSceneNode->attachChildNode(gon);
-	cho->setColor(Vec<float>(1.0f,0.5f,0.0f),1.0f);
+// 	//gTextureVolumeCamera = new Camera(gRenderer,eye,look,up);
+// 
+// 	CellHullObject* cho = new CellHullObject(gRenderer,gFacesDebug,gVertsDebug,gNormsDebug,gDefaultMeshCamera);
+// 	GraphicObjectNode* gon = new GraphicObjectNode(cho,gDefaultMeshCamera);
+// 
+// 	VolumeTextureObject* vto = new VolumeTextureObject(gRenderer,gDims,gNumChannels,gImage,Vec<float>(1.0f,1.0f,25.0f/512.0f),gDefaultMeshCamera);
+// 	GraphicObjectNode* gonVT = new GraphicObjectNode(vto,gDefaultMeshCamera);
+// 
+// 	gon->attachToParentNode(gRootSceneNode->getRenderSectionNode(Renderer::Section::Pre));
+// 	cho->setColor(Vec<float>(1.0f,0.5f,0.0f),1.0f);
+// 
+// 	gonVT->attachToParentNode(gRootSceneNode->getRenderSectionNode(Renderer::Section::Main));
 
 	return S_OK;
 }

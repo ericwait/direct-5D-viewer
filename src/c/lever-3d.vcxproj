@@ -104,6 +104,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LEVER3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;</AdditionalIncludeDirectories>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,6 +118,9 @@
 copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
 </Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -176,7 +180,9 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClCompile Include="MessageProcessor.cpp" />
     <ClCompile Include="MeshPrimitive.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="SingleColoredMaterial.cpp" />
+    <ClCompile Include="StaticVolumeTextureMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

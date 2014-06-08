@@ -1,76 +1,74 @@
 #pragma once
 #include "GraphicObject.h"
 #include <DirectXMath.h>
-#include <set>
+#include <vector>
 
 class SceneNode
 {
 public:
-	SceneNode()
-	{
-		localToParentTransform = DirectX::XMMatrixIdentity();
-		parentToWorld = DirectX::XMMatrixIdentity();
-		parentNode=NULL;
-	}
-	virtual ~SceneNode()
-	{
-		for (std::set<SceneNode*>::iterator it=childrenNodes.begin(); it!=childrenNodes.end(); ++it)
-			delete *it;
+	friend class RootSceneNode;
+	SceneNode();
+	virtual ~SceneNode();
 
-		childrenNodes.clear();
-		parentNode = NULL;
-	}
+	void update();
 
-	void update(){updateTransforms(parentToWorld);}
+	virtual void attachToParentNode(SceneNode* parent);
 
-	virtual void attachChildNode(SceneNode* child)//TODO look over the tree and ensure that there is no duplicates
-	{
-		if (0<childrenNodes.count(child))
-			return;
+	void setLocalToParent(DirectX::XMMATRIX transform);
 
-		childrenNodes.insert(child);
-		child->updateTransforms(localToParentTransform*parentToWorld);
-	}
-
-	void setLocalToParent(DirectX::XMMATRIX transform)
-	{
-		localToParentTransform = transform;
-		updateTransforms(parentToWorld);
-	}
+	virtual bool isRenderable(){return false;}
+	DirectX::XMMATRIX getLocalToWorldTransform();
 
 protected:
-	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn)
-	{
-		parentToWorld = parentToWorldIn;
+	void setParentNode(SceneNode* parent);//TODO move this to protected
+	virtual const std::vector<SceneNode*>& getChildren();//TODO move this to protected
+	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
+	virtual void addChildNode(SceneNode* child);
 
-		for (std::set<SceneNode*>::iterator it=childrenNodes.begin(); it!=childrenNodes.end(); ++it)
-		{
-			(*it)->updateTransforms(localToParentTransform*parentToWorld);
-		}
-	}
+	virtual void requestUpdate();
 
 	DirectX::XMMATRIX localToParentTransform;
 	DirectX::XMMATRIX parentToWorld;
-	std::set<SceneNode*> childrenNodes;
+	std::vector<SceneNode*> childrenNodes;
 	SceneNode* parentNode;
 };
 
 class GraphicObjectNode : public SceneNode
 {
 public:
-	GraphicObjectNode(GraphicObject* graphicObjectIn){graphicObject = graphicObjectIn;}
+	GraphicObjectNode(GraphicObject* graphicObjectIn);
 	~GraphicObjectNode(){graphicObject = NULL;}
 
-	void attachChildNode(SceneNode* child){throw std::runtime_error("You cannot attach SceneNode to a GraphicObjectNode!");}
+	virtual bool isRenderable(){return true;}
+
+	//virtual void attachChildNode(SceneNode* child){};
+	virtual void attachToParentNode(SceneNode* parent);
+
+	const RendererPackage* getRenderPackage();
 
 protected:
-	void updateTransforms(DirectX::XMMATRIX parentToWorldIn)
-	{
-		parentToWorld = parentToWorldIn;
-		graphicObject->makeLocalToWorld(localToParentTransform*parentToWorld);
-	}
+	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 
 private:
 	GraphicObjectNode();
 	GraphicObject* graphicObject;
+};
+
+class RootSceneNode : public SceneNode
+{
+public:
+	RootSceneNode();
+	~RootSceneNode();
+
+	virtual void attachToParentNode(SceneNode* parent){}
+	SceneNode* getRenderSectionNode(Renderer::Section section);
+	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section);
+	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
+
+	virtual void requestUpdate();
+
+private:
+	void makeRenderableList();
+	SceneNode* rootChildrenNodes[Renderer::Section::SectionEnd];
+	std::vector<GraphicObjectNode*> renderList[Renderer::Section::SectionEnd];
 };

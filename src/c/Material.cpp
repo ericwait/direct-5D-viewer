@@ -21,12 +21,7 @@ void Material::setWireframe(bool wireframe)
 	this->wireframe = wireframe;
 }
 
-void Material::setShader(const std::string& shaderFilename, const std::string& shaderFunction)
+void Material::setShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams)
 {
-	shaderIdx = renderer->getPixelShader(shaderFilename,shaderFunction);
-}
-
-void SingleColoredMaterial::setShaderConsts()
-{
-	renderer->setPixelShaderConsts(constBuffer);
+	shaderIdx = renderer->getPixelShader(shaderFilename,shaderFunction,shaderParams);
 }

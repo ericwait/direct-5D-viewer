@@ -9,6 +9,8 @@
 class MeshPrimitive;
 class Material;
 class RendererPackage;
+class SceneNode;
+class RootSceneNode;
 
 struct Vertex
 {
@@ -24,14 +26,15 @@ public:
 	{
 		Pre,
 		Main,
-		Post
+		Post,
+		SectionEnd
 	};
 
 	enum VertexShaders
 	{
 		Default,
 		ViewAligned,
-		End
+		VertexShadersEnd
 	};
 
 	struct VertexShaderConstBuffer
@@ -46,16 +49,14 @@ public:
 
 	HRESULT init();
 	void renderAll();
-
-	HRESULT addToRenderList(RendererPackage* rendererPackage, Section section);
-	HRESULT removeFromRenderList(RendererPackage* rendererPackage);
-	void clearRenderList(Section section);
+	void attachToRootScene(SceneNode* sceneIn, Section section);
 	void clearVertexShaderList();
 	void clearPixelShaderList();
 
 	HRESULT createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut);
 	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
+	ID3D11ShaderResourceView* createTextureResourceView(Vec<size_t> dims, unsigned char* image);
 
 	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 		std::vector<Vec<float>> textureUV, VertexShaders shader);
@@ -64,9 +65,12 @@ public:
 
 	void updateShaderParams(const void* params, ID3D11Buffer* buffer);
 	void setPixelShaderConsts(ID3D11Buffer* buffer);
+	void setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView);
+	void setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState);
 
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
-	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction);
+	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
+	ID3D11SamplerState* getSamplerState();
 
 	void preRenderLoop();
 	void mainRenderLoop();
@@ -74,12 +78,16 @@ public:
 	void startRender();
 	void endRender();
 
+	void setRootWorldTransform(DirectX::XMMATRIX worldTransform);
+	DirectX::XMMATRIX getRootWorldTransorm();
+
 private:
 	HRESULT initSwapChain();
 	HRESULT initDepthStencils();
 	HRESULT initRenderTarget();
 	HRESULT resetViewPort();
 	HRESULT initRasterizerStates();
+	void createBlendState();
 
 	void releaseDepthStencils();
 	void releaseRenderTarget();
@@ -96,7 +104,7 @@ private:
 	HRESULT compileVertexShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
 	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
 
-	void renderPackage(RendererPackage* package);
+	void renderPackage(const RendererPackage* package);
 
 	Vec<float> backgroundColor;
 
@@ -106,6 +114,7 @@ private:
 	ID3D11DeviceContext* immediateContext;
 	ID3D11RenderTargetView* renderTargetView;
 	IDXGISurface1* IDXGIBackBuffer;	
+	ID3D11BlendState* blendState;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11DepthStencilState* depthStencilStateCompareAlways;
@@ -116,8 +125,6 @@ private:
 	ID3D11RasterizerState* rasterizerStateFillClip;
 
 	ID3D11Buffer* vertexShaderConstBuffer;
-
-	std::vector<MeshPrimitive*> meshPrimitives;
 	
 	std::map<std::string,int> pixelShaderMap;
 	std::map<std::string,int> vertexShaderMap;
@@ -126,14 +133,10 @@ private:
 	std::vector<ID3D11VertexShader*> vertexShaderList;
 	std::vector<ID3D11InputLayout*> vertexLayoutList;
 
-	std::vector<RendererPackage*> renderPreList;
-	std::vector<RendererPackage*> renderMainList;
-	std::vector<RendererPackage*> renderPostList;
+	ID3D11SamplerState* linearTextureSampler;
 
-	std::map<RendererPackage*,int> renderPreListMap;
-	std::map<RendererPackage*,int> renderMainListMap;
-	std::map<RendererPackage*,int> renderPostListMap;
+	RootSceneNode* rootScene;
 };
 
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::End] = {"DefaultMeshShaders.fx"};
-const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::End] = {"DefaultMeshVertexShader"};
+const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshShaders.fx","ViewAlignedVertexShader.fx"};
+const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshVertexShader","ViewAlignedVertexShader"};

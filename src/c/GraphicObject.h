@@ -9,40 +9,41 @@
 class GraphicObject
 {
 public:
+	friend class GraphicObjectNode;
 	GraphicObject(Renderer* renderer);
 	virtual ~GraphicObject();
 
-	HRESULT addToRenderList(Renderer::Section section, Camera* camera);
 	void removeFromRenderList();
-	HRESULT removeRendererResources();
+	void removeRendererResources();
 
 	virtual void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
+
+	const RendererPackage* getRenderPackage(){return rendererPackage;}
 
 protected:
 	GraphicObject();
 
 	void setLocalToWorld(DirectX::XMMATRIX localToWorld);
-	virtual void initalizeRendererResources(Camera* camera) = 0;
 
 	Renderer* renderer;
 	RendererPackage* rendererPackage;
+
 };
 
 class CellHullObject : public GraphicObject
 {
 public:
 	CellHullObject(Renderer* renderer, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
-		std::vector<Vec<float>>& normals);
+		std::vector<Vec<float>>& normals, Camera* camera);
 	~CellHullObject();
 
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
 
-protected:
-		void initalizeRendererResources(Camera* camera);
-
 private:
 	CellHullObject();
+	void initalizeRendererResources(Camera* camera);
+
 	MeshPrimitive* meshPrimitive;
 	SingleColoredMaterial* material;
 
@@ -51,13 +52,28 @@ private:
 	std::vector<Vec<float>> normals;
 };
 
-// class VolumeTextureObject : GraphicObject
-// {
-// public:
-// 	VolumeTextureObject();
-// 	~VolumeTextureObject();
-// 
-// private:
-// 	MeshPrimitive* meshPrimitive;
-// 	//TODO list of materials
-// };
+class VolumeTextureObject : public GraphicObject
+{
+public:
+	static const Vec<unsigned int> triIndices[2]; 
+
+	static const Vec<float> triVertices[4];
+
+	VolumeTextureObject(Renderer* renderer, Vec<size_t> dimsIn, int numChannels, unsigned char* image, Vec<float> scaleFactorIn, Camera* camera);
+	~VolumeTextureObject();
+
+	void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
+
+private:
+	VolumeTextureObject();
+	void initalizeRendererResources(Camera* camera, unsigned char* image);
+
+	void createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces, std::vector<Vec<float>> &normals, std::vector<Vec<float>> &textureUVs);
+
+	Vec<size_t> dims;
+	Vec<float> scaleFactor;
+	int numChannels;
+	MeshPrimitive* meshPrimitive;
+	StaticVolumeTextureMaterial* material;
+};
+

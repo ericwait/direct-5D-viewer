@@ -6,21 +6,29 @@
 class Camera
 {
 public:
-	Camera(Renderer* renderer, Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
-	~Camera();
+	Camera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
 
-	void updateViewTransform(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
+	virtual void updateViewTransform(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
+
+	virtual void updateProjectionTransform();
+
+	DirectX::XMMATRIX getProjectionTransform() const {return projectionTransform;}
+	DirectX::XMMATRIX getViewTransform() const {return viewTransform;}
+
+protected:
+	Camera(){}
+	DirectX::XMMATRIX viewTransform;
+	DirectX::XMMATRIX projectionTransform;
+};
+
+class OrthoCamera : public Camera
+{
+public:
+	OrthoCamera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
 
 	void updateProjectionTransform();
 
-	DirectX::XMMATRIX getProjectionTransform(){return projectionTransform;}
-	DirectX::XMMATRIX getViewTransform(){return viewTransform;}
-
-protected:
-	Camera(){renderer = NULL;}
-	DirectX::XMMATRIX viewTransform;
-	DirectX::XMMATRIX projectionTransform;
-
-	Renderer* renderer;
+private:
+	OrthoCamera();
 };
 

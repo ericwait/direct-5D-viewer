@@ -7,7 +7,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn) : Material(re
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
-	setShader("DefaultMeshShaders.fx","DefaultMeshPixelShader");
+	setShader("DefaultMeshShaders.fx","DefaultMeshPixelShader","");
 }
 
 SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn) : Material(rendererIn)
@@ -17,7 +17,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
-	setShader("DefaultMeshShaders.fx","DefaultMeshPixelShader");
+	setShader("DefaultMeshShaders.fx","DefaultMeshPixelShader","");
 }
 
 SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn, float alpha) : Material(rendererIn)
@@ -27,7 +27,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
-	setShader("DefaultMeshShaders.fx","DefaultMeshPixelShader");
+	setShader("DefaultMeshShaders.fx","DefaultMeshPixelShader","");
 }
 
 SingleColoredMaterial::~SingleColoredMaterial()
@@ -50,4 +50,9 @@ void SingleColoredMaterial::setColorModifier(Vec<float> colorMod, float alphaMod
 void SingleColoredMaterial::updateParams()
 {
 	renderer->updateShaderParams(&colorBuffer,constBuffer);
+}
+
+void SingleColoredMaterial::setShaderResources()
+{
+	renderer->setPixelShaderConsts(constBuffer);
 }

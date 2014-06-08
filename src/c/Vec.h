@@ -36,7 +36,6 @@ public:
 		this->z = static_cast<T>(other.z);
 	}
 
-
 	DEVICE_PREFIX VEC_THIS_CLASS(T x, T y, T z)
 	{
 		this->x = x;
@@ -169,6 +168,11 @@ public:
 		return outVec;
 	}
 
+	DEVICE_PREFIX double length()
+	{
+		return sqrt(SQR((double)x) + SQR((double)y) + SQR((double)z));
+	}
+
 	DEVICE_PREFIX VEC_THIS_CLASS<T> clamp(VEC_THIS_CLASS<T> minVal, VEC_THIS_CLASS<T> maxVal)
 	{
 		VEC_THIS_CLASS<T> outVec;
@@ -177,6 +181,13 @@ public:
 		outVec.z = (z<maxVal.z) ? ((x>minVal.z) ? (z) : (minVal.z)) : (maxVal.z);
 
 		return outVec;
+	}
+
+	DEVICE_PREFIX VEC_THIS_CLASS<float> norm()
+	{
+		VEC_THIS_CLASS<float> outVec = *this;
+
+		return outVec / outVec.length();
 	}
 
 #define EXTERN_TYPE VEC_THIS_CLASS

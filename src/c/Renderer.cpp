@@ -24,25 +24,28 @@ Renderer::Renderer()
 	rasterizerStateWireClip = NULL;
 	rasterizerStateFillClip = NULL;
 
+	linearTextureSampler = NULL;
+
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 }
 
 Renderer::~Renderer()
 {
-	clearRenderList(Pre);
-	clearRenderList(Main);
-	clearRenderList(Post);
+	DWORD waitTerm = WaitForSingleObject(mutexDevice,10000);
+
+	SAFE_DELETE(rootScene);
 
 	clearVertexShaderList();
 	clearPixelShaderList();
 	
 	SAFE_RELEASE(vertexShaderConstBuffer);
+	SAFE_RELEASE(linearTextureSampler);
+	SAFE_RELEASE(blendState);
 
 	releaseRasterizerStates();
 	releaseRenderTarget();
 	releaseDepthStencils();
 	releaseSwapChain();
-
 
 	CloseHandle(mutexDevice);
 	//TODO Ensure that everything has been cleaned up
@@ -50,23 +53,47 @@ Renderer::~Renderer()
 
 HRESULT Renderer::init()
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
+
 	if (initSwapChain() == S_FALSE)
+	{
+		ReleaseMutex(mutexDevice);
 		return S_FALSE;
+	}
 
 	if (initDepthStencils() == S_FALSE)
+	{
+		ReleaseMutex(mutexDevice);
 		return S_FALSE;
+	}
 
 	if (initRenderTarget() == S_FALSE)
+	{
+		ReleaseMutex(mutexDevice);
 		return S_FALSE;
+	}
 
 	if (initRasterizerStates() == S_FALSE)
+	{
+		ReleaseMutex(mutexDevice);
 		return S_FALSE;
+	}
 
-	return createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
+	createBlendState();
+
+	HRESULT hr = createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
+
+	rootScene = new RootSceneNode();
+
+	ReleaseMutex(mutexDevice);
+
+	return hr;
 }
 
 HRESULT Renderer::initSwapChain()
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
+
 	HRESULT hr = S_FALSE;
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -121,6 +148,8 @@ HRESULT Renderer::initSwapChain()
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	immediateContext->RSSetViewports( 1, &vp );
+
+	ReleaseMutex(mutexDevice);
 
 	return hr;
 }
@@ -180,7 +209,6 @@ HRESULT Renderer::initDepthStencils()
 	descDS.DepthFunc=D3D11_COMPARISON_ALWAYS;
 	descDS.StencilEnable=FALSE;
 
-
 	hr = d3dDevice->CreateDepthStencilState(&descDS,&depthStencilStateCompareAlways);
 	if( FAILED( hr ) )
 		return hr;
@@ -190,10 +218,12 @@ HRESULT Renderer::initDepthStencils()
 
 	descDSV.Format = descDepth.Format;
 	descDSV.Flags = 0;
+
 	if( descDepth.SampleDesc.Count > 1 )
 		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 	else
 		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
 	descDSV.Texture2D.MipSlice = 0;
 
 	hr = d3dDevice->CreateDepthStencilView(depthStencil, &descDSV, &depthStencilView);
@@ -386,6 +416,8 @@ HRESULT Renderer::compilePixelShader(const wchar_t* fileName, const char* shader
 
 HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
+
 	if ( verts.size() == 0 )
 		return S_FALSE;
 
@@ -403,20 +435,18 @@ HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** 
 	vertData.SysMemPitch = 0;
 	vertData.SysMemSlicePitch = 0;
 
-	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	if ( waitResult != WAIT_OBJECT_0 )
-		return S_FALSE;
-
 	HRESULT result = d3dDevice->CreateBuffer(&vertBufferDesc, &vertData, vertexBufferOut);
-	ReleaseMutex(mutexDevice);
 	if ( FAILED(result) )
 		*vertexBufferOut = NULL;
+
+	ReleaseMutex(mutexDevice);
 
 	return result;
 }
 
 HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	if (faces.size()==0)
 		return S_FALSE;
 
@@ -434,14 +464,11 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
-	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	if ( waitResult != WAIT_OBJECT_0 )
-		return S_FALSE;
-
 	HRESULT result = d3dDevice->CreateBuffer(&indexBufferDesc, &indexData, indexBufferOut);
-	ReleaseMutex(mutexDevice);
 	if ( FAILED(result) )
 		*indexBufferOut = NULL;
+	
+	ReleaseMutex(mutexDevice);
 
 	return result;
 }
@@ -449,9 +476,11 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 	std::vector<Vec<float>> textureUV, VertexShaders shader)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, textureUV, shader);
 
-	meshPrimitives.push_back(newMesh);
+	//meshPrimitives.push_back(newMesh);  //TODO delete this method?
+	ReleaseMutex(mutexDevice);
 
 	return newMesh;
 }
@@ -459,15 +488,18 @@ MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces,
 MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 	VertexShaders shader)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, shader);
 
-	meshPrimitives.push_back(newMesh);
-
+	//meshPrimitives.push_back(newMesh);
+	ReleaseMutex(mutexDevice);
+	
 	return newMesh;
 }
 
 HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	D3D11_BUFFER_DESC bufferDesc;
 
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
@@ -476,22 +508,33 @@ HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOu
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
 
-	return d3dDevice->CreateBuffer(&bufferDesc, NULL, constBufferOut);
+	HRESULT hr = d3dDevice->CreateBuffer(&bufferDesc, NULL, constBufferOut);
+
+	ReleaseMutex(mutexDevice);
+
+	return hr;
 }
 
 void Renderer::updateShaderParams(const void* params, ID3D11Buffer* buffer)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	immediateContext->UpdateSubresource(buffer,0,NULL,params,0,0);
+	ReleaseMutex(mutexDevice);
 }
 
 int Renderer::getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction)
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	std::string shaderLookupName = shaderFilename;
 	shaderLookupName += ":";
 	shaderLookupName += shaderFunction;
 
 	if (0!=vertexShaderMap.count(shaderLookupName))
-		return vertexShaderMap[shaderLookupName];
+	{
+		int idx = vertexShaderMap[shaderLookupName];
+		ReleaseMutex(mutexDevice);
+		return idx;
+	}
 
 	ID3D11VertexShader* newShader;
 	ID3D11InputLayout* newLayout;
@@ -500,24 +543,34 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 	fn.assign(shaderFilename.begin(),shaderFilename.end());
 
 	if (compileVertexShader(fn.c_str(), shaderFunction.c_str(),&newShader,&newLayout)==S_FALSE)
+	{
+		ReleaseMutex(mutexDevice);
 		return -1;
+	}
 
 	vertexShaderList.push_back(newShader);
 	vertexLayoutList.push_back(newLayout);
 
 	vertexShaderMap.insert(std::pair<std::string,int>(shaderLookupName,vertexShaderList.size()-1));
 
-	return vertexShaderMap[shaderLookupName];
+	int idx = vertexShaderMap[shaderLookupName];
+
+	ReleaseMutex(mutexDevice);
+
+	return idx;
 }
 
-int Renderer::getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction)
+int Renderer::getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams)
 {
-	std::string shaderLookupName = shaderFilename;
-	shaderLookupName += ":";
-	shaderLookupName += shaderFunction;
+	WaitForSingleObject(mutexDevice,INFINITE);
+	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + shaderParams;
 
 	if (pixelShaderMap.count(shaderLookupName)!=0)
-		return pixelShaderMap[shaderLookupName];
+	{
+		int idx = pixelShaderMap[shaderLookupName];
+		ReleaseMutex(mutexDevice);
+		return idx;
+	}
 
 	ID3D11PixelShader* newShader;
 
@@ -525,97 +578,20 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 	fn.assign(shaderFilename.begin(),shaderFilename.end());
 
 	if (compilePixelShader(fn.c_str(), shaderFunction.c_str(),&newShader)==S_FALSE)
+	{
+		ReleaseMutex(mutexDevice);
 		return -1;
+	}
 
 	pixelShaderList.push_back(newShader);
 
 	pixelShaderMap.insert(std::pair<std::string,int>(shaderLookupName,pixelShaderList.size()-1));
 
-	return pixelShaderMap[shaderLookupName];
-}
+	int idx = pixelShaderMap[shaderLookupName];
+	
+	ReleaseMutex(mutexDevice);
 
-HRESULT Renderer::addToRenderList(RendererPackage* rendererPackage, Section section)
-{
-	if (rendererPackage==NULL)
-		return S_FALSE;
-
-	switch (section)
-	{
-	case Pre:
-		if (0!=renderPreListMap.count(rendererPackage))
-			break;
-
-		renderPreList.push_back(rendererPackage);
-		renderPreListMap.insert(std::pair<RendererPackage*,int>(rendererPackage,renderPreList.size()-1));
-		break;
-	case Main:
-		if (0!=renderMainListMap.count(rendererPackage))
-			break;
-
-		renderMainList.push_back(rendererPackage);
-		renderMainListMap.insert(std::pair<RendererPackage*,int>(rendererPackage,renderMainList.size()-1));
-		break;
-	case Post:
-		if (0!=renderPostListMap.count(rendererPackage))
-			break;
-
-		renderPostList.push_back(rendererPackage);
-		renderPostListMap.insert(std::pair<RendererPackage*,int>(rendererPackage,renderPostList.size()-1));
-		break;
-	}
-
-	return S_OK;
-}
-
-HRESULT Renderer::removeFromRenderList(RendererPackage* rendererPackage)
-{
-	if (rendererPackage==NULL)
-		return S_FALSE;
-	int idx = -1;
-
-	if (0==renderPreListMap.count(rendererPackage))
-	{
-		idx = renderPreListMap[rendererPackage];
-		renderPreList.erase(renderPreList.begin()+idx);
-		renderPreListMap.erase(rendererPackage);
-	}
-
-	if (0==renderMainListMap.count(rendererPackage))
-	{
-		idx = renderMainListMap[rendererPackage];
-		renderMainList.erase(renderMainList.begin()+idx);
-		renderMainListMap.erase(rendererPackage);
-	}
-
-	if (0!=renderPostListMap.count(rendererPackage))
-	{
-		idx = renderPostListMap[rendererPackage];
-		renderPostList.erase(renderPostList.begin()+idx);
-		renderPostListMap.erase(rendererPackage);
-	}
-
-	return S_OK;
-}
-
-void Renderer::clearRenderList(Section section)
-{
-	switch (section)
-	{
-	case Renderer::Pre:
-		renderPreList.clear();
-		renderPreListMap.clear();
-		break;
-	case Renderer::Main:
-		renderMainList.clear();
-		renderMainListMap.clear();
-		break;
-	case Renderer::Post:
-		renderPostList.clear();
-		renderPostList.clear();
-		break;
-	default:
-		break;
-	}
+	return idx;
 }
 
 void Renderer::clearVertexShaderList()
@@ -644,43 +620,61 @@ void Renderer::clearPixelShaderList()
 
 void Renderer::renderAll()
 {
+	WaitForSingleObject(mutexDevice,INFINITE);
 	startRender();
 	preRenderLoop();
 	mainRenderLoop();
 	postRenderLoop();
 	endRender();
+
+	ReleaseMutex(mutexDevice);
+}
+
+void Renderer::attachToRootScene(SceneNode* sceneIn, Section section)
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+
+	sceneIn->attachToParentNode(rootScene->getRenderSectionNode(section));
+
+	ReleaseMutex(mutexDevice);
 }
 
 void Renderer::preRenderLoop()
 {
+	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre);
 	for (int i=0; i<renderPreList.size(); ++i)
 	{
 		if (renderPreList[i]->isRenderable())
-			renderPackage(renderPreList[i]);
+			renderPackage(renderPreList[i]->getRenderPackage());
 	}
 }
 
 void Renderer::mainRenderLoop()
 {
+	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
+
+	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main);
 	for (int i=0; i<renderMainList.size(); ++i)
 	{
 		if (renderMainList[i]->isRenderable())
-			renderPackage(renderMainList[i]);
+			renderPackage(renderMainList[i]->getRenderPackage());
 	}
 }
 
 void Renderer::postRenderLoop()
 {
+	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
+
+	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post);
 	for (int i=0; i<renderPostList.size(); ++i)
 	{
 		if (renderPostList[i]->isRenderable())
-			renderPackage(renderPostList[i]);
+			renderPackage(renderPostList[i]->getRenderPackage());
 	}
 }
 
 void Renderer::startRender()
 {
-	//TODO get mutex
 	float ClearColor[4] = {backgroundColor.x, backgroundColor.y, backgroundColor.z};
 	immediateContext->ClearRenderTargetView(renderTargetView, ClearColor);
 	immediateContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
@@ -690,15 +684,13 @@ void Renderer::startRender()
 void Renderer::endRender()
 {
 	swapChain->Present( 0, 0 );
-	//TODO release mutex
 }
 
-void Renderer::renderPackage(RendererPackage* package)
+void Renderer::renderPackage(const RendererPackage* package)
 {
-
 	//Vertex Shader setup
 	VertexShaderConstBuffer vcb;
-	Camera* camera = package->getCamera();
+	const Camera* camera = package->getCamera();
 	vcb.projectionTransform = DirectX::XMMatrixTranspose(camera->getProjectionTransform());
 	vcb.viewTransform = DirectX::XMMatrixTranspose(camera->getViewTransform());
 	vcb.worldTransform = DirectX::XMMatrixTranspose(package->getLocalToWorld());
@@ -712,7 +704,7 @@ void Renderer::renderPackage(RendererPackage* package)
 
 	//Pixel Shader setup
 	package->getMaterial()->updateParams();
-	package->getMaterial()->setShaderConsts();//TODO this needs tweeking
+	package->getMaterial()->setShaderResources();//TODO this needs tweeking
 	setPixelShader(package->getMaterial()->shaderIdx);
 
 	setDepthStencilState(package->getMaterial()->testDepth);
@@ -773,3 +765,121 @@ void Renderer::setPixelShaderConsts(ID3D11Buffer* buffer)
 {
 	immediateContext->PSSetConstantBuffers(1,1,&buffer);
 }
+
+ID3D11SamplerState* Renderer::getSamplerState()
+{
+	if (linearTextureSampler==NULL)
+	{
+		D3D11_SAMPLER_DESC samDesc;
+		ZeroMemory( &samDesc, sizeof(samDesc) );
+		//samDesc.Filter = D3D11_FILTER_ANISOTROPIC ;
+		samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		//samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		//samDesc.AddressU = samDesc.AddressV = samDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samDesc.AddressU = samDesc.AddressV = samDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+		samDesc.BorderColor[0] = 0.0;
+		samDesc.BorderColor[1] = 0.0;
+		samDesc.BorderColor[2] = 0.0;
+		samDesc.BorderColor[3] = 0.0;
+		samDesc.MaxAnisotropy = 16;
+		samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		samDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		if (S_OK != d3dDevice->CreateSamplerState(&samDesc,&linearTextureSampler))
+		{
+			throw std::runtime_error("Could not create Texture Sampler!");
+		}
+	}
+
+	return linearTextureSampler;
+}
+
+ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, unsigned char* image)
+{
+	HRESULT hr = S_OK;
+	UINT iMipCount = 1;
+	UINT BitSize = 0;
+
+	D3D11_TEXTURE3D_DESC desc;
+	desc.Format = DXGI_FORMAT_R8_UNORM;
+	desc.Width = dims.x;
+	desc.Height = dims.y;
+	desc.Depth = dims.z;
+	desc.MipLevels = iMipCount;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	ID3D11Texture3D* pTex3D = NULL;
+
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.SysMemPitch = dims.x;
+	initData.SysMemSlicePitch = dims.x*dims.y;
+	initData.pSysMem = (void*)image;
+
+	hr = d3dDevice->CreateTexture3D( &desc, &initData, &pTex3D );
+	if( FAILED( hr ))
+		throw std::runtime_error("Could not create Texture Resource!");
+
+	ID3D11ShaderResourceView* localSRV;
+	hr = d3dDevice->CreateShaderResourceView( pTex3D, NULL, &localSRV);
+	SAFE_RELEASE( pTex3D );
+	if( FAILED( hr ))
+		throw std::runtime_error("Could not create Texture Resource View!");
+
+	return localSRV;
+}
+
+void Renderer::createBlendState()
+{
+	D3D11_BLEND_DESC BlendState;
+	ZeroMemory(&BlendState, sizeof(D3D11_BLEND_DESC));
+	BlendState.AlphaToCoverageEnable = FALSE;
+	BlendState.IndependentBlendEnable = FALSE;
+// 	BlendState.RenderTarget[0].BlendEnable = TRUE;
+// 	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+// 	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+// 	BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+// 	BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+// 	BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+// 	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+// 	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	BlendState.RenderTarget[0].BlendEnable=TRUE;
+	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+
+	BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+	BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	d3dDevice->CreateBlendState(&BlendState, &blendState);
+	immediateContext->OMSetBlendState(blendState, 0, 0xffffffff);
+}
+
+void Renderer::setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView)
+{
+	immediateContext->PSSetShaderResources(startIdx,length,shaderResourceView);
+}
+
+void Renderer::setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState)
+{
+	immediateContext->PSSetSamplers(startIdx,length,samplerState);
+}
+
+void Renderer::setRootWorldTransform(DirectX::XMMATRIX worldTransform)
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+
+	rootScene->setLocalToParent(worldTransform);
+
+	ReleaseMutex(mutexDevice);
+}
+
+DirectX::XMMATRIX Renderer::getRootWorldTransorm()
+{
+	return rootScene->getLocalToWorldTransform();
+}
+

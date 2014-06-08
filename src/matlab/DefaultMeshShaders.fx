@@ -20,8 +20,8 @@ struct VS_OUTPUT
 
 struct PS_OUTPUT
 {
-	float4 color : SV_TARGET;
-	float depth : SV_DEPTH;
+	float4 color : SV_TARGET0;
+	float depth : SV_DEPTH0;
 };
 
 VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TEXCOORD, float3 Normal : NORMAL )
@@ -34,8 +34,6 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 
 	output.Pos = mul( output.Pos, View );
 	output.Pos = mul( output.Pos, Projection );
-
-	//Normal.w = 0.0;
 
 	output.Normal = mul( Normal, World );
 
