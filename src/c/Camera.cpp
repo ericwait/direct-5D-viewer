@@ -24,6 +24,14 @@ void Camera::updateProjectionTransform()
 	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, 0.01f, 100.0f);
 }
 
+
+
+OrthoCamera::OrthoCamera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection) : Camera(cameraPostion,lookPostion,upDirection)
+{
+	updateViewTransform(cameraPostion,lookPostion,upDirection);
+	updateProjectionTransform();
+}
+
 void OrthoCamera::updateProjectionTransform()
 {
 	float orthoHeight = 2.0;
@@ -38,10 +46,4 @@ void OrthoCamera::updateProjectionTransform()
 
 	projectionTransform = DirectX::XMMatrixOrthographicRH(aspectRatio*orthoHeight, orthoHeight, 0.01f, 100.0f)
 		* DirectX::XMMatrixScaling(widgetScale, widgetScale, 1.0f) * DirectX::XMMatrixTranslation(ctrX, ctrY, 0.0f);
-}
-
-OrthoCamera::OrthoCamera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection) : Camera(cameraPostion,lookPostion,upDirection)
-{
-	updateViewTransform(cameraPostion,lookPostion,upDirection);
-	updateProjectionTransform();
 }

@@ -11,7 +11,4 @@ lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, she
 
 lever_3d('loadTexture',im);
 
-%clear mex
-
 end
-

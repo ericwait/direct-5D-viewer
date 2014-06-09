@@ -55,12 +55,15 @@ private:
 	ID3D11Buffer* constBuffer;
 };
 
+
 class StaticVolumeTextureMaterial : public Material
 {
 public:
 	StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dims, int numChannels, unsigned char* image,
 		unsigned char* shaderConstMemoryIn=NULL);
 	~StaticVolumeTextureMaterial();
+
+	const Vec<float> colors[6];
 
 	void setTransferFunction(int channel, Vec<float> transferFunction);
 	void setRange(int channel, Vec<float> ranges);
@@ -104,4 +107,3 @@ private:
 	std::vector<ID3D11SamplerState*> samplerState;
 	std::vector<ID3D11ShaderResourceView*> shaderResourceView;
 };
-

@@ -21,6 +21,7 @@ protected:
 	DirectX::XMMATRIX projectionTransform;
 };
 
+
 class OrthoCamera : public Camera
 {
 public:
@@ -31,4 +32,3 @@ public:
 private:
 	OrthoCamera();
 };
-

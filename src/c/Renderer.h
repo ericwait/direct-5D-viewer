@@ -47,16 +47,49 @@ public:
 	Renderer();
 	~Renderer();
 
+//////////////////////////////////////////////////////////////////////////
+// Class setup including getters and setters
+//////////////////////////////////////////////////////////////////////////
 	HRESULT init();
-	void renderAll();
-	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
+
+//Setters	
 	void setCurrentFrame(unsigned int frame);
 	void incrementFrame();
 	void decrementFrame();
 	unsigned int getLastFrame();
+	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
+
 	void clearVertexShaderList();
 	void clearPixelShaderList();
+	void resizeViewPort();
 
+	void updateShaderParams(const void* params, ID3D11Buffer* buffer);
+	void setPixelShaderConsts(ID3D11Buffer* buffer);
+	void setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView);
+	void setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState);
+
+	void setRootWorldTransform(DirectX::XMMATRIX worldTransform);
+	
+//Getters
+	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
+	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
+	ID3D11SamplerState* getSamplerState();
+
+	DirectX::XMMATRIX getRootWorldTransorm();
+
+//////////////////////////////////////////////////////////////////////////
+// Rendering to screen
+//////////////////////////////////////////////////////////////////////////
+	void renderAll();
+	void startRender();
+	void preRenderLoop();
+	void mainRenderLoop();
+	void postRenderLoop();
+	void endRender();
+
+//////////////////////////////////////////////////////////////////////////
+// Resource setup for external classes
+//////////////////////////////////////////////////////////////////////////
 	HRESULT createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut);
 	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
@@ -66,25 +99,6 @@ public:
 		std::vector<Vec<float>> textureUV, VertexShaders shader);
 	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 		VertexShaders shader);
-
-	void updateShaderParams(const void* params, ID3D11Buffer* buffer);
-	void setPixelShaderConsts(ID3D11Buffer* buffer);
-	void setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView);
-	void setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState);
-
-	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
-	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
-	ID3D11SamplerState* getSamplerState();
-
-	void preRenderLoop();
-	void mainRenderLoop();
-	void postRenderLoop();
-	void startRender();
-	void endRender();
-
-	void setRootWorldTransform(DirectX::XMMATRIX worldTransform);
-	DirectX::XMMATRIX getRootWorldTransorm();
-	void resizeViewPort();
 
 private:
 	HRESULT initSwapChain();
@@ -111,6 +125,7 @@ private:
 
 	void renderPackage(const RendererPackage* package);
 
+//Member variables 
 	Vec<float> backgroundColor;
 
 	HANDLE mutexDevice;

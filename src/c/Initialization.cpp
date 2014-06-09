@@ -75,22 +75,9 @@ HRESULT createRenderResources()
 	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	
-	gRenderer = new Renderer();
+	gRenderer = new Renderer();//delete on message loop exit
 	gRenderer->init();
 
-
-// 	//gTextureVolumeCamera = new Camera(gRenderer,eye,look,up);
-// 
-// 	CellHullObject* cho = new CellHullObject(gRenderer,gFacesDebug,gVertsDebug,gNormsDebug,gDefaultMeshCamera);
-// 	GraphicObjectNode* gon = new GraphicObjectNode(cho,gDefaultMeshCamera);
-// 
-// 	VolumeTextureObject* vto = new VolumeTextureObject(gRenderer,gDims,gNumChannels,gImage,Vec<float>(1.0f,1.0f,25.0f/512.0f),gDefaultMeshCamera);
-// 	GraphicObjectNode* gonVT = new GraphicObjectNode(vto,gDefaultMeshCamera);
-// 
-// 	gon->attachToParentNode(gRootSceneNode->getRenderSectionNode(Renderer::Section::Pre));
-// 	cho->setColor(Vec<float>(1.0f,0.5f,0.0f),1.0f);
-// 
-// 	gonVT->attachToParentNode(gRootSceneNode->getRenderSectionNode(Renderer::Section::Main));
 	gCameraDefaultMesh = new Camera(eye,look,up);//delete on message loop exit
 	gCameraWidget = new OrthoCamera(eye,look,up);//delete on message loop exit
 

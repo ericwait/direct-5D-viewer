@@ -480,7 +480,6 @@ MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces,
 	WaitForSingleObject(mutexDevice,INFINITE);
 	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, textureUV, shader);
 
-	//meshPrimitives.push_back(newMesh);  //TODO delete this method?
 	ReleaseMutex(mutexDevice);
 
 	return newMesh;
@@ -958,4 +957,3 @@ unsigned int Renderer::getLastFrame()
 {
 	return rootScene->getNumFrames()-1;
 }
-

@@ -35,6 +35,21 @@ void SceneNode::setLocalToParent(DirectX::XMMATRIX transform)
 	updateTransforms(parentToWorld);
 }
 
+DirectX::XMMATRIX SceneNode::getLocalToWorldTransform()
+{
+	return localToParentTransform*parentToWorld;
+}
+
+void SceneNode::setParentNode(SceneNode* parent)
+{
+	parentNode = parent;
+}
+
+const std::vector<SceneNode*>& SceneNode::getChildren()
+{
+	return childrenNodes;
+}
+
 void SceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 {
 	parentToWorld = parentToWorldIn;
@@ -45,14 +60,10 @@ void SceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 	}
 }
 
-DirectX::XMMATRIX SceneNode::getLocalToWorldTransform()
+void SceneNode::addChildNode(SceneNode* child)
 {
-	return localToParentTransform*parentToWorld;
-}
-
-const std::vector<SceneNode*>& SceneNode::getChildren()
-{
-	return childrenNodes;
+	//TODO check for dups
+	childrenNodes.push_back(child);
 }
 
 void SceneNode::requestUpdate()
@@ -61,20 +72,21 @@ void SceneNode::requestUpdate()
 		parentNode->requestUpdate();
 }
 
-void SceneNode::setParentNode(SceneNode* parent)
-{
-	parentNode = parent;
-}
 
-void SceneNode::addChildNode(SceneNode* child)
-{
-	//TODO check for dups
-	childrenNodes.push_back(child);
-}
 
 GraphicObjectNode::GraphicObjectNode(GraphicObject* graphicObjectIn)
 {
 	graphicObject = graphicObjectIn;
+}
+
+void GraphicObjectNode::attachToParentNode(SceneNode* parent)
+{
+	SceneNode::attachToParentNode(parent);
+}
+
+const RendererPackage* GraphicObjectNode::getRenderPackage()
+{
+	return graphicObject->getRenderPackage();
 }
 
 void GraphicObjectNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
@@ -83,59 +95,7 @@ void GraphicObjectNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 	graphicObject->makeLocalToWorld(localToParentTransform*parentToWorld);
 }
 
-const RendererPackage* GraphicObjectNode::getRenderPackage()
-{
-	return graphicObject->getRenderPackage();
-}
 
-void GraphicObjectNode::attachToParentNode(SceneNode* parent)
-{
-	SceneNode::attachToParentNode(parent);
-}
-
-void RootSceneNode::makeRenderableList()
-{
-	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
-	{
-		renderList[i].clear();
-		renderList[i].resize(rootChildrenNodes[i].size());
-
-		for (int k=0; k<rootChildrenNodes[i].size(); ++k)
-		{
-			std::vector<SceneNode*> curChildList;
-			curChildList.push_back(rootChildrenNodes[i][k]);
-
-			std::vector<SceneNode*>::iterator it = curChildList.begin();
-			size_t j = 0;
-			while (j<curChildList.size())
-			{
-				const std::vector<SceneNode*>& children = curChildList[j]->getChildren();
-				curChildList.insert(curChildList.end(),children.begin(),children.end());
-
-				if (curChildList[j]->isRenderable())
-					renderList[i][k].push_back((GraphicObjectNode*)curChildList[j]);
-
-				++j;
-			}
-
-			curChildList.clear();
-		}
-	}
-}
-
-const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer::Section section,unsigned int frame)
-{
-	frame = frame % rootChildrenNodes[section].size();
-	if (renderList[section].size()<=frame)
-		throw std::runtime_error("Renderlist is malformed!");
-
-	return renderList[section][frame];
-}
-
-void RootSceneNode::requestUpdate()
-{
-	makeRenderableList();
-}
 
 RootSceneNode::RootSceneNode() : SceneNode()
 {
@@ -173,6 +133,15 @@ SceneNode* RootSceneNode::getRenderSectionNode(Renderer::Section section, int fr
 	return rootChildrenNodes[section][frame];
 }
 
+const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer::Section section,unsigned int frame)
+{
+	frame = frame % rootChildrenNodes[section].size();
+	if (renderList[section].size()<=frame)
+		throw std::runtime_error("Renderlist is malformed!");
+
+	return renderList[section][frame];
+}
+
 void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 {
 	parentToWorld = parentToWorldIn;
@@ -191,4 +160,39 @@ int RootSceneNode::getNumFrames()
 			maxFrames = rootChildrenNodes[i].size();
 
 	return maxFrames;
+}
+
+void RootSceneNode::requestUpdate()
+{
+	makeRenderableList();
+}
+
+void RootSceneNode::makeRenderableList()
+{
+	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
+	{
+		renderList[i].clear();
+		renderList[i].resize(rootChildrenNodes[i].size());
+
+		for (int k=0; k<rootChildrenNodes[i].size(); ++k)
+		{
+			std::vector<SceneNode*> curChildList;
+			curChildList.push_back(rootChildrenNodes[i][k]);
+
+			std::vector<SceneNode*>::iterator it = curChildList.begin();
+			size_t j = 0;
+			while (j<curChildList.size())
+			{
+				const std::vector<SceneNode*>& children = curChildList[j]->getChildren();
+				curChildList.insert(curChildList.end(),children.begin(),children.end());
+
+				if (curChildList[j]->isRenderable())
+					renderList[i][k].push_back((GraphicObjectNode*)curChildList[j]);
+
+				++j;
+			}
+
+			curChildList.clear();
+		}
+	}
 }

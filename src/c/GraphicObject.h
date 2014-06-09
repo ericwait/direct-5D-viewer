@@ -30,6 +30,7 @@ protected:
 
 };
 
+
 class CellHullObject : public GraphicObject
 {
 public:
@@ -52,11 +53,11 @@ private:
 	std::vector<Vec<float>> normals;
 };
 
+
 class VolumeTextureObject : public GraphicObject
 {
 public:
 	static const Vec<unsigned int> triIndices[2]; 
-
 	static const Vec<float> triVertices[4];
 
 	VolumeTextureObject(Renderer* renderer, Vec<size_t> dimsIn, int numChannels, unsigned char* image, Vec<float> scaleFactorIn, Camera* camera,
@@ -78,4 +79,3 @@ private:
 	MeshPrimitive* meshPrimitive;
 	StaticVolumeTextureMaterial* material;
 };
-

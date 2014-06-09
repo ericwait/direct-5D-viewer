@@ -42,34 +42,23 @@ void GraphicObject::removeRendererResources()
 	SAFE_DELETE(rendererPackage);
 }
 
+void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
+{
+	setLocalToWorld(parentToWorld);
+}
+
 void GraphicObject::setLocalToWorld(DirectX::XMMATRIX localToWorld)
 {
 	if (rendererPackage!=NULL)
 		rendererPackage->setLocalToWorld(localToWorld);
 }
 
-void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
-{
-	setLocalToWorld(parentToWorld);
-}
+
 
 CellHullObject::CellHullObject()
 {
 	meshPrimitive = NULL;
 	material = NULL;
-}
-
-CellHullObject::~CellHullObject()
-{
-	//TODO remove meshPrimitive or just set to NULL
-
-	SAFE_DELETE(material);
-
-	faces.clear();
-	vertices.clear();
-	normals.clear();
-
-	GraphicObject::~GraphicObject();
 }
 
 CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
@@ -86,19 +75,17 @@ CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned in
 	initalizeRendererResources(camera);
 }
 
-
-void CellHullObject::initalizeRendererResources(Camera* camera)
+CellHullObject::~CellHullObject()
 {
-	if (rendererPackage==NULL)
-	{
-		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,Renderer::VertexShaders::Default);
-		material = new SingleColoredMaterial(renderer);
+	//TODO remove meshPrimitive or just set to NULL
 
-		rendererPackage = new RendererPackage(camera);
-		rendererPackage->setMeshPrimitive(meshPrimitive);
-		rendererPackage->setMaterial(material);
-		rendererPackage->setRenderableFlag(true);
-	}
+	SAFE_DELETE(material);
+
+	faces.clear();
+	vertices.clear();
+	normals.clear();
+
+	GraphicObject::~GraphicObject();
 }
 
 void CellHullObject::setColor(Vec<float> color, float alpha)
@@ -112,6 +99,22 @@ void CellHullObject::setColorMod(Vec<float> colorMod, float alpha)
 	if (material!=NULL)
 		material->setColorModifier(colorMod,alpha);
 }
+
+void CellHullObject::initalizeRendererResources(Camera* camera)
+{
+	if (rendererPackage==NULL)
+	{
+		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,Renderer::VertexShaders::Default);
+		material = new SingleColoredMaterial(renderer);//delete in destructor
+
+		rendererPackage = new RendererPackage(camera);//delete in destructor
+		rendererPackage->setMeshPrimitive(meshPrimitive);
+		rendererPackage->setMaterial(material);
+		rendererPackage->setRenderableFlag(true);
+	}
+}
+
+
 
 VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image, 
 										Vec<float> scaleFactorIn, Camera* camera, unsigned char* constMemIn/*=NULL*/)
@@ -131,27 +134,6 @@ VolumeTextureObject::~VolumeTextureObject()
 	GraphicObject::~GraphicObject();
 }
 
-void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char* shaderMemIn/*=NULL*/)
-{
-	if (rendererPackage==NULL)
-	{
-		std::vector<Vec<unsigned int>> faces;
-		std::vector<Vec<float>> vertices;
-		std::vector<Vec<float>> normals;
-		std::vector<Vec<float>> textureUVs;
-
-		createViewAlignedPlanes(vertices, faces, normals, textureUVs);
-
-		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,textureUVs,Renderer::VertexShaders::ViewAligned);
-		material = new StaticVolumeTextureMaterial(renderer,dims,numChannels,image,shaderMemIn);
-
-		rendererPackage = new RendererPackage(camera);
-		rendererPackage->setMeshPrimitive(meshPrimitive);
-		rendererPackage->setMaterial(material);
-		rendererPackage->setRenderableFlag(true);
-	}
-}
-
 void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 {
 	DirectX::XMVECTOR det;
@@ -164,6 +146,27 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 		* DirectX::XMMatrixTranslation(0.5f, 0.5f, 0.5f); //puts the origin back to 0
 
 	setLocalToWorld(worldMatrix);
+}
+
+void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char* shaderMemIn/*=NULL*/)
+{
+	if (rendererPackage==NULL)
+	{
+		std::vector<Vec<unsigned int>> faces;
+		std::vector<Vec<float>> vertices;
+		std::vector<Vec<float>> normals;
+		std::vector<Vec<float>> textureUVs;
+
+		createViewAlignedPlanes(vertices, faces, normals, textureUVs);
+
+		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,textureUVs,Renderer::VertexShaders::ViewAligned);
+		material = new StaticVolumeTextureMaterial(renderer,dims,numChannels,image,shaderMemIn);//delete in destructor
+
+		rendererPackage = new RendererPackage(camera);//delete in destructor
+		rendererPackage->setMeshPrimitive(meshPrimitive);
+		rendererPackage->setMaterial(material);
+		rendererPackage->setRenderableFlag(true);
+	}
 }
 
 void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces,

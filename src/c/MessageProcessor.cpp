@@ -112,8 +112,6 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	DestroyWindow(gWindowHandle);
 	UnregisterClass(szWndClassName, gDllInstance);
 
-	//TODO cleanUp();
-
 	gRendererInit = true;
 
 	return ((int)msg.wParam);

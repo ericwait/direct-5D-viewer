@@ -20,8 +20,8 @@ public:
 	DirectX::XMMATRIX getLocalToWorldTransform();
 
 protected:
-	void setParentNode(SceneNode* parent);//TODO move this to protected
-	virtual const std::vector<SceneNode*>& getChildren();//TODO move this to protected
+	void setParentNode(SceneNode* parent);
+	virtual const std::vector<SceneNode*>& getChildren();
 	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 	virtual void addChildNode(SceneNode* child);
 
@@ -33,6 +33,7 @@ protected:
 	SceneNode* parentNode;
 };
 
+
 class GraphicObjectNode : public SceneNode
 {
 public:
@@ -41,7 +42,6 @@ public:
 
 	virtual bool isRenderable(){return true;}
 
-	//virtual void attachChildNode(SceneNode* child){};
 	virtual void attachToParentNode(SceneNode* parent);
 
 	const RendererPackage* getRenderPackage();
@@ -53,6 +53,7 @@ private:
 	GraphicObjectNode();
 	GraphicObject* graphicObject;
 };
+
 
 class RootSceneNode : public SceneNode
 {
