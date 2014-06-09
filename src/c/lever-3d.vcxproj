@@ -181,8 +181,6 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClCompile Include="MeshPrimitive.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneNode.cpp" />
-    <ClCompile Include="SingleColoredMaterial.cpp" />
-    <ClCompile Include="StaticVolumeTextureMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
