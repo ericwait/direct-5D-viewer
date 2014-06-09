@@ -11,6 +11,9 @@ HANDLE messageLoopHandle = NULL;
 HINSTANCE gDllInstance = NULL;
 DWORD threadID;
 
+std::vector<CellHullObject*> cellHullObjects;
+std::vector<VolumeTextureObject*> volumeTextureObjects;
+
 bool registerExitFunction = false;
 
 bool checkRenderThread()
@@ -58,24 +61,46 @@ void startThread()
 
 void termThread()
 {
-	// Send thread a termination event
-	SetEvent(gTermEvent);
-	PostThreadMessage(threadID, WM_QUIT, (WPARAM)0, (LPARAM)0);
+	if (gTermEvent!=NULL)
+	{
+		// Send thread a termination event
+		SetEvent(gTermEvent);
+		PostThreadMessage(threadID, WM_QUIT, (WPARAM)0, (LPARAM)0);
+	}
 
-	// Resume the thread in case it's suspended
-	ResumeThread(messageLoopHandle);
+	if (messageLoopHandle!=NULL)
+	{
+		// Resume the thread in case it's suspended
+		ResumeThread(messageLoopHandle);
 
-	// Wait for thread termination/force termination if it times out
-	DWORD waitTerm = WaitForSingleObject(messageLoopHandle, 30000);
-	if ( waitTerm == WAIT_TIMEOUT )
-		TerminateThread(messageLoopHandle, -1000);
+		// Wait for thread termination/force termination if it times out
+		DWORD waitTerm = WaitForSingleObject(messageLoopHandle, 30000);
+		if ( waitTerm == WAIT_TIMEOUT )
+			TerminateThread(messageLoopHandle, -1000);
 
-	CloseHandle(messageLoopHandle);
-	CloseHandle(gTermEvent);
+		CloseHandle(messageLoopHandle);
+	}
+	if (gTermEvent!=NULL)
+		CloseHandle(gTermEvent);
+
 	messageLoopHandle = NULL;
 	gTermEvent = NULL;
 	gRendererInit = false;
 }
+
+void cleanUp()
+{
+	for (int i=0; i<cellHullObjects.size(); ++i)
+		delete cellHullObjects[i];
+	cellHullObjects.clear();
+
+	for (int i=0; i<volumeTextureObjects.size(); ++ i)
+		delete volumeTextureObjects[i];
+	volumeTextureObjects.clear();
+
+	termThread();
+}
+
 
 BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
@@ -90,10 +115,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
 
 extern "C" void exitFunc()
 {
-	if ( messageLoopHandle )
-	{
-		termThread();
-	}
+	cleanUp();
 }
 
 void loadHulls( const mxArray* verts, const mxArray* faces, const mxArray* normals) 
@@ -205,6 +227,7 @@ CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
 	}
 
 	CellHullObject* cho = new CellHullObject(gRenderer,faces,verts,normals,camera);
+	cellHullObjects.push_back(cho);
 
 	return cho;
 }
@@ -247,6 +270,7 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 	{
 		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer,dims,numChannel,image+i*numChannel*dims.product(),scale,
 			gCameraDefaultMesh,shaderConstMemory);
+		volumeTextureObjects.push_back(volumeTexture);
 
 		shaderConstMemory = volumeTexture->getShaderConstMemory();
 		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
@@ -324,6 +348,8 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 	}
 
 	CellHullObject* borderObj = new CellHullObject(gRenderer,faces,vertices,normals,gCameraDefaultMesh);
+	cellHullObjects.push_back(borderObj);
+
 	GraphicObjectNode* borderNode = new GraphicObjectNode(borderObj);
 	borderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
 
@@ -359,7 +385,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		loadWidget(prhs+1);
 	}
 
-	if (messageLoopHandle!=NULL)
+	else if (_strcmpi("close",command)==0)
+	{
+		termThread();
+		cleanUp();
+	}
+
+	else if (messageLoopHandle!=NULL)
 	{
 		if (_strcmpi("loadTexture",command)==0)
 		{
@@ -504,18 +536,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			//loadHulls(hulls);
 		}
-	}
 
-	else if (_strcmpi("close",command)==0)
-	{
-		termThread();
-	}
-
-	else
-	{
-		char buff[255];
-		sprintf_s(buff,"%s is not a valid command!\n",command);
-		mexErrMsgTxt(buff);
+		else
+		{
+			char buff[255];
+			sprintf_s(buff,"%s is not a valid command!\n",command);
+			mexErrMsgTxt(buff);
+		}
 	}
 
 	mxFree(command);
