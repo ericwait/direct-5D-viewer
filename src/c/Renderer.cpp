@@ -913,8 +913,8 @@ void Renderer::resizeViewPort()
 	initRenderTarget();
 
 	resetViewPort();
-	gWidgetCamera->updateProjectionTransform();
-	gDefaultMeshCamera->updateProjectionTransform();
+	gCameraWidget->updateProjectionTransform();
+	gCameraDefaultMesh->updateProjectionTransform();
 
 	ReleaseMutex(mutexDevice);
 }

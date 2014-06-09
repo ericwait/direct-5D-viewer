@@ -14,9 +14,9 @@ extern volatile bool gRendererInit;
 extern unsigned int gWindowWidth;
 extern unsigned int gWindowHeight;
 extern Renderer* gRenderer;
-extern OrthoCamera* gWidgetCamera;
-extern Camera* gDefaultMeshCamera;
-extern Camera* gTextureVolumeCamera;
+extern OrthoCamera* gCameraWidget;
+extern Camera* gCameraDefaultMesh;
+extern Camera* gCameraTextureVolume;
 //////////////////////These are to be deleted after testing
 // extern std::vector<Vec<unsigned int>> gFacesDebug;
 // extern std::vector<Vec<float>> gVertsDebug;

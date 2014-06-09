@@ -12,9 +12,9 @@ unsigned int gWindowWidth = 1280;
 
 HFONT gFont = NULL;
 Renderer* gRenderer = NULL;
-Camera* gDefaultMeshCamera = NULL;
-OrthoCamera* gWidgetCamera = NULL;
-Camera* gTextureVolumeCamera = NULL;
+Camera* gCameraDefaultMesh = NULL;
+OrthoCamera* gCameraWidget = NULL;
+Camera* gCameraTextureVolume = NULL;
 std::vector<Vec<unsigned int>> gFacesDebug;
 std::vector<Vec<float>> gVertsDebug;
 std::vector<Vec<float>> gNormsDebug;
@@ -78,8 +78,6 @@ HRESULT createRenderResources()
 	gRenderer = new Renderer();
 	gRenderer->init();
 
-	gDefaultMeshCamera = new Camera(eye,look,up);
-	gWidgetCamera = new OrthoCamera(eye,look,up);
 
 // 	//gTextureVolumeCamera = new Camera(gRenderer,eye,look,up);
 // 
@@ -93,6 +91,8 @@ HRESULT createRenderResources()
 // 	cho->setColor(Vec<float>(1.0f,0.5f,0.0f),1.0f);
 // 
 // 	gonVT->attachToParentNode(gRootSceneNode->getRenderSectionNode(Renderer::Section::Main));
+	gCameraDefaultMesh = new Camera(eye,look,up);//delete on message loop exit
+	gCameraWidget = new OrthoCamera(eye,look,up);//delete on message loop exit
 
 	return S_OK;
 }

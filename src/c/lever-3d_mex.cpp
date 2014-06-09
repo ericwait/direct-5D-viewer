@@ -211,21 +211,21 @@ CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
 
 void loadWidget(const mxArray* widget[])
 {
-	CellHullObject* arrowX = createCellHullObject(widget,gWidgetCamera);
+	CellHullObject* arrowX = createCellHullObject(widget,gCameraWidget);
 	arrowX->setColor(Vec<float>(1.0f, 0.2f, 0.2f),1.0f);
 	GraphicObjectNode* arrowXnode = new GraphicObjectNode(arrowX);
 	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI/2.0f));
 
-	CellHullObject* arrowY = createCellHullObject(widget,gWidgetCamera);
+	CellHullObject* arrowY = createCellHullObject(widget,gCameraWidget);
 	arrowY->setColor(Vec<float>(0.1f, 1.0f, 0.1f),1.0f);
 	GraphicObjectNode* arrowYnode = new GraphicObjectNode(arrowY);
 	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI/2.0f));
 
-	CellHullObject* arrowZ = createCellHullObject(widget,gWidgetCamera);
+	CellHullObject* arrowZ = createCellHullObject(widget,gCameraWidget);
 	arrowZ->setColor(Vec<float>(0.4f, 0.4f, 1.0f),1.0f);
 	GraphicObjectNode* arrowZnode = new GraphicObjectNode(arrowZ);
 
-	CellHullObject* sphere = createCellHullObject(widget+3,gWidgetCamera);
+	CellHullObject* sphere = createCellHullObject(widget+3,gCameraWidget);
 	sphere->setColor(Vec<float>(0.9f,0.9f,0.9f),1.0f);
 	GraphicObjectNode* sphereNode = new GraphicObjectNode(sphere);
 
@@ -246,7 +246,7 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 	for (int i=0; i<numFrames; ++i)
 	{
 		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer,dims,numChannel,image+i*numChannel*dims.product(),scale,
-			gDefaultMeshCamera,shaderConstMemory);
+			gCameraDefaultMesh,shaderConstMemory);
 
 		shaderConstMemory = volumeTexture->getShaderConstMemory();
 		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
@@ -323,7 +323,7 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 			normals[faces[2*i].x+j] = norm;
 	}
 
-	CellHullObject* borderObj = new CellHullObject(gRenderer,faces,vertices,normals,gDefaultMeshCamera);
+	CellHullObject* borderObj = new CellHullObject(gRenderer,faces,vertices,normals,gCameraDefaultMesh);
 	GraphicObjectNode* borderNode = new GraphicObjectNode(borderObj);
 	borderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
 
