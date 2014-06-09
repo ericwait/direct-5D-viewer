@@ -114,14 +114,14 @@ void CellHullObject::setColorMod(Vec<float> colorMod, float alpha)
 }
 
 VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image, 
-										Vec<float> scaleFactorIn, Camera* camera)
+										Vec<float> scaleFactorIn, Camera* camera, unsigned char* constMemIn/*=NULL*/)
 {
 	renderer = rendererIn;
 	dims = dimsIn;
 	numChannels = numChannelsIn;
 	scaleFactor = scaleFactorIn;
 
-	initalizeRendererResources(camera,image);
+	initalizeRendererResources(camera,image, constMemIn);
 }
 
 VolumeTextureObject::~VolumeTextureObject()
@@ -131,7 +131,7 @@ VolumeTextureObject::~VolumeTextureObject()
 	GraphicObject::~GraphicObject();
 }
 
-void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image)
+void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char* shaderMemIn/*=NULL*/)
 {
 	if (rendererPackage==NULL)
 	{
@@ -143,7 +143,7 @@ void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned ch
 		createViewAlignedPlanes(vertices, faces, normals, textureUVs);
 
 		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,textureUVs,Renderer::VertexShaders::ViewAligned);
-		material = new StaticVolumeTextureMaterial(renderer,dims,numChannels,image);
+		material = new StaticVolumeTextureMaterial(renderer,dims,numChannels,image,shaderMemIn);
 
 		rendererPackage = new RendererPackage(camera);
 		rendererPackage->setMeshPrimitive(meshPrimitive);

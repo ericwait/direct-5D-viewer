@@ -1,4 +1,0 @@
-function [faces verts colors normals] = MakeSphere( input_args )
-
-end
-

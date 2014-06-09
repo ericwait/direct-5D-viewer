@@ -58,7 +58,8 @@ private:
 class StaticVolumeTextureMaterial : public Material
 {
 public:
-	StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dims, int numChannels, unsigned char* image);
+	StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dims, int numChannels, unsigned char* image,
+		unsigned char* shaderConstMemoryIn=NULL);
 	~StaticVolumeTextureMaterial();
 
 	void setTransferFunction(int channel, Vec<float> transferFunction);
@@ -66,6 +67,7 @@ public:
 	void setColor(int channel, Vec<float> color, float alphaMod);
 	void setLightOn(bool on);
 	void setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir);
+	unsigned char* getShaderConstMemory(){return shaderConstMemory;}
 
 	void updateParams();
 

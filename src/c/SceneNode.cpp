@@ -98,30 +98,38 @@ void RootSceneNode::makeRenderableList()
 	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
 	{
 		renderList[i].clear();
+		renderList[i].resize(rootChildrenNodes[i].size());
 
-		std::vector<SceneNode*> curChildList;
-		curChildList.push_back(rootChildrenNodes[i]);
-
-		std::vector<SceneNode*>::iterator it = curChildList.begin();
-		size_t j = 0;
-		while (j<curChildList.size())
+		for (int k=0; k<rootChildrenNodes[i].size(); ++k)
 		{
-			const std::vector<SceneNode*>& children = curChildList[j]->getChildren();
-			curChildList.insert(curChildList.end(),children.begin(),children.end());
+			std::vector<SceneNode*> curChildList;
+			curChildList.push_back(rootChildrenNodes[i][k]);
 
-			if (curChildList[j]->isRenderable())
-				renderList[i].push_back((GraphicObjectNode*)curChildList[j]);
+			std::vector<SceneNode*>::iterator it = curChildList.begin();
+			size_t j = 0;
+			while (j<curChildList.size())
+			{
+				const std::vector<SceneNode*>& children = curChildList[j]->getChildren();
+				curChildList.insert(curChildList.end(),children.begin(),children.end());
 
-			++j;
+				if (curChildList[j]->isRenderable())
+					renderList[i][k].push_back((GraphicObjectNode*)curChildList[j]);
+
+				++j;
+			}
+
+			curChildList.clear();
 		}
-
-		curChildList.clear();
 	}
 }
 
-const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer::Section section)
+const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer::Section section,unsigned int frame)
 {
-	return renderList[section];
+	frame = frame % rootChildrenNodes[section].size();
+	if (renderList[section].size()<=frame)
+		throw std::runtime_error("Renderlist is malformed!");
+
+	return renderList[section][frame];
 }
 
 void RootSceneNode::requestUpdate()
@@ -133,22 +141,36 @@ RootSceneNode::RootSceneNode() : SceneNode()
 {
 	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
 	{
-		rootChildrenNodes[i] = new SceneNode;
-		rootChildrenNodes[i]->setParentNode(this);
+		rootChildrenNodes[i].push_back(new SceneNode);
+		rootChildrenNodes[i][0]->setParentNode(this);
 	}
+
+	makeRenderableList();
 }
 
 RootSceneNode::~RootSceneNode()
 {
 	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
 	{
-		delete rootChildrenNodes[i];
+		for (int j=0; j<rootChildrenNodes[i].size(); ++j)
+			delete rootChildrenNodes[i][j];
+		rootChildrenNodes[i].clear();
 	}
 }
 
-SceneNode* RootSceneNode::getRenderSectionNode(Renderer::Section section)
+SceneNode* RootSceneNode::getRenderSectionNode(Renderer::Section section, int frame)
 {
-	return rootChildrenNodes[section];
+	if (frame>=rootChildrenNodes[section].size())
+	{
+		int oldSize = rootChildrenNodes[section].size();
+		rootChildrenNodes[section].resize(frame+1);
+		for (int i=oldSize; i<=frame; ++i)
+		{
+			rootChildrenNodes[section][i] = new SceneNode;
+		}
+	}
+
+	return rootChildrenNodes[section][frame];
 }
 
 void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
@@ -156,5 +178,17 @@ void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 	parentToWorld = parentToWorldIn;
 
 	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
-		rootChildrenNodes[i]->updateTransforms(localToParentTransform*parentToWorld);
+		for (int j=0; j<rootChildrenNodes[i].size(); ++j)
+			rootChildrenNodes[i][j]->updateTransforms(localToParentTransform*parentToWorld);
+}
+
+int RootSceneNode::getNumFrames()
+{
+	int maxFrames = 0;
+
+	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
+		if (maxFrames < rootChildrenNodes[i].size())
+			maxFrames = rootChildrenNodes[i].size();
+
+	return maxFrames;
 }

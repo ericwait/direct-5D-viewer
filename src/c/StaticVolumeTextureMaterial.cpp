@@ -13,10 +13,12 @@ const Vec<float> colors[6] =
 };
 
 
-StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image) : Material(rendererIn)
+StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image,
+														 unsigned char* shaderConstMemoryIn/*=NULL*/) : Material(rendererIn)
 {
 	numChannels = numChannelsIn;
 	dims = dimsIn;
+	shaderConstMemory = shaderConstMemoryIn;
 
 	cullBackFace = false;
 	testDepth = false;
@@ -31,7 +33,8 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	volPixShaderConsts.ranges.resize(numChannels);
 	volPixShaderConsts.transferFunctions.resize(numChannels);
 
-	shaderConstMemory = new unsigned char[volPixShaderConsts.sizeOf()];
+	if (shaderConstMemory==NULL)
+		shaderConstMemory = new unsigned char[volPixShaderConsts.sizeOf()];
 
 	renderer->createConstantBuffer(volPixShaderConsts.sizeOf(),&constBuffer);
 
@@ -59,7 +62,7 @@ StaticVolumeTextureMaterial::~StaticVolumeTextureMaterial()
 
 	SAFE_RELEASE(constBuffer);
 
-	delete[] shaderConstMemory;
+	//delete[] shaderConstMemory;  //TODO make a better structure that cleans this up
 
 	Material::~Material();
 }
@@ -135,8 +138,8 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\n";
 	shaderText += "\toutput.color.a = saturate(alpha);\n";
 	shaderText += "\toutput.color.a = output.color.a*step(0.1,output.color.a);\n";
- 	//shaderText += "\toutput.color.rgb = saturate(input.TextureUV);\n";//////////////////////////////////////////
- 	//shaderText += "\toutput.color.a = 1.0f;\n";///////////////
+	//shaderText += "\toutput.color.rgb = saturate(input.TextureUV);\n";//////////////////////////////////////////
+	//shaderText += "\toutput.color.a = 1.0f;\n";///////////////
 	shaderText += "\n";
 	shaderText += "\toutput.depth = input.Pos.z;\n";
 	shaderText += "\n";
@@ -145,7 +148,7 @@ void createStaticVolumeShaderText(std::string strChans)
 
 	FILE* file;
 	fopen_s(&file,"StaticVolumePixelShader.fx","w");
-	
+
 	fprintf(file,shaderText.c_str());
 
 	fclose(file);
@@ -157,7 +160,6 @@ void StaticVolumeTextureMaterial::setTransferFunction(int channel, Vec<float> tr
 	size_t memStart = channel*sizeof(float)*4;
 
 	memcpy((void*)(shaderConstMemory+memStart),&(transferFunction),sizeof(float)*3);
-	renderer->updateShaderParams(shaderConstMemory,constBuffer);
 }
 
 void StaticVolumeTextureMaterial::setRange(int channel, Vec<float> ranges)
@@ -166,7 +168,6 @@ void StaticVolumeTextureMaterial::setRange(int channel, Vec<float> ranges)
 	size_t memStart = channel*sizeof(float)*4 + sizeof(float)*4*numChannels;
 
 	memcpy((void*)(shaderConstMemory+memStart),&(ranges),sizeof(float)*3);
-	renderer->updateShaderParams(shaderConstMemory,constBuffer);
 }
 
 void StaticVolumeTextureMaterial::setColor(int channel, Vec<float> color, float alphaMod)
@@ -176,7 +177,6 @@ void StaticVolumeTextureMaterial::setColor(int channel, Vec<float> color, float 
 
 	memcpy((void*)(shaderConstMemory+memStart),&(color.x),sizeof(float)*3);
 	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*3),&(alphaMod),sizeof(float));
-	renderer->updateShaderParams(shaderConstMemory,constBuffer);
 }
 
 void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir)
@@ -187,7 +187,6 @@ void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<floa
 	memcpy((void*)(shaderConstMemory+memStart),&xDir,sizeof(float)*3);//TODO can I do this?
 	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*4),&yDir,sizeof(float)*3);
 	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*8),&zDir,sizeof(float)*3);
-	renderer->updateShaderParams(shaderConstMemory,constBuffer);
 }
 
 void StaticVolumeTextureMaterial::setLightOn(bool on)
@@ -197,7 +196,6 @@ void StaticVolumeTextureMaterial::setLightOn(bool on)
 	size_t memStart = 12*sizeof(float)+12*sizeof(float)*numChannels;
 
 	memcpy((void*)(shaderConstMemory+memStart),&isOn,sizeof(float));
-	renderer->updateShaderParams(shaderConstMemory,constBuffer);
 }
 
 void StaticVolumeTextureMaterial::updateParams()

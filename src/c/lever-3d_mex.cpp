@@ -235,15 +235,24 @@ void loadWidget(const mxArray* widget[])
 	arrowZnode->attachToParentNode(widgetScene);
 	sphereNode->attachToParentNode(widgetScene);
 
-	gRenderer->attachToRootScene(widgetScene,Renderer::Section::Post);
+	gRenderer->attachToRootScene(widgetScene,Renderer::Section::Post,0);
 }
 
 void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scale)
-{
-	VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer,dims,numChannel,image,scale,gDefaultMeshCamera);
-	GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
+{ 
+	//TODO keep objects around somewhere for better cleanup
+	unsigned char* shaderConstMemory = NULL;
 
-	gRenderer->attachToRootScene(volumeTextureNode,Renderer::Section::Main);
+	for (int i=0; i<numFrames; ++i)
+	{
+		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer,dims,numChannel,image+i*numChannel*dims.product(),scale,
+			gDefaultMeshCamera,shaderConstMemory);
+
+		shaderConstMemory = volumeTexture->getShaderConstMemory();
+		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
+
+		gRenderer->attachToRootScene(volumeTextureNode,Renderer::Section::Main,i);
+	}
 
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<unsigned int>> faces;
@@ -318,7 +327,7 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 	GraphicObjectNode* borderNode = new GraphicObjectNode(borderObj);
 	borderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
 
-	gRenderer->attachToRootScene(borderNode,Renderer::Pre);
+	gRenderer->attachToRootScene(borderNode,Renderer::Pre,0);
 }
 
 // This is the entry point from Matlab
@@ -356,7 +365,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		{
 			size_t numDims = mxGetNumberOfDimensions(prhs[1]);
 			if (numDims<3)
-				mexErrMsgTxt("Image must have three dimensions!");
+				mexErrMsgTxt("Image must have at least three dimensions!");
 
 			const mwSize* DIMS = mxGetDimensions(prhs[1]);
 			Vec<size_t> dims = Vec<size_t>(DIMS[0],DIMS[1],DIMS[2]);

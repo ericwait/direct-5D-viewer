@@ -61,14 +61,16 @@ public:
 	~RootSceneNode();
 
 	virtual void attachToParentNode(SceneNode* parent){}
-	SceneNode* getRenderSectionNode(Renderer::Section section);
-	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section);
+	SceneNode* getRenderSectionNode(Renderer::Section section, int frame);
+	int getNumRenderableObjects(Renderer::Section section){return renderList[section].size();}
+	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section, unsigned int frame);
 	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
+	int getNumFrames();
 
 	virtual void requestUpdate();
 
 private:
 	void makeRenderableList();
-	SceneNode* rootChildrenNodes[Renderer::Section::SectionEnd];
-	std::vector<GraphicObjectNode*> renderList[Renderer::Section::SectionEnd];
+	std::vector<SceneNode*> rootChildrenNodes[Renderer::Section::SectionEnd];
+	std::vector<std::vector<GraphicObjectNode*>> renderList[Renderer::Section::SectionEnd];
 };

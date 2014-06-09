@@ -27,6 +27,7 @@ Renderer::Renderer()
 	linearTextureSampler = NULL;
 
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
+	currentFrame = 0;
 }
 
 Renderer::~Renderer()
@@ -630,18 +631,21 @@ void Renderer::renderAll()
 	ReleaseMutex(mutexDevice);
 }
 
-void Renderer::attachToRootScene(SceneNode* sceneIn, Section section)
+void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
 
-	sceneIn->attachToParentNode(rootScene->getRenderSectionNode(section));
+	sceneIn->attachToParentNode(rootScene->getRenderSectionNode(section,frame));
 
 	ReleaseMutex(mutexDevice);
 }
 
 void Renderer::preRenderLoop()
 {
-	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre);
+	if (rootScene->getNumRenderableObjects(Pre)<1)
+		return;
+
+	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre,currentFrame);
 	for (int i=0; i<renderPreList.size(); ++i)
 	{
 		if (renderPreList[i]->isRenderable())
@@ -651,9 +655,12 @@ void Renderer::preRenderLoop()
 
 void Renderer::mainRenderLoop()
 {
+	if (rootScene->getNumRenderableObjects(Main)<1)
+		return;
+
 	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
 
-	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main);
+	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
 	for (int i=0; i<renderMainList.size(); ++i)
 	{
 		if (renderMainList[i]->isRenderable())
@@ -663,9 +670,12 @@ void Renderer::mainRenderLoop()
 
 void Renderer::postRenderLoop()
 {
+	if (rootScene->getNumRenderableObjects(Post)<1)
+		return;
+
 	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
 
-	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post);
+	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post,currentFrame);
 	for (int i=0; i<renderPostList.size(); ++i)
 	{
 		if (renderPostList[i]->isRenderable())
@@ -703,7 +713,7 @@ void Renderer::renderPackage(const RendererPackage* package)
 	setRasterizerState(package->getMaterial()->wireframe);
 
 	//Pixel Shader setup
-	package->getMaterial()->updateParams();
+	package->getMaterial()->updateParams();//can be sped up by doing this differently
 	package->getMaterial()->setShaderResources();//TODO this needs tweeking
 	setPixelShader(package->getMaterial()->shaderIdx);
 
@@ -881,5 +891,71 @@ void Renderer::setRootWorldTransform(DirectX::XMMATRIX worldTransform)
 DirectX::XMMATRIX Renderer::getRootWorldTransorm()
 {
 	return rootScene->getLocalToWorldTransform();
+}
+
+void Renderer::resizeViewPort()
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+
+	DXGI_SWAP_CHAIN_DESC desc;  
+	swapChain->GetDesc( &desc );  
+
+	immediateContext->OMSetRenderTargets(0, 0, 0);
+
+	releaseRenderTarget();
+	releaseDepthStencils();
+
+	HRESULT hr;
+	hr = swapChain->ResizeBuffers(2, gWindowWidth, gWindowHeight,DXGI_FORMAT_B8G8R8A8_UNORM,
+		DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE | DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+
+	initDepthStencils();
+	initRenderTarget();
+
+	resetViewPort();
+	gWidgetCamera->updateProjectionTransform();
+	gDefaultMeshCamera->updateProjectionTransform();
+
+	ReleaseMutex(mutexDevice);
+}
+
+HRESULT Renderer::resetViewPort()
+{
+	D3D11_VIEWPORT vp;
+	vp.Width = gWindowWidth;
+	vp.Height = gWindowHeight;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	immediateContext->RSSetViewports( 1, &vp );
+
+	return S_OK;
+}
+
+void Renderer::setCurrentFrame(unsigned int frame)
+{
+	if (frame>rootScene->getNumFrames())
+		frame = rootScene->getNumFrames()-1;
+
+	currentFrame = frame;
+}
+
+void Renderer::incrementFrame()
+{
+	++currentFrame;
+	if (currentFrame>rootScene->getNumFrames()-1)
+		currentFrame = 0;
+}
+
+void Renderer::decrementFrame()
+{
+	if (currentFrame!=0)
+		--currentFrame;
+}
+
+unsigned int Renderer::getLastFrame()
+{
+	return rootScene->getNumFrames()-1;
 }
 

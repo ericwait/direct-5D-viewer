@@ -49,7 +49,11 @@ public:
 
 	HRESULT init();
 	void renderAll();
-	void attachToRootScene(SceneNode* sceneIn, Section section);
+	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
+	void setCurrentFrame(unsigned int frame);
+	void incrementFrame();
+	void decrementFrame();
+	unsigned int getLastFrame();
 	void clearVertexShaderList();
 	void clearPixelShaderList();
 
@@ -80,6 +84,7 @@ public:
 
 	void setRootWorldTransform(DirectX::XMMATRIX worldTransform);
 	DirectX::XMMATRIX getRootWorldTransorm();
+	void resizeViewPort();
 
 private:
 	HRESULT initSwapChain();
@@ -136,6 +141,7 @@ private:
 	ID3D11SamplerState* linearTextureSampler;
 
 	RootSceneNode* rootScene;
+	unsigned int currentFrame;
 };
 
 const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshShaders.fx","ViewAlignedVertexShader.fx"};

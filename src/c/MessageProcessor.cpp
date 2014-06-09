@@ -26,6 +26,11 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOVE:
 		break;
 	case WM_SIZE:
+		gWindowWidth = LOWORD( lParam );
+		gWindowHeight = HIWORD( lParam );
+		if (gRenderer!=NULL)
+			gRenderer->resizeViewPort();
+
 		break;
 	case WM_MOUSEMOVE:
 		if (leftButtonDown)
@@ -45,6 +50,16 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_LBUTTONUP:
 		leftButtonDown = false;
+		break;
+	case WM_KEYDOWN:
+		if (VK_PRIOR==wParam) //Page Up key
+			gRenderer->incrementFrame();
+		if (VK_NEXT==wParam) //Page Down key
+			gRenderer->decrementFrame();
+		if (VK_HOME==wParam)
+			gRenderer->setCurrentFrame(0);
+		if (VK_END==wParam)
+			gRenderer->setCurrentFrame(gRenderer->getLastFrame());
 		break;
 	}
 

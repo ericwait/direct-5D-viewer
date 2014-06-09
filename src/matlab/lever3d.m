@@ -5,7 +5,7 @@ function lever3d()
 [arrowFaces, arrowVerts, arrowNorms] = MakeArrow(0.65,0.05,0.15,40);
 [sphereFaces, sphereVerts, shereNorms] = MakeSphere(0.20,40);
 
-[im, imageData] = tiffReader('uint8',[],1);
+[im, imageData] = tiffReader('uint8');
 
 lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
 
