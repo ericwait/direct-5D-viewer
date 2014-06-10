@@ -63,7 +63,7 @@ public:
 		unsigned char* shaderConstMemoryIn=NULL);
 	~StaticVolumeTextureMaterial();
 
-	const Vec<float> colors[6];
+	static const Vec<float> colors[6];
 
 	void setTransferFunction(int channel, Vec<float> transferFunction);
 	void setRange(int channel, Vec<float> ranges);

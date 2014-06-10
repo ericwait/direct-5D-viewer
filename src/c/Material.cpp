@@ -1,6 +1,6 @@
 #include "Material.h"
 
-const Vec<float> colors[6] = 
+const Vec<float> StaticVolumeTextureMaterial::colors[6] = 
 {
 	Vec<float>(1.0f, 0.0f, 0.0f),
 	Vec<float>(0.0f, 1.0f, 0.0f),
