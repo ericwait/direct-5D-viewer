@@ -106,7 +106,6 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 	SAFE_DELETE(gRenderer);
 	SAFE_DELETE(gCameraDefaultMesh);
-	SAFE_DELETE(gCameraTextureVolume);
 	SAFE_DELETE(gCameraWidget);
 
 	DestroyWindow(gWindowHandle);

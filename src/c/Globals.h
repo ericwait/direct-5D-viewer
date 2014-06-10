@@ -16,7 +16,6 @@ extern unsigned int gWindowHeight;
 extern Renderer* gRenderer;
 extern OrthoCamera* gCameraWidget;
 extern Camera* gCameraDefaultMesh;
-extern Camera* gCameraTextureVolume;
 //////////////////////These are to be deleted after testing
 // extern std::vector<Vec<unsigned int>> gFacesDebug;
 // extern std::vector<Vec<float>> gVertsDebug;

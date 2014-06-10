@@ -14,7 +14,6 @@ HFONT gFont = NULL;
 Renderer* gRenderer = NULL;
 Camera* gCameraDefaultMesh = NULL;
 OrthoCamera* gCameraWidget = NULL;
-Camera* gCameraTextureVolume = NULL;
 std::vector<Vec<unsigned int>> gFacesDebug;
 std::vector<Vec<float>> gVertsDebug;
 std::vector<Vec<float>> gNormsDebug;
