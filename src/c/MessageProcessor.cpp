@@ -2,6 +2,8 @@
 #include "MessageProcessor.h"
 #include "Initialization.h"
 
+bool gRendererOn = true;
+
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (message==WM_DESTROY)
@@ -26,11 +28,23 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOVE:
 		break;
 	case WM_SIZE:
+		if (wParam == SIZE_MINIMIZED)
+		{
+			gRendererOn = false;
+			break;
+		}else if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
+			gRendererOn = true;
+
 		gWindowWidth = LOWORD( lParam );
 		gWindowHeight = HIWORD( lParam );
 		if (gRenderer!=NULL)
 			gRenderer->resizeViewPort();
-
+		break;
+	case WM_MOUSEWHEEL:
+		if (GET_WHEEL_DELTA_WPARAM(wParam)>0)
+			gCameraDefaultMesh->zoomIncrement();
+		else
+			gCameraDefaultMesh->ZoomDecrement();
 		break;
 	case WM_MOUSEMOVE:
 		if (leftButtonDown)
@@ -73,7 +87,8 @@ HRESULT messageProcess( MSG& msg )
 	if (msg.message==WM_QUIT)
 		return S_FALSE;
 
-	gRenderer->renderAll();
+	if (gRendererOn)
+		gRenderer->renderAll();
 
 	return hr;
 }

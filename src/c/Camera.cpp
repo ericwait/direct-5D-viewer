@@ -1,22 +1,50 @@
 #include "Camera.h"
 #include "Globals.h"
 
-Camera::Camera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection)
+Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
 {
-	updateViewTransform(cameraPostion,lookPostion,upDirection);
+	cameraPosition = cameraPositionIn;
+	lookPosition = lookPositionIn;
+	upDirection = upDirectionIn;
+
+	updateViewTransform();
 	updateProjectionTransform();
 }
 
-void Camera::updateViewTransform(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection)
+void Camera::zoomIncrement()
 {
-	DirectX::XMFLOAT3 eye(cameraPostion.x,cameraPostion.y,cameraPostion.z);
-	DirectX::FXMVECTOR eyeVec = DirectX::XMLoadFloat3(&eye);
-	DirectX::XMFLOAT3 focus(lookPostion.x,lookPostion.y,lookPostion.z);
-	DirectX::FXMVECTOR focusVec = DirectX::XMLoadFloat3(&focus);
-	DirectX::XMFLOAT3 up(upDirection.x,upDirection.y,upDirection.z);
-	DirectX::FXMVECTOR upVec = DirectX::XMLoadFloat3(&up);
+	if (cameraPosition.z<-0.01f)
+	{
+		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.5f;
+		updateViewTransform();
+	}
+}
 
-	viewTransform = DirectX::XMMatrixLookAtRH(eyeVec,focusVec,upVec);
+void Camera::ZoomDecrement()
+{
+	if (cameraPosition.z>-20.0f)
+	{
+		cameraPosition.z -= (lookPosition.z-cameraPosition.z);
+		updateViewTransform();
+	}
+}
+
+void Camera::setCameraPosition(Vec<float> cameraPositionIn)
+{
+	cameraPosition = cameraPositionIn;
+	updateViewTransform();
+}
+
+void Camera::setLookPosition(Vec<float> lookPositionIn)
+{
+	lookPosition = lookPositionIn;
+	updateViewTransform();
+}
+
+void Camera::setUpDirection(Vec<float> upDirectionIn)
+{
+	upDirection = upDirectionIn;
+	updateViewTransform();
 }
 
 void Camera::updateProjectionTransform()
@@ -25,10 +53,34 @@ void Camera::updateProjectionTransform()
 }
 
 
-
-OrthoCamera::OrthoCamera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection) : Camera(cameraPostion,lookPostion,upDirection)
+void Camera::setCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
 {
-	updateViewTransform(cameraPostion,lookPostion,upDirection);
+	cameraPosition = cameraPositionIn;
+	lookPosition = lookPositionIn;
+	upDirection = upDirectionIn;
+
+	updateViewTransform();
+}
+
+
+void Camera::updateViewTransform()
+{
+	DirectX::XMFLOAT3 eye(cameraPosition.x,cameraPosition.y,cameraPosition.z);
+	DirectX::FXMVECTOR eyeVec = DirectX::XMLoadFloat3(&eye);
+	DirectX::XMFLOAT3 focus(lookPosition.x,lookPosition.y,lookPosition.z);
+	DirectX::FXMVECTOR focusVec = DirectX::XMLoadFloat3(&focus);
+	DirectX::XMFLOAT3 up(upDirection.x,upDirection.y,upDirection.z);
+	DirectX::FXMVECTOR upVec = DirectX::XMLoadFloat3(&up);
+
+	viewTransform = DirectX::XMMatrixLookAtRH(eyeVec,focusVec,upVec);
+}
+
+
+
+OrthoCamera::OrthoCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
+	: Camera(cameraPositionIn,lookPositionIn,upDirectionIn)
+{
+	updateViewTransform();
 	updateProjectionTransform();
 }
 

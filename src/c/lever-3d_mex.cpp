@@ -13,6 +13,9 @@ DWORD threadID;
 
 std::vector<CellHullObject*> cellHullObjects;
 std::vector<VolumeTextureObject*> volumeTextureObjects;
+CellHullObject* gBorderObj = NULL;
+
+extern std::vector<DirectX::XMVECTOR> volumeBoundingVerts;
 
 bool registerExitFunction = false;
 
@@ -32,7 +35,6 @@ bool checkRenderThread()
 
 	return true;
 }
-
 
 void startThread()
 {
@@ -90,6 +92,8 @@ void termThread()
 
 void cleanUp()
 {
+	gRendererOn = false;
+
 	for (int i=0; i<cellHullObjects.size(); ++i)
 		delete cellHullObjects[i];
 	cellHullObjects.clear();
@@ -347,11 +351,10 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 			normals[faces[2*i].x+j] = norm;
 	}
 
-	CellHullObject* borderObj = new CellHullObject(gRenderer,faces,vertices,normals,gCameraDefaultMesh);
-	cellHullObjects.push_back(borderObj);
+	gBorderObj = new CellHullObject(gRenderer,faces,vertices,normals,gCameraDefaultMesh);
 
-	GraphicObjectNode* borderNode = new GraphicObjectNode(borderObj);
-	borderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
+	GraphicObjectNode* borderNode = new GraphicObjectNode(gBorderObj);
+	gBorderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
 
 	gRenderer->attachToRootScene(borderNode,Renderer::Pre,0);
 }
@@ -410,8 +413,15 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				numFrames = DIMS[4];
 
 			unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
+
 			Vec<float> scale(dims);
 			scale = scale / scale.maxValue();
+			if (nrhs>2)
+			{
+				double* physDims = (double*)mxGetData(prhs[2]);
+				scale.y *= physDims[1]/physDims[0];
+				scale.z *= physDims[2]/physDims[0];
+			}
 
 			loadVolumeTexture(image,dims,numChannels,numFrames,scale);
 		}
@@ -437,91 +447,47 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 		else if (_strcmpi("transferUpdate",command)==0)
 		{
-			if (nrhs!=19) mexErrMsgTxt("not the right arguments for transferUpdate!");
+			if (nrhs!=2) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
 
-			// 		gTransferFunctions[0].x = (float)mxGetScalar(prhs[1]);
-			// 		gTransferFunctions[0].y = (float)mxGetScalar(prhs[2]);
-			// 		gTransferFunctions[0].z = (float)mxGetScalar(prhs[3]);
-			// 
-			// 		gTransferFunctions[1].x = (float)mxGetScalar(prhs[4]);
-			// 		gTransferFunctions[1].y = (float)mxGetScalar(prhs[5]);
-			// 		gTransferFunctions[1].z = (float)mxGetScalar(prhs[6]);
-			// 
-			// 		gTransferFunctions[2].x = (float)mxGetScalar(prhs[7]);
-			// 		gTransferFunctions[2].y = (float)mxGetScalar(prhs[8]);
-			// 		gTransferFunctions[2].z = (float)mxGetScalar(prhs[9]);
-			// 
-			// 		gTransferFunctions[3].x = (float)mxGetScalar(prhs[10]);
-			// 		gTransferFunctions[3].y = (float)mxGetScalar(prhs[11]);
-			// 		gTransferFunctions[3].z = (float)mxGetScalar(prhs[12]);
-			// 
-			// 		gTransferFunctions[4].x = (float)mxGetScalar(prhs[13]);
-			// 		gTransferFunctions[4].y = (float)mxGetScalar(prhs[14]);
-			// 		gTransferFunctions[4].z = (float)mxGetScalar(prhs[15]);
-			// 
-			// 		gTransferFunctions[5].x = (float)mxGetScalar(prhs[16]);
-			// 		gTransferFunctions[5].y = (float)mxGetScalar(prhs[17]);
-			// 		gTransferFunctions[5].z = (float)mxGetScalar(prhs[18]);
+			size_t numElem = mxGetNumberOfElements(prhs[1]);
+			
+			if (numElem!=volumeTextureObjects[0]->getNumberOfChannels())
+				mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
 
-		}
+			for (int chan=0; chan<volumeTextureObjects[0]->getNumberOfChannels(); ++chan)
+			{
+				Vec<float> transferFunction(0.0f,0.0f,0.0f);
+				Vec<float> ranges;
+				Vec<float> color;
+				float alphaMod;
 
-		else if (_strcmpi("rangesUpdate",command)==0)
-		{
-			if (nrhs!=19) mexErrMsgTxt("Wrong input arguments for rangesUpdate");
+				mxArray* mxColorPt = mxGetField(prhs[1],chan,"color");
+				double* mxColor = (double*)mxGetData(mxColorPt);
+				color = Vec<float>((float)(mxColor[0]),(float)(mxColor[1]),(float)(mxColor[2]));
 
-			// 		gRanges[0].x = (float)mxGetScalar(prhs[1]);
-			// 		gRanges[0].y = (float)mxGetScalar(prhs[2]);
-			// 		gRanges[0].z = (float)mxGetScalar(prhs[3]);
-			// 
-			// 		gRanges[1].x = (float)mxGetScalar(prhs[4]);
-			// 		gRanges[1].y = (float)mxGetScalar(prhs[5]);
-			// 		gRanges[1].z = (float)mxGetScalar(prhs[6]);
-			// 
-			// 		gRanges[2].x = (float)mxGetScalar(prhs[7]);
-			// 		gRanges[2].y = (float)mxGetScalar(prhs[8]);
-			// 		gRanges[2].z = (float)mxGetScalar(prhs[9]);
-			// 
-			// 		gRanges[3].x = (float)mxGetScalar(prhs[10]);
-			// 		gRanges[3].y = (float)mxGetScalar(prhs[11]);
-			// 		gRanges[3].z = (float)mxGetScalar(prhs[12]);
-			// 
-			// 		gRanges[4].x = (float)mxGetScalar(prhs[13]);
-			// 		gRanges[4].y = (float)mxGetScalar(prhs[14]);
-			// 		gRanges[4].z = (float)mxGetScalar(prhs[15]);
-			// 
-			// 		gRanges[5].x = (float)mxGetScalar(prhs[16]);
-			// 		gRanges[5].y = (float)mxGetScalar(prhs[17]);
-			// 		gRanges[5].z = (float)mxGetScalar(prhs[18]);
-		}
+				mxArray* mxOnPt = mxGetField(prhs[1],chan,"visible");
+				if (mxGetScalar(mxOnPt)!=0)
+				{
+					mxArray* mxAPt = mxGetField(prhs[1],chan,"a");
+					mxArray* mxBPt = mxGetField(prhs[1],chan,"b");
+					mxArray* mxCPt = mxGetField(prhs[1],chan,"c");
+					double a = mxGetScalar(mxAPt);
+					double b = mxGetScalar(mxBPt);
+					double c = mxGetScalar(mxCPt);
+					transferFunction = Vec<float>((float)a,(float)b,(float)c);
+				}
 
-		else if (_strcmpi("colorsUpdate",command)==0)
-		{
-			if (nrhs!=19) mexErrMsgTxt("not the right arguments for transferUpdate!");
+				mxArray* mxMin = mxGetField(prhs[1],chan,"minVal");
+				mxArray* mxMax = mxGetField(prhs[1],chan,"maxVal");
+				ranges = Vec<float>((float)mxGetScalar(mxMin),(float)mxGetScalar(mxMax),1.0f);
 
-			// 		gChannelColor[0].x = (float)mxGetScalar(prhs[1]);
-			// 		gChannelColor[0].y = (float)mxGetScalar(prhs[2]);
-			// 		gChannelColor[0].z = (float)mxGetScalar(prhs[3]);
-			// 
-			// 		gChannelColor[1].x = (float)mxGetScalar(prhs[4]);
-			// 		gChannelColor[1].y = (float)mxGetScalar(prhs[5]);
-			// 		gChannelColor[1].z = (float)mxGetScalar(prhs[6]);
-			// 
-			// 		gChannelColor[2].x = (float)mxGetScalar(prhs[7]);
-			// 		gChannelColor[2].y = (float)mxGetScalar(prhs[8]);
-			// 		gChannelColor[2].z = (float)mxGetScalar(prhs[9]);
-			// 
-			// 		gChannelColor[3].x = (float)mxGetScalar(prhs[10]);
-			// 		gChannelColor[3].y = (float)mxGetScalar(prhs[11]);
-			// 		gChannelColor[3].z = (float)mxGetScalar(prhs[12]);
-			// 
-			// 		gChannelColor[4].x = (float)mxGetScalar(prhs[13]);
-			// 		gChannelColor[4].y = (float)mxGetScalar(prhs[14]);
-			// 		gChannelColor[4].z = (float)mxGetScalar(prhs[15]);
-			// 
-			// 		gChannelColor[5].x = (float)mxGetScalar(prhs[16]);
-			// 		gChannelColor[5].y = (float)mxGetScalar(prhs[17]);
-			// 		gChannelColor[5].z = (float)mxGetScalar(prhs[18]);
+				mxArray* mxAlphaPt = mxGetField(prhs[1],chan,"alphaMod");
+				alphaMod = (float)mxGetScalar(mxAlphaPt);
 
+				volumeTextureObjects[0]->setTransferFunction(chan,transferFunction);
+				volumeTextureObjects[0]->setRange(chan,ranges);
+				volumeTextureObjects[0]->setColor(chan,color,alphaMod);
+			}
 		}
 
 		else if (_strcmpi("poll",command)==0)

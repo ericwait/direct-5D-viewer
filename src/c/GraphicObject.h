@@ -24,10 +24,10 @@ protected:
 	GraphicObject();
 
 	void setLocalToWorld(DirectX::XMMATRIX localToWorld);
+	virtual void updateBoundingBox(DirectX::XMMATRIX localToWorld){}
 
 	Renderer* renderer;
 	RendererPackage* rendererPackage;
-
 };
 
 
@@ -40,10 +40,12 @@ public:
 
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
+	void getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals);
 
 private:
 	CellHullObject();
 	void initalizeRendererResources(Camera* camera);
+	virtual void updateBoundingBox(DirectX::XMMATRIX localToWorld);
 
 	MeshPrimitive* meshPrimitive;
 	SingleColoredMaterial* material;
@@ -51,6 +53,7 @@ private:
 	std::vector<Vec<unsigned int>> faces;
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<float>> normals;
+	Vec<float> curBoundingBox[2];
 };
 
 
@@ -66,6 +69,12 @@ public:
 
 	void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
 	unsigned char* getShaderConstMemory(){return material->getShaderConstMemory();}
+	void setTransferFunction(int channel, Vec<float> transferFunction){material->setTransferFunction(channel,transferFunction);}
+	void setRange(int channel, Vec<float> ranges){material->setRange(channel,ranges);}
+	void setColor(int channel, Vec<float> color, float alphaMod){material->setColor(channel,color,alphaMod);}
+	void setLightOn(bool on){material->setLightOn(on);}
+
+	int getNumberOfChannels(){return numChannels;}
 
 private:
 	VolumeTextureObject();

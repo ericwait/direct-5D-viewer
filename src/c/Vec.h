@@ -13,6 +13,8 @@
 #endif
 
 #ifdef INCLUDE_VEC
+#undef min
+#undef max
 
 #include "Defines.h"
 

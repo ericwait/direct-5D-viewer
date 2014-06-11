@@ -311,7 +311,7 @@ HRESULT Renderer::initRasterizerStates()
 	memset(&d3d11rd,0,sizeof(d3d11rd));
 	d3d11rd.FillMode=D3D11_FILL_SOLID;
 	d3d11rd.CullMode=D3D11_CULL_NONE;
-	//d3d11rd.CullMode=D3D11_CULL_FRONT;
+	//d3d11rd.CullMode=D3D11_CULL_BACK;
 	d3d11rd.DepthClipEnable=TRUE;
 	d3d11rd.MultisampleEnable=FALSE;
 	d3d11rd.AntialiasedLineEnable=TRUE;
@@ -737,7 +737,7 @@ void Renderer::setRasterizerState(bool wireframe)
 	if (wireframe)
 		immediateContext->RSSetState(rasterizerStateWireClip);
 	else
-		immediateContext->RSSetState(rasterizerStateNoClip);
+		immediateContext->RSSetState(rasterizerStateFillClip);
 }
 
 void Renderer::setPixelShader(int pixelShaderListIdx)
@@ -781,10 +781,7 @@ ID3D11SamplerState* Renderer::getSamplerState()
 	{
 		D3D11_SAMPLER_DESC samDesc;
 		ZeroMemory( &samDesc, sizeof(samDesc) );
-		//samDesc.Filter = D3D11_FILTER_ANISOTROPIC ;
 		samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		//samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-		//samDesc.AddressU = samDesc.AddressV = samDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 		samDesc.AddressU = samDesc.AddressV = samDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 		samDesc.BorderColor[0] = 0.0;
 		samDesc.BorderColor[1] = 0.0;

@@ -6,10 +6,14 @@
 class Camera
 {
 public:
-	Camera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
+	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
 
-	virtual void updateViewTransform(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
-
+	void zoomIncrement();
+	void ZoomDecrement();
+	void setCameraPosition(Vec<float> cameraPositionIn);
+	void setLookPosition(Vec<float> lookPositionIn);
+	void setUpDirection(Vec<float> upDirectionIn);
+	void setCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
 	virtual void updateProjectionTransform();
 
 	DirectX::XMMATRIX getProjectionTransform() const {return projectionTransform;}
@@ -17,6 +21,11 @@ public:
 
 protected:
 	Camera(){}
+
+	virtual void updateViewTransform();
+	Vec<float> cameraPosition;
+	Vec<float> lookPosition;
+	Vec<float> upDirection;
 	DirectX::XMMATRIX viewTransform;
 	DirectX::XMMATRIX projectionTransform;
 };
@@ -25,7 +34,7 @@ protected:
 class OrthoCamera : public Camera
 {
 public:
-	OrthoCamera(Vec<float> cameraPostion, Vec<float> lookPostion, Vec<float> upDirection);
+	OrthoCamera(Vec<float> cameraPostionIn, Vec<float> lookPostionIn, Vec<float> upDirectionIn);
 
 	void updateProjectionTransform();
 

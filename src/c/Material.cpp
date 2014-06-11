@@ -10,6 +10,7 @@ const Vec<float> StaticVolumeTextureMaterial::colors[6] =
 	Vec<float>(1.0f, 0.0f, 1.0f)
 };
 
+
 void createStaticVolumeShaderText(std::string strChans);
 
 
@@ -256,7 +257,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\t\talpha = max(alpha,intensity*channelColor[i].a);\n";
 	shaderText += "\n";
 	shaderText += "\t\tfloat3 grad;\n";
-	shaderText += "\t\tif(lightOn.x>0);\n";
+	shaderText += "\t\tif(lightOn.x>0)\n";
 	shaderText += "\t\t{\n";
 	shaderText += "\t\t\tgrad.x = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[0]) - \n";
 	shaderText += "\t\t\t\tg_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[0]);\n";

@@ -1,4 +1,6 @@
 #include "GraphicObject.h"
+#undef min
+#undef max
 
 const Vec<unsigned int> VolumeTextureObject::triIndices[2] = 
 {
@@ -51,6 +53,8 @@ void GraphicObject::setLocalToWorld(DirectX::XMMATRIX localToWorld)
 {
 	if (rendererPackage!=NULL)
 		rendererPackage->setLocalToWorld(localToWorld);
+
+	updateBoundingBox(localToWorld);
 }
 
 
@@ -59,6 +63,9 @@ CellHullObject::CellHullObject()
 {
 	meshPrimitive = NULL;
 	material = NULL;
+
+	curBoundingBox[0] = Vec<float>(0.0f,0.0f,0.0f);
+	curBoundingBox[1] = Vec<float>(0.0f,0.0f,0.0f);
 }
 
 CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
@@ -71,6 +78,14 @@ CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned in
 	this->faces = faces;
 	this->vertices = vertices;
 	this->normals = normals;
+
+	curBoundingBox[0] = vertices[0];
+	curBoundingBox[1] = vertices[0];
+	for (int i=1; i<vertices.size(); ++i)
+	{
+		curBoundingBox[0] = Vec<float>::min(curBoundingBox[0],vertices[i]);
+		curBoundingBox[1] = Vec<float>::max(curBoundingBox[1],vertices[i]);
+	}
 
 	initalizeRendererResources(camera);
 }
@@ -100,6 +115,14 @@ void CellHullObject::setColorMod(Vec<float> colorMod, float alpha)
 		material->setColorModifier(colorMod,alpha);
 }
 
+
+void CellHullObject::getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals)
+{
+	minVals = curBoundingBox[0];
+	maxVals = curBoundingBox[1];
+}
+
+
 void CellHullObject::initalizeRendererResources(Camera* camera)
 {
 	if (rendererPackage==NULL)
@@ -111,6 +134,25 @@ void CellHullObject::initalizeRendererResources(Camera* camera)
 		rendererPackage->setMeshPrimitive(meshPrimitive);
 		rendererPackage->setMaterial(material);
 		rendererPackage->setRenderableFlag(true);
+	}
+}
+
+void CellHullObject::updateBoundingBox(DirectX::XMMATRIX localToWorld)
+{
+	float mx = std::numeric_limits<float>::max();
+	float mn = std::numeric_limits<float>::lowest();
+
+	curBoundingBox[0] = Vec<float>(mx,mx,mx);
+	curBoundingBox[1] = Vec<float>(mn,mn,mn);
+
+	for (int i=0; i<vertices.size(); ++i)
+	{
+		DirectX::XMFLOAT3 v3(vertices[i].x,vertices[i].y,vertices[i].z);
+		DirectX::XMVECTOR vV = DirectX::XMLoadFloat3(&v3);
+		vV = DirectX::XMVector3TransformCoord(vV,localToWorld);
+
+		curBoundingBox[0] = Vec<float>::min(curBoundingBox[0], Vec<float>(DirectX::XMVectorGetX(vV),DirectX::XMVectorGetY(vV),DirectX::XMVectorGetZ(vV)));
+		curBoundingBox[1] = Vec<float>::max(curBoundingBox[1], Vec<float>(DirectX::XMVectorGetX(vV),DirectX::XMVectorGetY(vV),DirectX::XMVectorGetZ(vV)));
 	}
 }
 
@@ -172,7 +214,7 @@ void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned ch
 void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces,
 	std::vector<Vec<float>> &normals, std::vector<Vec<float>> &textureUVs)
 {
-	int numPlanes = dims.maxValue() * 1.5;
+	int numPlanes = dims.maxValue() * 1.5 * 1.5;//second 1.5 is to reduce moire
 
 	vertices.resize(4*numPlanes);
 	faces.resize(2*numPlanes);
