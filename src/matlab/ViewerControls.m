@@ -74,8 +74,8 @@ if isempty(imageData)
     return
 end
 
-if (exist([imageData.DatasetName '.mat'],'file'))
-    load([imageData.DatasetName '.mat']);
+if (exist([imageData.DatasetName '_Settings.mat'],'file'))
+    load([imageData.DatasetName '_Settings.mat']);
 end
 
 if (isempty(channelData))
@@ -217,7 +217,7 @@ function saveData()
 global imageData channelData
 
 if (~isempty(imageData) && ~isempty(channelData))
-    save([imageData.DatasetName '.mat'],'channelData');
+    save([imageData.DatasetName '_Settings.mat'],'channelData');
 end
 end
 

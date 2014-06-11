@@ -49,7 +49,7 @@ void Camera::setUpDirection(Vec<float> upDirectionIn)
 
 void Camera::updateProjectionTransform()
 {
-	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, 0.01f, 100.0f);
+	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, 0.1f, 40.0f);
 }
 
 

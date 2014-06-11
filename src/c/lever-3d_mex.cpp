@@ -465,9 +465,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				double* mxColor = (double*)mxGetData(mxColorPt);
 				color = Vec<float>((float)(mxColor[0]),(float)(mxColor[1]),(float)(mxColor[2]));
 
-				mxArray* mxOnPt = mxGetField(prhs[1],chan,"visible");
-				if (mxGetScalar(mxOnPt)!=0)
-				{
 					mxArray* mxAPt = mxGetField(prhs[1],chan,"a");
 					mxArray* mxBPt = mxGetField(prhs[1],chan,"b");
 					mxArray* mxCPt = mxGetField(prhs[1],chan,"c");
@@ -475,14 +472,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 					double b = mxGetScalar(mxBPt);
 					double c = mxGetScalar(mxCPt);
 					transferFunction = Vec<float>((float)a,(float)b,(float)c);
-				}
 
 				mxArray* mxMin = mxGetField(prhs[1],chan,"minVal");
 				mxArray* mxMax = mxGetField(prhs[1],chan,"maxVal");
 				ranges = Vec<float>((float)mxGetScalar(mxMin),(float)mxGetScalar(mxMax),1.0f);
 
 				mxArray* mxAlphaPt = mxGetField(prhs[1],chan,"alphaMod");
-				alphaMod = (float)mxGetScalar(mxAlphaPt);
+				mxArray* mxOnPt = mxGetField(prhs[1],chan,"visible");
+				if (mxGetScalar(mxOnPt)!=0)
+					alphaMod = (float)mxGetScalar(mxAlphaPt);
+				else
+					alphaMod = 0.0f;
 
 				volumeTextureObjects[0]->setTransferFunction(chan,transferFunction);
 				volumeTextureObjects[0]->setRange(chan,ranges);
