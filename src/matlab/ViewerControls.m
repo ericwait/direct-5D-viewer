@@ -111,9 +111,9 @@ end
 if (imageData.NumberOfChannels>0)
     for i=1:imageData.NumberOfChannels
         if i==1
-            strng = sprintf('Channel %d',i);
+            strng = {sprintf('Channel %d',i)};
         else
-            strng = {strng; sprintf('Channel %d',i)};
+            strng = [strng; {sprintf('Channel %d',i)}];
         end
     end
 end
@@ -130,9 +130,9 @@ set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
 set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
 set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 
-set(handles.s_curFrame,'max',imageData.NumberOfFrames);
-set(handles.s_curFrame,'Value',1);
-set(handles.s_curFrame,'min',1);
+% set(handles.s_curFrame,'max',imageData.NumberOfFrames);
+% set(handles.s_curFrame,'Value',1);
+% set(handles.s_curFrame,'min',1);
 
 updateCurrentState(handles);
 end

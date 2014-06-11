@@ -253,7 +253,6 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\t\tfloat intensity = g_txDiffuse[i].Sample( g_samLinear[i], input.TextureUV );\n";
 	shaderText += "\t\tintensity = clamp(intensity,ranges[i][0],ranges[i][1]);\n";
 	shaderText += "\t\tintensity = transferFunctions[i][0]*intensity*intensity+transferFunctions[i][1]*intensity+transferFunctions[i][2];\n";
-	shaderText += "\t\t//alpha = max(alpha,intensity*channelColor[i].a);\n";
 	shaderText += "\t\tfloat3 grad;\n";
 	shaderText += "\t\tfloat lightMod = 1.0f;\n";
 	shaderText += "\t\tif(lightOn.x>0)\n";
@@ -277,6 +276,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\tif (alpha!=0)\n";
 	shaderText += "\t{\n";
 	shaderText += "\t\toutput.color.rgb /= alpha;\n";
+	shaderText += "\t\toutput.color.rgb = saturate(output.color.rgb*numAlpha*0.5f);\n";
 	shaderText += "\t\tunlitComposite /= alpha;\n";
 	shaderText += "\t\toutput.color.a = alpha / numAlpha;\n";
 	shaderText += "\t}\n";

@@ -1,8 +1,11 @@
 #include "Globals.h"
 #include "MessageProcessor.h"
 #include "Initialization.h"
+#include <time.h>
 
 bool gRendererOn = true;
+bool gPlay = false;
+float gFramesPerSec = 5;
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -68,12 +71,16 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 		if (VK_PRIOR==wParam) //Page Up key
 			gRenderer->incrementFrame();
-		if (VK_NEXT==wParam) //Page Down key
+		else if (VK_NEXT==wParam) //Page Down key
 			gRenderer->decrementFrame();
-		if (VK_HOME==wParam)
+		else if (VK_HOME==wParam)
 			gRenderer->setCurrentFrame(0);
-		if (VK_END==wParam)
+		else if (VK_END==wParam)
 			gRenderer->setCurrentFrame(gRenderer->getLastFrame());
+		else if (VK_SPACE==wParam)
+			gPlay = !gPlay;
+		else if ('C'==wParam)
+			gRenderer->setRootWorldTransform(DirectX::XMMatrixIdentity());
 		break;
 	}
 
@@ -83,12 +90,25 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 HRESULT messageProcess( MSG& msg ) 
 {
  	HRESULT hr = S_OK;
+	static clock_t lastTimeupdate = clock();
 
 	if (msg.message==WM_QUIT)
 		return S_FALSE;
 
 	if (gRendererOn)
+	{
+		if (gPlay)
+		{
+			float timeFromLast = (float)(clock() - lastTimeupdate) / CLOCKS_PER_SEC;
+			if (timeFromLast > 1.0f/gFramesPerSec)
+			{
+				lastTimeupdate = clock();
+				gRenderer->incrementFrame();
+			}
+		}
+
 		gRenderer->renderAll();
+	}
 
 	return hr;
 }

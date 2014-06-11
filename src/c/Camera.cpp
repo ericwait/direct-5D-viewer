@@ -15,7 +15,7 @@ void Camera::zoomIncrement()
 {
 	if (cameraPosition.z<-0.01f)
 	{
-		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.5f;
+		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.25f;
 		updateViewTransform();
 	}
 }
@@ -24,7 +24,7 @@ void Camera::ZoomDecrement()
 {
 	if (cameraPosition.z>-20.0f)
 	{
-		cameraPosition.z -= (lookPosition.z-cameraPosition.z);
+		cameraPosition.z -= (lookPosition.z-cameraPosition.z)*0.5;
 		updateViewTransform();
 	}
 }
