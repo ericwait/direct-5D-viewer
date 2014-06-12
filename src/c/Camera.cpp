@@ -15,16 +15,16 @@ void Camera::zoomIncrement()
 {
 	if (cameraPosition.z<-0.01f)
 	{
-		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.25f;
+		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.125f;
 		updateViewTransform();
 	}
 }
 
-void Camera::ZoomDecrement()
+void Camera::zoomDecrement()
 {
 	if (cameraPosition.z>-20.0f)
 	{
-		cameraPosition.z -= (lookPosition.z-cameraPosition.z)*0.5;
+		cameraPosition.z -= (lookPosition.z-cameraPosition.z)*0.25;
 		updateViewTransform();
 	}
 }
@@ -49,7 +49,7 @@ void Camera::setUpDirection(Vec<float> upDirectionIn)
 
 void Camera::updateProjectionTransform()
 {
-	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, 0.1f, 40.0f);
+	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, 0.2f, 25.0f);
 }
 
 
