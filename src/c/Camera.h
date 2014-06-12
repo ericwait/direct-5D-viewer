@@ -9,7 +9,7 @@ public:
 	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
 
 	void zoomIncrement();
-	void ZoomDecrement();
+	void zoomDecrement();
 	void setCameraPosition(Vec<float> cameraPositionIn);
 	void setLookPosition(Vec<float> lookPositionIn);
 	void setUpDirection(Vec<float> upDirectionIn);

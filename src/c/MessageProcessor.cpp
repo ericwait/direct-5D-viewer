@@ -47,7 +47,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (GET_WHEEL_DELTA_WPARAM(wParam)>0)
 			gCameraDefaultMesh->zoomIncrement();
 		else
-			gCameraDefaultMesh->ZoomDecrement();
+			gCameraDefaultMesh->zoomDecrement();
 		break;
 	case WM_MOUSEMOVE:
 		if (leftButtonDown)
