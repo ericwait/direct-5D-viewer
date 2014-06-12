@@ -72,6 +72,8 @@ public:
 	void setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir);
 	unsigned char* getShaderConstMemory(){return shaderConstMemory;}
 
+	bool isLightOn(){return lightingOn;}
+
 	void updateParams();
 
 private:
@@ -103,6 +105,7 @@ private:
 	unsigned char* shaderConstMemory;
 	int numChannels;
 	Vec<size_t> dims;
+	bool lightingOn;
 	ID3D11Buffer* constBuffer;
 	std::vector<ID3D11SamplerState*> samplerState;
 	std::vector<ID3D11ShaderResourceView*> shaderResourceView;

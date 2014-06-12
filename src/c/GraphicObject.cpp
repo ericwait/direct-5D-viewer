@@ -187,6 +187,25 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 		* DirectX::XMMatrixScaling(1.0f/scaleFactor.x, 1.0f/scaleFactor.y, 1.0f/scaleFactor.z) //convert space from world to local
 		* DirectX::XMMatrixTranslation(0.5f, 0.5f, 0.5f); //puts the origin back to 0
 
+	DirectX::XMFLOAT3 vec(1.0f,0.0f,0.0f);
+	DirectX::XMVECTOR vecU = DirectX::XMLoadFloat3(&vec);
+	DirectX::XMMATRIX trans = DirectX::XMMatrixTranspose(worldMatrix)*
+		DirectX::XMMatrixScaling(1.0/dims.x,1.0/dims.y,1.0/dims.z);
+
+	Vec<float> xDir, yDir, zDir;
+	DirectX::XMVECTOR vecO = DirectX::XMVector3TransformNormal(vecU,trans);
+	xDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
+	vec = DirectX::XMFLOAT3(0.0f,1.0f,0.0f);
+	vecU = DirectX::XMLoadFloat3(&vec);
+	vecO = DirectX::XMVector3TransformNormal(vecU,trans);
+	yDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
+	vec = DirectX::XMFLOAT3(0.0f,0.0f,1.0f);
+	vecU = DirectX::XMLoadFloat3(&vec);
+	vecO = DirectX::XMVector3TransformNormal(vecU,trans);
+	zDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
+
+	material->setGradientSampleDir(xDir,yDir,zDir);
+
 	setLocalToWorld(worldMatrix);
 }
 

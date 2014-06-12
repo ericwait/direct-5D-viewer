@@ -333,7 +333,7 @@ end
 
 % --- Executes on button press in cb_textureLighting.
 function cb_textureLighting_Callback(hObject, eventdata, handles)
-
+lever_3d('textureLightingUpdate',get(handles.cb_textureLighting,'Value'));
 end
 
 

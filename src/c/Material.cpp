@@ -111,6 +111,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	cullBackFace = false;
 	testDepth = false;
 	wireframe = false;
+	lightingOn = false;
 
 	char cBuffer[3];
 	sprintf_s(cBuffer,"%d",numChannels);
@@ -182,6 +183,8 @@ void StaticVolumeTextureMaterial::setColor(int channel, Vec<float> color, float 
 
 void StaticVolumeTextureMaterial::setLightOn(bool on)
 {
+	lightingOn = on;
+
 	float isOn = (on==true) ? (1.0f) : (0.0f);
 	//3 float4s along with 3 times numchannel float4s behind
 	size_t memStart = 12*sizeof(float)+12*sizeof(float)*numChannels;
@@ -194,7 +197,7 @@ void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<floa
 	//3 times numchannel float4s behind
 	size_t memStart = 12*sizeof(float)*numChannels;
 
-	memcpy((void*)(shaderConstMemory+memStart),&xDir,sizeof(float)*3);//TODO can I do this?
+	memcpy((void*)(shaderConstMemory+memStart),&xDir,sizeof(float)*3);
 	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*4),&yDir,sizeof(float)*3);
 	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*8),&zDir,sizeof(float)*3);
 }
@@ -245,7 +248,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\tPixelOutputType output = (PixelOutputType)0;\n";
 	shaderText += "\tfloat alpha = 0.0f;\n";
 	shaderText += "\n";
-	shaderText += "\tfloat4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);\n";
+	shaderText += "\tfloat4 mainLightDir = float4(0.5774,0.5774,0.5774,0);\n";
 	shaderText += "\tfloat unlitComposite = 0.0f;\n";
 	shaderText += "\tint numAlpha = 0;\n";
 	shaderText += "\t[unroll(" + strChans + ")] for (int i=0; i<" + strChans + "; ++i)\n";
@@ -264,7 +267,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\t\t\tgrad.z = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[2]) - \n";
 	shaderText += "\t\t\t\tg_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[2]);\n";
 	shaderText += "\t\t\tgrad = normalize(grad);\n";
-	shaderText += "\t\t\tlightMod = saturate(dot(grad,mainLightDir))*0.7 + 0.3;\n";
+	shaderText += "\t\t\tlightMod = saturate(dot(grad,mainLightDir))*0.6 + 0.4;\n";
 	shaderText += "\t\t}\n";
 	shaderText += "\t\tif (channelColor[i].a>0)\n";
 	shaderText += "\t\t\t++numAlpha;\n";

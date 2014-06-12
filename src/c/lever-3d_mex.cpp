@@ -438,11 +438,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			//g_peelFactor = (float)mxGetScalar(prhs[1]);
 		}
 
-		else if (_strcmpi("lightingUpdate",command)==0)
+		else if (_strcmpi("textureLightingUpdate",command)==0)
 		{
 			if (nrhs!=2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
 
-			//g_lightingOn = (float)mxGetScalar(prhs[1]);
+			if (mxGetScalar(prhs[1])>0.0)
+				volumeTextureObjects[0]->setLightOn(true);
+			else
+				volumeTextureObjects[0]->setLightOn(false);
 		}
 
 		else if (_strcmpi("transferUpdate",command)==0)
