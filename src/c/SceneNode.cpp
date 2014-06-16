@@ -29,6 +29,13 @@ void SceneNode::attachToParentNode(SceneNode* parent)
 	requestUpdate();
 }
 
+void SceneNode::detatchFromParentNode()
+{
+	parentNode->detatchChildNode(this);
+	parentNode = NULL;
+}
+
+
 void SceneNode::setLocalToParent(DirectX::XMMATRIX transform)
 {
 	localToParentTransform = transform;
@@ -72,6 +79,18 @@ void SceneNode::requestUpdate()
 		parentNode->requestUpdate();
 }
 
+void SceneNode::detatchChildNode(SceneNode* child)
+{
+	for (std::vector<SceneNode*>::iterator it=childrenNodes.begin(); it!=childrenNodes.end(); ++it)
+	{
+		if (*it==child)
+		{
+			childrenNodes.erase(it,it+1);
+			break;
+		}
+	}
+}
+
 
 
 GraphicObjectNode::GraphicObjectNode(GraphicObject* graphicObjectIn)
@@ -84,6 +103,24 @@ void GraphicObjectNode::attachToParentNode(SceneNode* parent)
 	SceneNode::attachToParentNode(parent);
 }
 
+void GraphicObjectNode::releaseRenderResources()
+{
+	if (parentNode!=NULL)
+		detatchFromParentNode();
+
+	SAFE_DELETE(graphicObject);
+	
+	renderable = false;
+}
+
+
+void GraphicObjectNode::setRenderable(bool render)
+{
+	renderable = render;
+	requestUpdate();
+}
+
+
 const RendererPackage* GraphicObjectNode::getRenderPackage()
 {
 	return graphicObject->getRenderPackage();
@@ -93,6 +130,11 @@ void GraphicObjectNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 {
 	parentToWorld = parentToWorldIn;
 	graphicObject->makeLocalToWorld(localToParentTransform*parentToWorld);
+}
+
+GraphicObjectNode::~GraphicObjectNode()
+{
+	releaseRenderResources();
 }
 
 
@@ -122,11 +164,12 @@ SceneNode* RootSceneNode::getRenderSectionNode(Renderer::Section section, int fr
 {
 	if (frame>=rootChildrenNodes[section].size())
 	{
-		int oldSize = rootChildrenNodes[section].size();
+		int oldSize = int(rootChildrenNodes[section].size());
 		rootChildrenNodes[section].resize(frame+1);
 		for (int i=oldSize; i<=frame; ++i)
 		{
 			rootChildrenNodes[section][i] = new SceneNode;
+			rootChildrenNodes[section][i]->parentNode = this; //TODO rethink this
 		}
 	}
 
@@ -137,7 +180,7 @@ const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer
 {
 	frame = frame % rootChildrenNodes[section].size();
 	if (renderList[section].size()<=frame)
-		throw std::runtime_error("Renderlist is malformed!");
+		throw std::runtime_error("Render list is malformed!");
 
 	return renderList[section][frame];
 }
@@ -151,13 +194,21 @@ void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 			rootChildrenNodes[i][j]->updateTransforms(localToParentTransform*parentToWorld);
 }
 
+
+void RootSceneNode::resetWorldTransform()
+{
+	localToParentTransform = DirectX::XMMatrixRotationZ(DirectX::XM_PI);
+	updateTransforms(DirectX::XMMatrixIdentity());
+}
+
+
 int RootSceneNode::getNumFrames()
 {
 	int maxFrames = 0;
 
 	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
 		if (maxFrames < rootChildrenNodes[i].size())
-			maxFrames = rootChildrenNodes[i].size();
+			maxFrames = int(rootChildrenNodes[i].size());
 
 	return maxFrames;
 }
@@ -166,6 +217,7 @@ void RootSceneNode::requestUpdate()
 {
 	makeRenderableList();
 }
+
 
 void RootSceneNode::makeRenderableList()
 {

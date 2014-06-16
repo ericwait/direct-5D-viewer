@@ -8,8 +8,13 @@ class Camera
 public:
 	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
 
+	void moveLeft();
+	void moveRight();
+	void moveUp();
+	void moveDown();
 	void zoomIncrement();
 	void zoomDecrement();
+	void resetCamera();
 	void setCameraPosition(Vec<float> cameraPositionIn);
 	void setLookPosition(Vec<float> lookPositionIn);
 	void setUpDirection(Vec<float> upDirectionIn);
@@ -26,6 +31,9 @@ protected:
 	Vec<float> cameraPosition;
 	Vec<float> lookPosition;
 	Vec<float> upDirection;
+	Vec<float> defaultCameraPosition;
+	Vec<float> defaultLookPosition;
+	Vec<float> defaultUpDirection;
 	DirectX::XMMATRIX viewTransform;
 	DirectX::XMMATRIX projectionTransform;
 };

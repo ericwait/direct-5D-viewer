@@ -32,7 +32,7 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-	DWORD waitTerm = WaitForSingleObject(mutexDevice,10000);
+	DWORD waitTerm = WaitForSingleObject(mutexDevice,5000);
 
 	SAFE_DELETE(rootScene);
 
@@ -49,7 +49,6 @@ Renderer::~Renderer()
 	releaseSwapChain();
 
 	CloseHandle(mutexDevice);
-	//TODO Ensure that everything has been cleaned up
 }
 
 HRESULT Renderer::init()
@@ -85,6 +84,8 @@ HRESULT Renderer::init()
 	HRESULT hr = createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
 
 	rootScene = new RootSceneNode();
+
+	resetRootWorldTransform();
 
 	ReleaseMutex(mutexDevice);
 
@@ -142,8 +143,8 @@ HRESULT Renderer::initSwapChain()
 	}
 
 	D3D11_VIEWPORT vp;
-	vp.Width = gWindowWidth;
-	vp.Height = gWindowHeight;
+	vp.Width = (float)gWindowWidth;
+	vp.Height = (float)gWindowHeight;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
@@ -767,7 +768,7 @@ void Renderer::setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer
 
 void Renderer::drawTriangles(size_t numFaces)
 {
-	immediateContext->DrawIndexed(3*numFaces,0,0);
+	immediateContext->DrawIndexed(unsigned int(3*numFaces),0,0);
 }
 
 void Renderer::setPixelShaderConsts(ID3D11Buffer* buffer)
@@ -808,9 +809,9 @@ ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, 
 
 	D3D11_TEXTURE3D_DESC desc;
 	desc.Format = DXGI_FORMAT_R8_UNORM;
-	desc.Width = dims.x;
-	desc.Height = dims.y;
-	desc.Depth = dims.z;
+	desc.Width = (unsigned int)dims.x;
+	desc.Height = (unsigned int)dims.y;
+	desc.Depth = (unsigned int)dims.z;
 	desc.MipLevels = iMipCount;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -820,8 +821,8 @@ ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, 
 	ID3D11Texture3D* pTex3D = NULL;
 
 	D3D11_SUBRESOURCE_DATA initData;
-	initData.SysMemPitch = dims.x;
-	initData.SysMemSlicePitch = dims.x*dims.y;
+	initData.SysMemPitch = (unsigned int)dims.x;
+	initData.SysMemSlicePitch = unsigned int(dims.x*dims.y);
 	initData.pSysMem = (void*)image;
 
 	hr = d3dDevice->CreateTexture3D( &desc, &initData, &pTex3D );
@@ -889,6 +890,16 @@ DirectX::XMMATRIX Renderer::getRootWorldTransorm()
 	return rootScene->getLocalToWorldTransform();
 }
 
+void Renderer::getMutex()
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+}
+
+void Renderer::releaseMutex()
+{
+	ReleaseMutex(mutexDevice);
+}
+
 void Renderer::resizeViewPort()
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
@@ -918,8 +929,8 @@ void Renderer::resizeViewPort()
 HRESULT Renderer::resetViewPort()
 {
 	D3D11_VIEWPORT vp;
-	vp.Width = gWindowWidth;
-	vp.Height = gWindowHeight;
+	vp.Width = (float)gWindowWidth;
+	vp.Height = (float)gWindowHeight;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
@@ -929,7 +940,7 @@ HRESULT Renderer::resetViewPort()
 	return S_OK;
 }
 
-void Renderer::setCurrentFrame(unsigned int frame)
+void Renderer::setCurrentFrame(int frame)
 {
 	if (frame>rootScene->getNumFrames())
 		frame = rootScene->getNumFrames()-1;
@@ -940,7 +951,7 @@ void Renderer::setCurrentFrame(unsigned int frame)
 void Renderer::incrementFrame()
 {
 	++currentFrame;
-	if (currentFrame>rootScene->getNumFrames()-1)
+	if (currentFrame>unsigned int(rootScene->getNumFrames()-1))
 		currentFrame = 0;
 }
 
@@ -953,4 +964,9 @@ void Renderer::decrementFrame()
 unsigned int Renderer::getLastFrame()
 {
 	return rootScene->getNumFrames()-1;
+}
+
+void Renderer::resetRootWorldTransform()
+{
+	rootScene->resetWorldTransform();
 }

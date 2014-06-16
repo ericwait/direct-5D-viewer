@@ -15,6 +15,7 @@ public:
 
 	void removeFromRenderList();
 	void removeRendererResources();
+	virtual void setLightOn(bool on){}
 
 	virtual void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
 
@@ -38,6 +39,7 @@ public:
 		std::vector<Vec<float>>& normals, Camera* camera);
 	~CellHullObject();
 
+	void setLightOn(bool on){}
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
 	void getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals);

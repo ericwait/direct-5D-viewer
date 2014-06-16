@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 10-Jun-2014 19:19:25
+% Last Modified by GUIDE v2.5 12-Jun-2014 12:22:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -130,6 +130,9 @@ set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
 set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
 set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 
+procStr = {'Process image with...','Contrast Enhancement'};
+set(handles.m_imageProcessing,'String',procStr);
+
 % set(handles.s_curFrame,'max',imageData.NumberOfFrames);
 % set(handles.s_curFrame,'Value',1);
 % set(handles.s_curFrame,'min',1);
@@ -176,7 +179,11 @@ ylim([0 1]);
 
 hold off
 saveData();
-lever_3d('transferUpdate',channelData);
+if (1==get(handles.rb_Processed,'Value'))
+    lever_3d('transferUpdate',channelData,'processed');
+else
+    lever_3d('transferUpdate',channelData,'original');
+end
 end
 
 function [x, y, a, b, c] = calcCurve(vis,minX, midY, maxX)
@@ -336,10 +343,71 @@ function cb_textureLighting_Callback(hObject, eventdata, handles)
 lever_3d('textureLightingUpdate',get(handles.cb_textureLighting,'Value'));
 end
 
-
 % --- Executes on button press in cb_segLighting.
 function cb_segLighting_Callback(hObject, eventdata, handles)
 
+end
+
+% --- Executes on button press in rb_orgImage.
+function rb_orgImage_Callback(hObject, eventdata, handles)
+set(handles.rb_Processed,'Value',0);
+set(handles.rb_orgImage,'Value',1);
+
+lever_3d('viewTexture','original');
+end
+
+% --- Executes on button press in rb_Processed.
+function rb_Processed_Callback(hObject, eventdata, handles)
+set(handles.rb_Processed,'Value',1);
+set(handles.rb_orgImage,'Value',0);
+
+lever_3d('viewTexture','processed');
+end
+
+% --- Executes on selection change in m_imageProcessing.
+function m_imageProcessing_Callback(hObject, eventdata, handles)
+global imageData orgImage processedImage channelData
+chan = get(handles.m_channelPicker,'Value');
+channelData(chan).alphaMod = get(handles.s_alpha,'Value');
+
+processIdx = get(handles.m_imageProcessing,'Value');
+processStr = get(handles.m_imageProcessing,'String');
+
+if (isempty(processedImage))
+    processedImage = orgImage;
+end
+
+if (strcmpi('Contrast Enhancement',processStr{processIdx}))
+    params = {'Gaussian Sigma in X','Gaussian Sigma in Y', 'Gaussian Sigma in Z', 'Median Filter in X', 'Median Filter in Y','Median Filter in Z'};
+    diaTitle = 'Contrast Enhancement';
+    def = {'100', '100', '100', '3', '3', '3'};
+    response = inputdlg(params,diaTitle,1,def);
+    gX = str2num(response{1});
+    gY = str2num(response{2});
+    gZ = str2num(response{3});
+    mX = str2num(response{4});
+    mY = str2num(response{5});
+    mZ = str2num(response{6});
+    for t=1:size(processedImage,5)
+        processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',processedImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+    end
+end
+
+set(handles.m_imageProcessing,'Value',1);
+
+set(handles.rb_Processed,'Enable','on','Value',1);
+set(handles.rb_orgImage,'Value',0);
+
+channelData(chan).alphaMod = 1.0;
+channelData(chan).minVal = 0.0;
+channelData(chan).midVal = 0.5;
+channelData(chan).maxVal = 1.0;
+channelData(chan).a = 0.0;
+channelData(chan).b = 1.0;
+channelData(chan).c = 0.0;
+
+lever_3d('loadTexture',uint8(processedImage),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
+updateCurrentState(handles);
 end
 
 %% Create Functions
@@ -418,12 +486,14 @@ end
 
 % --- Executes during object creation, after setting all properties.
 function s_peelSize_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to s_peelSize (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+end
+
+% --- Executes during object creation, after setting all properties.
+function m_imageProcessing_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
 end

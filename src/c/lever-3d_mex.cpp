@@ -11,9 +11,19 @@ HANDLE messageLoopHandle = NULL;
 HINSTANCE gDllInstance = NULL;
 DWORD threadID;
 
-std::vector<CellHullObject*> cellHullObjects;
-std::vector<VolumeTextureObject*> volumeTextureObjects;
+enum GraphicObjectTypes //original 
+{
+	Widget,
+	CellHulls,
+	Border,
+	OriginalVolume,
+	ProcessedVolume,
+	VTend
+};
+
+std::vector<GraphicObjectNode*> localGraphicObjectNodes[GraphicObjectTypes::VTend];
 CellHullObject* gBorderObj = NULL;
+std::vector<VolumeTextureObject*> firstVolumeTextures;
 
 extern std::vector<DirectX::XMVECTOR> volumeBoundingVerts;
 
@@ -92,19 +102,30 @@ void termThread()
 
 void cleanUp()
 {
-	gRendererOn = false;
+	if (messageLoopHandle!=NULL)
+	{
+		gRendererOn = false;
 
-	for (int i=0; i<cellHullObjects.size(); ++i)
-		delete cellHullObjects[i];
-	cellHullObjects.clear();
+		Sleep(1000);
 
-	for (int i=0; i<volumeTextureObjects.size(); ++ i)
-		delete volumeTextureObjects[i];
-	volumeTextureObjects.clear();
+		gRenderer->getMutex();
+
+		gBorderObj = NULL;
+		firstVolumeTextures.clear();
+
+		for (int i=0; i<GraphicObjectTypes::VTend; ++i)
+		{
+			for (int j=0; j<localGraphicObjectNodes[i].size(); ++j)
+			{
+				localGraphicObjectNodes[i][j]->releaseRenderResources();
+			}
+
+			localGraphicObjectNodes[i].clear();
+		}
+	}
 
 	termThread();
 }
-
 
 BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
@@ -204,9 +225,9 @@ CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
 	Vec<unsigned int> curFace;
 	for (int i=0; i<numFaces; ++i)
 	{
-		curFace.x = faceData[i];
-		curFace.y = faceData[i+numFaces];
-		curFace.z = faceData[i+2*numFaces];
+		curFace.x = unsigned int(faceData[i]);
+		curFace.y = unsigned int(faceData[i+numFaces]);
+		curFace.z = unsigned int(faceData[i+2*numFaces]);
 
 		curFace = curFace - 1;
 
@@ -218,69 +239,62 @@ CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
 	Vec<float> curVert, curNormal;
 	for (int i=0; i<numVerts; ++i)
 	{
-		curVert.x = vertData[i];
-		curVert.y = vertData[i+numVerts];
-		curVert.z = vertData[i+2*numVerts];
+		curVert.x = float(vertData[i]);
+		curVert.y = float(vertData[i+numVerts]);
+		curVert.z = float(vertData[i+2*numVerts]);
 
-		curNormal.x = normData[i];
-		curNormal.y = normData[i+numVerts];
-		curNormal.z = normData[i+2*numVerts];
+		curNormal.x = float(normData[i]);
+		curNormal.y = float(normData[i+numVerts]);
+		curNormal.z = float(normData[i+2*numVerts]);
 
 		verts[i] = curVert;
 		normals[i] = curNormal;
 	}
 
 	CellHullObject* cho = new CellHullObject(gRenderer,faces,verts,normals,camera);
-	cellHullObjects.push_back(cho);
 
 	return cho;
 }
 
 void loadWidget(const mxArray* widget[])
 {
+	gRenderer->getMutex();
+
+	SceneNode* widgetScene = new SceneNode();
+	gRenderer->attachToRootScene(widgetScene,Renderer::Section::Post,0);
+
 	CellHullObject* arrowX = createCellHullObject(widget,gCameraWidget);
 	arrowX->setColor(Vec<float>(1.0f, 0.2f, 0.2f),1.0f);
 	GraphicObjectNode* arrowXnode = new GraphicObjectNode(arrowX);
 	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI/2.0f));
+	arrowXnode->attachToParentNode(widgetScene);
+	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowXnode);
 
 	CellHullObject* arrowY = createCellHullObject(widget,gCameraWidget);
 	arrowY->setColor(Vec<float>(0.1f, 1.0f, 0.1f),1.0f);
 	GraphicObjectNode* arrowYnode = new GraphicObjectNode(arrowY);
 	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI/2.0f));
+	arrowYnode->attachToParentNode(widgetScene);
+	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowYnode);
 
 	CellHullObject* arrowZ = createCellHullObject(widget,gCameraWidget);
 	arrowZ->setColor(Vec<float>(0.4f, 0.4f, 1.0f),1.0f);
 	GraphicObjectNode* arrowZnode = new GraphicObjectNode(arrowZ);
+	arrowZnode->attachToParentNode(widgetScene);
+	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowZnode);
 
 	CellHullObject* sphere = createCellHullObject(widget+3,gCameraWidget);
 	sphere->setColor(Vec<float>(0.9f,0.9f,0.9f),1.0f);
 	GraphicObjectNode* sphereNode = new GraphicObjectNode(sphere);
-
-	SceneNode* widgetScene = new SceneNode();
-	arrowXnode->attachToParentNode(widgetScene);
-	arrowYnode->attachToParentNode(widgetScene);
-	arrowZnode->attachToParentNode(widgetScene);
 	sphereNode->attachToParentNode(widgetScene);
+	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(sphereNode);
 
-	gRenderer->attachToRootScene(widgetScene,Renderer::Section::Post,0);
+	gRenderer->releaseMutex();
 }
 
-void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scale)
-{ 
-	//TODO keep objects around somewhere for better cleanup
-	unsigned char* shaderConstMemory = NULL;
-
-	for (int i=0; i<numFrames; ++i)
-	{
-		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer,dims,numChannel,image+i*numChannel*dims.product(),scale,
-			gCameraDefaultMesh,shaderConstMemory);
-		volumeTextureObjects.push_back(volumeTexture);
-
-		shaderConstMemory = volumeTexture->getShaderConstMemory();
-		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
-
-		gRenderer->attachToRootScene(volumeTextureNode,Renderer::Section::Main,i);
-	}
+void createBorder(Vec<float> &scale)
+{
+	gRenderer->getMutex();
 
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<unsigned int>> faces;
@@ -355,8 +369,68 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 
 	GraphicObjectNode* borderNode = new GraphicObjectNode(gBorderObj);
 	gBorderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
-
 	gRenderer->attachToRootScene(borderNode,Renderer::Pre,0);
+
+	localGraphicObjectNodes[GraphicObjectTypes::Border].push_back(borderNode);
+
+	gRenderer->releaseMutex();
+}
+
+void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ)
+{ 
+	gRenderer->getMutex();
+
+	unsigned char* shaderConstMemory = NULL;
+
+	int fvtIdx = typ - GraphicObjectTypes::OriginalVolume;
+
+	if (!firstVolumeTextures.empty() && fvtIdx<firstVolumeTextures.size() && NULL!=firstVolumeTextures[fvtIdx])
+	{
+		for (int i=0; i<localGraphicObjectNodes[typ].size(); ++i)
+		{
+			delete localGraphicObjectNodes[typ][i];
+		}
+
+		localGraphicObjectNodes[typ].clear();
+	}
+
+	for (int i=0; i<numFrames; ++i)
+	{
+		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer,dims,numChannel,image+i*numChannel*dims.product(),scales,
+			gCameraDefaultMesh,shaderConstMemory);
+		shaderConstMemory = volumeTexture->getShaderConstMemory();
+
+		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
+		gRenderer->attachToRootScene(volumeTextureNode,Renderer::Section::Main,i);
+
+		localGraphicObjectNodes[typ].push_back(volumeTextureNode);
+
+		if (0==i)
+		{
+			if (fvtIdx+1>firstVolumeTextures.size())
+				firstVolumeTextures.resize(fvtIdx+1);
+
+			firstVolumeTextures[fvtIdx] = volumeTexture;
+		}
+	}
+
+	gRenderer->releaseMutex();
+}
+
+void setCurrentTexture(GraphicObjectTypes textureType)
+{
+	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
+
+	for (int i=0; i<firstVolumeTextures.size(); ++i)
+	{
+		int idx = GraphicObjectTypes::OriginalVolume + i;	
+		if (idx==GraphicObjectTypes::VTend)
+			break;
+
+		bool render = i==fvtIdx;
+		for (int j=0; j<localGraphicObjectNodes[idx].size(); ++j)
+			localGraphicObjectNodes[idx][j]->setRenderable(render);
+	}
 }
 
 // This is the entry point from Matlab
@@ -386,11 +460,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		}
 
 		loadWidget(prhs+1);
+		gRendererOn = true;
 	}
 
 	else if (_strcmpi("close",command)==0)
 	{
-		termThread();
 		cleanUp();
 	}
 
@@ -407,10 +481,10 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			int numChannels = 1;
 			int numFrames = 1;
 			if (numDims>3)
-				numChannels = DIMS[3];
+				numChannels = int(DIMS[3]);
 
 			if (numDims>4)
-				numFrames = DIMS[4];
+				numFrames = int(DIMS[4]);
 
 			unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
 
@@ -419,11 +493,27 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			if (nrhs>2)
 			{
 				double* physDims = (double*)mxGetData(prhs[2]);
-				scale.y *= physDims[1]/physDims[0];
-				scale.z *= physDims[2]/physDims[0];
+				scale.y *= float(physDims[1]/physDims[0]);
+				scale.z *= float(physDims[2]/physDims[0]);
 			}
 
-			loadVolumeTexture(image,dims,numChannels,numFrames,scale);
+			GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+			if (nrhs>3)
+			{
+				char buff[96];
+				mxGetString(prhs[3],buff,96);
+
+				if (_strcmpi("original",buff)==0)
+					textureType = GraphicObjectTypes::OriginalVolume;
+				else if (_strcmpi("processed",buff)==0)
+					textureType = GraphicObjectTypes::ProcessedVolume;
+			}
+
+			loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
+			setCurrentTexture(textureType);
+
+			if (localGraphicObjectNodes[GraphicObjectTypes::Border].empty())
+				createBorder(scale);
 		}
 
 		else if (_strcmpi("getData",command)==0)
@@ -443,21 +533,39 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			if (nrhs!=2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
 
 			if (mxGetScalar(prhs[1])>0.0)
-				volumeTextureObjects[0]->setLightOn(true);
+				for (int i=0; i<firstVolumeTextures.size(); ++i)
+					if (NULL!=firstVolumeTextures[i])
+						firstVolumeTextures[i]->setLightOn(true);
 			else
-				volumeTextureObjects[0]->setLightOn(false);
+				for (int i=0; i<firstVolumeTextures.size(); ++i)
+					if (NULL!=firstVolumeTextures[i])
+						firstVolumeTextures[i]->setLightOn(false);
 		}
 
 		else if (_strcmpi("transferUpdate",command)==0)
 		{
-			if (nrhs!=2) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
+			if (2>nrhs || 3<nlhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
+
+			GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+			if (nrhs>2)
+			{
+				char buff[96];
+				mxGetString(prhs[2],buff,96);
+
+				if (_strcmpi("original",buff)==0)
+					textureType = GraphicObjectTypes::OriginalVolume;
+				else if (_strcmpi("processed",buff)==0)
+					textureType = GraphicObjectTypes::ProcessedVolume;
+			}
+
+			int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
 			size_t numElem = mxGetNumberOfElements(prhs[1]);
 			
-			if (numElem!=volumeTextureObjects[0]->getNumberOfChannels())
+			if (firstVolumeTextures.size()-1<fvtIdx || NULL==firstVolumeTextures[fvtIdx] || numElem!=firstVolumeTextures[fvtIdx]->getNumberOfChannels())
 				mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
 
-			for (int chan=0; chan<volumeTextureObjects[0]->getNumberOfChannels(); ++chan)
+			for (int chan=0; chan<firstVolumeTextures[fvtIdx]->getNumberOfChannels(); ++chan)
 			{
 				Vec<float> transferFunction(0.0f,0.0f,0.0f);
 				Vec<float> ranges;
@@ -487,10 +595,28 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				else
 					alphaMod = 0.0f;
 
-				volumeTextureObjects[0]->setTransferFunction(chan,transferFunction);
-				volumeTextureObjects[0]->setRange(chan,ranges);
-				volumeTextureObjects[0]->setColor(chan,color,alphaMod);
+				firstVolumeTextures[fvtIdx]->setTransferFunction(chan,transferFunction);
+				firstVolumeTextures[fvtIdx]->setRange(chan,ranges);
+				firstVolumeTextures[fvtIdx]->setColor(chan,color,alphaMod);
 			}
+		}
+
+		else if (_strcmpi("viewTexture",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("not the right arguments for viewTexture!");
+
+			char buff[96];
+			mxGetString(prhs[1],buff,96);
+
+			GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+
+			if (_strcmpi("original",buff)==0)
+				textureType = GraphicObjectTypes::OriginalVolume;
+			else if (_strcmpi("processed",buff)==0)
+				textureType = GraphicObjectTypes::ProcessedVolume;
+
+			setCurrentTexture(textureType);
+
 		}
 
 		else if (_strcmpi("poll",command)==0)

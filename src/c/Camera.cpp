@@ -3,17 +3,45 @@
 
 Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
 {
-	cameraPosition = cameraPositionIn;
-	lookPosition = lookPositionIn;
-	upDirection = upDirectionIn;
+	cameraPosition = defaultCameraPosition = cameraPositionIn;
+	lookPosition = defaultLookPosition = lookPositionIn;
+	upDirection = defaultUpDirection = upDirectionIn;
 
 	updateViewTransform();
 	updateProjectionTransform();
 }
 
+void Camera::moveLeft()
+{
+	cameraPosition.x -= 0.1f;
+	lookPosition.x	 -= 0.1f;
+	updateViewTransform();
+}
+
+void Camera::moveRight()
+{
+	cameraPosition.x += 0.1f;
+	lookPosition.x	 += 0.1f;
+	updateViewTransform();
+}
+
+void Camera::moveUp()
+{
+	cameraPosition.y -= 0.1f;
+	lookPosition.y	 -= 0.1f;
+	updateViewTransform();
+}
+
+void Camera::moveDown()
+{
+	cameraPosition.y += 0.1f;
+	lookPosition.y	 += 0.1f;
+	updateViewTransform();
+}
+
 void Camera::zoomIncrement()
 {
-	if (cameraPosition.z<-0.01f)
+	if (lookPosition.z-cameraPosition.z>0.02f)
 	{
 		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.125f;
 		updateViewTransform();
@@ -22,11 +50,20 @@ void Camera::zoomIncrement()
 
 void Camera::zoomDecrement()
 {
-	if (cameraPosition.z>-20.0f)
+	if (lookPosition.z-cameraPosition.z<10.0f)
 	{
-		cameraPosition.z -= (lookPosition.z-cameraPosition.z)*0.25;
+		cameraPosition.z -= (lookPosition.z-cameraPosition.z)*0.25f;
 		updateViewTransform();
 	}
+}
+
+
+void Camera::resetCamera()
+{
+	cameraPosition = defaultCameraPosition;
+	lookPosition = defaultLookPosition;
+	upDirection = defaultUpDirection;
+	updateViewTransform();
 }
 
 void Camera::setCameraPosition(Vec<float> cameraPositionIn)
@@ -92,9 +129,9 @@ void OrthoCamera::updateProjectionTransform()
 	float widgetPixSize = 40.0;
 	float widgetPixSpacing = 5.0;
 
-	float widgetScale = widgetPixSize / ((float)gWindowHeight / 2.0);
-	float ctrY = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowHeight / 2.0)) - 1.0;
-	float ctrX = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowWidth / 2.0)) - 1.0;
+	float widgetScale = widgetPixSize / ((float)gWindowHeight / 2.0f);
+	float ctrY = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowHeight / 2.0f)) - 1.0f;
+	float ctrX = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowWidth / 2.0f)) - 1.0f;
 
 	projectionTransform = DirectX::XMMatrixOrthographicRH(aspectRatio*orthoHeight, orthoHeight, 0.01f, 100.0f)
 		* DirectX::XMMatrixScaling(widgetScale, widgetScale, 1.0f) * DirectX::XMMatrixTranslation(ctrX, ctrY, 0.0f);

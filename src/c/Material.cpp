@@ -210,8 +210,8 @@ void StaticVolumeTextureMaterial::updateParams()
 void StaticVolumeTextureMaterial::setShaderResources()
 {
 	renderer->setPixelShaderConsts(constBuffer);
-	renderer->setPixelShaderResourceViews(0,shaderResourceView.size(),shaderResourceView.data());
-	renderer->setPixelShaderTextureSamplers(0,samplerState.size(),samplerState.data());
+	renderer->setPixelShaderResourceViews(0,(int)shaderResourceView.size(),shaderResourceView.data());
+	renderer->setPixelShaderTextureSamplers(0,(int)samplerState.size(),samplerState.data());
 }
 
 void createStaticVolumeShaderText(std::string strChans)

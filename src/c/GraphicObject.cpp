@@ -181,16 +181,23 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 	DirectX::XMVECTOR det;
 	DirectX::XMMATRIX invParentWorld = DirectX::XMMatrixInverse(&det,parentToWorld);
 
+	DirectX::XMMATRIX handedCorrection(0.0f,1.0f,0.0f,0.0f,
+									   1.0f,0.0f,0.0f,0.0f,
+									   0.0f,0.0f,1.0f,0.0f,
+									   0.0f,0.0f,0.0f,1.0f);
+
 	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixTranslation(-0.5f, -0.5f, -0.5f) //centering texture coord at vol origin
+		* DirectX::XMMatrixScaling(2.0f, 2.0f, 2.0f) //move up to trans?
 		* invParentWorld 
-		//* DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f) //move up to trans?
+		* handedCorrection
+		* DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f) //move up to trans?
 		* DirectX::XMMatrixScaling(1.0f/scaleFactor.x, 1.0f/scaleFactor.y, 1.0f/scaleFactor.z) //convert space from world to local
 		* DirectX::XMMatrixTranslation(0.5f, 0.5f, 0.5f); //puts the origin back to 0
 
 	DirectX::XMFLOAT3 vec(1.0f,0.0f,0.0f);
 	DirectX::XMVECTOR vecU = DirectX::XMLoadFloat3(&vec);
 	DirectX::XMMATRIX trans = DirectX::XMMatrixTranspose(worldMatrix)*
-		DirectX::XMMatrixScaling(1.0/dims.x,1.0/dims.y,1.0/dims.z);
+		DirectX::XMMatrixScaling(1.0f/dims.x,1.0f/dims.y,1.0f/dims.z);
 
 	Vec<float> xDir, yDir, zDir;
 	DirectX::XMVECTOR vecO = DirectX::XMVector3TransformNormal(vecU,trans);
@@ -233,7 +240,7 @@ void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned ch
 void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces,
 	std::vector<Vec<float>> &normals, std::vector<Vec<float>> &textureUVs)
 {
-	int numPlanes = dims.maxValue() * 1.5 * 1.5;//second 1.5 is to reduce moire
+	int numPlanes = int(dims.maxValue() * 1.5f * 1.5f);//second 1.5 is to reduce moire
 
 	vertices.resize(4*numPlanes);
 	faces.resize(2*numPlanes);
@@ -250,6 +257,9 @@ void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &verti
 		{
 			vertices[planesFirstVert+i] = triVertices[i]*1.5f;
 			vertices[planesFirstVert+i].z = zPosition*1.5f;
+
+			//Vec<float> temp(vertices[planesFirstVert+i].y,vertices[planesFirstVert+i].x,vertices[planesFirstVert+i].z);
+			//textureUVs[planesFirstVert+i] = temp * 0.5f + 0.5f;
 
 			textureUVs[planesFirstVert+i] = vertices[planesFirstVert+i] * 0.5f + 0.5f;
 		}

@@ -53,11 +53,12 @@ public:
 	HRESULT init();
 
 //Setters	
-	void setCurrentFrame(unsigned int frame);
+	void setCurrentFrame(int frame);
 	void incrementFrame();
 	void decrementFrame();
 	unsigned int getLastFrame();
 	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
+	void removeFromRootScene(SceneNode* sceneIn);
 
 	void clearVertexShaderList();
 	void clearPixelShaderList();
@@ -69,6 +70,7 @@ public:
 	void setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState);
 
 	void setRootWorldTransform(DirectX::XMMATRIX worldTransform);
+	void resetRootWorldTransform();
 	
 //Getters
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
@@ -76,6 +78,8 @@ public:
 	ID3D11SamplerState* getSamplerState();
 
 	DirectX::XMMATRIX getRootWorldTransorm();
+	void getMutex();
+	void releaseMutex();
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen

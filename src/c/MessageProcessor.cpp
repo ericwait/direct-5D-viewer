@@ -3,7 +3,7 @@
 #include "Initialization.h"
 #include <time.h>
 
-bool gRendererOn = true;
+bool gRendererOn = false;
 bool gPlay = false;
 float gFramesPerSec = 5;
 
@@ -18,6 +18,9 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HMENU hmenu = GetMenu(hWnd);
 
 	static bool leftButtonDown = false;
+	static bool shiftDown = false;
+	static bool ctrlDown = false;
+	static bool altDown = false;
 	static int previousMouseX = 0;
 	static int previousMouseY = 0;
 	static DirectX::XMMATRIX previousWorldRotation;
@@ -69,7 +72,15 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		leftButtonDown = false;
 		break;
 	case WM_KEYDOWN:
-		if (VK_PRIOR==wParam) //Page Up key
+		if (VK_LEFT==wParam)
+			gCameraDefaultMesh->moveLeft();
+		else if (VK_RIGHT==wParam)
+			gCameraDefaultMesh->moveRight();
+		else if (VK_UP==wParam)
+			gCameraDefaultMesh->moveUp();
+		else if (VK_DOWN==wParam)
+			gCameraDefaultMesh->moveDown();
+		else if (VK_PRIOR==wParam) //Page Up key
 			gRenderer->incrementFrame();
 		else if (VK_NEXT==wParam) //Page Down key
 			gRenderer->decrementFrame();
@@ -79,8 +90,24 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gRenderer->setCurrentFrame(gRenderer->getLastFrame());
 		else if (VK_SPACE==wParam)
 			gPlay = !gPlay;
+		else if (VK_SHIFT==wParam)
+			shiftDown = true;
+		else if (VK_CONTROL==wParam)
+			ctrlDown = true;
+		else if (VK_MENU==wParam)
+			altDown = true;
 		else if ('C'==wParam)
-			gRenderer->setRootWorldTransform(DirectX::XMMatrixIdentity());
+			gCameraDefaultMesh->resetCamera();
+		else if ('R'==wParam)
+			gRenderer->resetRootWorldTransform();
+		break;
+	case WM_KEYUP:
+		if (VK_SHIFT==wParam)
+			shiftDown = false;
+		else if (VK_CONTROL==wParam)
+			ctrlDown = false;
+		else if (VK_MENU)
+			altDown = false;
 		break;
 	}
 
