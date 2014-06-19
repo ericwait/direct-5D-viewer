@@ -429,8 +429,10 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 
 		bool render = i==fvtIdx;
 		for (int j=0; j<localGraphicObjectNodes[idx].size(); ++j)
-			localGraphicObjectNodes[idx][j]->setRenderable(render);
+			localGraphicObjectNodes[idx][j]->setRenderable(render,true);
 	}
+
+	localGraphicObjectNodes[GraphicObjectTypes::OriginalVolume][0]->setRenderable(textureType==GraphicObjectTypes::OriginalVolume,false);
 }
 
 // This is the entry point from Matlab

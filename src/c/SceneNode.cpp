@@ -113,11 +113,12 @@ void GraphicObjectNode::releaseRenderResources()
 	renderable = false;
 }
 
-
-void GraphicObjectNode::setRenderable(bool render)
+void GraphicObjectNode::setRenderable(bool render, bool delayUpdate/*=false*/)
 {
 	renderable = render;
-	requestUpdate();
+	if (!delayUpdate)
+		requestUpdate();
+}
 }
 
 

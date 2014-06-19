@@ -42,7 +42,7 @@ public:
 	virtual void attachToParentNode(SceneNode* parent);
 	void releaseRenderResources();
 	void setLightOn(bool on){graphicObject->setLightOn(on);}
-	void setRenderable(bool render);
+	void setRenderable(bool render, bool delayUpdate=false);
 
 	virtual bool isRenderable(){return renderable;}
 	const RendererPackage* getRenderPackage();
