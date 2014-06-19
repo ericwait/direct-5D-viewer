@@ -243,7 +243,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "	float3 Normal : NORMAL;\n";
 	shaderText += "};\n";
 	shaderText += "\n";
-	shaderText += "PixelOutputType MultiChanVolumePixelShader( VS_OUTPUT input ) : SV_TARGET\n";
+	shaderText += "PixelOutputType MultiChanVolumePixelShader( VS_OUTPUT input )\n";
 	shaderText += "{\n";
 	shaderText += "\tPixelOutputType output = (PixelOutputType)0;\n";
 	shaderText += "\tfloat alpha = 0.0f;\n";
@@ -286,7 +286,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\toutput.color.a *= saturate(unlitComposite);\n";
 	shaderText += "\toutput.color.a = output.color.a*step(0.15,output.color.a);\n";
 	shaderText += "\n";
-	shaderText += "\toutput.depth = input.Pos.z;\n";
+	shaderText += "\toutput.depth = 1.0f;\n";
 	shaderText += "\n";
 	shaderText += "\treturn output;\n";
 	shaderText += "}\n";

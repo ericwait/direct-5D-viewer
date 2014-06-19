@@ -20,8 +20,8 @@ struct VS_OUTPUT
 
 struct PS_OUTPUT
 {
-	float4 color : SV_TARGET0;
-	float depth : SV_DEPTH0;
+	float4 color : SV_TARGET;
+	float depth : SV_DEPTH;
 };
 
 VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TEXCOORD, float3 Normal : NORMAL )
@@ -40,7 +40,7 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 	return output;
 }
 
-PS_OUTPUT DefaultMeshPixelShader( VS_OUTPUT input ) : SV_TARGET
+PS_OUTPUT DefaultMeshPixelShader( VS_OUTPUT input )
 { 
 	PS_OUTPUT output;
 	float4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);
