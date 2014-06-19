@@ -7,52 +7,68 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 	lookPosition = defaultLookPosition = lookPositionIn;
 	upDirection = defaultUpDirection = upDirectionIn;
 
+	zoomFactor = 50;
+
 	updateViewTransform();
 	updateProjectionTransform();
 }
 
 void Camera::moveLeft()
 {
-	cameraPosition.x -= 0.1f;
-	lookPosition.x	 -= 0.1f;
+	cameraPosition.x += 0.03f;
+	lookPosition.x	 += 0.03f;
 	updateViewTransform();
 }
 
 void Camera::moveRight()
 {
-	cameraPosition.x += 0.1f;
-	lookPosition.x	 += 0.1f;
+	cameraPosition.x -= 0.03f;
+	lookPosition.x	 -= 0.03f;
 	updateViewTransform();
 }
 
 void Camera::moveUp()
 {
-	cameraPosition.y -= 0.1f;
-	lookPosition.y	 -= 0.1f;
+	cameraPosition.y += 0.03f;
+	lookPosition.y	 += 0.03f;
 	updateViewTransform();
 }
 
 void Camera::moveDown()
 {
-	cameraPosition.y += 0.1f;
-	lookPosition.y	 += 0.1f;
+	cameraPosition.y -= 0.03f;
+	lookPosition.y	 -= 0.03f;
 	updateViewTransform();
 }
 
 void Camera::zoomIncrement()
 {
-	if (lookPosition.z-cameraPosition.z>0.02f)
+	float curDelta = lookPosition.z-cameraPosition.z;
+	if (curDelta>0.02f)
 	{
-		cameraPosition.z += (lookPosition.z-cameraPosition.z)*0.125f;
+		float newDelta = curDelta - SQR(curDelta)/zoomFactor;
+
+		if (newDelta>0.02f)
+			cameraPosition.z = lookPosition.z - newDelta;
+		else
+			cameraPosition.z = lookPosition.z - 0.02f;
+
 		updateViewTransform();
 	}
 }
 
 void Camera::zoomDecrement()
 {
-	if (lookPosition.z-cameraPosition.z<10.0f)
+	float curDelta = lookPosition.z-cameraPosition.z;
+	if (curDelta<10.0f)
 	{
-		cameraPosition.z -= (lookPosition.z-cameraPosition.z)*0.25f;
+		float newDelta = zoomFactor/2.0f - sqrt(abs(SQR(zoomFactor) - 4.0f*zoomFactor*(curDelta))) /2.0f;
+
+		if (newDelta<10.0f)
+			cameraPosition.z = lookPosition.z - newDelta;
+		else
+			cameraPosition.z = lookPosition.z - 10.0f;
+
 		updateViewTransform();
 	}
 }

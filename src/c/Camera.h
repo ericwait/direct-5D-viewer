@@ -36,6 +36,7 @@ protected:
 	Vec<float> defaultUpDirection;
 	DirectX::XMMATRIX viewTransform;
 	DirectX::XMMATRIX projectionTransform;
+	float zoomFactor;
 };
 
 
