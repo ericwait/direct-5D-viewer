@@ -421,6 +421,8 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 {
 	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
+	gRenderer->getMutex();
+
 	for (int i=0; i<firstVolumeTextures.size(); ++i)
 	{
 		int idx = GraphicObjectTypes::OriginalVolume + i;	
@@ -433,6 +435,8 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 	}
 
 	localGraphicObjectNodes[GraphicObjectTypes::OriginalVolume][0]->setRenderable(textureType==GraphicObjectTypes::OriginalVolume,false);
+
+	gRenderer->releaseMutex();
 }
 
 // This is the entry point from Matlab
