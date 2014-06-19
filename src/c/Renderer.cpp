@@ -99,7 +99,7 @@ HRESULT Renderer::initSwapChain()
 	HRESULT hr = S_FALSE;
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
-	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_DRIVER_TYPE driverTypes[] =	{D3D_DRIVER_TYPE_HARDWARE, D3D_DRIVER_TYPE_WARP, D3D_DRIVER_TYPE_REFERENCE};
@@ -207,7 +207,7 @@ HRESULT Renderer::initDepthStencils()
 	//Compare always depth stencil
 	ZeroMemory(&descDS,sizeof(descDS));
 	descDS.DepthEnable=TRUE;
-	descDS.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ALL    ;
+	descDS.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ALL;
 	descDS.DepthFunc=D3D11_COMPARISON_ALWAYS;
 	descDS.StencilEnable=FALSE;
 
@@ -648,8 +648,7 @@ void Renderer::preRenderLoop()
 	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre,currentFrame);
 	for (int i=0; i<renderPreList.size(); ++i)
 	{
-		if (renderPreList[i]->isRenderable())
-			renderPackage(renderPreList[i]->getRenderPackage());
+		renderPackage(renderPreList[i]->getRenderPackage());
 	}
 }
 
@@ -663,8 +662,7 @@ void Renderer::mainRenderLoop()
 	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
 	for (int i=0; i<renderMainList.size(); ++i)
 	{
-		if (renderMainList[i]->isRenderable())
-			renderPackage(renderMainList[i]->getRenderPackage());
+		renderPackage(renderMainList[i]->getRenderPackage());
 	}
 }
 
@@ -678,8 +676,7 @@ void Renderer::postRenderLoop()
 	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post,currentFrame);
 	for (int i=0; i<renderPostList.size(); ++i)
 	{
-		if (renderPostList[i]->isRenderable())
-			renderPackage(renderPostList[i]->getRenderPackage());
+		renderPackage(renderPostList[i]->getRenderPackage());
 	}
 }
 
@@ -961,9 +958,9 @@ void Renderer::decrementFrame()
 		--currentFrame;
 }
 
-unsigned int Renderer::getLastFrame()
+unsigned int Renderer::getNumberOfFrames()
 {
-	return rootScene->getNumFrames()-1;
+	return rootScene->getNumFrames();
 }
 
 void Renderer::resetRootWorldTransform()
