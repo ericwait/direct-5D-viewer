@@ -43,6 +43,7 @@ public:
 	void releaseRenderResources();
 	void setLightOn(bool on){graphicObject->setLightOn(on);}
 	void setRenderable(bool render, bool delayUpdate=false);
+	void setWireframe(bool wireframe);
 
 	virtual bool isRenderable(){return renderable;}
 	const RendererPackage* getRenderPackage();

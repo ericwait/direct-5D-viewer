@@ -87,7 +87,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		else if (VK_HOME==wParam)
 			gRenderer->setCurrentFrame(0);
 		else if (VK_END==wParam)
-			gRenderer->setCurrentFrame(gRenderer->getLastFrame());
+			gRenderer->setCurrentFrame(gRenderer->getNumberOfFrames()-1);
 		else if (VK_SPACE==wParam)
 			gPlay = !gPlay;
 		else if (VK_SHIFT==wParam)

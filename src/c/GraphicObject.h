@@ -16,6 +16,7 @@ public:
 	void removeFromRenderList();
 	void removeRendererResources();
 	virtual void setLightOn(bool on){}
+	virtual void setWireframe(bool wireframe){throw std::runtime_error("You cannot set wire frame on a GraphicObject!");}
 
 	virtual void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
 
@@ -42,6 +43,7 @@ public:
 	void setLightOn(bool on){}
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
+	void setWireframe(bool wireframe);
 	void getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals);
 
 private:
@@ -75,6 +77,7 @@ public:
 	void setRange(int channel, Vec<float> ranges){material->setRange(channel,ranges);}
 	void setColor(int channel, Vec<float> color, float alphaMod){material->setColor(channel,color,alphaMod);}
 	void setLightOn(bool on){material->setLightOn(on);}
+	void setWireframe(bool wireframe){throw std::runtime_error("You cannot set wire frame on a VolumeTextureObject!");}
 
 	int getNumberOfChannels(){return numChannels;}
 

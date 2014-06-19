@@ -56,7 +56,7 @@ public:
 	void setCurrentFrame(int frame);
 	void incrementFrame();
 	void decrementFrame();
-	unsigned int getLastFrame();
+	unsigned int getNumberOfFrames();
 	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
 	void removeFromRootScene(SceneNode* sceneIn);
 

@@ -115,6 +115,11 @@ void CellHullObject::setColorMod(Vec<float> colorMod, float alpha)
 		material->setColorModifier(colorMod,alpha);
 }
 
+void CellHullObject::setWireframe(bool wireframe)
+{
+	material->setWireframe(wireframe);
+}
+
 
 void CellHullObject::getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals)
 {
@@ -155,7 +160,6 @@ void CellHullObject::updateBoundingBox(DirectX::XMMATRIX localToWorld)
 		curBoundingBox[1] = Vec<float>::max(curBoundingBox[1], Vec<float>(DirectX::XMVectorGetX(vV),DirectX::XMVectorGetY(vV),DirectX::XMVectorGetZ(vV)));
 	}
 }
-
 
 
 VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image, 

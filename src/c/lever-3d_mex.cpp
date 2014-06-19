@@ -143,76 +143,9 @@ extern "C" void exitFunc()
 	cleanUp();
 }
 
-void loadHulls( const mxArray* verts, const mxArray* faces, const mxArray* normals) 
+CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
+									 Camera* camera)
 {
-// 
-// 	size_t numVerts = mxGetM(verts);
-// 	size_t numFaces = mxGetM(faces);
-// 	size_t numNormals = mxGetM(normals);
-// 
-// 	if (numVerts<1)
-// 		mexErrMsgTxt("No Verts!");
-// 
-// 	if (numFaces<1)
-// 		mexErrMsgTxt("No faces!");
-// 
-// 	if (numNormals<1)
-// 		mexErrMsgTxt("No norms!");
-// 
-// 	if (numVerts!=numNormals) mexErrMsgTxt("Number of normals does not match the number of verts!\n");
-// 	if (numVerts<=0)
-// 		return;
-// 
-// 	gVertsDebug.resize(numVerts);
-// 	gFacesDebug.resize(numFaces);
-// 	gNormsDebug.resize(numNormals);
-// 
-// 	double* vertData = (double*)mxGetData(verts);
-// 	double* normData = (double*)mxGetData(normals);
-// 	Vec<float> curVert, curNormal;
-// 	for (int i=0; i<numVerts; ++i)
-// 	{
-// 		curVert.x = vertData[i];
-// 		curVert.y = vertData[i+numVerts];
-// 		curVert.z = vertData[i+2*numVerts];
-// 
-// 		curNormal.x = normData[i];
-// 		curNormal.y = normData[i+numVerts];
-// 		curNormal.z = normData[i+2*numVerts];
-// 
-// 		gVertsDebug[i] = curVert;
-// 		gNormsDebug[i] = curNormal;
-// 	}
-// 
-// 	double* faceData = (double*)mxGetData(faces);
-// 	Vec<unsigned int> curFace;
-// 	for (int i=0; i<numFaces; ++i)
-// 	{
-// 		curFace.x = faceData[i];
-// 		curFace.y = faceData[i+numFaces];
-// 		curFace.z = faceData[i+2*numFaces];
-// 
-// 		curFace = curFace - 1;
-// 
-// 		gFacesDebug[i] = curFace;
-// 	}
-}
-
-CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
-{
-	size_t numFaces = mxGetM(widget[0]);
-	size_t numVerts = mxGetM(widget[1]);
-	size_t numNormals = mxGetM(widget[2]);
-
-	if (numVerts<1)
-		mexErrMsgTxt("No Verts!");
-
-	if (numFaces<1)
-		mexErrMsgTxt("No faces!");
-
-	if (numNormals<1)
-		mexErrMsgTxt("No norms!");
-
 	std::vector<Vec<unsigned int>> faces;
 	std::vector<Vec<float>> verts;
 	std::vector<Vec<float>> normals;
@@ -221,7 +154,6 @@ CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
 	verts.resize(numVerts);
 	normals.resize(numNormals);
 
-	double* faceData = (double*)mxGetData(widget[0]);
 	Vec<unsigned int> curFace;
 	for (int i=0; i<numFaces; ++i)
 	{
@@ -234,8 +166,6 @@ CellHullObject* createCellHullObject(const mxArray** widget, Camera* camera)
 		faces[i] = curFace;
 	}
 
-	double* vertData = (double*)mxGetData(widget[1]);
-	double* normData = (double*)mxGetData(widget[2]);
 	Vec<float> curVert, curNormal;
 	for (int i=0; i<numVerts; ++i)
 	{
@@ -260,35 +190,127 @@ void loadWidget(const mxArray* widget[])
 {
 	gRenderer->getMutex();
 
+	size_t numFaces = mxGetM(widget[0]);
+	size_t numVerts = mxGetM(widget[1]);
+	size_t numNormals = mxGetM(widget[2]);
+
+	if (numVerts<1)
+		mexErrMsgTxt("No Verts!");
+
+	if (numFaces<1)
+		mexErrMsgTxt("No faces!");
+
+	if (numNormals<1)
+		mexErrMsgTxt("No norms!");
+
+	double* faceData = (double*)mxGetData(widget[0]);
+	double* vertData = (double*)mxGetData(widget[1]);
+	double* normData = (double*)mxGetData(widget[2]);
+
 	SceneNode* widgetScene = new SceneNode();
 	gRenderer->attachToRootScene(widgetScene,Renderer::Section::Post,0);
 
-	CellHullObject* arrowX = createCellHullObject(widget,gCameraWidget);
+	CellHullObject* arrowX = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraWidget);
 	arrowX->setColor(Vec<float>(1.0f, 0.2f, 0.2f),1.0f);
 	GraphicObjectNode* arrowXnode = new GraphicObjectNode(arrowX);
 	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI/2.0f));
 	arrowXnode->attachToParentNode(widgetScene);
 	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowXnode);
 
-	CellHullObject* arrowY = createCellHullObject(widget,gCameraWidget);
+	CellHullObject* arrowY = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraWidget);
 	arrowY->setColor(Vec<float>(0.1f, 1.0f, 0.1f),1.0f);
 	GraphicObjectNode* arrowYnode = new GraphicObjectNode(arrowY);
 	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI/2.0f));
 	arrowYnode->attachToParentNode(widgetScene);
 	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowYnode);
 
-	CellHullObject* arrowZ = createCellHullObject(widget,gCameraWidget);
+	CellHullObject* arrowZ = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraWidget);
 	arrowZ->setColor(Vec<float>(0.4f, 0.4f, 1.0f),1.0f);
 	GraphicObjectNode* arrowZnode = new GraphicObjectNode(arrowZ);
 	arrowZnode->attachToParentNode(widgetScene);
 	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowZnode);
 
-	CellHullObject* sphere = createCellHullObject(widget+3,gCameraWidget);
+	numFaces = mxGetM(widget[3]);
+	numVerts = mxGetM(widget[4]);
+	numNormals = mxGetM(widget[5]);
+
+	if (numVerts<1)
+		mexErrMsgTxt("No Verts!");
+
+	if (numFaces<1)
+		mexErrMsgTxt("No faces!");
+
+	if (numNormals<1)
+		mexErrMsgTxt("No norms!");
+
+	faceData = (double*)mxGetData(widget[3]);
+	vertData = (double*)mxGetData(widget[4]);
+	normData = (double*)mxGetData(widget[5]);
+
+	CellHullObject* sphere = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraWidget);
 	sphere->setColor(Vec<float>(0.9f,0.9f,0.9f),1.0f);
 	GraphicObjectNode* sphereNode = new GraphicObjectNode(sphere);
 	sphereNode->attachToParentNode(widgetScene);
 	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(sphereNode);
 
+	gRenderer->releaseMutex();
+}
+
+void loadHulls(const mxArray* hulls)
+{
+	std::vector<SceneNode*> hullRootNodes;
+	hullRootNodes.resize(gRenderer->getNumberOfFrames());
+	for (int i=0; i<gRenderer->getNumberOfFrames(); ++i)
+		hullRootNodes[i] = new SceneNode();
+
+	size_t numHulls = mxGetNumberOfElements(hulls);
+	for (size_t i=0; i<numHulls; ++i)
+	{
+		mxArray* mxFaces = mxGetField(hulls,i,"faces");
+		mxArray* mxVerts = mxGetField(hulls,i,"verts");
+		mxArray* mxNorms = mxGetField(hulls,i,"norms");
+		mxArray* mxColor = mxGetField(hulls,i,"color");
+		mxArray* mxFrame = mxGetField(hulls,i,"frame");
+
+		size_t numFaces = mxGetM(mxFaces);
+		size_t numVerts = mxGetM(mxVerts);
+		size_t numNormals = mxGetM(mxNorms);
+
+		if (numVerts<1)
+			mexErrMsgTxt("No Verts!");
+
+		if (numFaces<1)
+			mexErrMsgTxt("No faces!");
+
+		if (numNormals<1)
+			mexErrMsgTxt("No norms!");
+
+		if (numNormals!=numVerts)
+			mexErrMsgTxt("Number of verts does not match the number of normals!");
+
+		double* faceData = (double*)mxGetData(mxFaces);
+		double* vertData = (double*)mxGetData(mxVerts);
+		double* normData = (double*)mxGetData(mxNorms);
+		double* colorData = (double*)mxGetData(mxColor);
+		int frame = int(mxGetScalar(mxFrame))-1;
+
+		gRenderer->getMutex();
+		
+		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
+		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
+		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
+		curHullNode->setWireframe(true);
+		curHullNode->attachToParentNode(hullRootNodes[frame]);
+		localGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
+		
+		gRenderer->releaseMutex();
+	}
+
+	gRenderer->getMutex();
+
+	for (int i=0; i<gRenderer->getNumberOfFrames(); ++i)
+		gRenderer->attachToRootScene(hullRootNodes[i],Renderer::Section::Main,i);
+	
 	gRenderer->releaseMutex();
 }
 
@@ -439,6 +461,38 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 	gRenderer->releaseMutex();
 }
 
+void toggleSegmentationResults(bool on)
+{
+	gRenderer->getMutex();
+
+	for (int i=0; i<localGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+		localGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on,true);
+
+	localGraphicObjectNodes[GraphicObjectTypes::CellHulls][0]->setRenderable(on,false);
+
+	gRenderer->releaseMutex();
+}
+
+void toggleSegmentaionWireframe(bool wireframe)
+{
+	gRenderer->getMutex();
+
+	for (int i=0; i<localGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+		localGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setWireframe(wireframe);
+
+	gRenderer->releaseMutex();
+}
+
+void toggleSegmentaionLighting(bool lighting)
+{
+	gRenderer->getMutex();
+
+	for (int i=0; i<localGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+		localGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setLightOn(lighting);
+
+	gRenderer->releaseMutex();
+}
+
 // This is the entry point from Matlab
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
@@ -539,13 +593,35 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			if (nrhs!=2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
 
 			if (mxGetScalar(prhs[1])>0.0)
+			{
 				for (int i=0; i<firstVolumeTextures.size(); ++i)
+				{
 					if (NULL!=firstVolumeTextures[i])
+					{
 						firstVolumeTextures[i]->setLightOn(true);
+					}
+				}
+			}
 			else
+			{
 				for (int i=0; i<firstVolumeTextures.size(); ++i)
+				{
 					if (NULL!=firstVolumeTextures[i])
+					{
 						firstVolumeTextures[i]->setLightOn(false);
+					}
+				}
+			}
+		}
+
+		else if (_strcmpi("segmentationLighting",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
+
+			double onD = mxGetScalar(prhs[1]);
+			bool on = onD>0;
+
+			toggleSegmentaionLighting(on);
 		}
 
 		else if (_strcmpi("transferUpdate",command)==0)
@@ -609,7 +685,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 		else if (_strcmpi("viewTexture",command)==0)
 		{
-			if (nrhs!=2) mexErrMsgTxt("not the right arguments for viewTexture!");
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for viewTexture!");
 
 			char buff[96];
 			mxGetString(prhs[1],buff,96);
@@ -622,7 +698,26 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				textureType = GraphicObjectTypes::ProcessedVolume;
 
 			setCurrentTexture(textureType);
+		}
 
+		else if (_strcmpi("viewSegmentation",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for viewSegmentation!");
+
+			double onD = mxGetScalar(prhs[1]);
+			bool on = onD>0;
+
+			toggleSegmentationResults(on);
+		}
+
+		else if (_strcmpi("wireframeSegmentation",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for wireframeSegmentation!");
+
+			double onD = mxGetScalar(prhs[1]);
+			bool on = onD>0;
+
+			toggleSegmentaionWireframe(on);
 		}
 
 		else if (_strcmpi("poll",command)==0)
@@ -630,12 +725,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			if (nlhs!=1) mexErrMsgTxt("Wrong number of return arguments");
 		}
 
-		else if (_strcmpi("load hulls",command)==0)
+		else if (_strcmpi("loadHulls",command)==0)
 		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+
 			const mxArray* hulls = prhs[1];
 			if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
 
-			//loadHulls(hulls);
+			loadHulls(hulls);
 		}
 
 		else

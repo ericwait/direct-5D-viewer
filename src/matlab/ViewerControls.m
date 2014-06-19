@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 12-Jun-2014 12:22:24
+% Last Modified by GUIDE v2.5 19-Jun-2014 09:26:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -130,7 +130,7 @@ set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
 set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
 set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 
-procStr = {'Process image with...','Contrast Enhancement'};
+procStr = {'Process image with...','Contrast Enhancement','Segment'};
 set(handles.m_imageProcessing,'String',procStr);
 
 % set(handles.s_curFrame,'max',imageData.NumberOfFrames);
@@ -238,6 +238,10 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 lever_3d('close');
 delete(hObject);
 clear mex
+clear CellHulls
+clear orgImage
+clear processedImage
+clear imageData
 end
 
 %% Callback functions
@@ -343,11 +347,6 @@ function cb_textureLighting_Callback(hObject, eventdata, handles)
 lever_3d('textureLightingUpdate',get(handles.cb_textureLighting,'Value'));
 end
 
-% --- Executes on button press in cb_segLighting.
-function cb_segLighting_Callback(hObject, eventdata, handles)
-
-end
-
 % --- Executes on button press in rb_orgImage.
 function rb_orgImage_Callback(hObject, eventdata, handles)
 set(handles.rb_Processed,'Value',0);
@@ -366,7 +365,7 @@ end
 
 % --- Executes on selection change in m_imageProcessing.
 function m_imageProcessing_Callback(hObject, eventdata, handles)
-global imageData orgImage processedImage channelData
+global imageData orgImage processedImage channelData CellHulls
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).alphaMod = get(handles.s_alpha,'Value');
 
@@ -377,37 +376,96 @@ if (isempty(processedImage))
     processedImage = orgImage;
 end
 
-if (strcmpi('Contrast Enhancement',processStr{processIdx}))
-    params = {'Gaussian Sigma in X','Gaussian Sigma in Y', 'Gaussian Sigma in Z', 'Median Filter in X', 'Median Filter in Y','Median Filter in Z'};
-    diaTitle = 'Contrast Enhancement';
-    def = {'100', '100', '100', '3', '3', '3'};
-    response = inputdlg(params,diaTitle,1,def);
-    gX = str2num(response{1});
-    gY = str2num(response{2});
-    gZ = str2num(response{3});
-    mX = str2num(response{4});
-    mY = str2num(response{5});
-    mZ = str2num(response{6});
-    for t=1:size(processedImage,5)
-        processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',processedImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+processed = 0;
+switch processStr{processIdx}
+    case 'Contrast Enhancement'
+        params = {'Gaussian Sigma in X','Gaussian Sigma in Y', 'Gaussian Sigma in Z', 'Median Filter in X', 'Median Filter in Y','Median Filter in Z'};
+        diaTitle = 'Contrast Enhancement';
+        def = {'100', '100', '100', '3', '3', '3'};
+        response = inputdlg(params,diaTitle,1,def);
+        if (~isempty(response))
+            gX = str2num(response{1});
+            gY = str2num(response{2});
+            gZ = str2num(response{3});
+            mX = str2num(response{4});
+            mY = str2num(response{5});
+            mZ = str2num(response{6});
+            if (get(handles.rb_Processed,'Value')==1)
+                for t=1:size(processedImage,5)
+                    processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',processedImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+                end
+            else
+                for t=1:size(orgImage,5)
+                    processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',orgImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+                end
+            end
+            processed = 1;
+        end
+    case 'Segment'
+        params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
+        diaTitle = 'Segmentation';
+        def = {'1.0', '2', '2', '1'};
+        response = inputdlg(params,diaTitle,1,def);
+        if (~isempty(response))
+            alpha = str2num(response{1});
+            oX = str2num(response{2});
+            oY = str2num(response{3});
+            oZ = str2num(response{4});
+            for t=1:size(processedImage,5)
+                segImage(:,:,:,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
+            end
+        end
+        Segment(segImage,chan);
+end
+
+if (processed>0)    
+    set(handles.rb_Processed,'Enable','on','Value',1);
+    set(handles.rb_orgImage,'Value',0);
+    
+    channelData(chan).alphaMod = 1.0;
+    channelData(chan).minVal = 0.0;
+    channelData(chan).midVal = 0.5;
+    channelData(chan).maxVal = 1.0;
+    channelData(chan).a = 0.0;
+    channelData(chan).b = 1.0;
+    channelData(chan).c = 0.0;
+    
+    viewImage = zeros(size(processedImage),'uint8');
+    for c=1:size(processedImage,4)
+        mx = max(processedImage(:,:,:,c,:));
+        mx = double(max(mx(:)));
+        viewImage(:,:,:,c,:) = uint8(double(processedImage(:,:,:,c,:)) ./mx .*255);
     end
+    
+    lever_3d('loadTexture',imageConvert(viewImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
+    updateCurrentState(handles);
+end
+
+if (~isempty(CellHulls))
+    set(handles.cb_SegmentationOn,'Value',1,'Enable','on');
+    set(handles.cb_Wireframe,'Value',1,'Enable','on');
+    set(handles.cb_segLighting,'Enable','on');
 end
 
 set(handles.m_imageProcessing,'Value',1);
+end
 
-set(handles.rb_Processed,'Enable','on','Value',1);
-set(handles.rb_orgImage,'Value',0);
+% --- Executes on button press in cb_SegmentationOn.
+function cb_SegmentationOn_Callback(hObject, eventdata, handles)
+on = get(handles.cb_SegmentationOn,'Value');
+lever_3d('viewSegmentation',on);
+end
 
-channelData(chan).alphaMod = 1.0;
-channelData(chan).minVal = 0.0;
-channelData(chan).midVal = 0.5;
-channelData(chan).maxVal = 1.0;
-channelData(chan).a = 0.0;
-channelData(chan).b = 1.0;
-channelData(chan).c = 0.0;
 
-lever_3d('loadTexture',uint8(processedImage),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
-updateCurrentState(handles);
+% --- Executes on button press in cb_Wireframe.
+function cb_Wireframe_Callback(hObject, eventdata, handles)
+on = get(handles.cb_Wireframe,'Value');
+lever_3d('wireframeSegmentation',on);
+end
+
+% --- Executes on button press in cb_segLighting.
+function cb_segLighting_Callback(hObject, eventdata, handles)
+
 end
 
 %% Create Functions

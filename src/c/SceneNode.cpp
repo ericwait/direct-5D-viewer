@@ -10,7 +10,7 @@ SceneNode::SceneNode()
 SceneNode::~SceneNode()
 {
 	for (std::vector<SceneNode*>::iterator it=childrenNodes.begin(); it!=childrenNodes.end(); ++it)
-		delete *it;
+		delete (*it);
 
 	childrenNodes.clear();
 	parentNode = NULL;
@@ -119,6 +119,10 @@ void GraphicObjectNode::setRenderable(bool render, bool delayUpdate/*=false*/)
 	if (!delayUpdate)
 		requestUpdate();
 }
+
+void GraphicObjectNode::setWireframe(bool wireframe)
+{
+	graphicObject->setWireframe(wireframe);
 }
 
 
@@ -137,7 +141,6 @@ GraphicObjectNode::~GraphicObjectNode()
 {
 	releaseRenderResources();
 }
-
 
 
 RootSceneNode::RootSceneNode() : SceneNode()
