@@ -134,4 +134,9 @@ DEVICE_PREFIX VEC_THIS_CLASS<T> cross(const EXTERN_TYPE<T>& other)
 	return outVec;
 }
 
+DEVICE_PREFIX T dot(const EXTERN_TYPE<T>& other)
+{
+	return x*other.x + y*other.y + z*other.z;
+}
+
 #endif
