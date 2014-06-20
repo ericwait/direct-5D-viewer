@@ -402,20 +402,22 @@ switch processStr{processIdx}
             processed = 1;
         end
     case 'Segment'
-        params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
+        params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z','Min Cell Diameter'};
         diaTitle = 'Segmentation';
-        def = {'1.0', '2', '2', '1'};
+        def = {'1.0', '2', '2', '1','6'};
         response = inputdlg(params,diaTitle,1,def);
         if (~isempty(response))
             alpha = str2num(response{1});
             oX = str2num(response{2});
             oY = str2num(response{3});
             oZ = str2num(response{4});
+            dia = str2num(response{5});
+            segImage = squeeze(processedImage(:,:,:,1,:));
             for t=1:size(processedImage,5)
                 segImage(:,:,:,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
             end
         end
-        Segment(segImage,chan);
+        Segment(segImage,chan,dia);
 end
 
 if (processed>0)    
@@ -455,7 +457,6 @@ function cb_SegmentationOn_Callback(hObject, eventdata, handles)
 on = get(handles.cb_SegmentationOn,'Value');
 lever_3d('viewSegmentation',on);
 end
-
 
 % --- Executes on button press in cb_Wireframe.
 function cb_Wireframe_Callback(hObject, eventdata, handles)

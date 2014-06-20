@@ -1,4 +1,4 @@
-function Segment(imIn, chan)
+function Segment(imIn, chan, minCellDia)
 global CellHulls orgImage imageData
 
 CellHulls = struct(...
@@ -18,7 +18,7 @@ imageDims = [imageData.XDimension, imageData.YDimension, imageData.ZDimension];
 physDims = [imageData.XPixelPhysicalSize, imageData.YPixelPhysicalSize, imageData.ZPixelPhysicalSize];
 scaleFactor  =  imageDims ./ max(imageDims) .* physDims/physDims(1);
 imDiv = imageDims /2;
-
+minCellVol = (4*pi*(minCellDia/2)^3)/3;
 for t=1:size(imIn,4)
     bw = imIn(:,:,:,t)>0;
     
@@ -29,7 +29,7 @@ for t=1:size(imIn,4)
         stats(i).BoundingBox(1,1:3) = stats(i).BoundingBox(1,1:3) - 0.5;
         stats(i).WeightedCentroid = stats(i).WeightedCentroid - 0.5;
         
-        if (size(stats(i).PixelList,1)<50)
+        if (size(stats(i).PixelList,1) < minCellVol)
             continue;
         end
         
@@ -82,7 +82,14 @@ for t=1:size(imIn,4)
     end
 end
 
+minCellDiaVox = minCellDia / imageDims(1) * scaleFactor(1);
+
 if (~isempty(CellHulls))
+    [newHulls,numTracks,costs] = trackerMex(imageData.NumberOfFrames,CellHulls,minCellDiaVox,minCellDiaVox/2);
+    for i=1:size(CellHulls,2)
+        CellHulls(i).color = newHulls(i).color;
+        CellHulls(i).track = newHulls(i).track;
+    end
     lever_3d('loadHulls',CellHulls);
 end
 end
