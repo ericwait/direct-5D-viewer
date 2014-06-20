@@ -1,0 +1,3 @@
+LIBRARY	"trackerMex"
+EXPORTS DllMain
+EXPORTS mexFunction
