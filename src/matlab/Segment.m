@@ -1,7 +1,7 @@
 function Segment(imIn, chan, minCellDia)
-global CellHulls orgImage imageData
+global imageData orgImage Hulls Tracks Families Costs
 
-CellHulls = struct(...
+Hulls = struct(...
     'label',{},...
     'frame',{},...
     'centerOfMass',{},...
@@ -13,6 +13,21 @@ CellHulls = struct(...
     'verts',{},...
     'norms',{}...
     );
+
+Tracks = struct(...
+    'hulls',{},...
+    'startFrame',{},...
+    'endFrame',{},...
+    'parentTrack',{},...
+    'childrenTracks',{},...
+    'family',{},...
+    'color',{});
+
+Families = struct(...
+    'tracks',{},...
+    'rootTrack',{},...
+    'startFrame',{},...
+    'endFrame',{});
 
 imageDims = [imageData.XDimension, imageData.YDimension, imageData.ZDimension];
 physDims = [imageData.XPixelPhysicalSize, imageData.YPixelPhysicalSize, imageData.ZPixelPhysicalSize];
@@ -61,35 +76,66 @@ for t=1:size(imIn,4)
         
         norms = calcVertNormals(verts,faces);
         
-        idx = length(CellHulls) + 1;
-        CellHulls(idx).label = idx;
-        CellHulls(idx).frame = t;
-        CellHulls(idx).centerOfMass = (stats(i).WeightedCentroid ./ imDiv-1) .* scaleFactor;
-        CellHulls(idx).track = -1;
+        idx = length(Hulls) + 1;
+        Hulls(idx).label = idx;
+        Hulls(idx).frame = t;
+        Hulls(idx).centerOfMass = (stats(i).WeightedCentroid ./ imDiv-1) .* scaleFactor;
+        Hulls(idx).track = -1;
         color = GetNextColor();
-        CellHulls(idx).color = color.background;
+        Hulls(idx).color = color.background;
         bbStart = (stats(i).BoundingBox(1,1:3)./imDiv-1) .* scaleFactor;
         bbEnd = stats(i).BoundingBox(1,4:6) ./ [imageData.XDimension,imageData.YDimension,imageData.ZDimension];
-        CellHulls(idx).boundingBox = [bbStart, bbEnd];
+        Hulls(idx).boundingBox = [bbStart, bbEnd];
         imDivArray = repmat(imDiv,size(stats(i).PixelList,1),1);
         imScaleArray = repmat(scaleFactor,size(stats(i).PixelList,1),1);
-        CellHulls(idx).pixels = (stats(i).PixelList./imDivArray-1) .* imScaleArray;
-        CellHulls(idx).faces = faces;
+        Hulls(idx).pixels = (stats(i).PixelList./imDivArray-1) .* imScaleArray;
+        Hulls(idx).faces = faces;
         imDivArray = repmat(imDiv,size(verts,1),1);
         imScaleArray = repmat(scaleFactor,size(verts,1),1);
-        CellHulls(idx).verts = (verts./imDivArray-1) .* imScaleArray;
-        CellHulls(idx).norms = norms;
+        Hulls(idx).verts = (verts./imDivArray-1) .* imScaleArray;
+        Hulls(idx).norms = norms;
     end
 end
 
 minCellDiaVox = minCellDia / imageDims(1) * scaleFactor(1);
 
-if (~isempty(CellHulls))
-    [newHulls,numTracks,costs] = trackerMex(imageData.NumberOfFrames,CellHulls,minCellDiaVox,minCellDiaVox/2);
-    for i=1:size(CellHulls,2)
-        CellHulls(i).color = newHulls(i).color;
-        CellHulls(i).track = newHulls(i).track;
+if (~isempty(Hulls))
+    [newHulls,numTracks,Costs] = trackerMex(imageData.NumberOfFrames,Hulls,minCellDiaVox,minCellDiaVox/2);
+    
+    Tracks(numTracks).startFrame = -1;
+    Families(numTracks).startFrame = -1;
+    
+    for i=1:length(newHulls)
+        Hulls(i).track = newHulls(i).track;
+        Hulls(i).color = newHulls(i).color;
+        
+        if (Tracks(Hulls(i).track).hulls == -1)
+            Tracks(Hulls(i).track).hulls = i;
+        else
+            Tracks(Hulls(i).track).hulls = [Tracks(Hulls(i).track).hulls i];
+        end
     end
-    lever_3d('loadHulls',CellHulls);
+    
+    for i=1:length(Tracks)
+        Tracks(i).parent = -1;
+        Tracks(i).childrenTracks = [-1 -1];
+        Tracks(i).family = i;
+        Tracks(i).color = Hulls(Tracks(i).hulls(1)).color;
+        Tracks(i).startFrame = min([Hulls(Tracks(i).hulls).frame]);
+        Tracks(i).endFrame = max([Hulls(Tracks(i).hulls).frame]);
+        
+        
+        Families(i).tracks = i;
+        Families(i).rootTrack = i;
+        
+        Families(i).startFrame = Tracks(i).startFrame;
+        Families(i).endFrame = Tracks(i).endFrame;
+    end
+    
+    ProcessNewborns();
+    
+    lever_3d('loadHulls',Hulls);
 end
+
+
 end
