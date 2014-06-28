@@ -12,6 +12,7 @@ extern HINSTANCE gDllInstance;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
 extern CellHullObject* gBorderObj;
+extern MessageQueue gMexMessageQueueOut;
 
 //Implemented in Initialization.cpp
 extern unsigned int gWindowWidth;

@@ -1,5 +1,5 @@
 function lever3d()
-global imageData orgImage processedImage
+global imageData orgImage processedImage tmr uiHandle
 
 [arrowFaces, arrowVerts, arrowNorms] = MakeArrow(0.65,0.05,0.15,40);
 [sphereFaces, sphereVerts, shereNorms] = MakeSphere(0.20,40);
@@ -12,6 +12,9 @@ lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, she
 
 lever_3d('loadTexture',imageConvert(orgImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize]);
 
-ViewerControls();
+uiHandle = ViewerControls();
+
+tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'BusyMode','queue','TimerFcn','CheckMessage');
+start(tmr);
 
 end

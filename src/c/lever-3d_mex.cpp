@@ -1,10 +1,12 @@
 #include "Vec.h"
 #include "mex.h"
+#include "MessageQueue.h"
 #include "windows.h"
 #include "MessageProcessor.h"
 #include "Globals.h"
 
 HANDLE gTermEvent = NULL;
+HANDLE mexMessageMutex = NULL;
 volatile bool gRendererInit = false;
 HANDLE messageLoopHandle = NULL;
 
@@ -22,6 +24,8 @@ enum GraphicObjectTypes //original
 };
 
 std::vector<GraphicObjectNode*> localGraphicObjectNodes[GraphicObjectTypes::VTend];
+MessageQueue gMexMessageQueueOut;
+
 CellHullObject* gBorderObj = NULL;
 std::vector<VolumeTextureObject*> firstVolumeTextures;
 
@@ -108,20 +112,30 @@ void cleanUp()
 
 		Sleep(1000);
 
-		gRenderer->getMutex();
-
-		gBorderObj = NULL;
-		firstVolumeTextures.clear();
+		if (gRenderer!=NULL)
+			gRenderer->getMutex();
 
 		for (int i=0; i<GraphicObjectTypes::VTend; ++i)
 		{
-			for (int j=0; j<localGraphicObjectNodes[i].size(); ++j)
+			if (gRenderer!=NULL)
 			{
-				localGraphicObjectNodes[i][j]->releaseRenderResources();
+				for (int j=0; j<gGraphicObjectNodes[i].size(); ++j)
+				{
+					gGraphicObjectNodes[i][j]->releaseRenderResources();
+				}
 			}
 
-			localGraphicObjectNodes[i].clear();
+			gGraphicObjectNodes[i].clear();
 		}
+
+		gBorderObj = NULL;
+		firstVolumeTextures.clear();
+	}
+
+	if (mexMessageMutex!=NULL)
+	{
+		CloseHandle(mexMessageMutex);
+		mexMessageMutex = NULL;
 	}
 
 	termThread();
@@ -498,10 +512,21 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if (nrhs<1 || !mxIsChar(prhs[0])) mexErrMsgTxt("Usage:\n");// TODO make this useful
 
-	if (messageLoopHandle)
+	if (mexMessageMutex==NULL)
+		mexMessageMutex = CreateMutex(NULL,FALSE,NULL);
+
+	DWORD waitTerm = WaitForSingleObject(mexMessageMutex,360000);
+	if (waitTerm==WAIT_TIMEOUT)
 	{
-		checkRenderThread();
+		cleanUp();
+		mexErrMsgTxt("Closed down Lever 3-D because it was not responding for over 6 min!");
+		return;
 	}
+
+// 	if (messageLoopHandle)
+// 	{
+// 		checkRenderThread();
+// 	}
 
 	char* command = mxArrayToString(prhs[0]);
 
@@ -526,6 +551,18 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	else if (_strcmpi("close",command)==0)
 	{
 		cleanUp();
+
+		gMexMessageQueueOut.clear();
+	}
+
+	else if (_strcmpi("poll",command)==0)
+	{
+		if (nlhs!=2) mexErrMsgTxt("Wrong number of return arguments");
+
+		Message curMsg = gMexMessageQueueOut.getNextMessage();
+
+		plhs[0] = mxCreateString(curMsg.str.c_str());
+		plhs[1] = mxCreateDoubleScalar(curMsg.val);
 	}
 
 	else if (messageLoopHandle!=NULL)
@@ -720,11 +757,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			toggleSegmentaionWireframe(on);
 		}
 
-		else if (_strcmpi("poll",command)==0)
-		{
-			if (nlhs!=1) mexErrMsgTxt("Wrong number of return arguments");
-		}
-
 		else if (_strcmpi("loadHulls",command)==0)
 		{
 			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for loadHulls!");
@@ -744,4 +776,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	}
 
 	mxFree(command);
+
+	ReleaseMutex(mexMessageMutex);
 }

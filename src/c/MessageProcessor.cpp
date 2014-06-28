@@ -175,5 +175,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 	gRendererInit = true;
 
+	gMexMessageQueueOut.addMessage("close",1.0);
+
 	return ((int)msg.wParam);
 }

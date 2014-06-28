@@ -10,9 +10,14 @@ SceneNode::SceneNode()
 SceneNode::~SceneNode()
 {
 	for (std::vector<SceneNode*>::iterator it=childrenNodes.begin(); it!=childrenNodes.end(); ++it)
-		delete (*it);
+	{
+		SceneNode* cur = *it;
+		cur->parentNode = NULL;
+		delete cur;
+	}
 
 	childrenNodes.clear();
+
 	parentNode = NULL;
 }
 

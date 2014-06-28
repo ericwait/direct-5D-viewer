@@ -235,10 +235,16 @@ end
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
+global tmr Hulls orgImage processedImage imageData
 lever_3d('close');
+
 delete(hObject);
+
+stop(tmr);
+delete(tmr);
+
 clear mex
-clear CellHulls
+clear Hulls
 clear orgImage
 clear processedImage
 clear imageData
@@ -365,7 +371,7 @@ end
 
 % --- Executes on selection change in m_imageProcessing.
 function m_imageProcessing_Callback(hObject, eventdata, handles)
-global imageData orgImage processedImage channelData CellHulls
+global imageData orgImage processedImage channelData Hulls
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).alphaMod = get(handles.s_alpha,'Value');
 
@@ -443,7 +449,7 @@ if (processed>0)
     updateCurrentState(handles);
 end
 
-if (~isempty(CellHulls))
+if (~isempty(Hulls))
     set(handles.cb_SegmentationOn,'Value',1,'Enable','on');
     set(handles.cb_Wireframe,'Value',1,'Enable','on');
     set(handles.cb_segLighting,'Enable','on');
