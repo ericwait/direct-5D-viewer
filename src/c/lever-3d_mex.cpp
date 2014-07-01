@@ -500,7 +500,7 @@ void toggleSegmentaionLighting(bool lighting)
 	gRenderer->releaseMutex();
 }
 
-void toogleSelectedCell(std::set<int> labels)
+void toggleSelectedCell(std::set<int> labels)
 {
 	gRenderer->getMutex();
 
@@ -793,7 +793,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			for (int i=0; i<numHulls; ++i)
 				hullset.insert((int)(hullList[i]));
 
-			toogleSelectedCell(hullset);
+			toggleSelectedCell(hullset);
 		}
 
 		else

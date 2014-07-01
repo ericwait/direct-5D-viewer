@@ -1,7 +1,5 @@
 function CheckMessage()
-global uiHandle Hulls Tracks
-persistent selectedHull;
-mlock
+global uiHandle Hulls Tracks selectedHull
 
 [command, val] = lever_3d('poll');
 
@@ -10,7 +8,6 @@ switch command
         return
     case 'close'
         close(uiHandle);
-        munlock
     case 'cellSelected'
         selectedHull = val;
         if (val == -1)
