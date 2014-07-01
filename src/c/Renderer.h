@@ -69,7 +69,8 @@ public:
 	void setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView);
 	void setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState);
 
-	void setRootWorldTransform(DirectX::XMMATRIX worldTransform);
+	void setWorldOrigin(Vec<float> org);
+	void setWorldRotation(DirectX::XMMATRIX rotation);
 	void resetRootWorldTransform();
 	
 //Getters
@@ -77,7 +78,7 @@ public:
 	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
 	ID3D11SamplerState* getSamplerState();
 
-	DirectX::XMMATRIX getRootWorldTransorm();
+	DirectX::XMMATRIX getRootWorldRotation();
 	void getMutex();
 	void releaseMutex();
 
@@ -130,7 +131,9 @@ private:
 	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
 
 	void renderPackage(const RendererPackage* package);
-//Member variables 
+	DirectX::XMMATRIX createWorldMatrix();
+	void updateWorldTransform();
+	//Member variables 
 	Vec<float> backgroundColor;
 
 	HANDLE mutexDevice;
@@ -161,6 +164,8 @@ private:
 	ID3D11SamplerState* linearTextureSampler;
 
 	RootSceneNode* rootScene;
+	Vec<float> origin;
+	DirectX::XMMATRIX curRotationMatrix;
 	unsigned int currentFrame;
 };
 

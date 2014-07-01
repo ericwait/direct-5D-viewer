@@ -796,6 +796,18 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			toggleSelectedCell(hullset);
 		}
 
+		else if (_strcmpi("setViewOrigin",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");
+
+			double* origin = (double*)mxGetData(prhs[1]);
+			int numDims = mxGetNumberOfElements(prhs[1]);
+
+			if (numDims!=3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
+
+			gRenderer->setWorldOrigin(Vec<float>((float)(origin[0]),(float)(origin[1]),(float)(origin[2])));
+		}
+
 		else
 		{
 			char buff[255];

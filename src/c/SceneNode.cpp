@@ -247,14 +247,6 @@ void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 			rootChildrenNodes[i][j]->updateTransforms(localToParentTransform*parentToWorld);
 }
 
-
-void RootSceneNode::resetWorldTransform()
-{
-	localToParentTransform = DirectX::XMMatrixRotationZ(DirectX::XM_PI);
-	updateTransforms(DirectX::XMMatrixIdentity());
-}
-
-
 int RootSceneNode::getNumFrames()
 {
 	int maxFrames = 0;

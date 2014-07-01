@@ -63,14 +63,14 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			rotX=DirectX::XMMatrixRotationY(((float)(iMouseX-previousMouseX)/gWindowWidth)*DirectX::XM_2PI);
 			rotY=DirectX::XMMatrixRotationX((-(float)(iMouseY-previousMouseY)/gWindowHeight)*DirectX::XM_2PI);
 
-			gRenderer->setRootWorldTransform(previousWorldRotation*rotX*rotY);
+			gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
 		}
 		break;
 	case WM_LBUTTONDOWN:
 		leftButtonDown = true;
 		previousMouseX = iMouseX;
 		previousMouseY = iMouseY;
-		previousWorldRotation = gRenderer->getRootWorldTransorm();
+		previousWorldRotation = gRenderer->getRootWorldRotation();
 		break;
 	case WM_RBUTTONDOWN:
 		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
@@ -109,6 +109,10 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gCameraDefaultMesh->resetCamera();
 		else if ('R'==wParam)
 			gRenderer->resetRootWorldTransform();
+		else if ('X'==wParam)
+		{
+			gMexMessageQueueOut.addMessage("centerSelectedCell",1.0);
+		}
 		break;
 	case WM_KEYUP:
 		if (VK_SHIFT==wParam)

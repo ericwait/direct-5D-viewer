@@ -15,6 +15,8 @@ switch command
         else
             lever_3d('displayHulls',Tracks(Hulls(val).track).hulls);
         end
+    case 'centerSelectedCell'
+        lever_3d('setViewOrigin',Hulls(selectedHull).centerOfMass);
 end
 end
 

@@ -873,18 +873,9 @@ void Renderer::setPixelShaderTextureSamplers(int startIdx, int length, ID3D11Sam
 	immediateContext->PSSetSamplers(startIdx,length,samplerState);
 }
 
-void Renderer::setRootWorldTransform(DirectX::XMMATRIX worldTransform)
+DirectX::XMMATRIX Renderer::getRootWorldRotation()
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
-
-	rootScene->setLocalToParent(worldTransform);
-
-	ReleaseMutex(mutexDevice);
-}
-
-DirectX::XMMATRIX Renderer::getRootWorldTransorm()
-{
-	return rootScene->getLocalToWorldTransform();
+	return curRotationMatrix;
 }
 
 void Renderer::getMutex()
@@ -897,7 +888,6 @@ void Renderer::releaseMutex()
 	ReleaseMutex(mutexDevice);
 }
 
-
 int Renderer::getHull(Vec<float> pnt, Vec<float> direction)
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
@@ -907,7 +897,6 @@ int Renderer::getHull(Vec<float> pnt, Vec<float> direction)
 
 	return label;
 }
-
 
 void Renderer::resizeViewPort()
 {
@@ -977,5 +966,35 @@ unsigned int Renderer::getNumberOfFrames()
 
 void Renderer::resetRootWorldTransform()
 {
-	rootScene->resetWorldTransform();
+	origin = Vec<float>(0.0f,0.0f,0.0f);
+	curRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(0.0f,0.0f,DirectX::XM_PI);
+	updateWorldTransform();
+}
+
+void Renderer::setWorldOrigin(Vec<float> org)
+{
+	origin = org;
+	updateWorldTransform();
+}
+
+void Renderer::setWorldRotation(DirectX::XMMATRIX rotation)
+{
+	curRotationMatrix = rotation;
+	updateWorldTransform();
+}
+
+DirectX::XMMATRIX Renderer::createWorldMatrix()
+{
+	DirectX::XMMATRIX transMatrix = DirectX::XMMatrixTranslation(-origin.x,-origin.y,-origin.z);
+
+	return transMatrix * curRotationMatrix;
+}
+
+void Renderer::updateWorldTransform()
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+
+	rootScene->setLocalToParent(createWorldMatrix());
+
+	ReleaseMutex(mutexDevice);
 }
