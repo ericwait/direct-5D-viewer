@@ -57,25 +57,23 @@ DEVICE_PREFIX VEC_THIS_CLASS<T> operator* (const EXTERN_TYPE<T>& other) const
 }
 
 // Adds each element by other
-template<typename d>
-DEVICE_PREFIX VEC_THIS_CLASS<T>& operator+= (const EXTERN_TYPE<T>& other) const
+DEVICE_PREFIX VEC_THIS_CLASS<T>& operator+= (const EXTERN_TYPE<T>& other)
 {
 	x += other.x;
 	y += other.y;
 	z += other.z;
 
-	return this;
+	return *this;
 }
 
 // Subtracts each element by other
-template<typename d>
-DEVICE_PREFIX VEC_THIS_CLASS<T>& operator-= (const EXTERN_TYPE<T>& other) const
+DEVICE_PREFIX VEC_THIS_CLASS<T>& operator-= (const EXTERN_TYPE<T>& other)
 {
 	x -= other.x;
 	y -= other.y;
 	z -= other.z;
 
-	return this;
+	return *this;
 }
 
 // Are all the values less then the passed in values
