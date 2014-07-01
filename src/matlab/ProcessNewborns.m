@@ -1,4 +1,4 @@
-function ProcessNewborns()
+function ProcessNewborns(maxCenterOfMassDistance,maxPixelDistance)
 global Families Tracks Hulls Costs
 
 minFamilyTimeFrame = 3;
@@ -57,7 +57,7 @@ for i=1:size
     %Massage the costs a bit
     for j=1:length(parentHullCandidates)
         %Get the length of time that the parentCandidate exists
-        parentTrackID = GetTrackID(parentHullCandidates(j));
+        parentTrackID = Hulls(parentHullCandidates(j)).track;
         if(isempty(parentTrackID)),continue,end
         parentTrackTimeFrame = Tracks(parentTrackID).endFrame - Tracks(parentTrackID).startFrame;
 
@@ -74,7 +74,7 @@ for i=1:size
             siblingHullIndex = Hulls(childHullID).frame - Tracks(parentTrackID).startFrame + 1;
             % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
             sibling = Tracks(parentTrackID).hulls(siblingHullIndex);
-            parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
+            parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling,maxCenterOfMassDistance,maxPixelDistance);
 %         end
 %         if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
 %             parentCosts(j) = costMatrix(parentHullCandidates,childHullID);
@@ -93,7 +93,7 @@ for i=1:size
     
     parentHullID = parentHullCandidates(index);
     %Make the connections
-    parentTrackID = GetTrackID(parentHullID);
+    parentTrackID = Hulls(parentHullID).track;
     
     if(isempty(parentTrackID))
         continue

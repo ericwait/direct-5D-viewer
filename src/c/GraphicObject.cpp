@@ -49,6 +49,13 @@ void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 	setLocalToWorld(parentToWorld);
 }
 
+int GraphicObject::getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut)
+{
+	depthOut = std::numeric_limits<float>::max();
+	return -1;
+}
+
+
 void GraphicObject::setLocalToWorld(DirectX::XMMATRIX localToWorld)
 {
 	if (rendererPackage!=NULL)
@@ -58,7 +65,6 @@ void GraphicObject::setLocalToWorld(DirectX::XMMATRIX localToWorld)
 }
 
 
-
 CellHullObject::CellHullObject()
 {
 	meshPrimitive = NULL;
@@ -66,6 +72,7 @@ CellHullObject::CellHullObject()
 
 	curBoundingBox[0] = Vec<float>(0.0f,0.0f,0.0f);
 	curBoundingBox[1] = Vec<float>(0.0f,0.0f,0.0f);
+	label = -1;
 }
 
 CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
@@ -127,6 +134,29 @@ void CellHullObject::getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& 
 	maxVals = curBoundingBox[1];
 }
 
+int CellHullObject::getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut)
+{
+	depthOut = std::numeric_limits<float>::max();
+	bool found = false;
+	for (unsigned int i=0; i<faces.size(); ++i){
+		Vec<float> triCoord;
+
+		if (intersectTriangle(faces[i],lclPntVec,lclDirVec,triCoord))
+		{
+			if ( triCoord.z<depthOut && triCoord.z>0)
+			{
+				depthOut = triCoord.z;
+				found = true;
+			}
+		}
+	}
+
+	if (found)
+		return label;
+
+	return -1;
+}
+
 
 void CellHullObject::initalizeRendererResources(Camera* camera)
 {
@@ -161,9 +191,101 @@ void CellHullObject::updateBoundingBox(DirectX::XMMATRIX localToWorld)
 	}
 }
 
+bool CellHullObject::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord)
+{
+// 	/* a = b - c */
+// #define vector(a,b,c) \
+// 	(a)[0] = (b)[0] - (c)[0];	\
+// 	(a)[1] = (b)[1] - (c)[1];	\
+// 	(a)[2] = (b)[2] - (c)[2];
+// 
+// 	int rayIntersectsTriangle(float *p, float *d,
+// 		float *v0, float *v1, float *v2) {
+// 
+// 			float e1[3],e2[3],h[3],s[3],q[3];
+// 			float a,f,u,v;
+// 			vector(e1,v1,v0);
+// 			vector(e2,v2,v0);
+// 
+// 			crossProduct(h,d,e2);
+// 			a = innerProduct(e1,h);
+// 
+// 			if (a > -0.00001 && a < 0.00001)
+// 				return(false);
+// 
+// 			f = 1/a;
+// 			vector(s,p,v0);
+// 			u = f * (innerProduct(s,h));
+// 
+// 			if (u < 0.0 || u > 1.0)
+// 				return(false);
+// 
+// 			crossProduct(q,s,e1);
+// 			v = f * innerProduct(d,q);
+// 
+// 			if (v < 0.0 || u + v > 1.0)
+// 				return(false);
+// 
+// 			// at this stage we can compute t to find out where
+// 			// the intersection point is on the line
+// 			t = f * innerProduct(e2,q);
+// 
+// 			if (t > 0.00001) // ray intersection
+// 				return(true);
+// 
+// 			else // this means that there is a line intersection
+// 				// but not a ray intersection
+// 				return (false);
+// 
+// 	}
+
+	// Find vectors for two edges sharing vert0
+	Vec<float> edge1(vertices[face.y]-vertices[face.x]);
+	Vec<float> edge2(vertices[face.z]-vertices[face.x]);
+
+	Vec<float> crossVec = lclDirVec.cross(edge2);
+
+	// If determinant is near zero, ray lies in plane of triangle
+	float det = edge1.dot(crossVec);
+
+	if( det > -0.00001f && det < 0.00001)
+		return false;
+
+ 	Vec<float> tvec;
+ 	if( det > 0 )
+ 	{
+ 		tvec = lclPntVec - vertices[face.x];
+ 	}
+ 	else
+ 	{
+ 		tvec = lclPntVec + vertices[face.x];
+  		det = -det;
+ 	}
+ 
+ 	// Calculate U parameter and test bounds
+ 	triCoord.x = tvec.dot(crossVec);
+ 	if( triCoord.x < 0.0f || triCoord.x > det )
+ 		return false;
+ 
+ 	// Prepare to test V parameter
+ 	Vec<float> qvec = tvec.cross(edge1);
+ 
+ 	// Calculate V parameter and test bounds
+ 	triCoord.y = lclDirVec.dot(qvec);
+ 	if( triCoord.y < 0.0f || triCoord.x + triCoord.y > det )
+ 		return false;
+ 
+ 	// Calculate t, scale parameters, ray intersects triangle
+ 	triCoord.z = edge2.dot(qvec);
+ 
+ 	triCoord = triCoord / det;
+ 
+ 	return true;
+}
+
 
 VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image, 
-										Vec<float> scaleFactorIn, Camera* camera, unsigned char* constMemIn/*=NULL*/)
+										 Vec<float> scaleFactorIn, Camera* camera, unsigned char* constMemIn/*=NULL*/)
 {
 	renderer = rendererIn;
 	dims = dimsIn;

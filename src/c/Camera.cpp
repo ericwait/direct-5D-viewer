@@ -115,6 +115,38 @@ void Camera::setCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, V
 	updateViewTransform();
 }
 
+void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& directionOut)
+{
+	DirectX::XMFLOAT3 getVal(1,0,0);
+	DirectX::XMVECTOR getVec = DirectX::XMLoadFloat3(&getVal);
+	DirectX::XMVECTOR vals = DirectX::XMVector3TransformNormal(getVec,projectionTransform);
+	float widthDiv = DirectX::XMVectorGetX(vals);
+
+	getVal = DirectX::XMFLOAT3(0,1,0);
+	getVec = DirectX::XMLoadFloat3(&getVal);
+	vals = DirectX::XMVector3TransformNormal(getVec,projectionTransform);
+	float heightDiv = DirectX::XMVectorGetY(vals);
+
+	DirectX::XMFLOAT3 v;
+	v.x = ( ( ( 2.0f * iMouseX ) / gWindowWidth ) - 1 ) / widthDiv;
+	v.y = -( ( ( 2.0f * iMouseY ) / gWindowHeight ) - 1 ) / heightDiv;
+	v.z = -1.0f;
+
+	DirectX::XMVECTOR Det;
+	DirectX::XMMATRIX m(DirectX::XMMatrixInverse(&Det,viewTransform));
+
+	DirectX::XMFLOAT3 vLoad(0,0,1);
+	DirectX::XMVECTOR vViewSpaceDir = DirectX::XMLoadFloat3(&v);
+	vLoad = DirectX::XMFLOAT3(0,0,0);
+	DirectX::XMVECTOR vViewSpaceOrig = DirectX::XMLoadFloat3(&vLoad);
+
+	DirectX::XMVECTOR vPickRayDir = DirectX::XMVector3TransformNormal(vViewSpaceDir,m);
+	DirectX::XMVECTOR vPickRayOrig = DirectX::XMVector3TransformCoord(vViewSpaceOrig,m);
+
+	pointOut = Vec<float>(DirectX::XMVectorGetX(vPickRayOrig),DirectX::XMVectorGetY(vPickRayOrig),DirectX::XMVectorGetZ(vPickRayOrig));
+	directionOut = Vec<float>(DirectX::XMVectorGetX(vPickRayDir),DirectX::XMVectorGetY(vPickRayDir),DirectX::XMVectorGetZ(vPickRayDir));
+}
+
 
 void Camera::updateViewTransform()
 {

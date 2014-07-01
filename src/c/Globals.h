@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include "SceneNode.h"
 #include "Camera.h"
+#include "Defines.h"
+#include "MessageQueue.h"
 #include "windows.h"
 #include "DirectXMath.h"
 
@@ -12,6 +14,7 @@ extern HINSTANCE gDllInstance;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
 extern CellHullObject* gBorderObj;
+extern std::vector<GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 extern MessageQueue gMexMessageQueueOut;
 
 //Implemented in Initialization.cpp

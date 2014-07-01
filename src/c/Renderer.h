@@ -81,6 +81,8 @@ public:
 	void getMutex();
 	void releaseMutex();
 
+	int getHull(Vec<float> pnt, Vec<float> direction);
+
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
 //////////////////////////////////////////////////////////////////////////
@@ -128,7 +130,6 @@ private:
 	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
 
 	void renderPackage(const RendererPackage* package);
-
 //Member variables 
 	Vec<float> backgroundColor;
 

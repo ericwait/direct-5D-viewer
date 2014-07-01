@@ -1,5 +1,7 @@
 #include "SceneNode.h"
 
+#undef max
+
 SceneNode::SceneNode()
 {
 	localToParentTransform = DirectX::XMMatrixIdentity();
@@ -52,6 +54,28 @@ DirectX::XMMATRIX SceneNode::getLocalToWorldTransform()
 	return localToParentTransform*parentToWorld;
 }
 
+
+int SceneNode::getHull(Vec<float> pnt, Vec<float> direction,float& depthOut)
+{
+	depthOut = std::numeric_limits<float>::max();
+	int labelOut = -1;
+
+	for (int i=0; i<childrenNodes.size(); ++i)
+	{
+		float curDepth;
+		int label = childrenNodes[i]->getHull(pnt,direction,curDepth);
+
+		if (curDepth < depthOut)
+		{
+			labelOut = label;
+			depthOut = curDepth;
+		}
+	}
+
+	return labelOut;
+}
+
+
 void SceneNode::setParentNode(SceneNode* parent)
 {
 	parentNode = parent;
@@ -97,7 +121,6 @@ void SceneNode::detatchChildNode(SceneNode* child)
 }
 
 
-
 GraphicObjectNode::GraphicObjectNode(GraphicObject* graphicObjectIn)
 {
 	graphicObject = graphicObjectIn;
@@ -135,6 +158,27 @@ const RendererPackage* GraphicObjectNode::getRenderPackage()
 {
 	return graphicObject->getRenderPackage();
 }
+
+
+int GraphicObjectNode::getHull(Vec<float> pnt, Vec<float> direction,float& depthOut)
+{
+	DirectX::XMVECTOR det;
+	DirectX::XMMATRIX locl = DirectX::XMMatrixInverse(&det,getLocalToWorldTransform());
+
+	DirectX::XMFLOAT3 viewPntF(pnt.x,pnt.y,pnt.z);
+	DirectX::XMVECTOR viewPntV = DirectX::XMLoadFloat3(&viewPntF);
+	DirectX::XMFLOAT3 viewDirF(direction.x,direction.y,direction.z);
+	DirectX::XMVECTOR viewDirV = DirectX::XMLoadFloat3(&viewDirF);
+
+	DirectX::XMVECTOR lclPnt = DirectX::XMVector3TransformCoord(viewPntV,locl);
+	DirectX::XMVECTOR lclDir = DirectX::XMVector3TransformNormal(viewDirV,locl);
+
+	Vec<float> lclPntVec(DirectX::XMVectorGetX(lclPnt),DirectX::XMVectorGetY(lclPnt),DirectX::XMVectorGetZ(lclPnt));
+	Vec<float> lclDirVec(DirectX::XMVectorGetX(lclDir),DirectX::XMVectorGetY(lclDir),DirectX::XMVectorGetZ(lclDir));
+
+	return graphicObject->getHull(lclPntVec,lclDirVec,depthOut);
+}
+
 
 void GraphicObjectNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 {
@@ -221,6 +265,30 @@ int RootSceneNode::getNumFrames()
 
 	return maxFrames;
 }
+
+
+int RootSceneNode::getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, float& depthOut)
+{
+	std::vector<SceneNode*> children = rootChildrenNodes[Renderer::Section::Main][currentFrame]->getChildren();
+
+	depthOut = std::numeric_limits<float>::max();
+	int labelOut = -1;
+
+	for (int i=0; i<children.size(); ++i)
+	{
+		float curDepth;
+		int label = children[i]->getHull(pnt,direction,curDepth);
+
+		if (curDepth < depthOut)
+		{
+			labelOut = label;
+			depthOut = curDepth;
+		}
+	}
+
+	return labelOut;
+}
+
 
 void RootSceneNode::requestUpdate()
 {

@@ -1,20 +1,7 @@
 function CheckMessage()
-global uiHandle
-%CHECKMESSAGE Summary of this function goes here
-%   Detailed explanation goes here
-% persistent cnt;
-% mlock
-% 
-% if (isempty(cnt))
-%     cnt = 1;
-% end
-% 
-% disp(cnt)
-% cnt = cnt + 1;
-% 
-% if (cnt>100)
-%     munlock
-% end
+global uiHandle Hulls Tracks
+persistent selectedHull;
+mlock
 
 [command, val] = lever_3d('poll');
 
@@ -22,12 +9,15 @@ switch command
     case 'null'
         return
     case 'close'
-        close(uiHandle)
+        close(uiHandle);
+        munlock
+    case 'cellSelected'
+        selectedHull = val;
+        if (val == -1)
+            lever_3d('viewSegmentation',1);
+        else
+            lever_3d('displayHulls',Tracks(Hulls(val).track).hulls);
+        end
 end
-
-%disp(command);
-
-%disp(val);
-
 end
 

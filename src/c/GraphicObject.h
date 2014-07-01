@@ -21,13 +21,14 @@ public:
 	virtual void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
 
 	const RendererPackage* getRenderPackage(){return rendererPackage;}
+	virtual int getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
+	virtual int getHullLabel(){return -1;}
 
 protected:
 	GraphicObject();
 
 	void setLocalToWorld(DirectX::XMMATRIX localToWorld);
 	virtual void updateBoundingBox(DirectX::XMMATRIX localToWorld){}
-
 	Renderer* renderer;
 	RendererPackage* rendererPackage;
 };
@@ -44,13 +45,16 @@ public:
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
 	void setWireframe(bool wireframe);
+	void setLabel(int labelIn){label = labelIn;}
 	void getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals);
+	virtual int getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
+	virtual int getHullLabel(){return label;}
 
 private:
 	CellHullObject();
 	void initalizeRendererResources(Camera* camera);
 	virtual void updateBoundingBox(DirectX::XMMATRIX localToWorld);
-
+	bool intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord);
 	MeshPrimitive* meshPrimitive;
 	SingleColoredMaterial* material;
 
@@ -58,6 +62,7 @@ private:
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<float>> normals;
 	Vec<float> curBoundingBox[2];
+	int label;
 };
 
 

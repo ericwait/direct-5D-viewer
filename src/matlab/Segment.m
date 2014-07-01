@@ -19,6 +19,7 @@ Tracks = struct(...
     'startFrame',{},...
     'endFrame',{},...
     'parentTrack',{},...
+    'siblingTrack',{},...
     'childrenTracks',{},...
     'family',{},...
     'color',{});
@@ -100,7 +101,7 @@ end
 minCellDiaVox = minCellDia / imageDims(1) * scaleFactor(1);
 
 if (~isempty(Hulls))
-    [newHulls,numTracks,Costs] = trackerMex(imageData.NumberOfFrames,Hulls,minCellDiaVox,minCellDiaVox/2);
+    [newHulls,numTracks,Costs] = trackerMex(imageData.NumberOfFrames,Hulls,minCellDiaVox*6,minCellDiaVox*2);
     
     Tracks(numTracks).startFrame = -1;
     Families(numTracks).startFrame = -1;
@@ -118,7 +119,7 @@ if (~isempty(Hulls))
     
     for i=1:length(Tracks)
         Tracks(i).parent = -1;
-        Tracks(i).childrenTracks = [-1 -1];
+        Tracks(i).childrenTracks = [];
         Tracks(i).family = i;
         Tracks(i).color = Hulls(Tracks(i).hulls(1)).color;
         Tracks(i).startFrame = min([Hulls(Tracks(i).hulls).frame]);
@@ -132,7 +133,7 @@ if (~isempty(Hulls))
         Families(i).endFrame = Tracks(i).endFrame;
     end
     
-    ProcessNewborns();
+    ProcessNewborns(minCellDiaVox*6,minCellDiaVox*2);
     
     lever_3d('loadHulls',Hulls);
 end

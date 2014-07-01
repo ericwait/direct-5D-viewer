@@ -897,6 +897,18 @@ void Renderer::releaseMutex()
 	ReleaseMutex(mutexDevice);
 }
 
+
+int Renderer::getHull(Vec<float> pnt, Vec<float> direction)
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+	float depth;
+	int label = rootScene->getHull(pnt,direction,currentFrame,depth);
+	ReleaseMutex(mutexDevice);
+
+	return label;
+}
+
+
 void Renderer::resizeViewPort()
 {
 	WaitForSingleObject(mutexDevice,INFINITE);

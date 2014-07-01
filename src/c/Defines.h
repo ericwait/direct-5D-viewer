@@ -35,3 +35,13 @@
 #ifndef SAFE_RELEASE
 #define SAFE_RELEASE(p) { if (p) { (p)->Release(); (p)=NULL; } }
 #endif
+
+enum GraphicObjectTypes
+{
+	Widget,
+	CellHulls,
+	Border,
+	OriginalVolume,
+	ProcessedVolume,
+	VTend
+};

@@ -23,6 +23,7 @@ public:
 
 	DirectX::XMMATRIX getProjectionTransform() const {return projectionTransform;}
 	DirectX::XMMATRIX getViewTransform() const {return viewTransform;}
+	void getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& directionOut);
 
 protected:
 	Camera(){}

@@ -4,6 +4,7 @@
 #include "windows.h"
 #include "MessageProcessor.h"
 #include "Globals.h"
+#include <set>
 
 HANDLE gTermEvent = NULL;
 HANDLE mexMessageMutex = NULL;
@@ -13,19 +14,9 @@ HANDLE messageLoopHandle = NULL;
 HINSTANCE gDllInstance = NULL;
 DWORD threadID;
 
-enum GraphicObjectTypes //original 
-{
-	Widget,
-	CellHulls,
-	Border,
-	OriginalVolume,
-	ProcessedVolume,
-	VTend
-};
-
-std::vector<GraphicObjectNode*> localGraphicObjectNodes[GraphicObjectTypes::VTend];
 MessageQueue gMexMessageQueueOut;
 
+std::vector<GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 CellHullObject* gBorderObj = NULL;
 std::vector<VolumeTextureObject*> firstVolumeTextures;
 
@@ -229,20 +220,20 @@ void loadWidget(const mxArray* widget[])
 	GraphicObjectNode* arrowXnode = new GraphicObjectNode(arrowX);
 	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI/2.0f));
 	arrowXnode->attachToParentNode(widgetScene);
-	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowXnode);
+	gGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowXnode);
 
 	CellHullObject* arrowY = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraWidget);
 	arrowY->setColor(Vec<float>(0.1f, 1.0f, 0.1f),1.0f);
 	GraphicObjectNode* arrowYnode = new GraphicObjectNode(arrowY);
 	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI/2.0f));
 	arrowYnode->attachToParentNode(widgetScene);
-	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowYnode);
+	gGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowYnode);
 
 	CellHullObject* arrowZ = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraWidget);
 	arrowZ->setColor(Vec<float>(0.4f, 0.4f, 1.0f),1.0f);
 	GraphicObjectNode* arrowZnode = new GraphicObjectNode(arrowZ);
 	arrowZnode->attachToParentNode(widgetScene);
-	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowZnode);
+	gGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(arrowZnode);
 
 	numFaces = mxGetM(widget[3]);
 	numVerts = mxGetM(widget[4]);
@@ -265,7 +256,7 @@ void loadWidget(const mxArray* widget[])
 	sphere->setColor(Vec<float>(0.9f,0.9f,0.9f),1.0f);
 	GraphicObjectNode* sphereNode = new GraphicObjectNode(sphere);
 	sphereNode->attachToParentNode(widgetScene);
-	localGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(sphereNode);
+	gGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(sphereNode);
 
 	gRenderer->releaseMutex();
 }
@@ -274,7 +265,7 @@ void loadHulls(const mxArray* hulls)
 {
 	std::vector<SceneNode*> hullRootNodes;
 	hullRootNodes.resize(gRenderer->getNumberOfFrames());
-	for (int i=0; i<gRenderer->getNumberOfFrames(); ++i)
+	for (unsigned int i=0; i<gRenderer->getNumberOfFrames(); ++i)
 		hullRootNodes[i] = new SceneNode();
 
 	size_t numHulls = mxGetNumberOfElements(hulls);
@@ -285,6 +276,7 @@ void loadHulls(const mxArray* hulls)
 		mxArray* mxNorms = mxGetField(hulls,i,"norms");
 		mxArray* mxColor = mxGetField(hulls,i,"color");
 		mxArray* mxFrame = mxGetField(hulls,i,"frame");
+		mxArray* mxLabel = mxGetField(hulls,i,"label");
 
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
@@ -312,17 +304,18 @@ void loadHulls(const mxArray* hulls)
 		
 		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
+		curHullObj->setLabel((int)mxGetScalar(mxLabel));
 		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
 		curHullNode->setWireframe(true);
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
-		localGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
 		
 		gRenderer->releaseMutex();
 	}
 
 	gRenderer->getMutex();
 
-	for (int i=0; i<gRenderer->getNumberOfFrames(); ++i)
+	for (unsigned int i=0; i<gRenderer->getNumberOfFrames(); ++i)
 		gRenderer->attachToRootScene(hullRootNodes[i],Renderer::Section::Main,i);
 	
 	gRenderer->releaseMutex();
@@ -407,7 +400,7 @@ void createBorder(Vec<float> &scale)
 	gBorderObj->setColor(Vec<float>(0.0f,0.0f,0.0f), 1.0f);
 	gRenderer->attachToRootScene(borderNode,Renderer::Pre,0);
 
-	localGraphicObjectNodes[GraphicObjectTypes::Border].push_back(borderNode);
+	gGraphicObjectNodes[GraphicObjectTypes::Border].push_back(borderNode);
 
 	gRenderer->releaseMutex();
 }
@@ -422,12 +415,12 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 
 	if (!firstVolumeTextures.empty() && fvtIdx<firstVolumeTextures.size() && NULL!=firstVolumeTextures[fvtIdx])
 	{
-		for (int i=0; i<localGraphicObjectNodes[typ].size(); ++i)
+		for (int i=0; i<gGraphicObjectNodes[typ].size(); ++i)
 		{
-			delete localGraphicObjectNodes[typ][i];
+			delete gGraphicObjectNodes[typ][i];
 		}
 
-		localGraphicObjectNodes[typ].clear();
+		gGraphicObjectNodes[typ].clear();
 	}
 
 	for (int i=0; i<numFrames; ++i)
@@ -439,7 +432,7 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
 		gRenderer->attachToRootScene(volumeTextureNode,Renderer::Section::Main,i);
 
-		localGraphicObjectNodes[typ].push_back(volumeTextureNode);
+		gGraphicObjectNodes[typ].push_back(volumeTextureNode);
 
 		if (0==i)
 		{
@@ -466,11 +459,11 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 			break;
 
 		bool render = i==fvtIdx;
-		for (int j=0; j<localGraphicObjectNodes[idx].size(); ++j)
-			localGraphicObjectNodes[idx][j]->setRenderable(render,true);
+		for (int j=0; j<gGraphicObjectNodes[idx].size(); ++j)
+			gGraphicObjectNodes[idx][j]->setRenderable(render,true);
 	}
 
-	localGraphicObjectNodes[GraphicObjectTypes::OriginalVolume][0]->setRenderable(textureType==GraphicObjectTypes::OriginalVolume,false);
+	gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume][0]->setRenderable(textureType==GraphicObjectTypes::OriginalVolume,false);
 
 	gRenderer->releaseMutex();
 }
@@ -479,10 +472,10 @@ void toggleSegmentationResults(bool on)
 {
 	gRenderer->getMutex();
 
-	for (int i=0; i<localGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		localGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on,true);
+	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on,true);
 
-	localGraphicObjectNodes[GraphicObjectTypes::CellHulls][0]->setRenderable(on,false);
+	gGraphicObjectNodes[GraphicObjectTypes::CellHulls][0]->setRenderable(on,false);
 
 	gRenderer->releaseMutex();
 }
@@ -491,8 +484,8 @@ void toggleSegmentaionWireframe(bool wireframe)
 {
 	gRenderer->getMutex();
 
-	for (int i=0; i<localGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		localGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setWireframe(wireframe);
+	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setWireframe(wireframe);
 
 	gRenderer->releaseMutex();
 }
@@ -501,8 +494,28 @@ void toggleSegmentaionLighting(bool lighting)
 {
 	gRenderer->getMutex();
 
-	for (int i=0; i<localGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		localGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setLightOn(lighting);
+	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setLightOn(lighting);
+
+	gRenderer->releaseMutex();
+}
+
+void toogleSelectedCell(std::set<int> labels)
+{
+	gRenderer->getMutex();
+
+	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+	{
+		bool delay = true;
+
+		if (i==gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size()-1)
+			delay = false;
+
+		if (labels.count(gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->getHullLabel())>0)
+			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(true,delay);
+		else
+			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(false,delay);
+	}
 
 	gRenderer->releaseMutex();
 }
@@ -536,16 +549,18 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			mexErrMsgTxt("Not enough input arguments to initialize Lever 3-d.  Did you forget the widget?");
 
 		if ( !messageLoopHandle )
+		{
 			startThread();
 
-		if ( registerExitFunction )
-		{
-			mexAtExit(exitFunc);
-			registerExitFunction = FALSE;
-		}
+			if ( registerExitFunction )
+			{
+				mexAtExit(exitFunc);
+				registerExitFunction = FALSE;
+			}
 
-		loadWidget(prhs+1);
-		gRendererOn = true;
+			loadWidget(prhs+1);
+			gRendererOn = true;
+		}
 	}
 
 	else if (_strcmpi("close",command)==0)
@@ -609,7 +624,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
 			setCurrentTexture(textureType);
 
-			if (localGraphicObjectNodes[GraphicObjectTypes::Border].empty())
+			if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
 				createBorder(scale);
 		}
 
@@ -765,6 +780,20 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
 
 			loadHulls(hulls);
+		}
+
+		else if (_strcmpi("displayHulls",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for displayHulls!");
+
+			double* hullList = (double*)mxGetData(prhs[1]);
+			int numHulls = mxGetNumberOfElements(prhs[1]);
+
+			std::set<int> hullset;
+			for (int i=0; i<numHulls; ++i)
+				hullset.insert((int)(hullList[i]));
+
+			toogleSelectedCell(hullset);
 		}
 
 		else

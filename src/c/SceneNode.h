@@ -18,6 +18,9 @@ public:
 	virtual bool isRenderable(){return false;}
 	DirectX::XMMATRIX getLocalToWorldTransform();
 
+	virtual int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut);
+	virtual int getHullLabel(){return -1;}
+
 protected:
 	void setParentNode(SceneNode* parent);
 	virtual const std::vector<SceneNode*>& getChildren();
@@ -47,6 +50,8 @@ public:
 
 	virtual bool isRenderable(){return renderable;}
 	const RendererPackage* getRenderPackage();
+	virtual int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut);
+	virtual int getHullLabel(){return graphicObject->getHullLabel();}
 
 protected:
 	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
@@ -71,6 +76,8 @@ public:
 	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 	void resetWorldTransform();
 	int getNumFrames();
+	int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
+	int getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
 	virtual void addChildNode(SceneNode* child){throw std::runtime_error("You cannot attach to a root node using this method!");}
 
 	virtual void requestUpdate();

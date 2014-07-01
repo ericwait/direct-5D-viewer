@@ -25,6 +25,10 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	static int previousMouseY = 0;
 	static DirectX::XMMATRIX previousWorldRotation;
 
+	int label;
+	Vec<float> pnt;
+	Vec<float> direction;
+
 	switch (message)
 	{
 	case WM_NULL:
@@ -67,6 +71,11 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		previousMouseX = iMouseX;
 		previousMouseY = iMouseY;
 		previousWorldRotation = gRenderer->getRootWorldTransorm();
+		break;
+	case WM_RBUTTONDOWN:
+		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
+		label = gRenderer->getHull(pnt,direction);
+		gMexMessageQueueOut.addMessage("cellSelected",label);
 		break;
 	case WM_LBUTTONUP:
 		leftButtonDown = false;
