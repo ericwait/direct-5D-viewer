@@ -120,6 +120,7 @@ end
 
 set(handles.m_channelPicker,'string',strng);
 set(handles.tb_numFrames,'string',num2str(imageData.NumberOfFrames));
+%set(handles.s_curFrame,'Max',imageData.NumberOfFrames,'Min',1);
 set(handles.tb_numChan,'string',num2str(imageData.NumberOfChannels));
 set(handles.tb_title,'string',imageData.DatasetName);
 set(handles.tb_curFrame,'string',num2str(1));
@@ -130,7 +131,7 @@ set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
 set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
 set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 
-procStr = {'Process image with...','Contrast Enhancement','Segment'};
+procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment'};
 set(handles.m_imageProcessing,'String',procStr);
 
 % set(handles.s_curFrame,'max',imageData.NumberOfFrames);
@@ -238,8 +239,6 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 global tmr Hulls orgImage processedImage imageData
 lever_3d('close');
 
-delete(hObject);
-
 stop(tmr);
 delete(tmr);
 
@@ -248,6 +247,8 @@ clear Hulls
 clear orgImage
 clear processedImage
 clear imageData
+
+delete(hObject);
 end
 
 %% Callback functions
@@ -256,6 +257,7 @@ end
 function s_curFrame_Callback(hObject, eventdata, handles)
 frame = round(get(handles.s_curFrame,'Value'));
 set(handles.tb_curFrame,'String',num2str(frame));
+lever_3d('setFrame',get(handles.s_curFrame,'Value') -1);
 end
 
 % --- Executes on slider movement.
@@ -403,6 +405,24 @@ switch processStr{processIdx}
             else
                 for t=1:size(orgImage,5)
                     processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',orgImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+                end
+            end
+            processed = 1;
+        end
+    case 'Markov Random Fields Denoise'
+        params = {'Max iterations'};
+        diaTitle = 'Denoise';
+        def = {'100'};
+        response = inputdlg(params,diaTitle,1,def);
+        if (~isempty(response))
+            iter = str2num(response{1});
+            if (get(handles.rb_Processed,'Value')==1)
+                for t=1:size(processedImage,5)
+                    processedImage(:,:,:,chan,t) = uint16(CudaMex('MarkovRandomFieldDenoiser',single(processedImage(:,:,:,chan,t)),iter));
+                end
+            else
+                for t=1:size(orgImage,5)
+                    processedImage(:,:,:,chan,t) = uint16(CudaMex('MarkovRandomFieldDenoiser',single(orgImage(:,:,:,chan,t)),iter));
                 end
             end
             processed = 1;
