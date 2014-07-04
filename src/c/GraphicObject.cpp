@@ -1,4 +1,5 @@
 #include "GraphicObject.h"
+#include "Globals.h"
 #undef min
 #undef max
 
@@ -42,6 +43,11 @@ void GraphicObject::removeFromRenderList()
 void GraphicObject::removeRendererResources()
 {
 	SAFE_DELETE(rendererPackage);
+}
+
+void GraphicObject::setWireframe(bool wireframe)
+{
+	gMexMessageQueueOut.addErrorMessage("You cannot set wire frame on a GraphicObject!");
 }
 
 void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
@@ -342,6 +348,11 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 	setLocalToWorld(worldMatrix);
 }
 
+void VolumeTextureObject::setWireframe(bool wireframe)
+{
+	gMexMessageQueueOut.addErrorMessage("You cannot set wire frame on a VolumeTextureObject!");
+}
+
 void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char* shaderMemIn/*=NULL*/)
 {
 	if (rendererPackage==NULL)
@@ -409,3 +420,4 @@ void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &verti
 		planesFirstVert += 4;
 	}
 }
+

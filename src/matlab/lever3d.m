@@ -9,13 +9,13 @@ global imageData orgImage processedImage tmr uiHandle
 
 processedImage = orgImage;
 
+tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'TimerFcn','CheckMessage');
+start(tmr);
+
 lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
 
 lever_3d('loadTexture',imageConvert(orgImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize]);
 
 uiHandle = ViewerControls();
-
-tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'TimerFcn','CheckMessage');
-start(tmr);
 
 end

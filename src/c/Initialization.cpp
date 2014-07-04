@@ -42,7 +42,8 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 		if ( !RegisterClassEx( &wcx ) )
 		{
 			DWORD errCode = GetLastError();
-			// TODO print out error to screen and/or log
+
+			gMexMessageQueueOut.addMessage("error","Unable to register window class!",errCode);
 
 			return E_FAIL;
 		}
@@ -51,13 +52,15 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	// Create window
 	RECT rc = { 0, 0, gWindowWidth, gWindowHeight};
 	AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
-	gWindowHandle = CreateWindow( szWndClassName, "LEVer 3D viewer", WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
-		NULL );
+	gWindowHandle = CreateWindow(szWndClassName, "LEVer 3D viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left,
+		rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
+
 	if( !gWindowHandle )
 	{
 		DWORD errCode = GetLastError();
-		// TODO error
+		
+		gMexMessageQueueOut.addMessage("error","Unable to register window class!",errCode);
+
 		return E_FAIL;
 	}
 	//SetCapture( gWindowHandle );
@@ -75,7 +78,10 @@ HRESULT createRenderResources()
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	
 	gRenderer = new Renderer();//delete on message loop exit
-	gRenderer->init();
+	HRESULT hr = gRenderer->init();
+
+	if (FAILED(hr))
+		return hr;
 
 	gCameraDefaultMesh = new Camera(eye,look,up);//delete on message loop exit
 	gCameraWidget = new OrthoCamera(eye,look,up);//delete on message loop exit
@@ -85,8 +91,9 @@ HRESULT createRenderResources()
 
 HRESULT windowInit(HINSTANCE hInstance, int nCmdShow)
 {
-	if ( FAILED(registerWindowClass(hInstance,nCmdShow)) )
-		return E_FAIL;
+	HRESULT hr = registerWindowClass(hInstance,nCmdShow);
+	if ( FAILED(hr) )
+		return hr;
 
 	gFont = CreateFont(18,//Height
 		0,          //Width

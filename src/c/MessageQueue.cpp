@@ -1,5 +1,5 @@
 #include "MessageQueue.h"
-
+#include "comdef.h"
 
 MessageQueue::MessageQueue()
 {
@@ -31,7 +31,11 @@ Message MessageQueue::getNextMessage()
 	}
 
 	if (messages.empty())
-		msgOut.str = "null";
+	{
+		msgOut.command = "null";
+		msgOut.message = "";
+		msgOut.val = 0.0;
+	}
 	else
 	{
 		msgOut = messages.front();
@@ -43,10 +47,31 @@ Message MessageQueue::getNextMessage()
 	return msgOut;
 }
 
-void MessageQueue::addMessage(std::string message, double val)
+void MessageQueue::addMessage(std::string command, double val)
 {
 	Message msgIn;
-	msgIn.str = message;
+	msgIn.command = command;
+	msgIn.message = "";
+	msgIn.val = val;
+
+	addMessage(msgIn);
+}
+
+void MessageQueue::addMessage(std::string command, std::string message)
+{
+	Message msgIn;
+	msgIn.command = command;
+	msgIn.message = message;
+	msgIn.val = 0.0;
+
+	addMessage(msgIn);
+}
+
+void MessageQueue::addMessage(std::string command, std::string message, double val)
+{
+	Message msgIn;
+	msgIn.command = command;
+	msgIn.message = message;
 	msgIn.val = val;
 
 	addMessage(msgIn);
@@ -71,6 +96,29 @@ void MessageQueue::addMessage(Message message)
 	messages.push(message);
 
 	ReleaseMutex(queueMutex);
+}
+
+void MessageQueue::addErrorMessage(HRESULT hr)
+{
+	_com_error err(hr);
+	LPCTSTR errMsg = err.ErrorMessage();
+
+	Message msgIn;
+	msgIn.command = "error";
+	msgIn.message = errMsg;
+	msgIn.val = hr;
+
+	addMessage(msgIn);
+}
+
+void MessageQueue::addErrorMessage(std::string message)
+{
+	Message msgIn;
+	msgIn.command = "error";
+	msgIn.message = message;
+	msgIn.val = -1.0;
+
+	addMessage(msgIn);
 }
 
 void MessageQueue::clear()
@@ -116,7 +164,8 @@ std::vector<Message> MessageQueue::flushQueue()
 	if (messages.empty())
 	{
 		Message none;
-		none.str = "null";
+		none.command = "null";
+		none.message = "";
 		none.val = -1;
 
 		queueOut.push_back(none);

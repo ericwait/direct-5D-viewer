@@ -5,6 +5,10 @@ msgs = lever_3d('poll');
 
 for i=1:length(msgs)
     switch msgs(i).command
+        case 'error'
+            msg = sprintf('Error from C code: %s\n\tError Code:%f',msgs(i).message,msgs(i).val);
+            errordlg(msg,'','modal');
+            error(msg);
         case 'null'
             return
         case 'close'

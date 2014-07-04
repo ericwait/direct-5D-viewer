@@ -155,7 +155,23 @@ HRESULT messageProcess( MSG& msg )
 
 DWORD WINAPI messageLoop(LPVOID lpParam)
 {
-	HRESULT hr = windowInit(gDllInstance,true);
+	HRESULT hr;
+	try 
+	{
+		hr = windowInit(gDllInstance,true);
+	}
+	catch (const std::exception& e)
+	{
+		gMexMessageQueueOut.addErrorMessage(e.what());
+	}
+	catch (const std::string& e)
+	{
+		gMexMessageQueueOut.addErrorMessage(e);
+	}
+	catch (...)
+	{
+		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");	
+	}
 	
 	MSG msg = {0};
 
@@ -165,30 +181,64 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 		DWORD termWait = WaitForSingleObject(gTermEvent, 0);
 
-		while ( termWait != WAIT_OBJECT_0 && hr==S_OK)
+		try
 		{
-			if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )
+			while ( termWait != WAIT_OBJECT_0 && hr==S_OK)
 			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+
+				hr = messageProcess(msg);
+
+				termWait = WaitForSingleObject(gTermEvent, 0);
 			}
-
-			hr = messageProcess(msg);
-
-			termWait = WaitForSingleObject(gTermEvent, 0);
+		}
+		catch (const std::exception& e)
+		{
+			gMexMessageQueueOut.addErrorMessage(e.what());
+		}
+		catch (const std::string& e)
+		{
+			gMexMessageQueueOut.addErrorMessage(e);
+		}
+		catch (...)
+		{
+			gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");	
 		}
 	}
+	else
+	{
+		gMexMessageQueueOut.addErrorMessage(hr);
+	}
 
-	SAFE_DELETE(gRenderer);
-	SAFE_DELETE(gCameraDefaultMesh);
-	SAFE_DELETE(gCameraWidget);
+	try
+	{
+		SAFE_DELETE(gRenderer);
+		SAFE_DELETE(gCameraDefaultMesh);
+		SAFE_DELETE(gCameraWidget);
 
-	DestroyWindow(gWindowHandle);
-	UnregisterClass(szWndClassName, gDllInstance);
+		DestroyWindow(gWindowHandle);
+		UnregisterClass(szWndClassName, gDllInstance);
 
-	gRendererInit = true;
+		gRendererInit = true;
 
-	gMexMessageQueueOut.addMessage("close",1.0);
+		gMexMessageQueueOut.addMessage("close",1.0);
+	}
+	catch (const std::exception& e)
+	{
+		gMexMessageQueueOut.addErrorMessage(e.what());
+	}
+	catch (const std::string& e)
+	{
+		gMexMessageQueueOut.addErrorMessage(e);
+	}
+	catch (...)
+	{
+		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");	
+	}
 
 	return ((int)msg.wParam);
 }

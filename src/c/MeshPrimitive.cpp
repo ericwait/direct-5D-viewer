@@ -1,4 +1,5 @@
 #include "MeshPrimitive.h"
+#include "Globals.h"
 
 MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 	std::vector<Vec<float>>& normals,std::vector<Vec<float>> textureUV, Renderer::VertexShaders shader)
@@ -18,11 +19,13 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	shaderIdx = -1;
 
-	if (S_FALSE == renderer->createVertexBuffer(vert,&vertexBuffer))
-		throw std::runtime_error("Could not create the vertex buffer!");
+	HRESULT hr = renderer->createVertexBuffer(vert,&vertexBuffer);
+	if (FAILED(hr))
+		gMexMessageQueueOut.addErrorMessage(hr);
 
-	if (S_FALSE == renderer->createIndexBuffer(faces,&indexBuffer))
-		throw std::runtime_error("Could not create the index buffer!");
+	hr = renderer->createIndexBuffer(faces,&indexBuffer);
+	if (FAILED(hr))
+		gMexMessageQueueOut.addErrorMessage(hr);
 
 	numFaces = faces.size();
 
@@ -41,17 +44,18 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 	for (int i=0; i<vertices.size(); ++i)
 	{
 		vert[i].pos = vertices[i];
-
 		vert[i].normal = normals[i];
 	}
 
 	shaderIdx = -1;
 
-	if (S_FALSE == renderer->createVertexBuffer(vert,&vertexBuffer))
-		throw std::runtime_error("Could not create the vertex buffer!");
+	HRESULT hr = renderer->createVertexBuffer(vert,&vertexBuffer);
+	if (FAILED(hr))
+		gMexMessageQueueOut.addErrorMessage(hr);
 
-	if (S_FALSE == renderer->createIndexBuffer(faces,&indexBuffer))
-		throw std::runtime_error("Could not create the index buffer!");
+	hr = renderer->createIndexBuffer(faces,&indexBuffer);
+	if (FAILED(hr))
+		gMexMessageQueueOut.addErrorMessage(hr);
 
 	numFaces = faces.size();
 

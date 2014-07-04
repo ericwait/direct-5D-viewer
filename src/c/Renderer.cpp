@@ -5,7 +5,6 @@
 #include "MeshPrimitive.h"
 #include "Camera.h"
 #include "RendererPackage.h"
-#include "comdef.h"
 
 Renderer::Renderer()
 {
@@ -56,33 +55,42 @@ HRESULT Renderer::init()
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
 
-	if (initSwapChain() == S_FALSE)
+	HRESULT hr = initSwapChain();
+	if (FAILED(hr))
 	{
 		ReleaseMutex(mutexDevice);
-		return S_FALSE;
+		return hr;
 	}
 
-	if (initDepthStencils() == S_FALSE)
+	hr = initDepthStencils();
+	if (FAILED(hr))
 	{
 		ReleaseMutex(mutexDevice);
-		return S_FALSE;
+		return hr;
 	}
 
-	if (initRenderTarget() == S_FALSE)
+	hr = initRenderTarget();
+	if (FAILED(hr))
 	{
 		ReleaseMutex(mutexDevice);
-		return S_FALSE;
+		return hr;
 	}
 
-	if (initRasterizerStates() == S_FALSE)
+	hr = initRasterizerStates();
+	if (FAILED(hr))
 	{
 		ReleaseMutex(mutexDevice);
-		return S_FALSE;
+		return hr;
 	}
 
 	createBlendState();
 
-	HRESULT hr = createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
+	hr = createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
+	if (FAILED(hr))
+	{
+		ReleaseMutex(mutexDevice);
+		return hr;
+	}
 
 	rootScene = new RootSceneNode();
 
@@ -144,11 +152,7 @@ HRESULT Renderer::initSwapChain()
 	}
 
 	if (FAILED(hr))
-	{
-		_com_error err(hr);
-		LPCTSTR errMsg = err.ErrorMessage();
-		throw std::runtime_error(errMsg);
-	}
+		return hr;
 
 	D3D11_VIEWPORT vp;
 	vp.Width = (float)gWindowWidth;
@@ -730,7 +734,7 @@ void Renderer::renderPackage(const RendererPackage* package)
 void Renderer::setVertexShader(int vertexShaderListIdx)
 {
 	if (vertexShaderListIdx>vertexShaderList.size()-1)
-		throw std::runtime_error("Write a default vertex Shader and implement it on this line!(Eric)");
+		gMexMessageQueueOut.addErrorMessage("There is no shader in the list of this type!");
 
 	immediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	immediateContext->VSSetShader(vertexShaderList[vertexShaderListIdx],NULL,0);
@@ -749,7 +753,7 @@ void Renderer::setRasterizerState(bool wireframe)
 void Renderer::setPixelShader(int pixelShaderListIdx)
 {
 	if (pixelShaderListIdx>pixelShaderList.size()-1)
-		throw std::runtime_error("Write a default pixel Shader and implement it on this line!(Eric)");
+		gMexMessageQueueOut.addErrorMessage("No pixel shader found in list with this index!");
 
 	immediateContext->PSSetShader(pixelShaderList[pixelShaderListIdx],NULL,0);
 }
@@ -797,10 +801,9 @@ ID3D11SamplerState* Renderer::getSamplerState()
 		samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 		samDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-		if (S_OK != d3dDevice->CreateSamplerState(&samDesc,&linearTextureSampler))
-		{
-			throw std::runtime_error("Could not create Texture Sampler!");
-		}
+		HRESULT hr = d3dDevice->CreateSamplerState(&samDesc,&linearTextureSampler);
+		if (FAILED(hr))
+			gMexMessageQueueOut.addErrorMessage(hr);
 	}
 
 	return linearTextureSampler;
@@ -832,13 +835,13 @@ ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, 
 
 	hr = d3dDevice->CreateTexture3D( &desc, &initData, &pTex3D );
 	if( FAILED( hr ))
-		throw std::runtime_error("Could not create Texture Resource!");
+		gMexMessageQueueOut.addErrorMessage(hr);
 
 	ID3D11ShaderResourceView* localSRV;
 	hr = d3dDevice->CreateShaderResourceView( pTex3D, NULL, &localSRV);
 	SAFE_RELEASE( pTex3D );
 	if( FAILED( hr ))
-		throw std::runtime_error("Could not create Texture Resource View!");
+		gMexMessageQueueOut.addErrorMessage(hr);
 
 	return localSRV;
 }

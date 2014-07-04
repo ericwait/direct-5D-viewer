@@ -78,7 +78,7 @@ public:
 	int getNumFrames();
 	int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
 	int getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
-	virtual void addChildNode(SceneNode* child){throw std::runtime_error("You cannot attach to a root node using this method!");}
+	virtual void addChildNode(SceneNode* child);
 
 	virtual void requestUpdate();
 

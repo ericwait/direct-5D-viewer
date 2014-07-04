@@ -1,4 +1,5 @@
 #include "SceneNode.h"
+#include "Globals.h"
 
 #undef max
 
@@ -233,7 +234,7 @@ const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer
 {
 	frame = frame % rootChildrenNodes[section].size();
 	if (renderList[section].size()<=frame)
-		throw std::runtime_error("Render list is malformed!");
+		gMexMessageQueueOut.addErrorMessage("Render list is malformed!");
 
 	return renderList[section][frame];
 }
@@ -281,6 +282,10 @@ int RootSceneNode::getHull(Vec<float> pnt, Vec<float> direction, unsigned int cu
 	return labelOut;
 }
 
+void RootSceneNode::addChildNode(SceneNode* child)
+{
+	gMexMessageQueueOut.addErrorMessage("You cannot attach to a root node using this method!");
+}
 
 void RootSceneNode::requestUpdate()
 {

@@ -5,7 +5,8 @@
 
 struct Message
 {
-	std::string str;
+	std::string command;
+	std::string message;
 	double val;
 };
 
@@ -16,12 +17,16 @@ public:
 	~MessageQueue();
 
 	Message getNextMessage();
-	void addMessage(std::string message, double val);
-	void addMessage(Message message);
+	void addMessage(std::string command, double val);
+	void addMessage(std::string command, std::string message);
+	void addMessage(std::string command, std::string message, double val);
+	void addErrorMessage(HRESULT hr);
+	void addErrorMessage(std::string message);
 	void clear();
 	std::vector<Message> flushQueue();
 
 private:
+	void addMessage(Message message);
 	bool validQueue;
 	HANDLE queueMutex;
 	std::queue<Message> messages;

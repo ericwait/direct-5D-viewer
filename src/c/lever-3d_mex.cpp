@@ -62,7 +62,7 @@ void startThread()
 			Sleep(1000);
 
 		if (!checkRenderThread())
-			mexErrMsgTxt("Failed to initialized the renderer thread!");
+			gMexMessageQueueOut.addErrorMessage("Failed to initialize the renderer thread!");
 	}
 }
 
@@ -97,39 +97,54 @@ void termThread()
 
 void cleanUp()
 {
-	if (messageLoopHandle!=NULL)
+	try 
 	{
-		gRendererOn = false;
-
-		Sleep(1000);
-
-		if (gRenderer!=NULL)
-			gRenderer->getMutex();
-
-		for (int i=0; i<GraphicObjectTypes::VTend; ++i)
+		if (messageLoopHandle!=NULL)
 		{
+			gRendererOn = false;
+
+			Sleep(1000);
+
 			if (gRenderer!=NULL)
+				gRenderer->getMutex();
+
+			for (int i=0; i<GraphicObjectTypes::VTend; ++i)
 			{
-				for (int j=0; j<gGraphicObjectNodes[i].size(); ++j)
+				if (gRenderer!=NULL)
 				{
-					gGraphicObjectNodes[i][j]->releaseRenderResources();
+					for (int j=0; j<gGraphicObjectNodes[i].size(); ++j)
+					{
+						gGraphicObjectNodes[i][j]->releaseRenderResources();
+					}
 				}
+
+				gGraphicObjectNodes[i].clear();
 			}
 
-			gGraphicObjectNodes[i].clear();
+			gBorderObj = NULL;
+			firstVolumeTextures.clear();
 		}
 
-		gBorderObj = NULL;
-		firstVolumeTextures.clear();
-	}
+		if (mexMessageMutex!=NULL)
+		{
+			CloseHandle(mexMessageMutex);
+			mexMessageMutex = NULL;
+		}
 
-	if (mexMessageMutex!=NULL)
+		termThread();
+	}
+	catch (const std::exception& e)
 	{
-		CloseHandle(mexMessageMutex);
-		mexMessageMutex = NULL;
+		mexErrMsgTxt(e.what());
 	}
-
-	termThread();
+	catch (const std::string& e)
+	{
+		mexErrMsgTxt(e.c_str());
+	}
+	catch (...)
+	{
+		mexErrMsgTxt("Caught an unknown error!");	
+	}
 }
 
 BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -193,6 +208,8 @@ CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* 
 
 void loadWidget(const mxArray* widget[])
 {
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	size_t numFaces = mxGetM(widget[0]);
@@ -263,6 +280,8 @@ void loadWidget(const mxArray* widget[])
 
 void loadHulls(const mxArray* hulls)
 {
+	if (gRenderer==NULL) return;
+
 	std::vector<SceneNode*> hullRootNodes;
 	hullRootNodes.resize(gRenderer->getNumberOfFrames());
 	for (unsigned int i=0; i<gRenderer->getNumberOfFrames(); ++i)
@@ -323,6 +342,8 @@ void loadHulls(const mxArray* hulls)
 
 void createBorder(Vec<float> &scale)
 {
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	std::vector<Vec<float>> vertices;
@@ -407,6 +428,8 @@ void createBorder(Vec<float> &scale)
 
 void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ)
 { 
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	unsigned char* shaderConstMemory = NULL;
@@ -448,6 +471,8 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 
 void setCurrentTexture(GraphicObjectTypes textureType)
 {
+	if (gRenderer==NULL) return;
+
 	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
 	gRenderer->getMutex();
@@ -470,6 +495,8 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 
 void toggleSegmentationResults(bool on)
 {
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
@@ -482,6 +509,8 @@ void toggleSegmentationResults(bool on)
 
 void toggleSegmentaionWireframe(bool wireframe)
 {
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
@@ -492,6 +521,8 @@ void toggleSegmentaionWireframe(bool wireframe)
 
 void toggleSegmentaionLighting(bool lighting)
 {
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
@@ -502,6 +533,8 @@ void toggleSegmentaionLighting(bool lighting)
 
 void toggleSelectedCell(std::set<int> labels)
 {
+	if (gRenderer==NULL) return;
+
 	gRenderer->getMutex();
 
 	for (int i=0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
@@ -543,6 +576,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	char* command = mxArrayToString(prhs[0]);
 
+	try
+	{
 	if (_strcmpi("init",command)==0)
 	{
 		if (nrhs<7)
@@ -576,15 +611,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 		std::vector<Message> curMsgs = gMexMessageQueueOut.flushQueue();
 
-		const char* fields[] = {"command","val"};
-		plhs[0] = mxCreateStructMatrix(curMsgs.size(),1,2,fields);
+		const char* fields[] = {"command","message","val"};
+		plhs[0] = mxCreateStructMatrix(curMsgs.size(),1,3,fields);
 
 		for (int i=0; i<curMsgs.size(); ++i)
 		{
-			mxArray* msg = mxCreateString(curMsgs[i].str.c_str());
+			mxArray* cmd = mxCreateString(curMsgs[i].command.c_str());
+			mxArray* msg = mxCreateString(curMsgs[i].message.c_str());
 			mxArray* val = mxCreateDoubleScalar(curMsgs[i].val);
-			mxSetField(plhs[0],i,fields[0],msg);
-			mxSetField(plhs[0],i,fields[1],val);
+			mxSetField(plhs[0],i,fields[0],cmd);
+			mxSetField(plhs[0],i,fields[1],msg);
+			mxSetField(plhs[0],i,fields[2],val);
 		}
 	}
 
@@ -830,6 +867,25 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			sprintf_s(buff,"%s is not a valid command!\n",command);
 			mexErrMsgTxt(buff);
 		}
+	}
+	}
+	catch (const std::exception& e)
+	{
+		mxFree(command);
+		ReleaseMutex(mexMessageMutex);
+		mexErrMsgTxt(e.what());
+	}
+	catch (const std::string& e) 
+	{
+		mxFree(command);
+		ReleaseMutex(mexMessageMutex);
+		mexErrMsgTxt(e.c_str());
+	}
+	catch (...)
+	{
+		mxFree(command);
+		ReleaseMutex(mexMessageMutex);
+		mexErrMsgTxt("Caught an unknown error!");	
 	}
 
 	mxFree(command);
