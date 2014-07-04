@@ -97,3 +97,41 @@ void MessageQueue::clear()
 	ReleaseMutex(queueMutex);
 }
 
+std::vector<Message> MessageQueue::flushQueue()
+{
+	DWORD waitTime = INFINITE;
+	Message msgOut;
+
+#ifdef _DEBUG
+	waitTime = 36000;
+#endif // _DEBUG
+
+	DWORD waitTerm = WaitForSingleObject(queueMutex,waitTime);
+	if (waitTerm==WAIT_TIMEOUT)
+	{
+		throw std::runtime_error("Could not acquire mutex for message queue!");
+	}
+
+	std::vector<Message> queueOut;
+	if (messages.empty())
+	{
+		Message none;
+		none.str = "null";
+		none.val = -1;
+
+		queueOut.push_back(none);
+	}
+	else
+	{
+		while (!messages.empty())
+		{
+			queueOut.push_back(messages.front());
+			messages.pop();
+		}
+	}
+
+	ReleaseMutex(queueMutex);
+
+	return queueOut;
+}
+

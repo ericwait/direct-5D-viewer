@@ -572,12 +572,20 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	else if (_strcmpi("poll",command)==0)
 	{
-		if (nlhs!=2) mexErrMsgTxt("Wrong number of return arguments");
+		if (nlhs!=1) mexErrMsgTxt("Wrong number of return arguments");
 
-		Message curMsg = gMexMessageQueueOut.getNextMessage();
+		std::vector<Message> curMsgs = gMexMessageQueueOut.flushQueue();
 
-		plhs[0] = mxCreateString(curMsg.str.c_str());
-		plhs[1] = mxCreateDoubleScalar(curMsg.val);
+		const char* fields[] = {"command","val"};
+		plhs[0] = mxCreateStructMatrix(curMsgs.size(),1,2,fields);
+
+		for (int i=0; i<curMsgs.size(); ++i)
+		{
+			mxArray* msg = mxCreateString(curMsgs[i].str.c_str());
+			mxArray* val = mxCreateDoubleScalar(curMsgs[i].val);
+			mxSetField(plhs[0],i,fields[0],msg);
+			mxSetField(plhs[0],i,fields[1],val);
+		}
 	}
 
 	else if (messageLoopHandle!=NULL)

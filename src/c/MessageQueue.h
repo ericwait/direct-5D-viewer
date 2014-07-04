@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <vector>
 #include "windows.h"
 
 struct Message
@@ -18,6 +19,7 @@ public:
 	void addMessage(std::string message, double val);
 	void addMessage(Message message);
 	void clear();
+	std::vector<Message> flushQueue();
 
 private:
 	bool validQueue;
