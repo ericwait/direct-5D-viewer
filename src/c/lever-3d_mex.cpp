@@ -804,6 +804,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			toggleSelectedCell(hullset);
 		}
 
+		else if (_strcmpi("setFrame",command)==0)
+		{
+			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setFrame!");
+
+			int curFrame = (int)mxGetScalar(prhs[1]);
+			gRenderer->setCurrentFrame(curFrame);
+		}
+
 		else if (_strcmpi("setViewOrigin",command)==0)
 		{
 			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");

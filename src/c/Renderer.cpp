@@ -944,6 +944,8 @@ void Renderer::setCurrentFrame(int frame)
 		frame = rootScene->getNumFrames()-1;
 
 	currentFrame = frame;
+
+	gMexMessageQueueOut.addMessage("timeChange",currentFrame);
 }
 
 void Renderer::incrementFrame()
@@ -951,12 +953,16 @@ void Renderer::incrementFrame()
 	++currentFrame;
 	if (currentFrame>unsigned int(rootScene->getNumFrames()-1))
 		currentFrame = 0;
+
+	gMexMessageQueueOut.addMessage("timeChange",currentFrame);
 }
 
 void Renderer::decrementFrame()
 {
 	if (currentFrame!=0)
 		--currentFrame;
+
+	gMexMessageQueueOut.addMessage("timeChange",currentFrame);
 }
 
 unsigned int Renderer::getNumberOfFrames()

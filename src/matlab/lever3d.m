@@ -5,6 +5,7 @@ global imageData orgImage processedImage tmr uiHandle
 [sphereFaces, sphereVerts, shereNorms] = MakeSphere(0.20,40);
 
 [orgImage, imageData] = tiffReader([],[],[],[],'d:\Users\Eric.Bioimage29\Documents\Images\LEVer3d\Susan_overnight_new');
+%[orgImage, imageData] = tiffReader();
 
 processedImage = orgImage;
 
@@ -14,7 +15,7 @@ lever_3d('loadTexture',imageConvert(orgImage,'uint8'),[imageData.XPixelPhysicalS
 
 uiHandle = ViewerControls();
 
-tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'BusyMode','queue','TimerFcn','CheckMessage');
+tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'TimerFcn','CheckMessage');
 start(tmr);
 
 end

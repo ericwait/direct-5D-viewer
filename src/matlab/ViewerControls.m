@@ -66,7 +66,7 @@ setupData(hObject, handles);
 end
 
 function setupData(hObject, handles)
-global imageData channelData
+global imageData channelData uiFrameSlider uiFrameTb
 
 channelData = [];
 
@@ -119,8 +119,10 @@ if (imageData.NumberOfChannels>0)
 end
 
 set(handles.m_channelPicker,'string',strng);
-set(handles.tb_numFrames,'string',num2str(imageData.NumberOfFrames));
-%set(handles.s_curFrame,'Max',imageData.NumberOfFrames,'Min',1);
+if (imageData.NumberOfFrames > 1)
+    set(handles.tb_numFrames,'string',num2str(imageData.NumberOfFrames));
+    set(handles.s_curFrame,'Max',imageData.NumberOfFrames,'Min',1,'Enable','on','SliderStep',[1/imageData.NumberOfFrames, 0.1],'Value',1);
+end
 set(handles.tb_numChan,'string',num2str(imageData.NumberOfChannels));
 set(handles.tb_title,'string',imageData.DatasetName);
 set(handles.tb_curFrame,'string',num2str(1));
@@ -134,9 +136,8 @@ set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment'};
 set(handles.m_imageProcessing,'String',procStr);
 
-% set(handles.s_curFrame,'max',imageData.NumberOfFrames);
-% set(handles.s_curFrame,'Value',1);
-% set(handles.s_curFrame,'min',1);
+uiFrameSlider = handles.s_curFrame;
+uiFrameTb = handles.tb_curFrame;
 
 updateCurrentState(handles);
 end
