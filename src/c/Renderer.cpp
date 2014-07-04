@@ -5,6 +5,7 @@
 #include "MeshPrimitive.h"
 #include "Camera.h"
 #include "RendererPackage.h"
+#include "comdef.h"
 
 Renderer::Renderer()
 {
@@ -140,6 +141,13 @@ HRESULT Renderer::initSwapChain()
 
 		if( SUCCEEDED(hr) )
 			break;
+	}
+
+	if (FAILED(hr))
+	{
+		_com_error err(hr);
+		LPCTSTR errMsg = err.ErrorMessage();
+		throw std::runtime_error(errMsg);
 	}
 
 	D3D11_VIEWPORT vp;
