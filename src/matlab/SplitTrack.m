@@ -1,6 +1,6 @@
 function newTrackID = SplitTrack(trackID,hullID)
 
-global Families Tracks
+global Families Tracks Hulls
 
 %get all the hulls that come after hullID (in time that is)
 %this also assumes that hulls are ordered
@@ -40,6 +40,9 @@ Tracks(trackID).childrenTracks = newTrackID;
 trackIndex = length(Families(Tracks(newTrackID).family).tracks) + 1;
 Families(Tracks(newTrackID).family).tracks(trackIndex) = newTrackID;
 
+for i=1:length(hullList)
+    Hulls(hullList(i)).track = newTrackID;
+end
 %update HashedCells
 %UpdateHashedCellsTrackID(newTrackID,hullList,Tracks(newTrackID).startTime);
 

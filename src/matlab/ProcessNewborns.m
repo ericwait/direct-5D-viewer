@@ -25,6 +25,8 @@ rootHull = 0;
 %costMatrix = GetCostMatrix();
 costMatrix = Costs;
 
+planes = [];
+
 size = length(families);
 for i=1:size
     if ( isempty(Families(families(i)).startFrame) )
@@ -110,16 +112,12 @@ for i=1:size
     connectTime = Hulls(parentHullID).frame+1;
     if(minParentHistoryTimeFrame < abs(Tracks(childTrackID).startFrame - Tracks(parentTrackID).startFrame))
         ChangeTrackParent(parentTrackID,connectTime,childTrackID);
+        Hulls(end+1) = CreateCleavagePlane(GetRootHull(Tracks(parentTrackID).childrenTracks(1)),...
+            GetRootHull(Tracks(parentTrackID).childrenTracks(2)));
+        Hulls(end).label = length(Hulls);
+        Tracks(parentTrackID).childrenTracks(1).hulls = [Tracks(parentTrackID).childrenTracks(1).hulls, length(Hulls)];
     end
 end
-
-if ( rootHull > 0 )
-    trackID = GetTrackID(rootHull);
-%     if ( ~isempty(trackID) )
-%         Figures.tree.familyID = Tracks(trackID).familyID;
-%     end
-end
-
 end
 
 
