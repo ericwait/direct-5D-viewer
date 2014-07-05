@@ -133,13 +133,38 @@ set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
 set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
 set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 
-procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment'};
+procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment','Distance Map'};
 set(handles.m_imageProcessing,'String',procStr);
 
 uiFrameSlider = handles.s_curFrame;
 uiFrameTb = handles.tb_curFrame;
 
 updateCurrentState(handles);
+end
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig
+lever_3d('close');
+
+stop(tmr);
+delete(tmr);
+
+close(uiTreeFig);
+
+clear mex
+Hulls = [];
+Tracks = [];
+Families = [];
+orgImage = [];
+processedImage = [];
+distanceImage = [];
+imageData = [];
+Costs = [];
+Colors = [];
+selectedHull = [];
+
+delete(hObject);
 end
 
 %% Calcualtions
@@ -235,30 +260,12 @@ function varargout = ViewerControls_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 end
 
-% --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
-global tmr Hulls orgImage processedImage imageData
-lever_3d('close');
-
-stop(tmr);
-delete(tmr);
-
-clear mex
-clear Hulls
-clear orgImage
-clear processedImage
-clear imageData
-
-delete(hObject);
-end
-
 %% Callback functions
 
 % --- Executes on slider movement.
 function s_curFrame_Callback(hObject, eventdata, handles)
 frame = round(get(handles.s_curFrame,'Value'));
-set(handles.tb_curFrame,'String',num2str(frame));
-lever_3d('setFrame',get(handles.s_curFrame,'Value') -1);
+UpdateTime(frame-1);
 end
 
 % --- Executes on slider movement.
@@ -374,7 +381,7 @@ end
 
 % --- Executes on selection change in m_imageProcessing.
 function m_imageProcessing_Callback(hObject, eventdata, handles)
-global imageData orgImage processedImage channelData Hulls
+global imageData orgImage processedImage distanceImage channelData Hulls
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).alphaMod = get(handles.s_alpha,'Value');
 
@@ -445,6 +452,22 @@ switch processStr{processIdx}
             end
         end
         Segment(segImage,chan,dia);
+    case 'Distance Map'
+        params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
+        diaTitle = 'Distance Map';
+        def = {'1.0', '2', '2', '1'};
+        response = inputdlg(params,diaTitle,1,def);
+        if (~isempty(response))
+            alpha = str2num(response{1});
+            oX = str2num(response{2});
+            oY = str2num(response{3});
+            oZ = str2num(response{4});
+            for t=1:size(processedImage,5)
+                temp = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
+                temp = temp>=max(temp(:));
+                distanceImage(:,:,:,chan,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
+            end
+        end
 end
 
 if (processed>0)    

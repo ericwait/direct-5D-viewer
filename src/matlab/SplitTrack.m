@@ -25,8 +25,7 @@ Tracks(newTrackID).family = Tracks(trackID).family;
 Tracks(newTrackID).parentTrack = trackID;
 Tracks(newTrackID).childrenTracks = [];
 Tracks(newTrackID).hulls = hullList;
-Tracks(newTrackID).startFrame = Tracks(trackID).startFrame + hullIndex - 1;
-Tracks(newTrackID).endFrame = Tracks(newTrackID).startFrame + length(hullList) - 1;
+RehashTracksHulls(newTrackID);
 Tracks(newTrackID).color = Tracks(trackID).color;
 
 %attach the parents children to the newTrack

@@ -1,5 +1,4 @@
 function ChangeTrackParent(parentTrackID,time,childTrackID)
-
 global Tracks Families
 
 %see if the child exists before time
