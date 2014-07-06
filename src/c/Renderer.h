@@ -42,6 +42,7 @@ public:
 		DirectX::XMMATRIX worldTransform;
 		DirectX::XMMATRIX viewTransform;
 		DirectX::XMMATRIX projectionTransform;
+		DirectX::XMFLOAT4 depthPeelPlanes;
 	};
 
 	Renderer();
@@ -73,6 +74,9 @@ public:
 	void setWorldRotation(DirectX::XMMATRIX rotation);
 	void resetRootWorldTransform();
 	
+	void setClipChunkPercent(float ccp);
+	void setNumPlanes(int numPlanes); //TODO this could be changed to be smarter about where to peel from
+
 //Getters
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
 	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
@@ -130,7 +134,7 @@ private:
 	HRESULT compileVertexShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
 	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
 
-	void renderPackage(const RendererPackage* package);
+	void renderPackage(const RendererPackage* package, float frontClip=-10, float backClip=10);
 	DirectX::XMMATRIX createWorldMatrix();
 	void updateWorldTransform();
 	//Member variables 
@@ -167,6 +171,8 @@ private:
 	Vec<float> origin;
 	DirectX::XMMATRIX curRotationMatrix;
 	unsigned int currentFrame;
+	float clipChunkPercent;
+	int numPlanes;
 };
 
 const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshShaders.fx","ViewAlignedVertexShader.fx"};

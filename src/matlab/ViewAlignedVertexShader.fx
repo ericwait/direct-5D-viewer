@@ -3,6 +3,7 @@ cbuffer VSConstantBuffer : register( b0 )
 	matrix World;
 	matrix View;
 	matrix Projection;
+	float4 depthPeelPlanes;
 };
 
 struct VS_OUTPUT
@@ -19,11 +20,11 @@ VS_OUTPUT ViewAlignedVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 
 	output.TextureUV = mul(float4(TextureUV,1), World).xyz; 
 
+	output.clipPlane[0] = float4(output.TextureUV.x, output.TextureUV.y, output.TextureUV.z,Pos.z-depthPeelPlanes.x);
+	output.clipPlane[1] = float4(1.0f-output.TextureUV.x, 1.0f-output.TextureUV.y, 1.0f-output.TextureUV.z,depthPeelPlanes.y-Pos.z);
+
 	output.Pos = mul( Pos, View );
 	output.Pos = mul( output.Pos, Projection );
-
-	output.clipPlane[0] = float4(output.TextureUV.x, output.TextureUV.y, output.TextureUV.z,0.5f);
-	output.clipPlane[1] = float4(1.0f-output.TextureUV.x, 1.0f-output.TextureUV.y, 1.0f-output.TextureUV.z,0.5f);
 
 	return output;
 }

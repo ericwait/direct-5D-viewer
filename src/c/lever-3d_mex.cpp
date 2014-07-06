@@ -320,7 +320,7 @@ void loadHulls(const mxArray* hulls)
 		int frame = int(mxGetScalar(mxFrame))-1;
 
 		gRenderer->getMutex();
-		
+
 		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
 		curHullObj->setLabel((int)mxGetScalar(mxLabel));
@@ -328,7 +328,7 @@ void loadHulls(const mxArray* hulls)
 		curHullNode->setWireframe(true);
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
-		
+
 		gRenderer->releaseMutex();
 	}
 
@@ -336,7 +336,7 @@ void loadHulls(const mxArray* hulls)
 
 	for (unsigned int i=0; i<gRenderer->getNumberOfFrames(); ++i)
 		gRenderer->attachToRootScene(hullRootNodes[i],Renderer::Section::Main,i);
-	
+
 	gRenderer->releaseMutex();
 }
 
@@ -569,191 +569,191 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		return;
 	}
 
-// 	if (messageLoopHandle)
-// 	{
-// 		checkRenderThread();
-// 	}
+	// 	if (messageLoopHandle)
+	// 	{
+	// 		checkRenderThread();
+	// 	}
 
 	char* command = mxArrayToString(prhs[0]);
 
 	try
 	{
-	if (_strcmpi("init",command)==0)
-	{
-		if (nrhs<7)
-			mexErrMsgTxt("Not enough input arguments to initialize Lever 3-d.  Did you forget the widget?");
-
-		if ( !messageLoopHandle )
+		if (_strcmpi("init",command)==0)
 		{
-			startThread();
+			if (nrhs<7)
+				mexErrMsgTxt("Not enough input arguments to initialize Lever 3-d.  Did you forget the widget?");
 
-			if ( registerExitFunction )
+			if ( !messageLoopHandle )
 			{
-				mexAtExit(exitFunc);
-				registerExitFunction = FALSE;
-			}
+				startThread();
 
-			loadWidget(prhs+1);
-			gRendererOn = true;
-		}
-	}
-
-	else if (_strcmpi("close",command)==0)
-	{
-		cleanUp();
-
-		gMexMessageQueueOut.clear();
-	}
-
-	else if (_strcmpi("poll",command)==0)
-	{
-		if (nlhs!=1) mexErrMsgTxt("Wrong number of return arguments");
-
-		std::vector<Message> curMsgs = gMexMessageQueueOut.flushQueue();
-
-		const char* fields[] = {"command","message","val"};
-		plhs[0] = mxCreateStructMatrix(curMsgs.size(),1,3,fields);
-
-		for (int i=0; i<curMsgs.size(); ++i)
-		{
-			mxArray* cmd = mxCreateString(curMsgs[i].command.c_str());
-			mxArray* msg = mxCreateString(curMsgs[i].message.c_str());
-			mxArray* val = mxCreateDoubleScalar(curMsgs[i].val);
-			mxSetField(plhs[0],i,fields[0],cmd);
-			mxSetField(plhs[0],i,fields[1],msg);
-			mxSetField(plhs[0],i,fields[2],val);
-		}
-	}
-
-	else if (messageLoopHandle!=NULL)
-	{
-		if (_strcmpi("loadTexture",command)==0)
-		{
-			size_t numDims = mxGetNumberOfDimensions(prhs[1]);
-			if (numDims<3)
-				mexErrMsgTxt("Image must have at least three dimensions!");
-
-			const mwSize* DIMS = mxGetDimensions(prhs[1]);
-			Vec<size_t> dims = Vec<size_t>(DIMS[0],DIMS[1],DIMS[2]);
-			int numChannels = 1;
-			int numFrames = 1;
-			if (numDims>3)
-				numChannels = int(DIMS[3]);
-
-			if (numDims>4)
-				numFrames = int(DIMS[4]);
-
-			unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
-
-			Vec<float> scale(dims);
-			scale = scale / scale.maxValue();
-			if (nrhs>2)
-			{
-				double* physDims = (double*)mxGetData(prhs[2]);
-				scale.y *= float(physDims[1]/physDims[0]);
-				scale.z *= float(physDims[2]/physDims[0]);
-			}
-
-			GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
-			if (nrhs>3)
-			{
-				char buff[96];
-				mxGetString(prhs[3],buff,96);
-
-				if (_strcmpi("original",buff)==0)
-					textureType = GraphicObjectTypes::OriginalVolume;
-				else if (_strcmpi("processed",buff)==0)
-					textureType = GraphicObjectTypes::ProcessedVolume;
-			}
-
-			loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
-			setCurrentTexture(textureType);
-
-			if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
-				createBorder(scale);
-		}
-
-		else if (_strcmpi("getData",command)==0)
-		{
-			;
-		}
-
-		else if (_strcmpi("peelUpdate",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("not the right arguments for peelUpdate!");
-
-			//g_peelFactor = (float)mxGetScalar(prhs[1]);
-		}
-
-		else if (_strcmpi("textureLightingUpdate",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
-
-			if (mxGetScalar(prhs[1])>0.0)
-			{
-				for (int i=0; i<firstVolumeTextures.size(); ++i)
+				if ( registerExitFunction )
 				{
-					if (NULL!=firstVolumeTextures[i])
+					mexAtExit(exitFunc);
+					registerExitFunction = FALSE;
+				}
+
+				loadWidget(prhs+1);
+				gRendererOn = true;
+			}
+		}
+
+		else if (_strcmpi("close",command)==0)
+		{
+			cleanUp();
+
+			gMexMessageQueueOut.clear();
+		}
+
+		else if (_strcmpi("poll",command)==0)
+		{
+			if (nlhs!=1) mexErrMsgTxt("Wrong number of return arguments");
+
+			std::vector<Message> curMsgs = gMexMessageQueueOut.flushQueue();
+
+			const char* fields[] = {"command","message","val"};
+			plhs[0] = mxCreateStructMatrix(curMsgs.size(),1,3,fields);
+
+			for (int i=0; i<curMsgs.size(); ++i)
+			{
+				mxArray* cmd = mxCreateString(curMsgs[i].command.c_str());
+				mxArray* msg = mxCreateString(curMsgs[i].message.c_str());
+				mxArray* val = mxCreateDoubleScalar(curMsgs[i].val);
+				mxSetField(plhs[0],i,fields[0],cmd);
+				mxSetField(plhs[0],i,fields[1],msg);
+				mxSetField(plhs[0],i,fields[2],val);
+			}
+		}
+
+		else if (messageLoopHandle!=NULL)
+		{
+			if (_strcmpi("loadTexture",command)==0)
+			{
+				size_t numDims = mxGetNumberOfDimensions(prhs[1]);
+				if (numDims<3)
+					mexErrMsgTxt("Image must have at least three dimensions!");
+
+				const mwSize* DIMS = mxGetDimensions(prhs[1]);
+				Vec<size_t> dims = Vec<size_t>(DIMS[0],DIMS[1],DIMS[2]);
+				int numChannels = 1;
+				int numFrames = 1;
+				if (numDims>3)
+					numChannels = int(DIMS[3]);
+
+				if (numDims>4)
+					numFrames = int(DIMS[4]);
+
+				unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
+
+				Vec<float> scale(dims);
+				scale = scale / scale.maxValue();
+				if (nrhs>2)
+				{
+					double* physDims = (double*)mxGetData(prhs[2]);
+					scale.y *= float(physDims[1]/physDims[0]);
+					scale.z *= float(physDims[2]/physDims[0]);
+				}
+
+				GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+				if (nrhs>3)
+				{
+					char buff[96];
+					mxGetString(prhs[3],buff,96);
+
+					if (_strcmpi("original",buff)==0)
+						textureType = GraphicObjectTypes::OriginalVolume;
+					else if (_strcmpi("processed",buff)==0)
+						textureType = GraphicObjectTypes::ProcessedVolume;
+				}
+
+				loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
+				setCurrentTexture(textureType);
+
+				if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
+					createBorder(scale);
+			}
+
+			else if (_strcmpi("getData",command)==0)
+			{
+				;
+			}
+
+			else if (_strcmpi("peelUpdate",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("not the right arguments for peelUpdate!");
+
+				gRenderer->setClipChunkPercent((float)mxGetScalar(prhs[1]));
+			}
+
+			else if (_strcmpi("textureLightingUpdate",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
+
+				if (mxGetScalar(prhs[1])>0.0)
+				{
+					for (int i=0; i<firstVolumeTextures.size(); ++i)
 					{
-						firstVolumeTextures[i]->setLightOn(true);
+						if (NULL!=firstVolumeTextures[i])
+						{
+							firstVolumeTextures[i]->setLightOn(true);
+						}
+					}
+				}
+				else
+				{
+					for (int i=0; i<firstVolumeTextures.size(); ++i)
+					{
+						if (NULL!=firstVolumeTextures[i])
+						{
+							firstVolumeTextures[i]->setLightOn(false);
+						}
 					}
 				}
 			}
-			else
+
+			else if (_strcmpi("segmentationLighting",command)==0)
 			{
-				for (int i=0; i<firstVolumeTextures.size(); ++i)
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
+
+				double onD = mxGetScalar(prhs[1]);
+				bool on = onD>0;
+
+				toggleSegmentaionLighting(on);
+			}
+
+			else if (_strcmpi("transferUpdate",command)==0)
+			{
+				if (2>nrhs || 3<nlhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
+
+				GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+				if (nrhs>2)
 				{
-					if (NULL!=firstVolumeTextures[i])
-					{
-						firstVolumeTextures[i]->setLightOn(false);
-					}
+					char buff[96];
+					mxGetString(prhs[2],buff,96);
+
+					if (_strcmpi("original",buff)==0)
+						textureType = GraphicObjectTypes::OriginalVolume;
+					else if (_strcmpi("processed",buff)==0)
+						textureType = GraphicObjectTypes::ProcessedVolume;
 				}
-			}
-		}
 
-		else if (_strcmpi("segmentationLighting",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
+				int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
-			double onD = mxGetScalar(prhs[1]);
-			bool on = onD>0;
+				size_t numElem = mxGetNumberOfElements(prhs[1]);
 
-			toggleSegmentaionLighting(on);
-		}
+				if (firstVolumeTextures.size()-1<fvtIdx || NULL==firstVolumeTextures[fvtIdx] || numElem!=firstVolumeTextures[fvtIdx]->getNumberOfChannels())
+					mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
 
-		else if (_strcmpi("transferUpdate",command)==0)
-		{
-			if (2>nrhs || 3<nlhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
+				for (int chan=0; chan<firstVolumeTextures[fvtIdx]->getNumberOfChannels(); ++chan)
+				{
+					Vec<float> transferFunction(0.0f,0.0f,0.0f);
+					Vec<float> ranges;
+					Vec<float> color;
+					float alphaMod;
 
-			GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
-			if (nrhs>2)
-			{
-				char buff[96];
-				mxGetString(prhs[2],buff,96);
-
-				if (_strcmpi("original",buff)==0)
-					textureType = GraphicObjectTypes::OriginalVolume;
-				else if (_strcmpi("processed",buff)==0)
-					textureType = GraphicObjectTypes::ProcessedVolume;
-			}
-
-			int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
-
-			size_t numElem = mxGetNumberOfElements(prhs[1]);
-			
-			if (firstVolumeTextures.size()-1<fvtIdx || NULL==firstVolumeTextures[fvtIdx] || numElem!=firstVolumeTextures[fvtIdx]->getNumberOfChannels())
-				mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
-
-			for (int chan=0; chan<firstVolumeTextures[fvtIdx]->getNumberOfChannels(); ++chan)
-			{
-				Vec<float> transferFunction(0.0f,0.0f,0.0f);
-				Vec<float> ranges;
-				Vec<float> color;
-				float alphaMod;
-
-				mxArray* mxColorPt = mxGetField(prhs[1],chan,"color");
-				double* mxColor = (double*)mxGetData(mxColorPt);
-				color = Vec<float>((float)(mxColor[0]),(float)(mxColor[1]),(float)(mxColor[2]));
+					mxArray* mxColorPt = mxGetField(prhs[1],chan,"color");
+					double* mxColor = (double*)mxGetData(mxColorPt);
+					color = Vec<float>((float)(mxColor[0]),(float)(mxColor[1]),(float)(mxColor[2]));
 
 					mxArray* mxAPt = mxGetField(prhs[1],chan,"a");
 					mxArray* mxBPt = mxGetField(prhs[1],chan,"b");
@@ -763,111 +763,111 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 					double c = mxGetScalar(mxCPt);
 					transferFunction = Vec<float>((float)a,(float)b,(float)c);
 
-				mxArray* mxMin = mxGetField(prhs[1],chan,"minVal");
-				mxArray* mxMax = mxGetField(prhs[1],chan,"maxVal");
-				ranges = Vec<float>((float)mxGetScalar(mxMin),(float)mxGetScalar(mxMax),1.0f);
+					mxArray* mxMin = mxGetField(prhs[1],chan,"minVal");
+					mxArray* mxMax = mxGetField(prhs[1],chan,"maxVal");
+					ranges = Vec<float>((float)mxGetScalar(mxMin),(float)mxGetScalar(mxMax),1.0f);
 
-				mxArray* mxAlphaPt = mxGetField(prhs[1],chan,"alphaMod");
-				mxArray* mxOnPt = mxGetField(prhs[1],chan,"visible");
-				if (mxGetScalar(mxOnPt)!=0)
-					alphaMod = (float)mxGetScalar(mxAlphaPt);
-				else
-					alphaMod = 0.0f;
+					mxArray* mxAlphaPt = mxGetField(prhs[1],chan,"alphaMod");
+					mxArray* mxOnPt = mxGetField(prhs[1],chan,"visible");
+					if (mxGetScalar(mxOnPt)!=0)
+						alphaMod = (float)mxGetScalar(mxAlphaPt);
+					else
+						alphaMod = 0.0f;
 
-				firstVolumeTextures[fvtIdx]->setTransferFunction(chan,transferFunction);
-				firstVolumeTextures[fvtIdx]->setRange(chan,ranges);
-				firstVolumeTextures[fvtIdx]->setColor(chan,color,alphaMod);
+					firstVolumeTextures[fvtIdx]->setTransferFunction(chan,transferFunction);
+					firstVolumeTextures[fvtIdx]->setRange(chan,ranges);
+					firstVolumeTextures[fvtIdx]->setColor(chan,color,alphaMod);
+				}
+			}
+
+			else if (_strcmpi("viewTexture",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for viewTexture!");
+
+				char buff[96];
+				mxGetString(prhs[1],buff,96);
+
+				GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+
+				if (_strcmpi("original",buff)==0)
+					textureType = GraphicObjectTypes::OriginalVolume;
+				else if (_strcmpi("processed",buff)==0)
+					textureType = GraphicObjectTypes::ProcessedVolume;
+
+				setCurrentTexture(textureType);
+			}
+
+			else if (_strcmpi("viewSegmentation",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for viewSegmentation!");
+
+				double onD = mxGetScalar(prhs[1]);
+				bool on = onD>0;
+
+				toggleSegmentationResults(on);
+			}
+
+			else if (_strcmpi("wireframeSegmentation",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for wireframeSegmentation!");
+
+				double onD = mxGetScalar(prhs[1]);
+				bool on = onD>0;
+
+				toggleSegmentaionWireframe(on);
+			}
+
+			else if (_strcmpi("loadHulls",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+
+				const mxArray* hulls = prhs[1];
+				if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
+
+				loadHulls(hulls);
+			}
+
+			else if (_strcmpi("displayHulls",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for displayHulls!");
+
+				double* hullList = (double*)mxGetData(prhs[1]);
+				int numHulls = mxGetNumberOfElements(prhs[1]);
+
+				std::set<int> hullset;
+				for (int i=0; i<numHulls; ++i)
+					hullset.insert((int)(hullList[i]));
+
+				toggleSelectedCell(hullset);
+			}
+
+			else if (_strcmpi("setFrame",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setFrame!");
+
+				int curFrame = (int)mxGetScalar(prhs[1]);
+				gRenderer->setCurrentFrame(curFrame);
+			}
+
+			else if (_strcmpi("setViewOrigin",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");
+
+				double* origin = (double*)mxGetData(prhs[1]);
+				int numDims = mxGetNumberOfElements(prhs[1]);
+
+				if (numDims!=3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
+
+				gRenderer->setWorldOrigin(Vec<float>((float)(origin[0]),(float)(origin[1]),(float)(origin[2])));
+			}
+
+			else
+			{
+				char buff[255];
+				sprintf_s(buff,"%s is not a valid command!\n",command);
+				mexErrMsgTxt(buff);
 			}
 		}
-
-		else if (_strcmpi("viewTexture",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for viewTexture!");
-
-			char buff[96];
-			mxGetString(prhs[1],buff,96);
-
-			GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
-
-			if (_strcmpi("original",buff)==0)
-				textureType = GraphicObjectTypes::OriginalVolume;
-			else if (_strcmpi("processed",buff)==0)
-				textureType = GraphicObjectTypes::ProcessedVolume;
-
-			setCurrentTexture(textureType);
-		}
-
-		else if (_strcmpi("viewSegmentation",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for viewSegmentation!");
-
-			double onD = mxGetScalar(prhs[1]);
-			bool on = onD>0;
-
-			toggleSegmentationResults(on);
-		}
-
-		else if (_strcmpi("wireframeSegmentation",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for wireframeSegmentation!");
-
-			double onD = mxGetScalar(prhs[1]);
-			bool on = onD>0;
-
-			toggleSegmentaionWireframe(on);
-		}
-
-		else if (_strcmpi("loadHulls",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for loadHulls!");
-
-			const mxArray* hulls = prhs[1];
-			if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
-
-			loadHulls(hulls);
-		}
-
-		else if (_strcmpi("displayHulls",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for displayHulls!");
-
-			double* hullList = (double*)mxGetData(prhs[1]);
-			int numHulls = mxGetNumberOfElements(prhs[1]);
-
-			std::set<int> hullset;
-			for (int i=0; i<numHulls; ++i)
-				hullset.insert((int)(hullList[i]));
-
-			toggleSelectedCell(hullset);
-		}
-
-		else if (_strcmpi("setFrame",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setFrame!");
-
-			int curFrame = (int)mxGetScalar(prhs[1]);
-			gRenderer->setCurrentFrame(curFrame);
-		}
-
-		else if (_strcmpi("setViewOrigin",command)==0)
-		{
-			if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");
-
-			double* origin = (double*)mxGetData(prhs[1]);
-			int numDims = mxGetNumberOfElements(prhs[1]);
-
-			if (numDims!=3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
-
-			gRenderer->setWorldOrigin(Vec<float>((float)(origin[0]),(float)(origin[1]),(float)(origin[2])));
-		}
-
-		else
-		{
-			char buff[255];
-			sprintf_s(buff,"%s is not a valid command!\n",command);
-			mexErrMsgTxt(buff);
-		}
-	}
 	}
 	catch (const std::exception& e)
 	{

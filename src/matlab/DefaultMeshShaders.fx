@@ -3,6 +3,7 @@ cbuffer VSConstantBuffer : register( b0 )
 	matrix World;
 	matrix View;
 	matrix Projection;
+	float4 depthPeelPlanes;
 };
 
 cbuffer PSConstantBuffer : register( b1 )
@@ -16,6 +17,7 @@ struct VS_OUTPUT
 	float4 Pos : SV_POSITION;
 	float3 TextureUV : TEXCOORD0;
 	float3 Normal : NORMAL;
+	float4 clipPlane[2] : SV_ClipDistance;
 };
 
 struct PS_OUTPUT
@@ -31,6 +33,9 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 	output.TextureUV = TextureUV; 
 
 	output.Pos = mul( Pos, World );
+
+	output.clipPlane[0] = float4(0,0,0, output.Pos.z-depthPeelPlanes.x);
+	output.clipPlane[1] = float4(0,0,0, depthPeelPlanes.y-output.Pos.z);
 
 	output.Pos = mul( output.Pos, View );
 	output.Pos = mul( output.Pos, Projection );

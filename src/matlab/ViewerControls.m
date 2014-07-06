@@ -355,7 +355,8 @@ end
 
 % --- Executes on slider movement.
 function s_peelSize_Callback(hObject, eventdata, handles)
-
+val = get(handles.s_peelSize,'Value');
+lever_3d('peelUpdate',val);
 end
 
 % --- Executes on button press in cb_textureLighting.

@@ -15,7 +15,7 @@ Renderer::Renderer()
 	immediateContext = NULL;
 	renderTargetView = NULL;
 	IDXGIBackBuffer= NULL;
-	
+
 	depthStencilView = NULL;
 	depthStencilStateCompareAlways = NULL;
 	depthStencilStateCompareLess = NULL;
@@ -28,6 +28,8 @@ Renderer::Renderer()
 
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 	currentFrame = 0;
+	clipChunkPercent = 0.0f;
+	numPlanes = 0;
 }
 
 Renderer::~Renderer()
@@ -38,7 +40,7 @@ Renderer::~Renderer()
 
 	clearVertexShaderList();
 	clearPixelShaderList();
-	
+
 	SAFE_RELEASE(vertexShaderConstBuffer);
 	SAFE_RELEASE(linearTextureSampler);
 	SAFE_RELEASE(blendState);
@@ -481,7 +483,7 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 	HRESULT result = d3dDevice->CreateBuffer(&indexBufferDesc, &indexData, indexBufferOut);
 	if ( FAILED(result) )
 		*indexBufferOut = NULL;
-	
+
 	ReleaseMutex(mutexDevice);
 
 	return result;
@@ -506,7 +508,7 @@ MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces,
 
 	//meshPrimitives.push_back(newMesh);
 	ReleaseMutex(mutexDevice);
-	
+
 	return newMesh;
 }
 
@@ -601,7 +603,7 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 	pixelShaderMap.insert(std::pair<std::string,int>(shaderLookupName,pixelShaderList.size()-1));
 
 	int idx = pixelShaderMap[shaderLookupName];
-	
+
 	ReleaseMutex(mutexDevice);
 
 	return idx;
@@ -626,7 +628,7 @@ void Renderer::clearPixelShaderList()
 {
 	for (int i = 0; i<pixelShaderList.size(); ++i)
 		SAFE_RELEASE(pixelShaderList[i]);
-	
+
 	pixelShaderList.clear();
 	pixelShaderMap.clear();
 }
@@ -672,9 +674,20 @@ void Renderer::mainRenderLoop()
 	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
 
 	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
-	for (int i=0; i<renderMainList.size(); ++i)
+
+	float numChunks = numPlanes*clipChunkPercent +1;
+
+	float chunkWidth = 3.0f/numChunks;
+
+	for (int i=numChunks-1; i>=0; --i)
 	{
-		renderPackage(renderMainList[i]->getRenderPackage());
+		float frontPlane = i*chunkWidth - 1.5f;
+		float backPlane = frontPlane + chunkWidth;
+
+		for (int i=0; i<renderMainList.size(); ++i)
+		{
+			renderPackage(renderMainList[i]->getRenderPackage(),frontPlane,backPlane);
+		}
 	}
 }
 
@@ -705,16 +718,24 @@ void Renderer::endRender()
 	swapChain->Present( 0, 0 );
 }
 
-void Renderer::renderPackage(const RendererPackage* package)
+void Renderer::renderPackage(const RendererPackage* package, float frontClip, float backClip)
 {
+	static int previousVertexShaderIdx = -1;
+	static int previousPixelShaderIdx = -1;
 	//Vertex Shader setup
 	VertexShaderConstBuffer vcb;
 	const Camera* camera = package->getCamera();
 	vcb.projectionTransform = DirectX::XMMatrixTranspose(camera->getProjectionTransform());
 	vcb.viewTransform = DirectX::XMMatrixTranspose(camera->getViewTransform());
 	vcb.worldTransform = DirectX::XMMatrixTranspose(package->getLocalToWorld());
+	vcb.depthPeelPlanes.x = frontClip;
+	vcb.depthPeelPlanes.y = backClip;
 	updateShaderParams(&vcb,vertexShaderConstBuffer);
-	setVertexShader(package->getMeshPrimitive()->shaderIdx);
+	if (previousVertexShaderIdx!=package->getMeshPrimitive()->shaderIdx)
+	{
+		setVertexShader(package->getMeshPrimitive()->shaderIdx);
+		previousVertexShaderIdx = package->getMeshPrimitive()->shaderIdx;
+	}
 
 	setGeometry(package->getMeshPrimitive()->vertexBuffer,package->getMeshPrimitive()->indexBuffer);
 
@@ -724,8 +745,12 @@ void Renderer::renderPackage(const RendererPackage* package)
 	//Pixel Shader setup
 	package->getMaterial()->updateParams();//can be sped up by doing this differently
 	package->getMaterial()->setShaderResources();//TODO this needs tweeking
-	setPixelShader(package->getMaterial()->shaderIdx);
-
+	if (previousPixelShaderIdx!=package->getMaterial()->shaderIdx)
+	{
+		setPixelShader(package->getMaterial()->shaderIdx);
+		previousPixelShaderIdx = package->getMaterial()->shaderIdx;
+	}
+	
 	setDepthStencilState(package->getMaterial()->testDepth);
 
 	drawTriangles(package->getMeshPrimitive()->numFaces);
@@ -852,14 +877,14 @@ void Renderer::createBlendState()
 	ZeroMemory(&BlendState, sizeof(D3D11_BLEND_DESC));
 	BlendState.AlphaToCoverageEnable = FALSE;
 	BlendState.IndependentBlendEnable = FALSE;
-// 	BlendState.RenderTarget[0].BlendEnable = TRUE;
-// 	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-// 	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-// 	BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-// 	BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-// 	BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-// 	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-// 	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	// 	BlendState.RenderTarget[0].BlendEnable = TRUE;
+	// 	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	// 	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	// 	BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	// 	BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	// 	BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	// 	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	// 	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	BlendState.RenderTarget[0].BlendEnable=TRUE;
 	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -987,6 +1012,26 @@ void Renderer::resetRootWorldTransform()
 	curRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(0.0f,0.0f,DirectX::XM_PI);
 	updateWorldTransform();
 }
+
+void Renderer::setClipChunkPercent(float ccp)
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+
+	clipChunkPercent = ccp;
+
+	ReleaseMutex(mutexDevice);
+}
+
+void Renderer::setNumPlanes(int numPlanesIn)
+{
+	WaitForSingleObject(mutexDevice,INFINITE);
+
+	if (numPlanes < numPlanesIn)
+		numPlanes = numPlanesIn;
+
+	ReleaseMutex(mutexDevice);
+}
+
 
 void Renderer::setWorldOrigin(Vec<float> org)
 {
