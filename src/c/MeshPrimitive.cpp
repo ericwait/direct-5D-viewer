@@ -60,6 +60,9 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 	numFaces = faces.size();
 
 	shaderIdx = renderer->getVertexShader(VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
+
+	if (shaderIdx == -1)
+		throw std::runtime_error("Cannot get vertex shader!");
 }
 
 MeshPrimitive::~MeshPrimitive()
