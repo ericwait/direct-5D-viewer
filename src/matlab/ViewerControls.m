@@ -531,8 +531,8 @@ end
 function cb_CaptureMovie_Callback(hObject, eventdata, handles)
 end
 
-% --- Executes on button press in cb_ResetView.
-function cb_ResetView_Callback(hObject, eventdata, handles)
+% --- Executes on button press in pb_ResetView.
+function pb_ResetView_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes on button press in cb_ShowFamily.
@@ -563,6 +563,34 @@ if (on)
 else
     UpdateSegmentationResults('off');
 end
+end
+
+% --- Executes on button press in pb_SaveSegmentation.
+function pb_SaveSegmentation_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in pb_SaveImages.
+function pb_SaveImages_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in pb_OpenImages.
+function pb_OpenImages_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in pb_OpenSegmentation.
+function pb_OpenSegmentation_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in pb_New.
+function pb_New_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in pb_Close.
+function pb_Close_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on selection change in m_DistanceChoice.
+function m_DistanceChoice_Callback(hObject, eventdata, handles)
 end
 
 %% Create Functions
@@ -648,6 +676,19 @@ end
 
 % --- Executes during object creation, after setting all properties.
 function m_imageProcessing_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+
+% --- Executes during object creation, after setting all properties.
+function m_DistanceChoice_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to m_DistanceChoice (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
