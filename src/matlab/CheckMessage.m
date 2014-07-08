@@ -1,6 +1,7 @@
 function CheckMessage()
-global uiHandle Hulls Tracks selectedHull
+global uiFigureHandle Hulls selectedHull trackHulls familyHulls uiControlHandles
 
+persistent shift ctrl alt selectedHullsList
 msgs = lever_3d('poll');
 
 for i=1:length(msgs)
@@ -12,19 +13,53 @@ for i=1:length(msgs)
         case 'null'
             return
         case 'close'
-            close(uiHandle);
+            close(uiFigureHandle);
         case 'cellSelected'
             selectedHull = msgs(i).val;
             if (msgs(i).val == -1)
                 lever_3d('viewSegmentation',1);
+                trackHulls = [];
+                familyHulls = [];
             else
-                lever_3d('displayHulls',Tracks(Hulls(msgs(i).val).track).hulls);
-                DrawTree(2);
+                if (shift)
+                    selectedHullsList = [selectedHullsList selectedHull];
+                    lever_3d('displayHulls',selectedHullsList);
+                else
+                    selectedHullsList = [];
+                    [trackHulls, familyHulls] = GetHullsToDisplay(selectedHull);
+                    if (get(uiControlHandles.cb_ShowFamily,'Value')==1)
+                        lever_3d('displayHulls',familyHulls);
+                    else
+                        lever_3d('displayHulls',trackHulls);
+                    end
+                    DrawTree(2);
+                end
             end
         case 'timeChange'
             UpdateTime(msgs(i).val,1);
         case 'centerSelectedCell'
             lever_3d('setViewOrigin',Hulls(selectedHull).centerOfMass);
+        case 'keyDown'
+            if (strcmp(msgs(i).message,'shift'))
+                shift = 1;
+            elseif (strcmp(msgs(i).message,'ctrl'))
+                ctrl = 1;
+            elseif (strcmp(msgs(i).message,'alt'))
+                alt = 1;
+            elseif (strcmp(msgs(i).message,'number'))
+                num = msgs(i).val;
+                if (~isempty(selectedHull) && selectedHull>0)
+                    SplitHull(selectedHull,num);
+                end
+            end
+        case 'keyUp'
+            if (strcmp(msgs(i).message,'shift'))
+                shift = 0;
+            elseif (strcmp(msgs(i).message,'ctrl'))
+                ctrl = 0;
+            elseif (strcmp(msgs(i).message,'alt'))
+                alt = 0;
+            end
     end
 end
 end

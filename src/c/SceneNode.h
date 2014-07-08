@@ -21,6 +21,8 @@ public:
 	virtual int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut);
 	virtual int getHullLabel(){return -1;}
 
+	SceneNode* getParentNode(){return parentNode;}
+
 protected:
 	void setParentNode(SceneNode* parent);
 	virtual const std::vector<SceneNode*>& getChildren();

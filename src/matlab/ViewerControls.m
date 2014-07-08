@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 19-Jun-2014 09:26:51
+% Last Modified by GUIDE v2.5 07-Jul-2014 13:41:56
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -66,8 +66,9 @@ setupData(hObject, handles);
 end
 
 function setupData(hObject, handles)
-global imageData channelData uiFrameSlider uiFrameTb
+global imageData channelData uiControlHandles
 
+uiControlHandles = handles;
 channelData = [];
 
 if isempty(imageData)
@@ -136,15 +137,12 @@ set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment','Distance Map'};
 set(handles.m_imageProcessing,'String',procStr);
 
-uiFrameSlider = handles.s_curFrame;
-uiFrameTb = handles.tb_curFrame;
-
 updateCurrentState(handles);
 end
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
-global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig
+global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig uiControlHandles
 lever_3d('close');
 
 stop(tmr);
@@ -163,6 +161,7 @@ imageData = [];
 Costs = [];
 Colors = [];
 selectedHull = [];
+uiControlHandles = [];
 
 delete(hObject);
 end
@@ -382,7 +381,7 @@ end
 
 % --- Executes on selection change in m_imageProcessing.
 function m_imageProcessing_Callback(hObject, eventdata, handles)
-global imageData orgImage processedImage distanceImage channelData Hulls
+global imageData orgImage processedImage distanceImage segImage channelData Hulls
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).alphaMod = get(handles.s_alpha,'Value');
 
@@ -401,12 +400,12 @@ switch processStr{processIdx}
         def = {'100', '100', '100', '3', '3', '3'};
         response = inputdlg(params,diaTitle,1,def);
         if (~isempty(response))
-            gX = str2num(response{1});
-            gY = str2num(response{2});
-            gZ = str2num(response{3});
-            mX = str2num(response{4});
-            mY = str2num(response{5});
-            mZ = str2num(response{6});
+            gX = str2double(response{1});
+            gY = str2double(response{2});
+            gZ = str2double(response{3});
+            mX = str2double(response{4});
+            mY = str2double(response{5});
+            mZ = str2double(response{6});
             if (get(handles.rb_Processed,'Value')==1)
                 for t=1:size(processedImage,5)
                     processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',processedImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
@@ -442,27 +441,33 @@ switch processStr{processIdx}
         def = {'1.0', '2', '2', '1','6'};
         response = inputdlg(params,diaTitle,1,def);
         if (~isempty(response))
-            alpha = str2num(response{1});
-            oX = str2num(response{2});
-            oY = str2num(response{3});
-            oZ = str2num(response{4});
-            dia = str2num(response{5});
-            segImage = squeeze(processedImage(:,:,:,1,:));
+            alpha = str2double(response{1});
+            oX = str2double(response{2});
+            oY = str2double(response{3});
+            oZ = str2double(response{4});
+            dia = str2double(response{5});
+            if (isempty(segImage))
+                segImage = zeros(size(processedImage),'uint8');
+            end
             for t=1:size(processedImage,5)
-                segImage(:,:,:,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
+                segImage(:,:,:,chan,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
             end
         end
-        Segment(segImage,chan,dia);
+        Segment(chan,dia);
+        
     case 'Distance Map'
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
         diaTitle = 'Distance Map';
         def = {'1.0', '2', '2', '1'};
         response = inputdlg(params,diaTitle,1,def);
         if (~isempty(response))
-            alpha = str2num(response{1});
-            oX = str2num(response{2});
-            oY = str2num(response{3});
-            oZ = str2num(response{4});
+            alpha = str2double(response{1});
+            oX = str2double(response{2});
+            oY = str2double(response{3});
+            oZ = str2double(response{4});
+            if (isempty(distanceImage))
+                distanceImage = zeros(size(processedImage));
+            end
             for t=1:size(processedImage,5)
                 temp = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
                 temp = temp>=max(temp(:));
@@ -475,13 +480,13 @@ if (processed>0)
     set(handles.rb_Processed,'Enable','on','Value',1);
     set(handles.rb_orgImage,'Value',0);
     
-    channelData(chan).alphaMod = 1.0;
-    channelData(chan).minVal = 0.0;
-    channelData(chan).midVal = 0.5;
-    channelData(chan).maxVal = 1.0;
-    channelData(chan).a = 0.0;
-    channelData(chan).b = 1.0;
-    channelData(chan).c = 0.0;
+%     channelData(chan).alphaMod = 1.0;
+%     channelData(chan).minVal = 0.0;
+%     channelData(chan).midVal = 0.5;
+%     channelData(chan).maxVal = 1.0;
+%     channelData(chan).a = 0.0;
+%     channelData(chan).b = 1.0;
+%     channelData(chan).c = 0.0;
     
     viewImage = zeros(size(processedImage),'uint8');
     for c=1:size(processedImage,4)
@@ -495,18 +500,12 @@ if (processed>0)
 end
 
 if (~isempty(Hulls))
-    set(handles.cb_SegmentationOn,'Value',1,'Enable','on');
+    set(handles.cb_SegmentationResults,'Value',1,'Enable','on');
     set(handles.cb_Wireframe,'Value',1,'Enable','on');
     set(handles.cb_segLighting,'Enable','on');
 end
 
 set(handles.m_imageProcessing,'Value',1);
-end
-
-% --- Executes on button press in cb_SegmentationOn.
-function cb_SegmentationOn_Callback(hObject, eventdata, handles)
-on = get(handles.cb_SegmentationOn,'Value');
-lever_3d('viewSegmentation',on);
 end
 
 % --- Executes on button press in cb_Wireframe.
@@ -518,6 +517,52 @@ end
 % --- Executes on button press in cb_segLighting.
 function cb_segLighting_Callback(hObject, eventdata, handles)
 
+end
+
+% --- Executes on button press in cb_Play.
+function cb_Play_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in cb_Rotate.
+function cb_Rotate_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in cb_CaptureMovie.
+function cb_CaptureMovie_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in cb_ResetView.
+function cb_ResetView_Callback(hObject, eventdata, handles)
+end
+
+% --- Executes on button press in cb_ShowFamily.
+function cb_ShowFamily_Callback(hObject, eventdata, handles)
+global trackHulls familyHulls
+if (get(handles.cb_ShowFamily,'Value'))
+    if (isempty(familyHulls))
+        lever_3d('viewSegmentation',1);
+    else
+        lever_3d('displayHulls',familyHulls);
+    end
+else
+    if (isempty(trackHulls))
+        lever_3d('viewSegmentation',1);
+    else
+        lever_3d('displayHulls',trackHulls);
+    end
+end
+end
+
+% --- Executes on button press in cb_SegmentationResults.
+function cb_SegmentationResults_Callback(hObject, eventdata, handles)
+on = get(handles.cb_SegmentationResults,'Value');
+lever_3d('viewSegmentation',on);
+if (on)
+    UpdateSegmentationResults('on');
+    DrawTree(2);
+else
+    UpdateSegmentationResults('off');
+end
 end
 
 %% Create Functions

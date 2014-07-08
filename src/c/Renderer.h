@@ -76,6 +76,7 @@ public:
 	
 	void setClipChunkPercent(float ccp);
 	void setNumPlanes(int numPlanes); //TODO this could be changed to be smarter about where to peel from
+	void updateRenderList();
 
 //Getters
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);

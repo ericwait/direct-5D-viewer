@@ -1032,6 +1032,11 @@ void Renderer::setNumPlanes(int numPlanesIn)
 	ReleaseMutex(mutexDevice);
 }
 
+void Renderer::updateRenderList()
+{
+	rootScene->requestUpdate();
+}
+
 
 void Renderer::setWorldOrigin(Vec<float> org)
 {

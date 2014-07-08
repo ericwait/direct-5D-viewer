@@ -19,6 +19,7 @@ MessageQueue gMexMessageQueueOut;
 std::vector<GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 CellHullObject* gBorderObj = NULL;
 std::vector<VolumeTextureObject*> firstVolumeTextures;
+std::vector<SceneNode*> hullRootNodes;
 
 extern std::vector<DirectX::XMVECTOR> volumeBoundingVerts;
 
@@ -282,7 +283,27 @@ void loadHulls(const mxArray* hulls)
 {
 	if (gRenderer==NULL) return;
 
-	std::vector<SceneNode*> hullRootNodes;
+	if (!gGraphicObjectNodes[GraphicObjectTypes::CellHulls].empty())
+	{
+		gRenderer->getMutex();
+		for (int j=0; j<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+		{
+			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->releaseRenderResources();
+			delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j];
+		}
+
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].clear();
+
+		gRenderer->updateRenderList();
+		gRenderer->releaseMutex();
+	}
+
+	if (hullRootNodes.size()!=gRenderer->getNumberOfFrames())
+	{
+		for (int i=0; i<hullRootNodes.size(); ++i)
+			delete hullRootNodes[i];
+	}
+
 	hullRootNodes.resize(gRenderer->getNumberOfFrames());
 	for (unsigned int i=0; i<gRenderer->getNumberOfFrames(); ++i)
 		hullRootNodes[i] = new SceneNode();
@@ -551,6 +572,131 @@ void toggleSelectedCell(std::set<int> labels)
 	}
 
 	gRenderer->releaseMutex();
+}
+
+void updateHulls(const mxArray* hulls)
+{
+	if (gRenderer==NULL) return;
+
+	size_t numHulls = mxGetNumberOfElements(hulls);
+	for (size_t i=0; i<numHulls; ++i)
+	{
+		mxArray* mxFaces = mxGetField(hulls,i,"faces");
+		mxArray* mxVerts = mxGetField(hulls,i,"verts");
+		mxArray* mxNorms = mxGetField(hulls,i,"norms");
+		mxArray* mxColor = mxGetField(hulls,i,"color");
+		mxArray* mxFrame = mxGetField(hulls,i,"frame");
+		mxArray* mxLabel = mxGetField(hulls,i,"label");
+
+		size_t numFaces = mxGetM(mxFaces);
+		size_t numVerts = mxGetM(mxVerts);
+		size_t numNormals = mxGetM(mxNorms);
+
+		if (numVerts<1)
+			mexErrMsgTxt("No Verts!");
+
+		if (numFaces<1)
+			mexErrMsgTxt("No faces!");
+
+		if (numNormals<1)
+			mexErrMsgTxt("No norms!");
+
+		if (numNormals!=numVerts)
+			mexErrMsgTxt("Number of verts does not match the number of normals!");
+
+		double* faceData = (double*)mxGetData(mxFaces);
+		double* vertData = (double*)mxGetData(mxVerts);
+		double* normData = (double*)mxGetData(mxNorms);
+		double* colorData = (double*)mxGetData(mxColor);
+		int frame = int(mxGetScalar(mxFrame))-1;
+
+		int hullIdx = -1;
+		for (int j=0; j<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+		{
+			int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
+			if (label==(int)mxGetScalar(mxLabel))
+			{
+				hullIdx = j;
+				break;
+			}
+		}
+
+		gRenderer->getMutex();
+
+		SceneNode* parentSceneNode = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->getParentNode();
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->releaseRenderResources();
+		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];
+
+		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
+		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
+		curHullObj->setLabel((int)mxGetScalar(mxLabel));
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx] = new GraphicObjectNode(curHullObj);
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->setWireframe(true);
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->attachToParentNode(parentSceneNode);
+
+		gRenderer->releaseMutex();
+	}
+}
+
+void addHulls(const mxArray* hulls)
+{
+	if (gRenderer==NULL) return;
+
+	size_t numHulls = mxGetNumberOfElements(hulls);
+	for (size_t i=0; i<numHulls; ++i)
+	{
+		mxArray* mxFaces = mxGetField(hulls,i,"faces");
+		mxArray* mxVerts = mxGetField(hulls,i,"verts");
+		mxArray* mxNorms = mxGetField(hulls,i,"norms");
+		mxArray* mxColor = mxGetField(hulls,i,"color");
+		mxArray* mxFrame = mxGetField(hulls,i,"frame");
+		mxArray* mxLabel = mxGetField(hulls,i,"label");
+
+		size_t numFaces = mxGetM(mxFaces);
+		size_t numVerts = mxGetM(mxVerts);
+		size_t numNormals = mxGetM(mxNorms);
+
+		if (numVerts<1)
+			mexErrMsgTxt("No Verts!");
+
+		if (numFaces<1)
+			mexErrMsgTxt("No faces!");
+
+		if (numNormals<1)
+			mexErrMsgTxt("No norms!");
+
+		if (numNormals!=numVerts)
+			mexErrMsgTxt("Number of verts does not match the number of normals!");
+
+		double* faceData = (double*)mxGetData(mxFaces);
+		double* vertData = (double*)mxGetData(mxVerts);
+		double* normData = (double*)mxGetData(mxNorms);
+		double* colorData = (double*)mxGetData(mxColor);
+		int frame = int(mxGetScalar(mxFrame))-1;
+
+		int hullIdx = -1;
+		for (int j=0; j<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+		{
+			int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
+			if (label==(int)mxGetScalar(mxLabel))
+			{
+				hullIdx = j;
+				break;
+			}
+		}
+
+		gRenderer->getMutex();
+
+		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
+		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
+		curHullObj->setLabel((int)mxGetScalar(mxLabel));
+		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
+		curHullNode->setWireframe(true);
+		curHullNode->attachToParentNode(hullRootNodes[frame]);
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
+
+		gRenderer->releaseMutex();
+	}
 }
 
 // This is the entry point from Matlab
@@ -859,6 +1005,26 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				if (numDims!=3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
 
 				gRenderer->setWorldOrigin(Vec<float>((float)(origin[0]),(float)(origin[1]),(float)(origin[2])));
+			}
+
+			else if (_strcmpi("updateHulls",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+
+				const mxArray* hulls = prhs[1];
+				if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
+
+				updateHulls(hulls);
+			}
+
+			else if (_strcmpi("addHulls",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+
+				const mxArray* hulls = prhs[1];
+				if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
+
+				addHulls(hulls);
 			}
 
 			else

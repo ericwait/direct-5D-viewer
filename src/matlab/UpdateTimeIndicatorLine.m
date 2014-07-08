@@ -1,7 +1,8 @@
 function UpdateTimeIndicatorLine(time)
-global uiTreeFig uiTreeAx uiTimeLine uiFrameTb
+global uiTreeFig uiTreeAx uiTimeLine uiControlHandles
 
-if (~ishandle(uiTreeFig)|| ~ishandle(uiTreeAx) || ~ishandle(uiFrameTb)), return, end
+if (isempty(uiTreeFig) || ~ishandle(uiTreeFig)|| isempty(uiTreeAx) ||~ishandle(uiTreeAx) || isempty(uiControlHandles) ||...
+        ~ishandle(uiControlHandles.tb_curFrame)), return, end
 
 if(ishandle(uiTimeLine))
     set(uiTimeLine,...
