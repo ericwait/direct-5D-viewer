@@ -216,6 +216,7 @@ void destroyTrackStructures()
 		gAssignedConnectIn = NULL;
 	}
 
+	gTracks.clear();
 	gAssignedTracklets.clear();
 }
 
@@ -247,6 +248,7 @@ void initTrackStrucutres()
 
 void buildTracks()
 {
+	gTracks.clear();
 	for ( int i=0; i < gAssignedTracklets.size(); ++i )
 	{
 		if ( gAssignedTracklets[i].empty() )
