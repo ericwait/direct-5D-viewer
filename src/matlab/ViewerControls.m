@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 07-Jul-2014 13:41:56
+% Last Modified by GUIDE v2.5 08-Jul-2014 15:14:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -368,7 +368,7 @@ function rb_orgImage_Callback(hObject, eventdata, handles)
 set(handles.rb_Processed,'Value',0);
 set(handles.rb_orgImage,'Value',1);
 
-lever_3d('viewTexture','original');
+lever_3d('viewTexture','original'); %TODO can this be split out into channels?
 end
 
 % --- Executes on button press in rb_Processed.
@@ -376,7 +376,7 @@ function rb_Processed_Callback(hObject, eventdata, handles)
 set(handles.rb_Processed,'Value',1);
 set(handles.rb_orgImage,'Value',0);
 
-lever_3d('viewTexture','processed');
+lever_3d('viewTexture','processed'); %TODO can this be split out into channels?
 end
 
 % --- Executes on selection change in m_imageProcessing.
@@ -406,6 +406,7 @@ switch processStr{processIdx}
             mX = str2double(response{4});
             mY = str2double(response{5});
             mZ = str2double(response{6});
+            tic
             if (get(handles.rb_Processed,'Value')==1)
                 for t=1:size(processedImage,5)
                     processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',processedImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
@@ -415,6 +416,8 @@ switch processStr{processIdx}
                     processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',orgImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
                 end
             end
+            processTime = toc;
+            fprintf('Contrast Enhancement took: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
             processed = 1;
         end
     case 'Markov Random Fields Denoise'
@@ -424,6 +427,7 @@ switch processStr{processIdx}
         response = inputdlg(params,diaTitle,1,def);
         if (~isempty(response))
             iter = str2num(response{1});
+            tic
             if (get(handles.rb_Processed,'Value')==1)
                 for t=1:size(processedImage,5)
                     processedImage(:,:,:,chan,t) = uint16(CudaMex('MarkovRandomFieldDenoiser',single(processedImage(:,:,:,chan,t)),iter));
@@ -434,6 +438,8 @@ switch processStr{processIdx}
                 end
             end
             processed = 1;
+            processTime = toc;
+            fprintf('Markov Random Fields Denoise: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
         end
     case 'Segment'
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z','Min Cell Diameter'};
@@ -446,15 +452,20 @@ switch processStr{processIdx}
             oY = str2double(response{3});
             oZ = str2double(response{4});
             dia = str2double(response{5});
+            tic
             if (isempty(segImage))
                 segImage = zeros(size(processedImage),'uint8');
             end
             for t=1:size(processedImage,5)
                 segImage(:,:,:,chan,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
             end
+            processTime = toc;
+            fprintf('Image Processing Took: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
+            Segment(chan,dia);
+            if (~isempty(distanceImage))
+                set(handles.m_DistanceChoice,'Enable','on');
+            end
         end
-        Segment(chan,dia);
-        
     case 'Distance Map'
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
         diaTitle = 'Distance Map';
@@ -468,10 +479,17 @@ switch processStr{processIdx}
             if (isempty(distanceImage))
                 distanceImage = zeros(size(processedImage));
             end
+            tic
             for t=1:size(processedImage,5)
                 temp = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
                 temp = temp>=max(temp(:));
                 distanceImage(:,:,:,chan,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
+            end
+            processTime = toc;
+            fprintf('Distance Map: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
+            if (~isempty(Hulls))
+                SetDistances(chan);
+                set(handles.m_DistanceChoice,'Enable','on');
             end
         end
 end
@@ -516,23 +534,29 @@ end
 
 % --- Executes on button press in cb_segLighting.
 function cb_segLighting_Callback(hObject, eventdata, handles)
-
+%TODO put seg lighting in the shader to be turned on and off
 end
 
 % --- Executes on button press in cb_Play.
 function cb_Play_Callback(hObject, eventdata, handles)
+on = get(handles.cb_Play,'Value');
+lever_3d('play',on);
 end
 
 % --- Executes on button press in cb_Rotate.
 function cb_Rotate_Callback(hObject, eventdata, handles)
+on = get(handles.cb_Rotate,'Value');
+lever_3d('rotate',on);
 end
 
 % --- Executes on button press in cb_CaptureMovie.
 function cb_CaptureMovie_Callback(hObject, eventdata, handles)
+%TODO capture movie button
 end
 
 % --- Executes on button press in pb_ResetView.
 function pb_ResetView_Callback(hObject, eventdata, handles)
+lever_3d('resetView');
 end
 
 % --- Executes on button press in cb_ShowFamily.
@@ -559,7 +583,7 @@ on = get(handles.cb_SegmentationResults,'Value');
 lever_3d('viewSegmentation',on);
 if (on)
     UpdateSegmentationResults('on');
-    DrawTree(2);
+    DrawTree();
 else
     UpdateSegmentationResults('off');
 end
@@ -567,30 +591,122 @@ end
 
 % --- Executes on button press in pb_SaveSegmentation.
 function pb_SaveSegmentation_Callback(hObject, eventdata, handles)
+global Hulls Tracks Families imageData
+folderName = uigetdir();
+if (folderName == 0), return, end
+
+save(fullfile(folderName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
+msg = 'There are empty structures:';
+if isempty(Hulls)
+    msg = [msg;{'Hulls'}];
+end
+if isempty(Tracks)
+    msg = [msg;{'Tracks'}];
+end
+if isempty(Families)
+    msg = [msg;{'Families'}];
+end
+
+if (size(msg,1)>1)
+    warndlg(msg);
+end
 end
 
 % --- Executes on button press in pb_SaveImages.
 function pb_SaveImages_Callback(hObject, eventdata, handles)
+global imageData processedImage segImage distanceImage 
+folderName = uigetdir();
+if (folderName == 0), return, end
+    
+msg = 'There are empty images:';
+
+if (~isempty(processedImage))
+    mkdir(folderName,'processed');
+    tiffWriter(processedImage,sprintf('%s\\%s',fullfile(folderName,'processed'),imageData.DatasetName),imageData);
+else
+    msg = [msg;{'Processed Images'}];
+end
+if (~isempty(segImage))
+    mkdir(folderName,'segmentation');
+    tiffWriter(segImage,sprintf('%s\\%s',fullfile(folderName,'segmentation'),imageData.DatasetName),imageData);
+else
+    msg = [msg;{'Segmentation Images'}];
+end
+if (~isempty(distanceImage))
+    save(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)),'distanceImage','-v7.3');
+else
+    msg = [msg;{'Distance Maps'}];
+end
+if (size(msg,1)>1)
+    warndlg(msg);
+end
 end
 
 % --- Executes on button press in pb_OpenImages.
 function pb_OpenImages_Callback(hObject, eventdata, handles)
+global processedImage segImage distanceImage imageData Hulls
+folderName = uigetdir();
+if (folderName == 0), return, end
+
+if (exist(fullfile(folderName,'processed'),'dir'))
+    processedImage = tiffReader('',[],[],[],fullfile(folderName,'processed'));
+    lever_3d('loadTexture',imageConvert(processedImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,...
+        imageData.ZPixelPhysicalSize],'processed');
+    set(handles.rb_Processed,'Enable','on','Value',1);
+    set(handles.rb_orgImage,'Value',0);
+    updateCurrentState(handles);
+end
+if (exist(fullfile(folderName,'segmentation'),'dir'))
+    segImage = tiffReader('',[],[],[],fullfile(folderName,'segmentation'));
+end
+if (exist(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)),'file'))
+    load(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)));
+    if (~isempty(Hulls))
+        SetDistances(chan);
+        set(handles.m_DistanceChoice,'Enable','on');
+    end
+end
 end
 
 % --- Executes on button press in pb_OpenSegmentation.
 function pb_OpenSegmentation_Callback(hObject, eventdata, handles)
+global Hulls Tracks Families distanceImage
+[fileName, pathName, ~] = uigetfile('.mat');
+if (fileName == 0), return, end
+
+load(fullfile(pathName,fileName));
+if (~isempty(Hulls))
+    set(handles.cb_SegmentationResults,'Value',1,'Enable','on');
+    set(handles.cb_Wireframe,'Value',1,'Enable','on');
+    set(handles.cb_segLighting,'Enable','on');
+    
+    lever_3d('loadHulls',Hulls);
+    if (~isempty(distanceImage))
+        set(handles.m_DistanceChoice,'Enable','on');
+    end
+    
+    DrawTree();
+end
 end
 
 % --- Executes on button press in pb_New.
 function pb_New_Callback(hObject, eventdata, handles)
+lever3d();
 end
 
 % --- Executes on button press in pb_Close.
 function pb_Close_Callback(hObject, eventdata, handles)
+figure1_CloseRequestFcn();
 end
 
 % --- Executes on selection change in m_DistanceChoice.
 function m_DistanceChoice_Callback(hObject, eventdata, handles)
+global useDistance Hulls
+chan = get(handles.m_channelPicker,'Value');
+SetDistances(chan);
+
+useDistance = get(handles.m_DistanceChoice,'Value')-1;
+DrawTree();
 end
 
 %% Create Functions

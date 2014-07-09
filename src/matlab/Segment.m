@@ -1,5 +1,6 @@
 function Segment(chan, minCellDia)
 global imageData orgImage segImage Hulls Tracks Families Costs hullChan
+tic
 [Hulls,Tracks,Families] = GetEmptyStructs();
 
 hullChan = chan;
@@ -13,12 +14,16 @@ for i=1:length(Hulls)
     Hulls(i).label = i;
 end
 
+segTime = toc;
+fprintf('Segmentation took: %f or %f avg per frame and found %d cells\n',segTime,segTime/size(segImage,5),length(Hulls));
+
 imageDims = [imageData.XDimension, imageData.YDimension, imageData.ZDimension];
 physDims = [imageData.XPixelPhysicalSize, imageData.YPixelPhysicalSize, imageData.ZPixelPhysicalSize];
 scaleFactor  =  imageDims ./ max(imageDims) .* physDims/physDims(1);
 minCellDiaVox = minCellDia / imageDims(1) * scaleFactor(1);
 
 if (~isempty(Hulls))
+    tic
     [newHulls,numTracks,Costs] = trackerMex(imageData.NumberOfFrames,Hulls,minCellDiaVox*6,minCellDiaVox*2);
     
     Tracks(numTracks).startFrame = -1;
@@ -52,8 +57,10 @@ if (~isempty(Hulls))
     end
     
     ProcessNewborns(minCellDiaVox*6,minCellDiaVox*2);
+    trackTime = toc;
+    fprintf('Tracking took: %f or %f avg per frame and found %d tracks\n',trackTime,trackTime/size(segImage,5),length(Tracks));
     
     lever_3d('loadHulls',Hulls);
-    DrawTree(2);
+    DrawTree();
 end
 end

@@ -7,7 +7,7 @@ kIdx = cluster(obj, Hulls(hull).pixelsOrg);
 
 im = zeros(imageData.XDimension, imageData.YDimension, imageData.ZDimension, 'uint8');
 for i=1:k
-    idx = sub2ind([imageData.XDimension, imageData.YDimension, imageData.ZDimension],Hulls(hull).pixelsOrg(kIdx==i,2),...
+    idx = sub2ind([imageData.YDimension, imageData.XDimension, imageData.ZDimension],Hulls(hull).pixelsOrg(kIdx==i,2),...
         Hulls(hull).pixelsOrg(kIdx==i,1),Hulls(hull).pixelsOrg(kIdx==i,3));
     im(idx) = i;
 end

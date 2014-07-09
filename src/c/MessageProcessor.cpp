@@ -5,7 +5,10 @@
 
 bool gRendererOn = false;
 bool gPlay = false;
+bool gRotate = false;
 float gFramesPerSec = 5;
+float numAngles = 720;
+const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(1/(numAngles)*DirectX::XM_2PI);
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -24,6 +27,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	static int previousMouseX = 0;
 	static int previousMouseY = 0;
 	static DirectX::XMMATRIX previousWorldRotation;
+	static float previousPeel;
 
 	int label;
 	Vec<float> pnt;
@@ -71,6 +75,9 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		previousMouseX = iMouseX;
 		previousMouseY = iMouseY;
 		previousWorldRotation = gRenderer->getRootWorldRotation();
+		previousPeel = gRenderer->getClipChunkPercent();
+		if (previousPeel>0.2f)
+			gRenderer->setClipChunkPercent(0.175f);
 		break;
 	case WM_RBUTTONDOWN:
 		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
@@ -79,6 +86,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_LBUTTONUP:
 		leftButtonDown = false;
+		gRenderer->setClipChunkPercent(previousPeel);
 		break;
 	case WM_KEYDOWN:
 		if (VK_LEFT==wParam)
@@ -100,7 +108,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		else if (VK_SPACE==wParam)
 		{
 			gPlay = !gPlay;
-			gMexMessageQueueOut.addMessage("playing",gPlay);
+			gMexMessageQueueOut.addMessage("play",gPlay);
 		}
 		else if (VK_SHIFT==wParam)
 		{
@@ -121,6 +129,11 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gCameraDefaultMesh->resetCamera();
 		else if ('R'==wParam)
 			gRenderer->resetRootWorldTransform();
+		else if ('S'==wParam)
+		{
+			gRotate = !gRotate;
+			gMexMessageQueueOut.addMessage("rotate",gRotate);
+		}
 		else if ('X'==wParam)
 		{
 			gMexMessageQueueOut.addMessage("centerSelectedCell",1.0);
@@ -171,7 +184,8 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 HRESULT messageProcess( MSG& msg ) 
 {
  	HRESULT hr = S_OK;
-	static clock_t lastTimeupdate = clock();
+	static clock_t lastTimeUpdate = clock();
+	static clock_t lastRotateUpdate = clock();
 
 	if (msg.message==WM_QUIT)
 		return S_FALSE;
@@ -180,11 +194,21 @@ HRESULT messageProcess( MSG& msg )
 	{
 		if (gPlay)
 		{
-			float timeFromLast = (float)(clock() - lastTimeupdate) / CLOCKS_PER_SEC;
+			float timeFromLast = (float)(clock() - lastTimeUpdate) / CLOCKS_PER_SEC;
 			if (timeFromLast > 1.0f/gFramesPerSec)
 			{
-				lastTimeupdate = clock();
+				lastTimeUpdate = clock();
 				gRenderer->incrementFrame();
+			}
+		}
+		if (gRotate)
+		{
+			float timeFromLast = (float)(clock() - lastRotateUpdate) / CLOCKS_PER_SEC;
+			if (timeFromLast > 2.5f/numAngles)
+			{
+				lastRotateUpdate = clock();
+				DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
+				gRenderer->setWorldRotation(previousWorldRotation*ROT_X);
 			}
 		}
 

@@ -1,5 +1,5 @@
-function DrawTree(dim)
-global Hulls Tracks Families selectedHull uiTreeFig uiTreeAx uiControlHandles imageData
+function DrawTree()
+global Hulls Tracks Families selectedHull uiTreeFig uiTreeAx uiControlHandles imageData useDistance
 
 if (isempty(selectedHull) || selectedHull==-1)
     familyID = FindLargestTree();
@@ -27,22 +27,22 @@ end
 clf(uiTreeFig)
 uiTreeAx = axes('Parent',uiTreeFig);
 
-if dim==2
+if useDistance>0
+    set(uiTreeAx,...
+        'XLim',     [0 imageData.NumberOfFrames],...
+        'Box',      'off');
+else
     set(uiTreeAx,...
         'YDir',     'reverse',...
         'XColor',   [0.35 0.35 0.35],...
         'YColor',   'w',...
         'XTick',    [],...
         'Box',      'off');
-else
-    set(uiTreeAx,...
-        'XLim',     [0 imageData.NumberOfFrames],...
-        'Box',      'off');
 end
 % ylabel('Time (Frames)');
 
 hold(uiTreeAx,'on');
-[xMin, ~, xMax] = traverseTree(trackID,0,dim);
+[xMin, ~, xMax] = traverseTree(trackID,0);
 
 xticks = unique(round((0:floor(imageData.NumberOfFrames/3))*3));
 xtickLbl = cell(floor(imageData.NumberOfFrames/3),1);
@@ -50,7 +50,16 @@ for i=0:floor(imageData.NumberOfFrames/3)
     xtickLbl{i+1} = num2str(i);
 end
 
-if dim==2
+if useDistance>0
+        set(uiTreeAx,...
+        'XLim',     [0 imageData.NumberOfFrames],...
+        'XTick',    xticks,...
+        'XColor','w',...
+        'YColor','w',...
+        'XTickLabel',   xtickLbl);
+    xlabel(uiTreeAx,'Time (Hours)','Color','w');
+    ylabel(uiTreeAx,'Distance to Vasculature (voxels)','Color','w');
+else
     set(uiTreeAx,...
         'YLim',     [0 imageData.NumberOfFrames],...
         'XLim',     [xMin-1 xMax+1],...
@@ -58,17 +67,9 @@ if dim==2
         'YTickLabel',   xtickLbl,...
         'Color','w');
     ylabel(uiTreeAx,'Time (Hours)','Color','w');
-else
-    set(uiTreeAx,...
-        'XLim',     [0 imageData.NumberOfFrames],...
-        'XTick',    xticks,...
-        'XTickLabel',   xtickLbl,...
-        'Color', 'w');
-    xlabel(uiTreeAx,'Time (Hours)','Color','w');
-    ylabel(uiTreeAx,'Distance to Vasculature (voxels)');
 end
 
-if dim==3
+if useDistance>0
     set(uiTreeAx,...
         'CameraUpVector', [0 0 1],...
         'CameraUpVectorMode', 'manual');
@@ -84,48 +85,49 @@ hold(uiTreeAx,'off');
 
 end
 
-function [xMin, xCenter, xMax, initDist] = traverseTree(trackID,initXmin,dim)
+function [xMin, xCenter, xMax, initDist] = traverseTree(trackID,initXmin)
 global Tracks
 
 if(~isempty(Tracks(trackID).childrenTracks))
-    [child1Xmin, child1Xcenter, child1Xmax, childDist1] = traverseTree(Tracks(trackID).childrenTracks(1),initXmin,dim);
-    [child2Xmin, child2Xcenter, child2Xmax, childDist2] = traverseTree(Tracks(trackID).childrenTracks(2),child1Xmax+1,dim);
+    [child1Xmin, child1Xcenter, child1Xmax, childDist1] = traverseTree(Tracks(trackID).childrenTracks(1),initXmin);
+    [child2Xmin, child2Xcenter, child2Xmax, childDist2] = traverseTree(Tracks(trackID).childrenTracks(2),child1Xmax+1);
     xMin = min(child1Xmin,child2Xmin);
     xMax = max(child1Xmax,child2Xmax);
     if(child1Xcenter < child2Xcenter)
-        drawHorizontalEdge(child1Xcenter,child2Xcenter,Tracks(trackID).endFrame,childDist1,childDist2,dim);
+        drawHorizontalEdge(child1Xcenter,child2Xcenter,Tracks(trackID).endFrame,childDist1,childDist2);
         xCenter = (child2Xcenter-child1Xcenter)/2 + child1Xcenter;
     else
-        drawHorizontalEdge(child2Xcenter,child1Xcenter,Tracks(trackID).endFrame,trackID,dim);
+        drawHorizontalEdge(child2Xcenter,child1Xcenter,Tracks(trackID).endFrame,childDist2,childDist1);
         xCenter = (child1Xcenter-child2Xcenter)/2 + child2Xcenter;
     end
     initDist = (childDist1+childDist2)/2;
-    drawVerticalEdge(trackID,xCenter,dim,initDist);
+    initDist = drawVerticalEdge(trackID,xCenter,initDist);
 else
     %This is when the edge is for a leaf node
-    initDist = drawVerticalEdge(trackID,initXmin,dim);
+    initDist = drawVerticalEdge(trackID,initXmin);
     xMin = initXmin;
     xCenter = initXmin;
     xMax = initXmin;
 end
 end
 
-function drawHorizontalEdge(xMin,xMax,y,z1,z2,dim)
-global uiTreeAx
-if dim==3
-%     plot3([xMin xMax],[y y],[z1 z2],'-k','LineWidth',1.5);
-plot(uiTreeAx,[y y],[z1 z2],'-w','LineWidth',1.5);
-elseif dim==2
-    plot(uiTreeAx,[xMin xMax],[y y],'-w','LineWidth',1.5);
+function drawHorizontalEdge(xMin,xMax,y,z1,z2)
+global uiTreeAx useDistance
+if useDistance>0
+%    plot3([xMin xMax],[y y],[z1 z2],'-k','LineWidth',1.5);
+    plot(uiTreeAx,[y y],[z1 z2],'-k','LineWidth',1.5);
+else
+    plot(uiTreeAx,[xMin xMax],[y y],'-k','LineWidth',1.5);
 end
 %Place the line behind all other elements already graphed
 h = get(uiTreeAx,'child');
 h = h([2:end, 1]);
 set(uiTreeAx, 'child', h);
+%end
 end
 
-function initDist = drawVerticalEdge(trackID,xVal,dim,endDist)
-global Tracks Hulls uiTreeAx
+function initDist = drawVerticalEdge(trackID,xVal,endDist)
+global Tracks Hulls uiTreeAx useDistance
 
 initDist = 0;
 
@@ -151,8 +153,8 @@ EdgeColor = Tracks(trackID).color;%.background;
 TextColor = 'k';
 
 %draw vertical line to represent edge length
-if dim==3
-    distances = [Hulls(Tracks(trackID).hulls).distanceToVasc];
+if useDistance>0
+    distances = arrayfun(@(x)(Hulls(x).distances(useDistance)),Tracks(trackID).hulls);
     hflt = fspecial('gaussian',[1,5], 2);
     if ~exist('endDist','var') && ~isempty(distances)
         endDist = distances(end);
@@ -196,13 +198,13 @@ if dim==3
 %         [CellHulls(CellTracks(trackID).hulls(i+1)).distanceToVascCOM CellHulls(CellTracks(trackID).hulls(i+1)).distanceToVascCOM],...
 %         ':','color',FaceColor,'LineWidth',1.0);
 
-elseif dim==2
+else
     plot(uiTreeAx,[xVal xVal], [Tracks(trackID).startFrame-1 Tracks(trackID).endFrame],'-w','LineWidth',1.5);
 end
 % plot([xVal xVal],[yMin CellTracks(trackID).endFrame],...
 %     '-k','UserData',trackID,'LineWidth',1.5);
 
-if dim==3
+if useDistance>0
     plot(uiTreeAx,yMin,distances(1),...
         'o',...
         'MarkerFaceColor',  FaceColor,...
@@ -219,7 +221,7 @@ if dim==3
         'UserData',             trackID);
     
     initDist = distances(1);
-elseif dim==2
+else
     plot(uiTreeAx,xVal,yMin,...
         'o',...
         'MarkerFaceColor',  FaceColor,...
@@ -236,106 +238,3 @@ elseif dim==2
         'UserData',             trackID);
 end
 end
-
-
-% 
-% % imTemp = mean(imSmooth(:,:,:,4:50,2),4);
-% % imTemp = imTemp./max(imTemp(:));
-% % thresh = graythresh(imTemp(:));
-% 
-% dists = zeros(50,length(0.1:0.1:2.0),2);
-% 
-% track73Hulls = find([Hulls(:).track]==73);
-% track371Hulls = find([Hulls(:).track]==371);
-% track578Hulls = find([Hulls(:).track]==578);
-% 
-% j=1;
-% alpha = 0.8;
-% % for alpha=0.1:0.1:2.0
-%     
-%     for t=1:50
-%         imTemp = double(imSmooth(:,:,:,t,2));
-%         imTempD = imTemp./255;
-%         thresh = graythresh(imTempD(:));
-%         if (thresh*alpha>1)
-%             break
-%         end
-%         imBW = im2bw(imTempD(:),thresh*alpha);
-%         imBW = reshape(imBW,size(imTempD));
-%         imDist(:,:,:,t) = bwdist(imBW);
-%     end
-%     
-%     for i=1:length(track73Hulls)
-%         coord = round(Hulls(track73Hulls(i)).centerOfMass);
-%         t = Hulls(track73Hulls(i)).frame;
-%         dists(t,j,1) = imDist(coord(2),coord(1),coord(3),t);
-%     end
-%     
-%     for i=1:length(track371Hulls)
-%         coord = round(Hulls(track371Hulls(i)).centerOfMass);
-%         t = Hulls(track371Hulls(i)).frame;
-%         dists(t,j,2) = imDist(coord(2),coord(1),coord(3),t);
-%     end
-%     
-%     for i=1:length(track578Hulls)
-%         coord = round(Hulls(track578Hulls(i)).centerOfMass);
-%         t = Hulls(track578Hulls(i)).frame;
-%         dists(t,j,1) = imDist(coord(2),coord(1),coord(3),t);
-%     end
-%     
-%     j = j+1;
-% %end
-% 
-% 
-% % for i=1:j
-% %     figure
-% %     hold on
-% %     plot(1:50,dists(:,i,1),'-b');
-% %     plot(30:50,dists(30:50,i,2),'-g');
-% % end
-% 
-% newDistParent = dists(4:29,1);%0,1);
-% newDistParent = conv(newDistParent,ones(1,4)/4,'valid');
-% newDist371 = dists(30:50,1);%0,2);
-% newDist371 = conv(newDist371,ones(1,4)/4,'valid');
-% newDist578 = dists(30:50,1);%0,1);
-% newDist578 = conv(newDist578,ones(1,4)/4,'valid');
-% 
-% splitFrame = 24;
-% 
-% figure
-% plot([newDistParent(end) newDist371(1)],[splitFrame-1 splitFrame],'-','color',Hulls(track371Hulls(1)).color,'linewidth',3);
-% hold on
-% plot([newDistParent(end) newDist578(1)],[splitFrame-1 splitFrame],'-','color',Hulls(track578Hulls(1)).color,'linewidth',3);
-% plot(newDistParent,1:splitFrame-1,'-','color',Hulls(track73Hulls(1)).color,'linewidth',3);
-% plot(newDist371,24:(splitFrame+length(newDist371)-1),'-','color',Hulls(track371Hulls(1)).color,'linewidth',3);
-% plot(newDist578,24:(splitFrame+length(newDist578)-1),'-','color',Hulls(track578Hulls(1)).color,'linewidth',3);
-% 
-% plot(newDistParent(1),1,'.','color',Hulls(track73Hulls(1)).color,'markersize',64);
-% plot(newDist371(1),splitFrame,'.','color',Hulls(track371Hulls(1)).color,'markersize',64);
-% plot(newDist578(1),splitFrame,'.','color',Hulls(track578Hulls(1)).color,'markersize',64);
-% 
-% text(newDistParent(1),1,'73',...
-%     'fontweight','bold','horizontalalignment','center','verticalalignment','middle');
-% text(newDist371(1),splitFrame,'371',...
-%     'fontweight','bold','horizontalalignment','center','verticalalignment','middle');
-% text(newDist578(1),splitFrame,'578',...
-%     'fontweight','bold','horizontalalignment','center','verticalalignment','middle');
-% 
-% axis ij
-% xlim([min([newDistParent;newDist371;newDist578])-0.5 max([newDistParent;newDist371;newDist578])+0.5]);
-% ylim([0 splitFrame+length(newDist578)-2])
-% set(gca,'color',[0.35 0.35 0.35],'XColor',[1 1 1],'YColor',[1 1 1]);
-% 
-% set(gca,...
-%     'YTick',    linspace(0,splitFrame+length(newDist578)-1,14),...
-%     'YTickLabel',   {'0','1','2','3','4','5','6','7','8','9','10','11','12','13','14'},...
-%     'Box',      'off');
-% ylabel(gca,'frame (Hours)','color','w');
-% xlabel(gca,'Distance to Vasculature (voxels)','color','w');
-% set(gcf,'color',[0.35 0.35 0.35]);
-% end
-% 
-% 
-% end
-

@@ -88,6 +88,7 @@ public:
 	void releaseMutex();
 
 	int getHull(Vec<float> pnt, Vec<float> direction);
+	float getClipChunkPercent(){return clipChunkPercent;}
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen

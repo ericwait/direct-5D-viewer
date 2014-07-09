@@ -27,4 +27,5 @@ extern Camera* gCameraDefaultMesh;
 //Implemented in MessageProcessor.cpp
 extern bool gRendererOn;
 extern bool gPlay;
+extern bool gRotate;
 extern float gFramesPerSec;

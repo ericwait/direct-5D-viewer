@@ -328,8 +328,7 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 
 	DirectX::XMFLOAT3 vec(1.0f,0.0f,0.0f);
 	DirectX::XMVECTOR vecU = DirectX::XMLoadFloat3(&vec);
-	DirectX::XMMATRIX trans = DirectX::XMMatrixTranspose(worldMatrix)*
-		DirectX::XMMatrixScaling(1.0f/dims.x,1.0f/dims.y,1.0f/dims.z);
+	DirectX::XMMATRIX trans = invParentWorld* DirectX::XMMatrixScaling(1.0f/dims.x,1.0f/dims.y,1.0f/dims.z);
 
 	Vec<float> xDir, yDir, zDir;
 	DirectX::XMVECTOR vecO = DirectX::XMVector3TransformNormal(vecU,trans);
@@ -393,7 +392,7 @@ void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &verti
 		//i is making each plane
 		for (int i=0; i<4; i++)
 		{
-			vertices[planesFirstVert+i] = triVertices[i]*1.5f;
+			vertices[planesFirstVert+i] = triVertices[i]*3.0f;
 			vertices[planesFirstVert+i].z = zPosition*1.5f;
 
 			//Vec<float> temp(vertices[planesFirstVert+i].y,vertices[planesFirstVert+i].x,vertices[planesFirstVert+i].z);

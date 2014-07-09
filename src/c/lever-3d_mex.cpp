@@ -812,6 +812,28 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 						textureType = GraphicObjectTypes::ProcessedVolume;
 				}
 
+				if (firstVolumeTextures.empty())
+				{					
+					RECT desktop;
+					const HWND hDesktop = GetDesktopWindow();
+					GetWindowRect(hDesktop, &desktop);
+					int horizontal = desktop.right *0.9;
+					int vertical = desktop.bottom *0.9;
+
+					if (vertical>horizontal)
+					{
+						gWindowHeight = (horizontal*dims.y)/dims.x;
+						gWindowWidth = horizontal;
+					}
+					else
+					{
+						gWindowWidth = (vertical*dims.x)/dims.y;
+						gWindowHeight = vertical;
+					}
+
+					SetWindowPos(gWindowHandle,0,0,0,gWindowWidth,gWindowHeight,SWP_NOZORDER|SWP_NOACTIVATE);
+				}
+
 				loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
 				setCurrentTexture(textureType);
 
@@ -865,6 +887,32 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				bool on = onD>0;
 
 				toggleSegmentaionLighting(on);
+			}
+
+			else if (_strcmpi("play",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for play!");
+
+				double onD = mxGetScalar(prhs[1]);
+				bool on = onD>0;
+
+				gPlay = on;
+			}
+
+			else if (_strcmpi("rotate",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for rotate!");
+
+				double onD = mxGetScalar(prhs[1]);
+				bool on = onD>0;
+
+				gRotate = on;
+			}
+
+			else if (_strcmpi("resetView",command)==0)
+			{
+				gRenderer->resetRootWorldTransform();
+				gCameraDefaultMesh->resetCamera();
 			}
 
 			else if (_strcmpi("transferUpdate",command)==0)

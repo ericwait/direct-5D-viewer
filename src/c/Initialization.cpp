@@ -73,7 +73,7 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 
 HRESULT createRenderResources()
 {
-	Vec<float> eye = Vec<float>(0.0f,0.0f,-2.5f);
+	Vec<float> eye = Vec<float>(0.0f,0.0f,-3.0f);
 	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	

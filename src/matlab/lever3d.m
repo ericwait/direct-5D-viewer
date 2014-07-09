@@ -1,11 +1,17 @@
 function lever3d()
-global imageData orgImage processedImage tmr uiControlFig
+global imageData orgImage processedImage tmr uiControlFig useDistance
+
+if (~isempty(uiControlFig) && ishandle(uiControlFig))
+    close(uiControlFig);
+end
+
+useDistance = 0;
 
 [arrowFaces, arrowVerts, arrowNorms] = MakeArrow(0.65,0.05,0.15,40);
 [sphereFaces, sphereVerts, shereNorms] = MakeSphere(0.20,40);
 
-[orgImage, imageData] = tiffReader([],[],[],[],'d:\Users\Eric.Bioimage29\Documents\Images\LEVer3d\Susan_overnight_new');
-%[orgImage, imageData] = tiffReader();
+%[orgImage, imageData] = tiffReader([],[],[],[],'d:\Users\Eric.Bioimage29\Documents\Images\LEVer3d\Susan_overnight_new');
+[orgImage, imageData] = tiffReader();
 
 processedImage = orgImage;
 
@@ -16,6 +22,6 @@ lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, she
 
 lever_3d('loadTexture',imageConvert(orgImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize]);
 
-uiControlFig = ViewerControls();
+ uiControlFig = ViewerControls();
 
 end

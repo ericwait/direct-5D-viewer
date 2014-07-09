@@ -32,11 +32,15 @@ for i=1:length(msgs)
                     else
                         lever_3d('displayHulls',trackHulls);
                     end
-                    DrawTree(2);
+                    DrawTree();
                 end
             end
         case 'timeChange'
             UpdateTime(msgs(i).val,1);
+        case 'play'
+            set(uiControlHandles.cb_Play,'Value',msgs(i).val);
+        case 'rotate'
+            set(uiControlHandles.cb_Rotate,'Value',msgs(i).val);
         case 'centerSelectedCell'
             lever_3d('setViewOrigin',Hulls(selectedHull).centerOfMass);
         case 'keyDown'
