@@ -521,6 +521,7 @@ if (~isempty(Hulls))
     set(handles.cb_SegmentationResults,'Value',1,'Enable','on');
     set(handles.cb_Wireframe,'Value',1,'Enable','on');
     set(handles.cb_segLighting,'Enable','on');
+    set(handles.cb_ShowLabels,'Enable','on');
 end
 
 set(handles.m_imageProcessing,'Value',1);
@@ -679,6 +680,7 @@ if (~isempty(Hulls))
     set(handles.cb_SegmentationResults,'Value',1,'Enable','on');
     set(handles.cb_Wireframe,'Value',1,'Enable','on');
     set(handles.cb_segLighting,'Enable','on');
+    set(handles.cb_ShowLabels,'Enable','on');
     
     lever_3d('loadHulls',Hulls);
     if (~isempty(distanceImage))
@@ -707,6 +709,12 @@ SetDistances(chan);
 
 useDistance = get(handles.m_DistanceChoice,'Value')-1;
 DrawTree();
+end
+
+% --- Executes on button press in cb_ShowLabels.
+function cb_ShowLabels_Callback(hObject, eventdata, handles)
+on = get(handles.cb_ShowLabels,'Value');
+lever_3d('showLabels',on);
 end
 
 %% Create Functions

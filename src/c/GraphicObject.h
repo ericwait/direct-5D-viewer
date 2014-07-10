@@ -45,7 +45,8 @@ public:
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
 	void setWireframe(bool wireframe);
-	void setLabel(int labelIn){label = labelIn;}
+	void setLabel(int labelIn);
+	void setTrack(int track);
 	void getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals);
 	virtual int getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
 	virtual int getHullLabel(){return label;}

@@ -133,6 +133,22 @@ void CellHullObject::setWireframe(bool wireframe)
 	material->setWireframe(wireframe);
 }
 
+void CellHullObject::setLabel(int labelIn)
+{
+	label = labelIn;
+}
+
+void CellHullObject::setTrack(int labelIn)
+{
+	if (labelIn==-1)
+		rendererPackage->setLabel("");
+	else
+	{
+		char buff[255];
+		sprintf_s(buff,"%d",labelIn);
+		rendererPackage->setLabel(buff);
+	}
+}
 
 void CellHullObject::getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals)
 {

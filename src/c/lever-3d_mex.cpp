@@ -317,6 +317,7 @@ void loadHulls(const mxArray* hulls)
 		mxArray* mxColor = mxGetField(hulls,i,"color");
 		mxArray* mxFrame = mxGetField(hulls,i,"frame");
 		mxArray* mxLabel = mxGetField(hulls,i,"label");
+		mxArray* mxTrack = mxGetField(hulls,i,"track");
 
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
@@ -345,6 +346,7 @@ void loadHulls(const mxArray* hulls)
 		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
 		curHullObj->setLabel((int)mxGetScalar(mxLabel));
+		curHullObj->setTrack((int)mxGetScalar(mxTrack));
 		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
 		curHullNode->setWireframe(true);
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
@@ -587,6 +589,7 @@ void updateHulls(const mxArray* hulls)
 		mxArray* mxColor = mxGetField(hulls,i,"color");
 		mxArray* mxFrame = mxGetField(hulls,i,"frame");
 		mxArray* mxLabel = mxGetField(hulls,i,"label");
+		mxArray* mxTrack = mxGetField(hulls,i,"track");
 
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
@@ -630,6 +633,7 @@ void updateHulls(const mxArray* hulls)
 		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
 		curHullObj->setLabel((int)mxGetScalar(mxLabel));
+		curHullObj->setTrack((int)mxGetScalar(mxTrack));
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx] = new GraphicObjectNode(curHullObj);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->setWireframe(true);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->attachToParentNode(parentSceneNode);
@@ -651,6 +655,7 @@ void addHulls(const mxArray* hulls)
 		mxArray* mxColor = mxGetField(hulls,i,"color");
 		mxArray* mxFrame = mxGetField(hulls,i,"frame");
 		mxArray* mxLabel = mxGetField(hulls,i,"label");
+		mxArray* mxTrack = mxGetField(hulls,i,"track");
 
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
@@ -690,6 +695,7 @@ void addHulls(const mxArray* hulls)
 		CellHullObject* curHullObj = createCellHullObject(faceData,numFaces,vertData,numVerts,normData,numNormals,gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0],(float)colorData[1],(float)colorData[2]),1.0f);
 		curHullObj->setLabel((int)mxGetScalar(mxLabel));
+		curHullObj->setTrack((int)mxGetScalar(mxTrack));
 		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
 		curHullNode->setWireframe(true);
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
@@ -907,6 +913,16 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				bool on = onD>0;
 
 				gRotate = on;
+			}
+
+			else if (_strcmpi("showLabels",command)==0)
+			{
+				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for showLabels!");
+
+				double onD = mxGetScalar(prhs[1]);
+				bool on = onD>0;
+
+				gRenderer->setLabels(on);
 			}
 
 			else if (_strcmpi("resetView",command)==0)

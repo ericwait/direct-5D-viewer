@@ -9,6 +9,7 @@ public:
 	virtual ~Material();
 
 	void setWireframe(bool wireframe);
+	virtual DirectX::XMFLOAT4 getColor(){return DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f);}
 
 protected:
 	Material(){}
@@ -40,6 +41,8 @@ public:
 	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
 	void setShaderResources();
+	
+	DirectX::XMFLOAT4 getColor(){return colorBuffer.color;}
 
 	void updateParams();
 

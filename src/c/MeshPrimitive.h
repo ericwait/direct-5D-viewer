@@ -11,6 +11,8 @@ public:
 	friend class Renderer;
 	~MeshPrimitive();
 
+	Vec<float> getCenterOfMass() const {return centerOfMass;}
+
 protected:
 	MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 		std::vector<Vec<float>>& normals, std::vector<Vec<float>> textureUV, Renderer::VertexShaders shader);
@@ -26,4 +28,5 @@ private:
 	Renderer* renderer;
 	int shaderIdx;
 	size_t numFaces;
+	Vec<float> centerOfMass;
 };

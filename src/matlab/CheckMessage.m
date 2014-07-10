@@ -15,12 +15,12 @@ for i=1:length(msgs)
         case 'close'
             close(uiFigureHandle);
         case 'cellSelected'
-            selectedHull = msgs(i).val;
             if (msgs(i).val == -1)
                 lever_3d('viewSegmentation',1);
                 trackHulls = [];
                 familyHulls = [];
             else
+                selectedHull = msgs(i).val;
                 if (shift)
                     selectedHullsList = [selectedHullsList selectedHull];
                     lever_3d('displayHulls',selectedHullsList);
@@ -43,6 +43,18 @@ for i=1:length(msgs)
             set(uiControlHandles.cb_Rotate,'Value',msgs(i).val);
         case 'centerSelectedCell'
             lever_3d('setViewOrigin',Hulls(selectedHull).centerOfMass);
+        case 'toggleLabels'
+            set(uiControlHandles.cb_ShowLabels,'Value',~get(uiControlHandles.cb_ShowLabels,'Value'));
+        case 'toggleHulls'
+            on = ~get(uiControlHandles.cb_SegmentationResults,'Value');
+            set(uiControlHandles.cb_SegmentationResults,'Value',on);
+            lever_3d('viewSegmentation',on);
+            if (on)
+                UpdateSegmentationResults('on');
+                DrawTree();
+            else
+                UpdateSegmentationResults('off');
+            end
         case 'keyDown'
             if (strcmp(msgs(i).message,'shift'))
                 shift = 1;

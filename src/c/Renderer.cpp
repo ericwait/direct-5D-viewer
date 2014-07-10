@@ -30,6 +30,7 @@ Renderer::Renderer()
 	currentFrame = 0;
 	clipChunkPercent = 0.0f;
 	numPlanes = 0;
+	labelsOn = false;
 }
 
 Renderer::~Renderer()
@@ -640,6 +641,7 @@ void Renderer::renderAll()
 	preRenderLoop();
 	mainRenderLoop();
 	postRenderLoop();
+	gdiRenderLoop();
 	endRender();
 
 	ReleaseMutex(mutexDevice);
@@ -705,6 +707,30 @@ void Renderer::postRenderLoop()
 	}
 }
 
+void Renderer::gdiRenderLoop()
+{
+	if (rootScene->getNumRenderableObjects(Main)<1 || !labelsOn)
+		return;
+
+	immediateContext->OMSetRenderTargets(0, 0, 0);
+
+	HDC hdc;
+	HRESULT hr=IDXGIBackBuffer->GetDC(FALSE,&hdc );
+	if (FAILED(hr))
+	{
+		gMexMessageQueueOut.addErrorMessage("Unable to get window's GDI device context!");
+		return;
+	}
+
+	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
+
+	for (int i=0; i<renderMainList.size(); ++i)
+		renderLabel(renderMainList[i]->getRenderPackage(),hdc);
+
+	IDXGIBackBuffer->ReleaseDC(NULL);
+	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+}
+
 void Renderer::startRender()
 {
 	float ClearColor[4] = {backgroundColor.x, backgroundColor.y, backgroundColor.z};
@@ -754,6 +780,37 @@ void Renderer::renderPackage(const RendererPackage* package, float frontClip, fl
 	setDepthStencilState(package->getMaterial()->testDepth);
 
 	drawTriangles(package->getMeshPrimitive()->numFaces);
+}
+
+void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
+{
+	if (package->getLabel().length()==0) return;
+
+	DirectX::XMVECTOR v2D={0.,0.,0.,0.};
+	int x,y;
+
+	DirectX::XMFLOAT4 color = package->getMaterial()->getColor();
+
+	COLORREF hexColor = (unsigned int) (255*color.z);
+	hexColor = hexColor << 8;
+	hexColor |=  (unsigned int) (255*color.y);
+	hexColor = hexColor << 8;
+	hexColor |=  (unsigned int) (255*color.x);
+
+	Vec<float> centerOfmassVec = package->getMeshPrimitive()->getCenterOfMass();
+	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
+	DirectX::XMVECTOR com = DirectX::XMLoadFloat3(&centerOfmass);
+	const Camera* camera = package->getCamera();
+	v2D= DirectX::XMVector3Project(com,0.0f,0.0f,gWindowWidth,gWindowHeight,0.0f,1.0f,camera->getProjectionTransform(),camera->getViewTransform(),
+		package->getLocalToWorld());
+
+	x=(int)DirectX::XMVectorGetX(v2D);
+	y=(int)DirectX::XMVectorGetY(v2D);
+
+	SelectObject(hdc, gFont);
+	SetTextColor(hdc,hexColor);
+	SetBkMode(hdc,TRANSPARENT);
+	TextOutA(hdc,x,y,package->getLabel().c_str(),package->getLabel().length());
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)
@@ -1036,7 +1093,6 @@ void Renderer::updateRenderList()
 {
 	rootScene->requestUpdate();
 }
-
 
 void Renderer::setWorldOrigin(Vec<float> org)
 {
