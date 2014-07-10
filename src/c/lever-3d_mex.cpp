@@ -847,11 +847,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 					createBorder(scale);
 			}
 
-			else if (_strcmpi("getData",command)==0)
-			{
-				;
-			}
-
 			else if (_strcmpi("peelUpdate",command)==0)
 			{
 				if (nrhs!=2) mexErrMsgTxt("not the right arguments for peelUpdate!");
