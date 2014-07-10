@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 08-Jul-2014 15:14:23
+% Last Modified by GUIDE v2.5 10-Jul-2014 12:37:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -134,7 +134,7 @@ set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
 set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
 set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
 
-procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment','Distance Map'};
+procStr = {'Process image with...','Contrast Enhancement','Markov Random Fields Denoise','Segment, Track, & Lineage','Distance Map'};
 set(handles.m_imageProcessing,'String',procStr);
 
 updateCurrentState(handles);
@@ -381,7 +381,7 @@ end
 
 % --- Executes on selection change in m_imageProcessing.
 function m_imageProcessing_Callback(hObject, eventdata, handles)
-global imageData orgImage processedImage distanceImage segImage channelData Hulls
+global imageData orgImage processedImage distanceImage segImage channelData Hulls hullChan
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).alphaMod = get(handles.s_alpha,'Value');
 
@@ -441,12 +441,13 @@ switch processStr{processIdx}
             processTime = toc;
             fprintf('Markov Random Fields Denoise: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
         end
-    case 'Segment'
+    case 'Segment, Track, & Lineage'
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z','Min Cell Diameter'};
         diaTitle = 'Segmentation';
         def = {'1.0', '2', '2', '1','6'};
         response = inputdlg(params,diaTitle,1,def);
         if (~isempty(response))
+            hullChan = chan;
             alpha = str2double(response{1});
             oX = str2double(response{2});
             oY = str2double(response{3});
@@ -592,11 +593,11 @@ end
 
 % --- Executes on button press in pb_SaveSegmentation.
 function pb_SaveSegmentation_Callback(hObject, eventdata, handles)
-global Hulls Tracks Families imageData
+global Hulls Tracks Families imageData hullChan
 folderName = uigetdir();
 if (folderName == 0), return, end
 
-save(fullfile(folderName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
+save(fullfile(folderName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','hullChan','-v7.3');
 msg = 'There are empty structures:';
 if isempty(Hulls)
     msg = [msg;{'Hulls'}];
@@ -649,6 +650,15 @@ global processedImage segImage distanceImage imageData Hulls
 folderName = uigetdir();
 if (folderName == 0), return, end
 
+if (exist(fullfile(folderName,'segmentation'),'dir'))
+    segImage = tiffReader('',[],[],[],fullfile(folderName,'segmentation'));
+end
+if (exist(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)),'file'))
+    load(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)));
+    if (~isempty(Hulls))
+        set(handles.m_DistanceChoice,'Enable','on');
+    end
+end
 if (exist(fullfile(folderName,'processed'),'dir'))
     processedImage = tiffReader('',[],[],[],fullfile(folderName,'processed'));
     lever_3d('loadTexture',imageConvert(processedImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,...
@@ -657,21 +667,11 @@ if (exist(fullfile(folderName,'processed'),'dir'))
     set(handles.rb_orgImage,'Value',0);
     updateCurrentState(handles);
 end
-if (exist(fullfile(folderName,'segmentation'),'dir'))
-    segImage = tiffReader('',[],[],[],fullfile(folderName,'segmentation'));
-end
-if (exist(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)),'file'))
-    load(fullfile(folderName,sprintf('%s_distanceMaps.mat',imageData.DatasetName)));
-    if (~isempty(Hulls))
-        SetDistances(chan);
-        set(handles.m_DistanceChoice,'Enable','on');
-    end
-end
 end
 
 % --- Executes on button press in pb_OpenSegmentation.
 function pb_OpenSegmentation_Callback(hObject, eventdata, handles)
-global Hulls Tracks Families distanceImage
+global Hulls Tracks Families distanceImage hullChan
 [fileName, pathName, ~] = uigetfile('.mat');
 if (fileName == 0), return, end
 
