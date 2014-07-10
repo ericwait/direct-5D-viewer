@@ -43,6 +43,7 @@ lever_3d('updateHulls',Hulls(hull));
 lever_3d('addHulls',Hulls(newHullIdx));
 
 [trackHulls, familyHulls] = GetHullsToDisplay(selectedHull);
+familyHulls = [familyHulls newHullIdx];
 if (get(uiControlHandles.cb_ShowFamily,'Value')==1)
     lever_3d('displayHulls',familyHulls);
 else
