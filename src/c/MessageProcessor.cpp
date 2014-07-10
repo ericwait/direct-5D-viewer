@@ -127,6 +127,10 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		else if ('C'==wParam)
 			gCameraDefaultMesh->resetCamera();
+		else if ('H'==wParam)
+		{
+			gMexMessageQueueOut.addMessage("toggleHulls",0.0);
+		}
 		else if ('L'==wParam)
 		{
 			gRenderer->toggleLabels();
