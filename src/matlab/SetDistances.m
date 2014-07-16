@@ -11,6 +11,10 @@ for i=1:length(Hulls)
         Hulls(i).distances(2) = min(distances(:));
         Hulls(i).distances(3) = distanceImage(round(Hulls(i).centerOfMassOrg(1)),round(Hulls(i).centerOfMassOrg(2)),...
             round(Hulls(i).centerOfMassOrg(3)),chan,Hulls(i).frame);
+    else
+        Hulls(i).distances(1) = -1;
+        Hulls(i).distances(2) = -1;
+        Hulls(i).distances(3) = -1;
     end
 end
 end
