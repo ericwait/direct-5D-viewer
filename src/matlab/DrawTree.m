@@ -188,7 +188,7 @@ if useDistance>0
 %         [CellHulls(CellTracks(trackID).hulls(i+1)).distanceToVasc CellHulls(CellTracks(trackID).hulls(i+1)).distanceToVasc],...
 %         '-','color',FaceColor,'LineWidth',2.0);
 
-    plot(uiTreeAx,[Hulls(Tracks(trackID).hulls(i+1)).frame-1 Tracks(trackID).endFrame],[distances(i+1) endDist],'-','color',FaceColor,'LineWidth',2.0);
+    plot(uiTreeAx,[Hulls(Tracks(trackID).hulls(end)).frame-1 Tracks(trackID).endFrame],[distances(length(Tracks(trackID).hulls)) endDist],'-','color',FaceColor,'LineWidth',2.0);
     
     childhandles = get(uiTreeAx, 'children');
     childhandles = childhandles([2:end 1]);
