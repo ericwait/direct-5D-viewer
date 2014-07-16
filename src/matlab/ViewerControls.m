@@ -369,6 +369,7 @@ set(handles.rb_Processed,'Value',0);
 set(handles.rb_orgImage,'Value',1);
 
 lever_3d('viewTexture','original'); %TODO can this be split out into channels?
+updateCurrentState(handles);
 end
 
 % --- Executes on button press in rb_Processed.
@@ -377,6 +378,7 @@ set(handles.rb_Processed,'Value',1);
 set(handles.rb_orgImage,'Value',0);
 
 lever_3d('viewTexture','processed'); %TODO can this be split out into channels?
+updateCurrentState(handles);
 end
 
 % --- Executes on selection change in m_imageProcessing.
