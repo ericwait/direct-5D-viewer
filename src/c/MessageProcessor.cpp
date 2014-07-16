@@ -77,7 +77,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		previousWorldRotation = gRenderer->getRootWorldRotation();
 		previousPeel = gRenderer->getClipChunkPercent();
 		if (previousPeel>0.2f)
-			gRenderer->setClipChunkPercent(0.175f);
+			gRenderer->setClipChunkPercent(0.1f);
 		break;
 	case WM_RBUTTONDOWN:
 		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
