@@ -13,7 +13,7 @@ stats = regionprops(bwIm,orgIm,'BoundingBox','PixelList','WeightedCentroid');
 newHulls(length(stats)).label = -1;
 
 for i=1:length(stats) 
-    if (size(stats(i).PixelList,1) < minCellVol)
+    if (size(stats(i).PixelList,1)<minCellVol || size(stats(i).PixelList,1)>imageData.XDimension*imageData.YDimension)
         continue;
     end
     
