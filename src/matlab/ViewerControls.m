@@ -142,7 +142,7 @@ end
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
-global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig uiControlHandles
+global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig uiControlHandles segImage channelData familyHulls trackHulls useDistance
 lever_3d('close');
 
 stop(tmr);
@@ -162,6 +162,11 @@ Costs = [];
 Colors = [];
 selectedHull = [];
 uiControlHandles = [];
+segImage = [];
+channelData = [];
+familyHulls = [];
+trackHulls = [];
+useDistance = [];
 
 delete(hObject);
 end
