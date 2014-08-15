@@ -279,8 +279,8 @@ chan = get(handles.m_channelPicker,'Value');
 mxVal = get(handles.s_ceil,'Value');
 mnVal = get(handles.s_floor,'Value');
 
-if (mxVal<=mnVal)
-    mnVal = mxVal-0.01;
+if (mxVal<=mnVal-0.01)
+    mnVal = mxVal-0.015;
     if (mnVal<0)
         mnVal = 0;
         mxVal = 0.01;
@@ -310,8 +310,8 @@ chan = get(handles.m_channelPicker,'Value');
 mxVal = get(handles.s_ceil,'Value');
 mnVal = get(handles.s_floor,'Value');
 
-if (mxVal<=mnVal)
-    mxVal = mnVal+0.01;
+if (mxVal<=mnVal+0.01)
+    mxVal = mnVal+0.015;
     if (mxVal>1)
         mxVal = 1;
         mnVal = 0.99;
@@ -705,7 +705,7 @@ end
 
 % --- Executes on button press in pb_Close.
 function pb_Close_Callback(hObject, eventdata, handles)
-figure1_CloseRequestFcn();
+figure1_CloseRequestFcn(hObject, eventdata, handles);
 end
 
 % --- Executes on selection change in m_DistanceChoice.
