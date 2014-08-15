@@ -383,7 +383,7 @@ void createBorder(Vec<float> &scale)
 		faces[2*i+1] = VolumeTextureObject::triIndices[1] + 4*i;
 	}
 
-	DirectX::XMMATRIX scl = DirectX::XMMatrixScaling(scale.x,scale.y,scale.z);
+	DirectX::XMMATRIX scl = DirectX::XMMatrixScaling(scale.y,scale.x,scale.z);
 	DirectX::XMMATRIX xRot = DirectX::XMMatrixRotationX(DirectX::XM_PI/2.0f);
 	DirectX::XMMATRIX start = DirectX::XMMatrixIdentity();
 
