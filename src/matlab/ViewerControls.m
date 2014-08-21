@@ -205,8 +205,8 @@ for i=1:length(channelData)
         plot(handles.funcPlot,x,y,':','Color',channelData(i).color,'LineWidth',2.0);
     end
 end
-xlim([0 1]);
-ylim([0 1]);
+xlim(handles.funcPlot,[0 1]);
+ylim(handles.funcPlot,[0 1]);
 
 hold off
 saveData();
