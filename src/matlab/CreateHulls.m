@@ -1,5 +1,14 @@
-function [ newHulls ] = CreateHulls(bwIm, orgIm, minCellDia, frame)
+function [ newHulls ] = CreateHulls(bwIm, orgIm, minCellDia, frame, minXY, minZ)
 global imageData
+
+newHulls = [];
+
+if ~exist('minXY','var')
+    minXY = 0;
+end
+if ~exist('minZ','var')
+    minZ = 0;
+end
 
 [newHulls,~,~] = GetEmptyStructs();
 imageDims = [imageData.XDimension, imageData.YDimension, imageData.ZDimension];
@@ -8,27 +17,38 @@ scaleFactor  =  imageDims ./ max(imageDims) .* physDims/physDims(1);
 imDiv = imageDims /2;
 minCellVol = (4*pi*(minCellDia/2)^3)/3;
 
-stats = regionprops(bwIm,orgIm,'BoundingBox','PixelList','WeightedCentroid');
+stts = regionprops(bwIm,orgIm,'BoundingBox','PixelList','WeightedCentroid');
+bb = vertcat(stts(:).BoundingBox);
+if (max(bb(:,4))<minXY || max(bb(:,5))<minXY || max(bb(:,6))<minZ)
+    return
+end
 
-newHulls(length(stats)).label = -1;
+newHulls(length(stts)).label = -1;
 
-for i=1:length(stats) 
-    if (size(stats(i).PixelList,1)<minCellVol || size(stats(i).PixelList,1)>imageData.XDimension*imageData.YDimension)
+for i=1:length(stts) 
+    if (size(stts(i).PixelList,1)<minCellVol ||...
+            size(stts(i).PixelList,1)>imageData.XDimension*imageData.YDimension ||...
+            (stts(i).BoundingBox(4)<minXY && stts(i).BoundingBox(5)<minXY) || stts(i).BoundingBox(6)<minZ)
         continue;
     end
     
-    newHulls(i).pixelsOrg = stats(i).PixelList;
-    newHulls(i).centerOfMassOrg = stats(i).WeightedCentroid;
+    newHulls(i).pixelsOrg = stts(i).PixelList;
+    newHulls(i).boundingBoxOrg = stts(i).BoundingBox;
+    newHulls(i).centerOfMassOrg = stts(i).WeightedCentroid;
     
-    stats(i).PixelList = stats(i).PixelList - 0.5;
-    stats(i).BoundingBox(1,1:3) = stats(i).BoundingBox(1,1:3) - 0.5;
-    stats(i).WeightedCentroid = stats(i).WeightedCentroid - 0.5;
+    stts(i).PixelList = stts(i).PixelList - 0.5;
+    stts(i).BoundingBox(1,1:3) = stts(i).BoundingBox(1,1:3) - 0.5;
+    stts(i).WeightedCentroid = stts(i).WeightedCentroid - 0.5;
     
-    k = convhulln(stats(i).PixelList);
+    try
+        k = convhulln(stts(i).PixelList);
+    catch err
+        continue
+    end
     u = unique(k(:));
-    remap = zeros(size(stats(i).PixelList,1),1);
+    remap = zeros(size(stts(i).PixelList,1),1);
     remap(u) = 1:length(u);
-    verts = stats(i).PixelList(u,:);
+    verts = stts(i).PixelList(u,:);
     faces = remap(k);
     if (any(faces(:)==0))
         error('there is a zero index in the faces structure!');
@@ -43,7 +63,7 @@ for i=1:length(stats)
         e2 = v3-v1;
         uNrm = cross(e1,e2);
         
-        dst = stats(i).WeightedCentroid - v1;
+        dst = stts(i).WeightedCentroid - v1;
         nrmDir = dot(uNrm,dst);
         if (nrmDir>0)
             faces(j,[1,2]) = faces(j,[2,1]);
@@ -54,16 +74,16 @@ for i=1:length(stats)
     
     newHulls(i).label = i;
     newHulls(i).frame = frame;
-    newHulls(i).centerOfMass = (stats(i).WeightedCentroid ./ imDiv-1) .* scaleFactor;
+    newHulls(i).centerOfMass = (stts(i).WeightedCentroid ./ imDiv-1) .* scaleFactor;
     newHulls(i).track = -1;
     color = GetNextColor();
     newHulls(i).color = color.background;
-    bbStart = (stats(i).BoundingBox(1,1:3)./imDiv-1) .* scaleFactor;
-    bbEnd = stats(i).BoundingBox(1,4:6) ./ [imageData.XDimension,imageData.YDimension,imageData.ZDimension];
+    bbStart = (stts(i).BoundingBox(1,1:3)./imDiv-1) .* scaleFactor;
+    bbEnd = stts(i).BoundingBox(1,4:6) ./ [imageData.XDimension,imageData.YDimension,imageData.ZDimension];
     newHulls(i).boundingBox = [bbStart, bbEnd];
-    imDivArray = repmat(imDiv,size(stats(i).PixelList,1),1);
-    imScaleArray = repmat(scaleFactor,size(stats(i).PixelList,1),1);
-    newHulls(i).pixels = (stats(i).PixelList./imDivArray-1) .* imScaleArray;
+    imDivArray = repmat(imDiv,size(stts(i).PixelList,1),1);
+    imScaleArray = repmat(scaleFactor,size(stts(i).PixelList,1),1);
+    newHulls(i).pixels = (stts(i).PixelList./imDivArray-1) .* imScaleArray;
     newHulls(i).faces = faces;
     imDivArray = repmat(imDiv,size(verts,1),1);
     imScaleArray = repmat(scaleFactor,size(verts,1),1);
