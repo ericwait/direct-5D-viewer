@@ -1,5 +1,9 @@
-function lever3d()
+function lever3d(make2d3d)
 global imageData orgImage processedImage tmr uiControlFig useDistance
+
+if (~exist('make2d3d','var') || isempty(make2d3d))
+    make2d3d = 0;
+end
 
 if (~isempty(uiControlFig) && ishandle(uiControlFig))
     close(uiControlFig);
@@ -16,7 +20,14 @@ if (FileName==0), return, end
 %[orgImage, imageData] = tiffReader([],[],[],[],'d:\Users\Eric.Bioimage29\Documents\Images\LEVer3d\Susan_overnight_new');
 [orgImage, imageData] = tiffReader([],[],[],[],fullfile(PathName,FileName));
 
-processedImage = orgImage;
+if (make2d3d~=0)
+    orgImage = squeeze(orgImage);
+    imageData.ZDimension = imageData.NumberOfFrames;
+    imageData.NumberOfFrames = 1;
+    imageData.ZPixelPhysicalSize = imageData.XPixelPhysicalSize;
+else
+    processedImage = orgImage;
+end
 
 tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'TimerFcn','CheckMessage');
 start(tmr);
