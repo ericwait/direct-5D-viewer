@@ -1,3 +1,4 @@
 LIBRARY	"lever-3d"
 EXPORTS DllMain
 EXPORTS mexFunction
+EXPORTS exitFunc
