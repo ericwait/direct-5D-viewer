@@ -18,6 +18,10 @@ imDiv = imageDims /2;
 minCellVol = (4*pi*(minCellDia/2)^3)/3;
 
 stts = regionprops(bwIm,orgIm,'BoundingBox','PixelList','WeightedCentroid');
+if isempty(stts)
+    return
+end
+
 bb = vertcat(stts(:).BoundingBox);
 if (max(bb(:,4))<minXY || max(bb(:,5))<minXY || max(bb(:,6))<minZ)
     return
