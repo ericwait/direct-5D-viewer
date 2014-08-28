@@ -2,9 +2,6 @@
 #include "Utility.h"
 #include "Hull.h"
 
-#undef max
-#undef min
-
 // Convenience defines
 #define DOT(x1,y1,x2,y2) ((x1)*(x2) + (y1)*(y2))
 #define LENGTH(x,y) (sqrt((SQR(x))+(SQR(y))))
@@ -46,8 +43,8 @@ double calcFullCellDist(int startCellIdx, int nextCellIdx, double vmax, double c
 	int startCellSize = gHulls[startCellIdx].getNumberofVoxels();
 	int nextCellSize = gHulls[nextCellIdx].getNumberofVoxels();
 
-	int nmax = std::max<int>(startCellSize, nextCellSize);
-	int nmin = std::min<int>(startCellSize, nextCellSize);
+	int nmax = MAX(startCellSize, nextCellSize);
+	int nmin = MIN(startCellSize, nextCellSize);
 
 	double sdist = ((double) (nmax - nmin)) / nmax;
 
@@ -74,16 +71,16 @@ double getCost(std::vector<int>& indices, int sourceIdx, int bCheck)
 	{
 		dir = (gHulls[nextHull].getFrame() - gHulls[sourceHull].getFrame() >= 0) ? 1 : -1;
 
-		int tStart = std::max<int>(gHulls[indices[sourceIdx]].getFrame() - gWindowSize + 1, 0);
+		int tStart = MAX(gHulls[indices[sourceIdx]].getFrame() - gWindowSize + 1, 0);
 		int tPathStart = gHulls[indices[0]].getFrame();
 		if ( dir < 0 )
 		{
-			tStart = std::max<int>(gHulls[indices[sourceIdx]].getFrame() + gWindowSize - 1, 0);
+			tStart = MAX(gHulls[indices[sourceIdx]].getFrame() + gWindowSize - 1, 0);
 			tPathStart = gHulls[indices[0]].getFrame();
-			startIdx = std::max<int>(tPathStart - tStart, 0);
+			startIdx = MAX(tPathStart - tStart, 0);
 		}
 		else
-			startIdx = std::max<int>(tStart - tPathStart, 0);
+			startIdx = MAX(tStart - tPathStart, 0);
 	}
 
 	for ( int k=startIdx; k < indices.size()-1; ++k )

@@ -24,6 +24,9 @@
 #define UNSET_VAR (-1)
 #define NCOLORS (15)
 
+#define MAX(x,y) ((x>y)?(x):(y))
+#define MIN(x,y) ((x<y)?(x):(y))
+
 template<typename T>
 struct Vec
 {
