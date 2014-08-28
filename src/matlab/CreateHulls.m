@@ -1,4 +1,8 @@
 function [ newHulls ] = CreateHulls(bwIm, orgIm, minCellDia, frame, minXY, minZ)
+%CreateHulls(bwIm, orgIm, minCellDia, frame, minXY, minZ) Creates hull
+%structures for a given frame.
+%   minCellDia is the smallest elipsoid that the blobs should fit within.
+%   minXY and minZ are optional
 global imageData
 
 newHulls = [];
