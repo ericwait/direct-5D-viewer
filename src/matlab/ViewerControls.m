@@ -145,6 +145,7 @@ lever_3d('close');
 if ~isempty(tmr)
     stop(tmr);
     delete(tmr);
+    tmr = [];
 end
 
 if ~isempty(uiTreeFig)
