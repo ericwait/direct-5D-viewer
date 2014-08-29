@@ -172,19 +172,67 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		else if ('1' == wParam || VK_NUMPAD1 == wParam)
 		{
+			if (shiftDown && ctrlDown && !altDown)
+			{
+				// make window size appropriate for a 1080p movie
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 1920 + 16, 1080 + 39, SWP_NOMOVE);
+			}
+			else if (ctrlDown && altDown && !shiftDown)
+			{
+				// make window size appropriate for a 4k movie (UHD = 3840 x 2160)
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 3840 + 16, 2160 + 39, 0);
+			}
+			{
 				gMexMessageQueueOut.addMessage("keyDown", "number", 1.0);
+			}
 		}
 		else if ('2' == wParam || VK_NUMPAD2 == wParam)
 		{
+			if (shiftDown && ctrlDown && !altDown)
+			{
+				// make window size appropriate for a two panel 1080p movie
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 1920 / 2 + 16, 1080 + 39, SWP_NOMOVE);
+			}
+			else if (ctrlDown && altDown && !shiftDown)
+			{
+				// make window size appropriate for a two panel 4k movie (UHD = 3840 x 2160)
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 3840 / 2 + 16, 2160 + 39, 0);
+			}
+			{
 				gMexMessageQueueOut.addMessage("keyDown", "number", 2.0);
+			}
 		}
 		else if ('3' == wParam || VK_NUMPAD3 == wParam)
 		{
+			if (shiftDown && ctrlDown && !altDown)
+			{
+				// make window size appropriate for a three panel 1080p movie
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 1920 / 3 + 16, 1080 + 39, SWP_NOMOVE);
+			}
+			else if (ctrlDown && altDown && !shiftDown)
+			{
+				// make window size appropriate for a three panel 4k movie (UHD = 3840 x 2160)
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 3840 / 3 + 16, 2160 + 39, 0);
+			}
+			{
 				gMexMessageQueueOut.addMessage("keyDown", "number", 3.0);
+			}
 		}
 		else if ('4' == wParam || VK_NUMPAD4 == wParam)
 		{
+			if (shiftDown && ctrlDown && !altDown)
+			{
+				// make window size appropriate for a four panel 1080p movie
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 1920 / 2 + 16, 1080 / 2 + 39, SWP_NOMOVE);
+			}
+			else if (ctrlDown && altDown && !shiftDown)
+			{
+				// make window size appropriate for a four panel 4k movie (UHD = 3840 x 2160)
+				SetWindowPos(gWindowHandle, HWND_NOTOPMOST, 0, 0, 3840 / 2 + 16, 2160 / 2 + 39, 0);
+			}
+			{
 				gMexMessageQueueOut.addMessage("keyDown", "number", 4.0);
+			}
 		}
 		else if ('5' == wParam || VK_NUMPAD5 == wParam)
 		{
