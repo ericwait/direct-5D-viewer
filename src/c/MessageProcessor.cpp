@@ -152,6 +152,13 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gRenderer->toggleLabels();
 			gMexMessageQueueOut.addMessage("toggleLabels",0.0);
 		}
+		else if ('P' == wParam)
+		{
+			if (ctrlDown)
+			{
+				gRenderer->captureWindow();
+			}
+		}
 		else if ('R'==wParam)
 			gRenderer->resetRootWorldTransform();
 		else if ('S'==wParam)

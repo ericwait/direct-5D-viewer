@@ -1086,6 +1086,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				addHulls(hulls);
 			}
 
+			else if (_strcmpi("setCapturePath",command)==0)
+			{
+				if (nrhs != 3) mexErrMsgTxt("Not the right arguments for setCapturePath!");
+
+				char filePath[512];
+				char fileName[255];
+				mxGetString(prhs[1], filePath, 512);
+				mxGetString(prhs[2], fileName, 255);
+
+				gRenderer->setCaptureFilePath(filePath);
+				gRenderer->setCaptureFileName(fileName);
+			}
+
 			else
 			{
 				char buff[255];

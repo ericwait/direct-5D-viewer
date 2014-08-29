@@ -79,6 +79,8 @@ public:
 	void updateRenderList();
 	void setLabels(bool on){labelsOn=on;}
 	void toggleLabels(){labelsOn = !labelsOn;}
+	void setCaptureFilePath(std::string fp){ captureFilePath = fp; }
+	void setCaptureFileName(std::string fn){ captureFileName = fn; }
 
 //Getters
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
@@ -91,6 +93,7 @@ public:
 
 	int getHull(Vec<float> pnt, Vec<float> direction);
 	float getClipChunkPercent(){return clipChunkPercent;}
+	HRESULT captureWindow();
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
@@ -180,6 +183,8 @@ private:
 	float clipChunkPercent;
 	int numPlanes;
 	bool labelsOn;
+	std::string captureFilePath;
+	std::string captureFileName;
 };
 
 const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshShaders.fx","ViewAlignedVertexShader.fx"};
