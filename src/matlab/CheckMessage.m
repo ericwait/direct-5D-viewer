@@ -1,5 +1,5 @@
 function CheckMessage()
-global uiFigureHandle Hulls selectedHull trackHulls familyHulls uiControlHandles
+global uiControlFig Hulls selectedHull trackHulls familyHulls uiControlHandles
 
 persistent shift ctrl alt selectedHullsList
 msgs = lever_3d('poll');
@@ -13,7 +13,7 @@ for i=1:length(msgs)
         case 'null'
             return
         case 'close'
-            close(uiFigureHandle);
+            close(uiControlFig);
         case 'cellSelected'
             if (msgs(i).val == -1)
                 lever_3d('viewSegmentation',1);
@@ -64,7 +64,7 @@ for i=1:length(msgs)
                 alt = 1;
             elseif (strcmp(msgs(i).message,'number'))
                 num = msgs(i).val;
-                if (~isempty(selectedHull) && selectedHull>0)
+                if (~isempty(selectedHull) && selectedHull>0 && num>1)
                     SplitHull(selectedHull,num);
                 end
             end
