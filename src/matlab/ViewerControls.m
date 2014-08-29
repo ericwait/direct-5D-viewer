@@ -142,10 +142,14 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig uiControlHandles segImage channelData familyHulls trackHulls useDistance
 lever_3d('close');
 
-stop(tmr);
-delete(tmr);
+if ~isempty(tmr)
+    stop(tmr);
+    delete(tmr);
+end
 
-close(uiTreeFig);
+if ~isempty(uiTreeFig)
+    close(uiTreeFig);
+end
 
 clear mex
 Hulls = [];
