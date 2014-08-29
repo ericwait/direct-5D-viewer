@@ -90,21 +90,37 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_KEYDOWN:
 		if (VK_LEFT==wParam)
+		{
 			gCameraDefaultMesh->moveLeft();
+		}
 		else if (VK_RIGHT==wParam)
+		{
 			gCameraDefaultMesh->moveRight();
+		}
 		else if (VK_UP==wParam)
+		{
 			gCameraDefaultMesh->moveUp();
+		}
 		else if (VK_DOWN==wParam)
+		{
 			gCameraDefaultMesh->moveDown();
+		}
 		else if (VK_PRIOR==wParam) //Page Up key
+		{
 			gRenderer->incrementFrame();
+		}
 		else if (VK_NEXT==wParam) //Page Down key
+		{
 			gRenderer->decrementFrame();
+		}
 		else if (VK_HOME==wParam)
+		{
 			gRenderer->setCurrentFrame(0);
+		}
 		else if (VK_END==wParam)
-			gRenderer->setCurrentFrame(gRenderer->getNumberOfFrames()-1);
+		{
+			gRenderer->setCurrentFrame(gRenderer->getNumberOfFrames() - 1);
+		}
 		else if (VK_SPACE==wParam)
 		{
 			gPlay = !gPlay;
@@ -120,10 +136,10 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			ctrlDown = true;
 			gMexMessageQueueOut.addMessage("keyDown","ctrl");
 		}
-		else if (VK_MENU==wParam)
+		else if (VK_MENU == wParam)
 		{
 			altDown = true;
-			gMexMessageQueueOut.addMessage("keyDown","alt");
+			gMexMessageQueueOut.addMessage("keyDown", "alt");
 		}
 		else if ('C'==wParam)
 			gCameraDefaultMesh->resetCamera();
@@ -147,26 +163,46 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			gMexMessageQueueOut.addMessage("centerSelectedCell",1.0);
 		}
-		else if ('1'==wParam || VK_NUMPAD1==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",1.0);
-		else if ('2'==wParam || VK_NUMPAD2==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",2.0);
-		else if ('3'==wParam || VK_NUMPAD3==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",3.0);
-		else if ('4'==wParam || VK_NUMPAD4==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",4.0);
-		else if ('5'==wParam || VK_NUMPAD5==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",5.0);
-		else if ('6'==wParam || VK_NUMPAD6==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",6.0);
-		else if ('7'==wParam || VK_NUMPAD7==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",7.0);
-		else if ('8'==wParam || VK_NUMPAD8==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",8.0);
-		else if ('9'==wParam || VK_NUMPAD9==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",9.0);
-		else if ('0'==wParam || VK_NUMPAD0==wParam)
-			gMexMessageQueueOut.addMessage("keyDown","number",0.0);
+		else if ('1' == wParam || VK_NUMPAD1 == wParam)
+		{
+				gMexMessageQueueOut.addMessage("keyDown", "number", 1.0);
+		}
+		else if ('2' == wParam || VK_NUMPAD2 == wParam)
+		{
+				gMexMessageQueueOut.addMessage("keyDown", "number", 2.0);
+		}
+		else if ('3' == wParam || VK_NUMPAD3 == wParam)
+		{
+				gMexMessageQueueOut.addMessage("keyDown", "number", 3.0);
+		}
+		else if ('4' == wParam || VK_NUMPAD4 == wParam)
+		{
+				gMexMessageQueueOut.addMessage("keyDown", "number", 4.0);
+		}
+		else if ('5' == wParam || VK_NUMPAD5 == wParam)
+		{
+			gMexMessageQueueOut.addMessage("keyDown", "number", 5.0);
+		}
+		else if ('6' == wParam || VK_NUMPAD6 == wParam)
+		{
+			gMexMessageQueueOut.addMessage("keyDown", "number", 6.0);
+		}
+		else if ('7' == wParam || VK_NUMPAD7 == wParam)
+		{
+			gMexMessageQueueOut.addMessage("keyDown", "number", 7.0);
+		}
+		else if ('8' == wParam || VK_NUMPAD8 == wParam)
+		{
+			gMexMessageQueueOut.addMessage("keyDown", "number", 8.0);
+		}
+		else if ('9' == wParam || VK_NUMPAD9 == wParam)
+		{
+			gMexMessageQueueOut.addMessage("keyDown", "number", 9.0);
+		}
+		else if ('0' == wParam || VK_NUMPAD0 == wParam)
+		{
+			gMexMessageQueueOut.addMessage("keyDown", "number", 0.0);
+		}
 		break;
 	case WM_KEYUP:
 		if (VK_SHIFT==wParam)
