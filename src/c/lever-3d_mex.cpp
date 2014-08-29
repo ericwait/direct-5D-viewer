@@ -823,17 +823,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 					RECT desktop;
 					const HWND hDesktop = GetDesktopWindow();
 					GetWindowRect(hDesktop, &desktop);
-					int horizontal = desktop.right *0.9;
-					int vertical = desktop.bottom *0.9;
+					int horizontal = (int)((double)desktop.right * 0.9);
+					int vertical = (int)((double)desktop.bottom * 0.9);
 
 					if (vertical>horizontal)
 					{
-						gWindowHeight = (horizontal*dims.y)/dims.x;
+						gWindowHeight = (unsigned int)((horizontal*dims.y)/(double)dims.x);
 						gWindowWidth = horizontal;
 					}
 					else
 					{
-						gWindowWidth = (vertical*dims.x)/dims.y;
+						gWindowWidth = (unsigned int)((vertical*dims.x) / (double)dims.y);
 						gWindowHeight = vertical;
 					}
 
@@ -1037,10 +1037,10 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for displayHulls!");
 
 				double* hullList = (double*)mxGetData(prhs[1]);
-				int numHulls = mxGetNumberOfElements(prhs[1]);
+				size_t numHulls = mxGetNumberOfElements(prhs[1]);
 
 				std::set<int> hullset;
-				for (int i=0; i<numHulls; ++i)
+				for (size_t i=0; i<numHulls; ++i)
 					hullset.insert((int)(hullList[i]));
 
 				toggleSelectedCell(hullset);
@@ -1059,7 +1059,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");
 
 				double* origin = (double*)mxGetData(prhs[1]);
-				int numDims = mxGetNumberOfElements(prhs[1]);
+				size_t numDims = mxGetNumberOfElements(prhs[1]);
 
 				if (numDims!=3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
 

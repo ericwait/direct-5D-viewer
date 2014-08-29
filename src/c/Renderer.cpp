@@ -681,7 +681,7 @@ void Renderer::mainRenderLoop()
 
 	float chunkWidth = 3.0f/numChunks;
 
-	for (int i=numChunks-1; i>=0; --i)
+	for (int i=(int)numChunks-1; i>=0; --i)
 	{
 		float frontPlane = i*chunkWidth - 1.5f;
 		float backPlane = frontPlane + chunkWidth;
@@ -801,8 +801,8 @@ void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
 	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
 	DirectX::XMVECTOR com = DirectX::XMLoadFloat3(&centerOfmass);
 	const Camera* camera = package->getCamera();
-	v2D= DirectX::XMVector3Project(com,0.0f,0.0f,gWindowWidth,gWindowHeight,0.0f,1.0f,camera->getProjectionTransform(),camera->getViewTransform(),
-		package->getLocalToWorld());
+	v2D= DirectX::XMVector3Project(com,0.0f,0.0f,(float)gWindowWidth,(float)gWindowHeight,0.0f,1.0f,
+		camera->getProjectionTransform(),camera->getViewTransform(),package->getLocalToWorld());
 
 	x=(int)DirectX::XMVectorGetX(v2D);
 	y=(int)DirectX::XMVectorGetY(v2D);
@@ -810,7 +810,7 @@ void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
 	SelectObject(hdc, gFont);
 	SetTextColor(hdc,hexColor);
 	SetBkMode(hdc,TRANSPARENT);
-	TextOutA(hdc,x,y,package->getLabel().c_str(),package->getLabel().length());
+	TextOutA(hdc,x,y,package->getLabel().c_str(),(int)package->getLabel().length());
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)
