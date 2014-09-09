@@ -96,15 +96,15 @@ localStruct = struct(...
     'b',1.0,...
     'c',0.0);
 
-channelData = localStruct;
-
-if (imageData.NumberOfChannels>0)
-    for i=1:imageData.NumberOfChannels
-        localStruct.color = colors(i,:);
-        channelData(i) = localStruct;
+if isempty(channelData)
+    channelData = localStruct;
+    if (imageData.NumberOfChannels>0)
+        for i=1:imageData.NumberOfChannels
+            localStruct.color = colors(i,:);
+            channelData(i) = localStruct;
+        end
     end
 end
-
 
 if (imageData.NumberOfChannels>0)
     for i=1:imageData.NumberOfChannels
