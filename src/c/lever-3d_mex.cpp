@@ -1099,6 +1099,50 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				gRenderer->setCaptureFileName(fileName);
 			}
 
+			else if (_strcmpi("takeControl",command)==0)
+			{
+				gRendererOn = false;
+				gRenderer->getMutex();
+				gRenderer->releaseMutex();
+			}
+
+			else if (_strcmpi("releaseControl",command)==0)
+			{
+				gRenderer->getMutex();
+				gRendererOn = true;
+				gRenderer->releaseMutex();
+			}
+
+			else if (_strcmpi("captureImage", command) == 0)
+			{
+				if (gRendererOn == true) mexErrMsgTxt("MATLAB does not have exclusive control over the renderer! Call takeControl before using this command");
+
+				//if (nrhs != 3) mexErrMsgTxt("Usage is lever_3d('captureImage',folderPath,fileNamePrefix); ");
+				if (nlhs != 1) mexErrMsgTxt("There must be one output argument to hold the file path/name that was captured!");
+
+				std::string fileNameOut;
+				HRESULT hr;
+
+				if (nrhs > 2)
+				{
+					char dirBuff[512];
+					char filePreBuff[256];
+
+					mxGetString(prhs[1], dirBuff, 512);
+					mxGetString(prhs[2], dirBuff, 256);
+
+					hr = gRenderer->captureWindow(dirBuff, filePreBuff, fileNameOut);
+				}
+				else
+				{
+					hr = gRenderer->captureWindow(&fileNameOut);
+				}
+
+				if (FAILED(hr)) mexErrMsgTxt("Unable to capture the screen!");
+
+				plhs[0] = mxCreateString(fileNameOut.c_str());
+			}
+
 			else
 			{
 				char buff[255];

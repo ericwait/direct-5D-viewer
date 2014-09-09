@@ -93,7 +93,8 @@ public:
 
 	int getHull(Vec<float> pnt, Vec<float> direction);
 	float getClipChunkPercent(){return clipChunkPercent;}
-	HRESULT captureWindow();
+	HRESULT captureWindow(std::string* filenameOut=NULL);
+	HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut);
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen

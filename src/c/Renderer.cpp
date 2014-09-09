@@ -1124,7 +1124,7 @@ void Renderer::updateWorldTransform()
 	ReleaseMutex(mutexDevice);
 }
 
-HRESULT Renderer::captureWindow()
+HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 {
 	// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 	// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
@@ -1156,6 +1156,9 @@ HRESULT Renderer::captureWindow()
 
 	memset(wsz, 0, 255 * sizeof(CHAR));
 	sprintf_s(wsz, "%s\\%s_%d.bmp", captureFilePath.c_str(),captureFileName.c_str(), nt);
+
+	if (filenameOut!=NULL)
+		*filenameOut = wsz;
 
 	// Retrieve the handle to a display device context for the client 
 	// area of the window. 
@@ -1302,6 +1305,23 @@ done:
 	DeleteObject(hdcMemDC);
 	IDXGIBackBuffer->ReleaseDC(NULL);
 	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+
+	return hr;
+}
+
+HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut)
+{
+	std::string oldCaptureFilePath = captureFilePath;
+	std::string oldCaptureFileName = captureFileName;
+
+	captureFilePath = filePathIn;
+	captureFileName = fileNameIn;
+
+	HRESULT hr;
+	hr = captureWindow(&filenameOut);
+
+	captureFilePath = oldCaptureFilePath;
+	captureFileName = oldCaptureFileName;
 
 	return hr;
 }
