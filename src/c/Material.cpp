@@ -248,15 +248,15 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\tPixelOutputType output = (PixelOutputType)0;\n";
 	shaderText += "\tfloat alpha = 0.0f;\n";
 	shaderText += "\n";
-	shaderText += "\tfloat4 mainLightDir = float4(0.5774,0.5774,0.5774,0);\n";
+	shaderText += "\tfloat4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);\n";
 	shaderText += "\tfloat unlitComposite = 0.0f;\n";
 	shaderText += "\tint numAlpha = 0;\n";
+	shaderText += "\tfloat3 grad;\n";
 	shaderText += "\t[unroll(" + strChans + ")] for (int i=0; i<" + strChans + "; ++i)\n";
 	shaderText += "\t{\n";
 	shaderText += "\t\tfloat intensity = g_txDiffuse[i].Sample( g_samLinear[i], input.TextureUV );\n";
 	shaderText += "\t\tintensity = clamp(intensity,ranges[i][0],ranges[i][1]);\n";
 	shaderText += "\t\tintensity = transferFunctions[i][0]*intensity*intensity+transferFunctions[i][1]*intensity+transferFunctions[i][2];\n";
-	shaderText += "\t\tfloat3 grad;\n";
 	shaderText += "\t\tfloat lightMod = 1.0f;\n";
 	shaderText += "\t\tif(lightOn.x>0)\n";
 	shaderText += "\t\t{\n";

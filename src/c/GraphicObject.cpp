@@ -344,7 +344,7 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 
 	DirectX::XMFLOAT3 vec(1.0f,0.0f,0.0f);
 	DirectX::XMVECTOR vecU = DirectX::XMLoadFloat3(&vec);
-	DirectX::XMMATRIX trans = invParentWorld* DirectX::XMMatrixScaling(1.0f/dims.x,1.0f/dims.y,1.0f/dims.z);
+	DirectX::XMMATRIX trans = invParentWorld * handedCorrection * DirectX::XMMatrixScaling(1.0f/dims.x,1.0f/dims.y,1.0f/dims.z);
 
 	Vec<float> xDir, yDir, zDir;
 	DirectX::XMVECTOR vecO = DirectX::XMVector3TransformNormal(vecU,trans);
