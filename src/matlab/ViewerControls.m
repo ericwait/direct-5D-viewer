@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 10-Jul-2014 12:37:51
+% Last Modified by GUIDE v2.5 26-Sep-2014 15:08:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -368,6 +368,11 @@ end
 % --- Executes on button press in cb_textureLighting.
 function cb_textureLighting_Callback(hObject, eventdata, handles)
 lever_3d('textureLightingUpdate',get(handles.cb_textureLighting,'Value'));
+end
+
+% --- Executes on button press in cb_atten.
+function cb_atten_Callback(hObject, eventdata, handles)
+lever_3d('textureAttenUpdate',get(handles.cb_atten,'Value'));
 end
 
 % --- Executes on button press in rb_orgImage.

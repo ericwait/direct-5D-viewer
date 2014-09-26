@@ -112,6 +112,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	testDepth = false;
 	wireframe = false;
 	lightingOn = false;
+	attenuationOn = false;
 
 	char cBuffer[3];
 	sprintf_s(cBuffer,"%d",numChannels);
@@ -192,6 +193,18 @@ void StaticVolumeTextureMaterial::setLightOn(bool on)
 	memcpy((void*)(shaderConstMemory+memStart),&isOn,sizeof(float));
 }
 
+void StaticVolumeTextureMaterial::setAttenuationOn(bool on)
+{
+	attenuationOn = on;
+
+	float isOn = (on == true) ? (1.0f) : (0.0f);
+	//2nd float plus 3 float4s along with 3 times numchannel float4s behind
+	size_t memStart = sizeof(float) + 12 * sizeof(float) + 12 * sizeof(float)*numChannels;
+
+	memcpy((void*)(shaderConstMemory + memStart), &isOn, sizeof(float));
+}
+
+
 void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir)
 {
 	//3 times numchannel float4s behind
@@ -238,9 +251,10 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\n";
 	shaderText += "struct VS_OUTPUT\n";
 	shaderText += "{\n";
-	shaderText += "	float4 Pos : SV_POSITION;\n";
-	shaderText += "	float3 TextureUV : TEXCOORD0;\n";
-	shaderText += "	float3 Normal : NORMAL;\n";
+	shaderText += "\tfloat4 Pos : SV_POSITION;\n";
+	shaderText += "\tfloat3 TextureUV : TEXCOORD0;\n";
+	shaderText += "\tfloat3 Normal : NORMAL;\n";
+	shaderText += "\tfloat3 Dpth : TEXCOORD1;\n";
 	shaderText += "};\n";
 	shaderText += "\n";
 	shaderText += "PixelOutputType MultiChanVolumePixelShader( VS_OUTPUT input )\n";
@@ -285,8 +299,15 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\t}\n";
 	shaderText += "\toutput.color.a *= saturate(unlitComposite);\n";
 	shaderText += "\toutput.color.a = output.color.a*step(0.15,output.color.a);\n";
+	shaderText += "\tif(lightOn.y>0)\n";
+	shaderText += "\t{\n";
+ 	shaderText += "\t\tfloat distMult = (input.Dpth.z<=0) ? (1) : (1-input.Dpth.z);\n";
+ 	shaderText += "\t\toutput.color.r *= distMult;\n";
+	shaderText += "\t\toutput.color.g *= distMult;\n";
+	shaderText += "\t\toutput.color.b *= distMult;\n";
+	shaderText += "\t\toutput.color.a *= distMult;\n";
+	shaderText += "\t}\n";
 	shaderText += "\n";
-	shaderText += "\toutput.depth = 1.0f;\n";
 	shaderText += "\n";
 	shaderText += "\treturn output;\n";
 	shaderText += "}\n";

@@ -11,6 +11,7 @@ struct VS_OUTPUT
 	float4 Pos : SV_POSITION;
 	float3 TextureUV : TEXCOORD0;
 	float3 Normal : NORMAL;
+	float3 Dpth : TEXCOORD1;
 	float4 clipPlane[2] : SV_ClipDistance;
 };
 
@@ -25,6 +26,7 @@ VS_OUTPUT ViewAlignedVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 
 	output.Pos = mul( Pos, View );
 	output.Pos = mul( output.Pos, Projection );
+	output.Dpth = Pos.xyz;
 
 	return output;
 }

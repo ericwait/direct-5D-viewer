@@ -880,6 +880,32 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				}
 			}
 
+			else if (_strcmpi("textureAttenUpdate", command) == 0)
+			{
+				if (nrhs != 2) mexErrMsgTxt("not the right arguments for attenuationUpdate!");
+
+				if (mxGetScalar(prhs[1]) > 0.0)
+				{
+					for (int i = 0; i < firstVolumeTextures.size(); ++i)
+					{
+						if (NULL != firstVolumeTextures[i])
+						{
+							firstVolumeTextures[i]->setAttenuationOn(true);
+						}
+					}
+				}
+				else
+				{
+					for (int i = 0; i < firstVolumeTextures.size(); ++i)
+					{
+						if (NULL != firstVolumeTextures[i])
+						{
+							firstVolumeTextures[i]->setAttenuationOn(false);
+						}
+					}
+				}
+			}
+
 			else if (_strcmpi("segmentationLighting",command)==0)
 			{
 				if (nrhs!=2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
