@@ -6,9 +6,10 @@
 bool gRendererOn = false;
 bool gPlay = false;
 bool gRotate = false;
+bool gCapture = false;
 float gFramesPerSec = 5;
 float numAngles = 720;
-const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(1/(numAngles)*DirectX::XM_2PI);
+const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(-1/(numAngles)*DirectX::XM_2PI);
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -64,8 +65,15 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (leftButtonDown)
 		{
 			DirectX::XMMATRIX rotX,rotY;
-			rotX=DirectX::XMMatrixRotationY(((float)(iMouseX-previousMouseX)/gWindowWidth)*DirectX::XM_2PI);
-			rotY=DirectX::XMMatrixRotationX((-(float)(iMouseY-previousMouseY)/gWindowHeight)*DirectX::XM_2PI);
+			if (shiftDown)
+				rotX = DirectX::XMMatrixIdentity();
+			else
+				rotX = DirectX::XMMatrixRotationY(((float)(iMouseX - previousMouseX) / gWindowWidth)*DirectX::XM_2PI);
+
+			if (ctrlDown)
+				rotY = DirectX::XMMatrixIdentity();
+			else
+				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / gWindowHeight)*DirectX::XM_2PI);
 
 			gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
 		}
@@ -286,12 +294,15 @@ HRESULT messageProcess( MSG& msg )
  	HRESULT hr = S_OK;
 	static clock_t lastTimeUpdate = clock();
 	static clock_t lastRotateUpdate = clock();
+	static int curAngle = 0;
 
 	if (msg.message==WM_QUIT)
 		return S_FALSE;
 
 	if (gRendererOn)
 	{
+		gRenderer->renderAll();
+
 		if (gPlay)
 		{
 			float timeFromLast = (float)(clock() - lastTimeUpdate) / CLOCKS_PER_SEC;
@@ -299,6 +310,11 @@ HRESULT messageProcess( MSG& msg )
 			{
 				lastTimeUpdate = clock();
 				gRenderer->incrementFrame();
+				if (gCapture)
+				{
+					gRenderer->renderAll();
+					gRenderer->captureWindow();
+				}
 			}
 		}
 		if (gRotate)
@@ -309,10 +325,20 @@ HRESULT messageProcess( MSG& msg )
 				lastRotateUpdate = clock();
 				DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
 				gRenderer->setWorldRotation(previousWorldRotation*ROT_X);
+				if (gCapture)
+				{
+					++curAngle;
+					gRenderer->renderAll();
+					gRenderer->captureWindow();
+					if (curAngle == numAngles)
+					{
+						gCapture = false;
+						gRotate = false;
+						curAngle = 0;
+					}
+				}
 			}
 		}
-
-		gRenderer->renderAll();
 	}
 
 	return hr;

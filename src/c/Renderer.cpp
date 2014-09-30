@@ -1046,8 +1046,15 @@ void Renderer::setCurrentFrame(int frame)
 void Renderer::incrementFrame()
 {
 	++currentFrame;
-	if (currentFrame>unsigned int(rootScene->getNumFrames()-1))
+	if (currentFrame > unsigned int(rootScene->getNumFrames() - 1))
+	{
 		currentFrame = 0;
+		if (gCapture)
+		{
+			gCapture = false;
+			gPlay = false;
+		}
+	}
 
 	gMexMessageQueueOut.addMessage("timeChange",currentFrame);
 }
@@ -1155,7 +1162,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	nt++;
 
 	memset(wsz, 0, 255 * sizeof(CHAR));
-	sprintf_s(wsz, "%s\\%s_%d.bmp", captureFilePath.c_str(),captureFileName.c_str(), nt);
+	sprintf_s(wsz, "%s\\%s_%05d.bmp", captureFilePath.c_str(),captureFileName.c_str(), nt);
 
 	if (filenameOut!=NULL)
 		*filenameOut = wsz;

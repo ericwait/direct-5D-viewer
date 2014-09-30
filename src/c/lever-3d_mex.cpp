@@ -952,6 +952,15 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				gCameraDefaultMesh->resetCamera();
 			}
 
+			else if (_strcmpi("captureSpinMovie", command) == 0)
+			{
+				gRenderer->resetRootWorldTransform();
+//				gCameraDefaultMesh->resetCamera();
+
+				gCapture = true;
+				gRotate = true;
+			}
+
 			else if (_strcmpi("transferUpdate",command)==0)
 			{
 				if (2>nrhs || 3<nlhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");

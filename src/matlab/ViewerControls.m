@@ -23,7 +23,7 @@ function varargout = ViewerControls(varargin)
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 26-Sep-2014 15:08:16
+% Last Modified by GUIDE v2.5 26-Sep-2014 16:04:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -565,9 +565,9 @@ on = get(handles.cb_Rotate,'Value');
 lever_3d('rotate',on);
 end
 
-% --- Executes on button press in cb_CaptureMovie.
-function cb_CaptureMovie_Callback(hObject, eventdata, handles)
-%TODO capture movie button
+% --- Executes on button press in pb_CaptureMovie.
+function pb_CaptureMovie_Callback(hObject, eventdata, handles)
+lever_3d('captureSpinMovie');
 end
 
 % --- Executes on button press in pb_ResetView.

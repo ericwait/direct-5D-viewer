@@ -28,4 +28,5 @@ extern Camera* gCameraDefaultMesh;
 extern bool gRendererOn;
 extern bool gPlay;
 extern bool gRotate;
+extern bool gCapture;
 extern float gFramesPerSec;
