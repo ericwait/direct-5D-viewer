@@ -828,12 +828,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 					if (vertical>horizontal)
 					{
-						gWindowHeight = (unsigned int)((horizontal*dims.y)/(double)dims.x);
+						gWindowHeight = (unsigned int)((horizontal*dims.x)/(double)dims.y);
 						gWindowWidth = horizontal;
 					}
 					else
 					{
-						gWindowWidth = (unsigned int)((vertical*dims.x) / (double)dims.y);
+						gWindowWidth = (unsigned int)((vertical*dims.y) / (double)dims.x);
 						gWindowHeight = vertical;
 					}
 
