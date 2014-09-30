@@ -1,4 +1,4 @@
-function CheckMessage()
+function CheckMessage(src, evnt)
 global uiControlFig Hulls selectedHull trackHulls familyHulls uiControlHandles
 
 persistent shift ctrl alt selectedHullsList

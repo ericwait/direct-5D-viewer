@@ -44,7 +44,7 @@ else
     processedImage = orgImage;
 end
 
-tmr = timer('ExecutionMode','fixedSpacing','Period',0.1,'TimerFcn','CheckMessage');
+tmr = timer('TimerFcn',@CheckMessage,'ExecutionMode','fixedSpacing','Period',0.1);
 start(tmr);
 
 lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
