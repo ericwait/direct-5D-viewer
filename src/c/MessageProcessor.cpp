@@ -44,6 +44,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	static int previousMouseY = 0;
 	static DirectX::XMMATRIX previousWorldRotation;
 	static float previousPeel;
+	static bool minimized = false;
 
 	int label;
 	Vec<float> pnt;
@@ -61,9 +62,14 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (wParam == SIZE_MINIMIZED)
 		{
 			gRendererOn = false;
+			minimized = true;
 			break;
-		}else if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
+		}
+		else if (wParam == SIZE_MAXIMIZED || (wParam == SIZE_RESTORED && minimized))
+		{
 			gRendererOn = true;
+			minimized = false;
+		}
 
 		gWindowWidth = LOWORD( lParam );
 		gWindowHeight = HIWORD( lParam );
