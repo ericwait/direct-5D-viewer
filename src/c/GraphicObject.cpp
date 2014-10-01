@@ -49,11 +49,6 @@ GraphicObject::~GraphicObject()
 	renderer = NULL;
 }
 
-void GraphicObject::removeFromRenderList()
-{
-	if (rendererPackage!=NULL)
-		rendererPackage->setRenderableFlag(false);
-}
 
 void GraphicObject::removeRendererResources()
 {
@@ -205,7 +200,6 @@ void CellHullObject::initalizeRendererResources(Camera* camera)
 		rendererPackage = new RendererPackage(camera);//delete in destructor
 		rendererPackage->setMeshPrimitive(meshPrimitive);
 		rendererPackage->setMaterial(material);
-		rendererPackage->setRenderableFlag(true);
 	}
 }
 
@@ -400,7 +394,6 @@ void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned ch
 		rendererPackage = new RendererPackage(camera);//delete in destructor
 		rendererPackage->setMeshPrimitive(meshPrimitive);
 		rendererPackage->setMaterial(material);
-		rendererPackage->setRenderableFlag(true);
 	}
 }
 
