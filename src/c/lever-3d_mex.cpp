@@ -845,26 +845,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 						textureType = GraphicObjectTypes::ProcessedVolume;
 				}
 
-				if (firstVolumeTextures.empty())
-				{					
-					RECT desktop;
-					const HWND hDesktop = GetDesktopWindow();
-					GetWindowRect(hDesktop, &desktop);
-					int horizontal = (int)((double)desktop.right * 0.9);
-					int vertical = (int)((double)desktop.bottom * 0.9);
-
-					if (vertical>horizontal)
-					{
-						gWindowHeight = (unsigned int)((horizontal*dims.x)/(double)dims.y);
-						gWindowWidth = horizontal;
-					}
-					else
-					{
-						gWindowWidth = (unsigned int)((vertical*dims.y) / (double)dims.x);
-						gWindowHeight = vertical;
-					}
-
-					SetWindowPos(gWindowHandle,0,0,0,gWindowWidth,gWindowHeight,SWP_NOZORDER|SWP_NOACTIVATE);
 				if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
 				{
 					HRESULT hr = createBorder(scale);
