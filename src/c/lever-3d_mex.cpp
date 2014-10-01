@@ -226,6 +226,9 @@ HRESULT loadWidget(const mxArray* widget[])
 {
 	if (gRenderer==NULL) return E_FAIL;
 
+	while (!gRendererInit)
+		Sleep(10);
+
 	gRenderer->getMutex();
 
 	size_t numFaces = mxGetM(widget[0]);
@@ -1076,7 +1079,9 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				const mxArray* hulls = prhs[1];
 				if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
 
-				loadHulls(hulls);
+				HRESULT hr = loadHulls(hulls);
+				if (FAILED(hr))
+					mexErrMsgTxt("Could not load hulls!");
 			}
 
 			else if (_strcmpi("displayHulls",command)==0)
@@ -1152,8 +1157,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			else if (_strcmpi("takeControl",command)==0)
 			{
-				gRendererOn = false;
 				gRenderer->getMutex();
+				gRendererOn = false;
 				gRenderer->releaseMutex();
 			}
 
