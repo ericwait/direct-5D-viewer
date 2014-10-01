@@ -63,6 +63,7 @@ tmr = timer('TimerFcn',@CheckMessage,'ExecutionMode','fixedSpacing','Period',0.1
 start(tmr);
 
 lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
+lever_3d('takeControl');
 
 lever_3d('loadTexture',imageConvert(orgImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize]);
 
@@ -70,4 +71,5 @@ lever_3d('setCapturePath',captureFilePath,imageData.DatasetName);
 
 uiControlFig = ViewerControls();
 lever_3d('resetView');
+lever_3d('releaseControl');
 end
