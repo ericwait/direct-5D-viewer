@@ -222,9 +222,9 @@ CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* 
 	return cho;
 }
 
-void loadWidget(const mxArray* widget[])
+HRESULT loadWidget(const mxArray* widget[])
 {
-	if (gRenderer==NULL) return;
+	if (gRenderer==NULL) return E_FAIL;
 
 	gRenderer->getMutex();
 
@@ -292,11 +292,13 @@ void loadWidget(const mxArray* widget[])
 	gGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(sphereNode);
 
 	gRenderer->releaseMutex();
+
+	return S_OK;
 }
 
-void loadHulls(const mxArray* hulls)
+HRESULT loadHulls(const mxArray* hulls)
 {
-	if (gRenderer==NULL) return;
+	if (gRenderer==NULL) return E_FAIL;
 
 	if (!gGraphicObjectNodes[GraphicObjectTypes::CellHulls].empty())
 	{
@@ -376,11 +378,13 @@ void loadHulls(const mxArray* hulls)
 		gRenderer->attachToRootScene(hullRootNodes[i],Renderer::Section::Main,i);
 
 	gRenderer->releaseMutex();
+
+	return S_OK;
 }
 
-void createBorder(Vec<float> &scale)
+HRESULT createBorder(Vec<float> &scale)
 {
-	if (gRenderer==NULL) return;
+	if (gRenderer==NULL) return E_FAIL;
 
 	gRenderer->getMutex();
 
@@ -462,11 +466,13 @@ void createBorder(Vec<float> &scale)
 	gGraphicObjectNodes[GraphicObjectTypes::Border].push_back(borderNode);
 
 	gRenderer->releaseMutex();
+
+	return S_OK;
 }
 
-void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ)
+HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ)
 { 
-	if (gRenderer==NULL) return;
+	if (gRenderer==NULL) return E_FAIL;
 
 	gRenderer->getMutex();
 
@@ -505,6 +511,8 @@ void loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, i
 	}
 
 	gRenderer->releaseMutex();
+
+	return S_OK;
 }
 
 void setCurrentTexture(GraphicObjectTypes textureType)
@@ -591,9 +599,9 @@ void toggleSelectedCell(std::set<int> labels)
 	gRenderer->releaseMutex();
 }
 
-void updateHulls(const mxArray* hulls)
+HRESULT updateHulls(const mxArray* hulls)
 {
-	if (gRenderer==NULL) return;
+	if (gRenderer==NULL) return E_FAIL;
 
 	size_t numHulls = mxGetNumberOfElements(hulls);
 	for (size_t i=0; i<numHulls; ++i)
@@ -655,11 +663,13 @@ void updateHulls(const mxArray* hulls)
 
 		gRenderer->releaseMutex();
 	}
+
+	return S_OK;
 }
 
-void addHulls(const mxArray* hulls)
+HRESULT addHulls(const mxArray* hulls)
 {
-	if (gRenderer==NULL) return;
+	if (gRenderer==NULL) return E_FAIL;
 
 	size_t numHulls = mxGetNumberOfElements(hulls);
 	for (size_t i=0; i<numHulls; ++i)
@@ -718,6 +728,8 @@ void addHulls(const mxArray* hulls)
 
 		gRenderer->releaseMutex();
 	}
+
+	return S_OK;
 }
 
 // This is the entry point from Matlab
@@ -853,13 +865,18 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 					}
 
 					SetWindowPos(gWindowHandle,0,0,0,gWindowWidth,gWindowHeight,SWP_NOZORDER|SWP_NOACTIVATE);
+				if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
+				{
+					HRESULT hr = createBorder(scale);
+					if (FAILED(hr))
+						mexErrMsgTxt("Could not create border!");
 				}
 
-				loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
-				setCurrentTexture(textureType);
+				HRESULT hr = loadVolumeTexture(image,dims,numChannels,numFrames,scale,textureType);
+				if (FAILED(hr))
+					mexErrMsgTxt("Could not load texture!");
 
-				if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
-					createBorder(scale);
+				setCurrentTexture(textureType);
 			}
 
 			else if (_strcmpi("peelUpdate",command)==0)
@@ -1123,7 +1140,9 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				const mxArray* hulls = prhs[1];
 				if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
 
-				updateHulls(hulls);
+				HRESULT hr = updateHulls(hulls);
+				if (FAILED(hr))
+					mexErrMsgTxt("Could not update hulls!");
 			}
 
 			else if (_strcmpi("addHulls",command)==0)
@@ -1133,7 +1152,9 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				const mxArray* hulls = prhs[1];
 				if (hulls==NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
 
-				addHulls(hulls);
+				HRESULT hr = addHulls(hulls);
+				if (FAILED(hr))
+					mexErrMsgTxt("Could not add hulls!");
 			}
 
 			else if (_strcmpi("setCapturePath",command)==0)

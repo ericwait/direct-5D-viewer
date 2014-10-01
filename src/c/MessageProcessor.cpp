@@ -312,7 +312,7 @@ HRESULT messageProcess( MSG& msg )
 	static int curAngle = 0;
 
 	if (msg.message==WM_QUIT)
-		return S_FALSE;
+		return E_FAIL;
 
 	if (gRendererOn)
 	{

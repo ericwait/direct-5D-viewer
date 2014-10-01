@@ -125,7 +125,7 @@ HRESULT Renderer::initSwapChain()
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
 
-	HRESULT hr = S_FALSE;
+	HRESULT hr = E_FAIL;
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
 	createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
@@ -197,11 +197,11 @@ void Renderer::releaseSwapChain()
 
 HRESULT Renderer::initDepthStencils()
 {
-	HRESULT hr = S_FALSE;
+	HRESULT hr = E_FAIL;
 
 	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
 	if ( waitResult != WAIT_OBJECT_0 )
-		return S_FALSE;
+		return E_FAIL;
 
 	// Create depth stencil texture
 	ID3D11Texture2D* depthStencil = NULL;
@@ -294,7 +294,7 @@ HRESULT Renderer::initRenderTarget()
 
 	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
 	if ( waitResult != WAIT_OBJECT_0 )
-		return S_FALSE;
+		return E_FAIL;
 
 	hr = d3dDevice->CreateRenderTargetView(backBuffer, NULL, &renderTargetView);
 
@@ -322,7 +322,7 @@ HRESULT Renderer::initRasterizerStates()
 
 	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
 	if ( waitResult != WAIT_OBJECT_0 )
-		return S_FALSE;
+		return E_FAIL;
 
 	memset(&d3d11rd,0,sizeof(d3d11rd));
 	d3d11rd.FillMode=D3D11_FILL_SOLID;
@@ -453,7 +453,7 @@ HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** 
 	WaitForSingleObject(mutexDevice,INFINITE);
 
 	if ( verts.size() == 0 )
-		return S_FALSE;
+		return E_FAIL;
 
 	D3D11_BUFFER_DESC vertBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertData;
@@ -482,7 +482,7 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
 	if (faces.size()==0)
-		return S_FALSE;
+		return E_FAIL;
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA indexData;
@@ -575,7 +575,7 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 	std::wstring fn;
 	fn.assign(shaderFilename.begin(),shaderFilename.end());
 
-	if (compileVertexShader(fn.c_str(), shaderFunction.c_str(),&newShader,&newLayout)==S_FALSE)
+	if (FAILED(compileVertexShader(fn.c_str(), shaderFunction.c_str(),&newShader,&newLayout)))
 	{
 		ReleaseMutex(mutexDevice);
 		return -1;
@@ -610,7 +610,7 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 	std::wstring fn;
 	fn.assign(shaderFilename.begin(),shaderFilename.end());
 
-	if (compilePixelShader(fn.c_str(), shaderFunction.c_str(),&newShader)==S_FALSE)
+	if (FAILED(compilePixelShader(fn.c_str(), shaderFunction.c_str(),&newShader)))
 	{
 		ReleaseMutex(mutexDevice);
 		return -1;
@@ -1186,7 +1186,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	// area of the window. 
 	immediateContext->OMSetRenderTargets(0, 0, 0);
 	HRESULT hr = IDXGIBackBuffer->GetDC(FALSE, &hdcWindow);
-	if (hr == S_FALSE)
+	if (FAILED(hr))
 	{
 		MessageBox(gWindowHandle, "GetDC has failed", "Failed", MB_OK);
 		goto done;
@@ -1198,7 +1198,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	if (!hdcMemDC)
 	{
 		MessageBox(gWindowHandle, "CreateCompatibleDC has failed", "Failed", MB_OK);
-		hr = S_FALSE;
+		hr = E_FAIL;
 		goto done;
 	}
 
@@ -1229,7 +1229,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	if (!hbmScreen)
 	{
 		MessageBox(gWindowHandle, "CreateCompatibleBitmap Failed", "Failed", MB_OK);
-		hr = S_FALSE;
+		hr = E_FAIL;
 		goto done;
 	}
 
@@ -1245,7 +1245,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 		SRCCOPY))
 	{
 		MessageBox(gWindowHandle, "BitBlt has failed", "Failed", MB_OK);
-		hr = S_FALSE;
+		hr = E_FAIL;
 		goto done;
 	}
 
@@ -1293,7 +1293,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	if (INVALID_HANDLE_VALUE == hFile)
 	{
 		dwError = GetLastError();
-		hr = S_FALSE;
+		hr = E_FAIL;
 		goto done;
 	}
 
