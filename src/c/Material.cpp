@@ -246,6 +246,21 @@ void createStaticVolumeShaderText(std::string strChans)
 {
 	std::string shaderText = "";
 
+	shaderText += "///////////////////////////////////////////////////////////////////////////////\n";
+	shaderText += "// Copyright 2014 Andrew Cohen, Eric Wait, and Mark Winter\n";
+	shaderText += "// This file is part of LEVER 3-D - the tool for 5-D stem cell segmentation,\n";
+	shaderText += "// tracking, and lineaging. See http://bioimage.coe.drexel.edu 'software' section\n";
+	shaderText += "// for details. LEVER 3-D is free software: you can redistribute it and/or modify\n";
+	shaderText += "// it under the terms of the GNU General Public License as published by the Free\n";
+	shaderText += "// Software Foundation, either version 3 of the License, or (at your option) any\n";
+	shaderText += "// later version.\n";
+	shaderText += "// LEVER 3-D is distributed in the hope that it will be useful, but WITHOUT ANY\n";
+	shaderText += "// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR\n";
+	shaderText += "// A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n";
+	shaderText += "// You should have received a copy of the GNU General Public License along with\n";
+	shaderText += "// LEVer in file \"gnu gpl v3.txt\".  If not, see  <http://www.gnu.org/licenses/>.\n";
+	shaderText += "///////////////////////////////////////////////////////////////////////////////\n";
+	shaderText += "\n";
 	shaderText += "cbuffer ConstantPSBuffer : register( b1 )\n";
 	shaderText += "{\n";
 	shaderText += "	float4 transferFunctions[" + strChans + "];\n";
