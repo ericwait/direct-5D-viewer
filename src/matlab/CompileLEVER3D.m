@@ -61,7 +61,7 @@ end
 % temporarily remove any startup scripts that would normally be run by matlabrc
 enableStartupScripts(false);
 
-addFiles = {'d3dcompiler_46.dll'};
+addFiles = {'d3dcompiler_47.dll'};
 compileMATLAB('lever3d', bindir, addFiles, toolboxStruct.deps);
 
 system(['copy DefaultMeshShaders.fx ' fullfile(bindir,'.')]);
