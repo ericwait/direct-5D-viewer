@@ -140,7 +140,9 @@ void SceneNode::detatchChildNode(SceneNode* child)
 GraphicObjectNode::GraphicObjectNode(GraphicObject* graphicObjectIn)
 {
 	graphicObject = graphicObjectIn;
+	renderable = true;
 }
+
 
 void GraphicObjectNode::attachToParentNode(SceneNode* parent)
 {
