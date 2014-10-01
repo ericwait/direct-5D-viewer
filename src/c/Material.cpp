@@ -155,6 +155,8 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 		setTransferFunction(i,Vec<float>(0.0f,1.0f,0.0f));
 		setRange(i,Vec<float>(0.0f,1.0f,0.0f));
 		setColor(i,colors[i%6],1.0f);
+		setAttenuationOn(false);
+		setLightOn(false);
 	}
 }
 
