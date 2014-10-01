@@ -103,7 +103,7 @@ fprintf('\nVisual Studio Compiling: %s...\n', outputFile);
 
 projectRoot = fullfile('..','c',projectName);
 
-result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
+result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /rebuild "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
 if ( result ~= 0 )
     error([projectName ': MEX compile failed.']);
 end
