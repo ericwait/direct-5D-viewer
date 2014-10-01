@@ -338,6 +338,7 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\t\toutput.color.a *= distMult;\n";
 	shaderText += "\t}\n";
 	shaderText += "\n";
+	shaderText += "\toutput.depth = 1.0f;\n";
 	shaderText += "\n";
 	shaderText += "\treturn output;\n";
 	shaderText += "}\n";
