@@ -18,10 +18,13 @@
 NVIDIA CUDA toolkit EULA can be found at
 http://docs.nvidia.com/cuda/eula/index.html#axzz3EoF66FNY
 
-To run LEVER 3-D executable you will need the following:
-MATLAB's runtime called MCR
-Visual C++ Redistributable for Visual Studio 2012 update 3
-DirectX 11 runtime and capable device
+To run LEVER 3-D executable you will need the following: MATLAB's runtime called
+MCR (version 8.3 (R2014a)
+http://www.mathworks.com/products/compiler/mcr/index.html) Visual C++
+Redistributable for Visual Studio 2012 (http://www.microsoft.com/en-
+us/download/details.aspx?id=30679) DirectX 11 runtime (for Windows 7, no need on
+Windows 8) and capable device (http://www.microsoft.com/en-
+us/download/details.aspx?id=35)
 
 To process images you will need:
 A CUDA compute 3.5 capable device or better
@@ -29,9 +32,7 @@ A CUDA compute 3.5 capable device or better
 Once all of the above prerequisites have been met, run the LEVER3D.exe from
 the same directory as:
 DefaultMeshShaders.fx
-StaticVolumePixelShader.fx
 ViewAlignedVertexShader.fx
-d3dcompiler_46.dll
 
 The program will open and ask for a metadata file.  Please see example dataset 
 on http://bioimage.coe.drexel.edu in the 'Software' section.
@@ -39,3 +40,6 @@ on http://bioimage.coe.drexel.edu in the 'Software' section.
 The metadata needs to be in the same directory as the tiff files.  The tiff
 files need to be named such that the following sprintf line will find each file
 sprintf('%s_c%02d_t%04d_z%04d.tif',datasetName,channel,frame,zSlice)
+
+Please see 'Additional Files 3' of BMC paper for a video tutorial of the user
+interface.
