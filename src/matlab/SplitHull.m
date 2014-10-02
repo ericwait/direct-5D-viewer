@@ -17,7 +17,7 @@ function SplitHull(hull, k)
 global Hulls Tracks Families orgImage imageData hullChan trackHulls familyHulls selectedHull uiControlHandles
 
 gmoptions = statset('Display','off', 'MaxIter',400);
-obj = gmdistribution.fit(Hulls(hull).pixelsOrg, k, 'Replicates',15, 'Options',gmoptions);
+obj = fitgmdist(Hulls(hull).pixelsOrg, k, 'Replicates',15, 'Options',gmoptions);
 kIdx = cluster(obj, Hulls(hull).pixelsOrg);
 
 im = zeros(imageData.XDimension, imageData.YDimension, imageData.ZDimension, 'uint8');
