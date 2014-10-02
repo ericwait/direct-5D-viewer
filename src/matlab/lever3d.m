@@ -13,12 +13,10 @@
 %LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function lever3d(make2d3d)
+function lever3d()
 global imageData orgImage processedImage tmr uiControlFig useDistance
 
-if (~exist('make2d3d','var') || isempty(make2d3d))
-    make2d3d = 0;
-end
+processedImage = [];
 
 if (~isempty(uiControlFig) && ishandle(uiControlFig))
     close(uiControlFig);
@@ -47,17 +45,8 @@ catch err
     end
 end
 
-%[orgImage, imageData] = tiffReader([],[],[],[],'d:\Users\Eric.Bioimage29\Documents\Images\LEVer3d\Susan_overnight_new');
 [orgImage, imageData] = tiffReader([],[],[],[],fullfile(PathName,FileName));
 
-if (make2d3d~=0)
-    orgImage = squeeze(orgImage);
-    imageData.ZDimension = imageData.NumberOfFrames;
-    imageData.NumberOfFrames = 1;
-    imageData.ZPixelPhysicalSize = imageData.XPixelPhysicalSize;
-else
-    processedImage = orgImage;
-end
 
 tmr = timer('TimerFcn',@CheckMessage,'ExecutionMode','fixedSpacing','Period',0.1);
 start(tmr);
