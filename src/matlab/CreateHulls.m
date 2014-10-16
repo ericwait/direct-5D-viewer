@@ -37,7 +37,8 @@ scaleFactor  =  imageDims ./ max(imageDims) .* physDims/physDims(1);
 imDiv = imageDims /2;
 minCellVol = (4*pi*(minCellDia/2)^3)/3;
 
-stts = regionprops(bwIm,orgIm,'BoundingBox','PixelList','WeightedCentroid');
+cc = bwconncomp(bwIm);
+stts = regionprops(cc,orgIm,'BoundingBox','PixelList','WeightedCentroid');
 if isempty(stts)
     return
 end
