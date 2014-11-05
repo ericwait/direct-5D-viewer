@@ -27,7 +27,7 @@ for i=1:k
     im(idx) = i;
 end
 
-newHulls = CreateHulls(im,orgImage(:,:,:,hullChan,Hulls(hull).frame),1,Hulls(hull).frame);
+newHulls = CreateHulls(im,orgImage(:,:,:,hullChan,Hulls(hull).frame),1,Hulls(hull).frame,0,0,1);
 
 oldHull = Hulls(hull);
 Hulls(hull) = newHulls(1);
