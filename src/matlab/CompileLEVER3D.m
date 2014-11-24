@@ -109,7 +109,7 @@ if ( result ~= 0 )
 end
 
 %system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.dll']) ' ' fullfile('.', [projectName '.mexw64' vsStruct.buildbits])]);
-fprintf('Done (%f sec)\n\n', toc(compileTime));
+fprintf('Done %s\n\n', printTime(toc(compileTime)));
 end
 
 function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList)
@@ -146,7 +146,7 @@ end
 
 system(['copy ' projectName '.exe ' fullfile(bindir,'.')]);
 
-fprintf('Done (%f sec)\n', toc(compileTime));
+fprintf('Done %s\n', printTime(toc(compileTime)));
 end
 
 function enableStartupScripts(bEnable)
