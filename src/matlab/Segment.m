@@ -30,7 +30,7 @@ for i=1:length(Hulls)
 end
 
 segTime = toc;
-fprintf('Segmentation took: %f or %f avg per frame and found %d cells\n',segTime,segTime/size(segImage,5),length(Hulls));
+fprintf('Segmentation took: %s or %f avg per frame and found %d cells\n',printTime(segTime),segTime/size(segImage,5),length(Hulls));
 
 imageDims = [imageData.XDimension, imageData.YDimension, imageData.ZDimension];
 physDims = [imageData.XPixelPhysicalSize, imageData.YPixelPhysicalSize, imageData.ZPixelPhysicalSize];
@@ -73,7 +73,7 @@ if (~isempty(Hulls))
     
     ProcessNewborns(minCellDiaVox*6,minCellDiaVox*2);
     trackTime = toc;
-    fprintf('Tracking took: %f or %f avg per frame and found %d tracks\n',trackTime,trackTime/size(segImage,5),length(Tracks));
+    fprintf('Tracking took: %s or %f avg per frame and found %d tracks\n',printTime(trackTime),trackTime/size(segImage,5),length(Tracks));
     
     lever_3d('loadHulls',Hulls);
     DrawTree();
