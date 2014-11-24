@@ -447,7 +447,7 @@ switch processStr{processIdx}
                 end
             end
             processTime = toc;
-            fprintf('Contrast Enhancement took: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
+            fprintf('Contrast Enhancement took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
             processed = 1;
         end
     case 'Markov Random Fields Denoise'
@@ -469,7 +469,7 @@ switch processStr{processIdx}
             end
             processed = 1;
             processTime = toc;
-            fprintf('Markov Random Fields Denoise: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
+            fprintf('Markov Random Fields Denoise: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
         end
     case 'Segment, Track, & Lineage'
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z','Min Cell Diameter'};
@@ -489,9 +489,12 @@ switch processStr{processIdx}
             end
             for t=1:size(processedImage,5)
                 segImage(:,:,:,chan,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
+                if (~any(segImage(:,:,:,chan,t)))
+                    warning('No segmentations on frame: %d!',t);
+                end
             end
             processTime = toc;
-            fprintf('Image Processing Took: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
+            fprintf('Image Processing Took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
             Segment(chan,dia);
             if (~isempty(distanceImage))
                 set(handles.m_DistanceChoice,'Enable','on');
@@ -517,7 +520,7 @@ switch processStr{processIdx}
                 distanceImage(:,:,:,chan,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
             end
             processTime = toc;
-            fprintf('Distance Map: %f total sec, or %f avg per frame\n',processTime,processTime/size(processedImage,5));
+            fprintf('Distance Map: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
             if (~isempty(Hulls))
                 SetDistances(chan);
                 set(handles.m_DistanceChoice,'Enable','on');
@@ -544,7 +547,7 @@ if (processed>0)
         viewImage(:,:,:,c,:) = uint8(double(processedImage(:,:,:,c,:)) ./mx .*255);
     end
     
-    lever_3d('loadTexture',imageConvert(viewImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
+    lever_3d('loadTexture',imageConvertNorm(viewImage,imageData,'uint8',1),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
     updateCurrentState(handles);
 end
 
