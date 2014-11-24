@@ -31,7 +31,9 @@ useDistance = 0;
 if (FileName==0), return, end
 
 try
-    mkdir(PathName,'ScreenShots');
+    if (~exist(fullfile(PathName,'ScreenShots'),'file'))
+        mkdir(PathName,'ScreenShots');
+    end
     captureFilePath = fullfile(PathName,'ScreenShots');
 catch err
     disp('Choose folder to place screen shots...');
