@@ -13,10 +13,14 @@
 %LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function lever3d()
+function lever3d(typ)
 global imageData orgImage processedImage tmr uiControlFig useDistance
 
 processedImage = [];
+
+if (~exist('typ','var'))
+    typ = [];
+end
 
 if (~isempty(uiControlFig) && ishandle(uiControlFig))
     close(uiControlFig);
@@ -47,8 +51,8 @@ catch err
     end
 end
 
-[orgImage, imageData] = tiffReader([],[],[],[],fullfile(PathName,FileName));
 
+[orgImage, imageData] = tiffReader(typ,[],[],[],fullfile(PathName,FileName));
 
 tmr = timer('TimerFcn',@CheckMessage,'ExecutionMode','fixedSpacing','Period',0.1);
 start(tmr);
@@ -56,7 +60,7 @@ start(tmr);
 lever_3d('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
 lever_3d('takeControl');
 
-lever_3d('loadTexture',imageConvert(orgImage,'uint8'),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize]);
+lever_3d('loadTexture',imageConvertNorm(orgImage,imageData,'uint8',1),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize]);
 
 lever_3d('setCapturePath',captureFilePath,imageData.DatasetName);
 
