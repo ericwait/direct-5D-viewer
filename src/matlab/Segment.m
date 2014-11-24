@@ -22,7 +22,11 @@ hullChan = chan;
 
 for t=1:size(segImage,5)
     bw = segImage(:,:,:,chan,t)>0;
-    Hulls = [Hulls CreateHulls(bw,orgImage(:,:,:,chan,t),minCellDia,t)];
+    newHulls = CreateHulls(bw,orgImage(:,:,:,chan,t),minCellDia,t);
+    if (isempty(newHulls))
+        warning('No hulls found on frame %d',t);
+    end
+    Hulls = [Hulls newHulls];
 end
 
 for i=1:length(Hulls)
