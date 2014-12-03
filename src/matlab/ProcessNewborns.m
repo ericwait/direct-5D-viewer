@@ -43,7 +43,9 @@ costMatrix = Costs;
 planes = [];
 
 size = length(families);
-for i=1:size
+[~,inds] = sort([Families.startFrame]);
+for j=1:size
+    i = inds(j);
     if ( isempty(Families(families(i)).startFrame) )
         continue;
     end
