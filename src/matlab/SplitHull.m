@@ -14,7 +14,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SplitHull(hull, k)
-global Hulls Tracks Families orgImage imageData hullChan trackHulls familyHulls selectedHull uiControlHandles
+global Hulls Tracks Families orgMetadata imageData segMetadata trackHulls familyHulls selectedHull uiControlHandles
 
 gmoptions = statset('Display','off', 'MaxIter',400);
 obj = fitgmdist(Hulls(hull).pixelsOrg, k, 'Replicates',15, 'Options',gmoptions);
@@ -27,7 +27,8 @@ for i=1:k
     im(idx) = i;
 end
 
-newHulls = CreateHulls(im,orgImage(:,:,:,hullChan,Hulls(hull).frame),1,Hulls(hull).frame,0,0,1);
+newHulls = CreateHulls(im,tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),Hulls(hull).frame,segMetadata.HullsChan,[],[],[],true),...
+    1,Hulls(hull).frame,0,0,1);
 
 oldHull = Hulls(hull);
 Hulls(hull) = newHulls(1);

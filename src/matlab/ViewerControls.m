@@ -155,7 +155,7 @@ end
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
-global tmr Hulls Tracks Families orgImage processedImage distanceImage imageData Costs Colors selectedHull uiTreeFig uiControlHandles segImage channelData familyHulls trackHulls useDistance
+global tmr Hulls Tracks Families orgMetadata processedMetadata segMetadata distMetadata imageData Costs Colors selectedHull uiTreeFig uiControlHandles segImage channelData familyHulls trackHulls useDistance distChanUsed
 lever_3d('close');
 
 if ~isempty(tmr)
@@ -172,9 +172,6 @@ clear mex
 Hulls = [];
 Tracks = [];
 Families = [];
-orgImage = [];
-processedImage = [];
-distanceImage = [];
 imageData = [];
 Costs = [];
 Colors = [];
@@ -185,6 +182,11 @@ channelData = [];
 familyHulls = [];
 trackHulls = [];
 useDistance = [];
+orgMetadata = [];
+processedMetadata = [];
+segMetadata = [];
+distMetadata = [];
+distChanUsed = [];
 
 delete(hObject);
 end
@@ -270,11 +272,11 @@ end
 
 % --- Executes on button press in save.
 function saveData()
-global imageData channelData
-
-if (~isempty(imageData) && ~isempty(channelData))
-    save([imageData.DatasetName '_Settings.mat'],'channelData');
-end
+% global imageData channelData
+% 
+% if (~isempty(imageData) && ~isempty(channelData))
+%     save([imageData.DatasetName '_Settings.mat'],'channelData');
+% end
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -411,20 +413,23 @@ end
 
 % --- Executes on selection change in m_imageProcessing.
 function m_imageProcessing_Callback(hObject, eventdata, handles)
-global imageData orgImage processedImage distanceImage segImage channelData Hulls hullChan
+global imageData orgMetadata processedMetadata segMetadata distMetadata channelData Hulls Tracks Families tmr
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).alphaMod = get(handles.s_alpha,'Value');
 
 processIdx = get(handles.m_imageProcessing,'Value');
 processStr = get(handles.m_imageProcessing,'String');
 
-if (isempty(processedImage))
-    processedImage = orgImage;
-end
+stop(tmr);
 
 processed = 0;
 switch processStr{processIdx}
     case 'Contrast Enhancement'
+        if (isempty(processedMetadata))
+            processedMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+            processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
+            processedMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
+        end
         params = {'Gaussian Sigma in X','Gaussian Sigma in Y', 'Gaussian Sigma in Z', 'Median Filter in X', 'Median Filter in Y','Median Filter in Z'};
         diaTitle = 'Contrast Enhancement';
         def = {'100', '100', '100', '3', '3', '3'};
@@ -437,20 +442,37 @@ switch processStr{processIdx}
             mY = str2double(response{5});
             mZ = str2double(response{6});
             tic
-            if (get(handles.rb_Processed,'Value')==1)
-                for t=1:size(processedImage,5)
-                    processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',processedImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+            processedImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,imageData.Type);
+            if (get(handles.rb_Processed,'Value')==1 ...
+                    && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
+                    && processedMetadata.ChanProcessed(chan))
+                parfor t=1:imageData.NumberOfFrames
+                    processedImage(:,:,:,1,t) = CudaMex(...
+                        'ContrastEnhancement',tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),t,chan,[],[],true,true),...
+                        [gX,gY,gZ],[mX,mY,mZ]);
                 end
             else
-                for t=1:size(orgImage,5)
-                    processedImage(:,:,:,chan,t) = CudaMex('ContrastEnhancement',orgImage(:,:,:,chan,t),[gX,gY,gZ],[mX,mY,mZ]);
+                parfor t=1:imageData.NumberOfFrames
+                    processedImage(:,:,:,1,t) = CudaMex(...
+                        'ContrastEnhancement',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
+                        [gX,gY,gZ],[mX,mY,mZ]);
                 end
             end
             processTime = toc;
             fprintf('Contrast Enhancement took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
+            tempData = imageData;
+            tempData.DatasetName = [imageData.DatasetName,'_processed'];
+            tiffWriter(processedImage,fullfile(processedMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
             processed = 1;
+            processedMetadata.ChanProcessed(chan) = true;
         end
     case 'Markov Random Fields Denoise'
+        if (isempty(processedMetadata))
+            processedMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+            processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
+            processedMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
+        end
         params = {'Max iterations'};
         diaTitle = 'Denoise';
         def = {'100'};
@@ -458,20 +480,38 @@ switch processStr{processIdx}
         if (~isempty(response))
             iter = str2num(response{1});
             tic
-            if (get(handles.rb_Processed,'Value')==1)
-                for t=1:size(processedImage,5)
-                    processedImage(:,:,:,chan,t) = uint16(CudaMex('MarkovRandomFieldDenoiser',single(processedImage(:,:,:,chan,t)),iter));
+            processedImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,imageData.Type);
+            if (get(handles.rb_Processed,'Value')==1 ...
+                    && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
+                    && processedMetadata.ChanProcessed(chan))
+                parfor t=1:imageData.NumberOfFrames
+                    processedImage(:,:,:,1,t) = imageConvertNorm(CudaMex('MarkovRandomFieldDenoiser',...
+                        tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),t,chan,[],'single',true,true),iter),...
+                        imageData.Type,true);
                 end
             else
-                for t=1:size(orgImage,5)
-                    processedImage(:,:,:,chan,t) = uint16(CudaMex('MarkovRandomFieldDenoiser',single(orgImage(:,:,:,chan,t)),iter));
+                parfor t=1:imageData.NumberOfFrames
+                    processedImage(:,:,:,1,t) = imageConvertNorm(CudaMex('MarkovRandomFieldDenoiser',...
+                        tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],'single',true,true),iter),...
+                        imageData.Type,true);
                 end
             end
-            processed = 1;
             processTime = toc;
-            fprintf('Markov Random Fields Denoise: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
+            fprintf('Markov Random Fields Denoise: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
+            processed = 1;
+            tempData = imageData;
+            tempData.DatasetName = [imageData.DatasetName,'_processed'];
+            tiffWriter(processedImage,fullfile(processedMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
+            processedMetadata.ChanProcessed(chan) = true;
         end
     case 'Segment, Track, & Lineage'
+        if (isempty(segMetadata))
+            segMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+            segMetadata.FileName = [imageData.DatasetName '_segmentation.txt'];
+            segMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
+            segMetadata.HullsChan = chan;%TODO this is prob not the right way to do this!
+        end
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z','Min Cell Diameter'};
         diaTitle = 'Segmentation';
         def = {'1.0', '2', '2', '1','6'};
@@ -484,23 +524,56 @@ switch processStr{processIdx}
             oZ = str2double(response{4});
             dia = str2double(response{5});
             tic
-            if (isempty(segImage))
-                segImage = zeros(size(processedImage),'uint8');
-            end
-            for t=1:size(processedImage,5)
-                segImage(:,:,:,chan,t) = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
-                if (~any(segImage(:,:,:,chan,t)))
-                    warning('No segmentations on frame: %d!',t);
+            segImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,'uint8');
+            if (get(handles.rb_Processed,'Value')==1 ...
+                    && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
+                    && processedMetadata.ChanProcessed(chan))
+                parfor t=1:imageData.NumberOfFrames
+                    segImage(:,:,:,1,t) = imageConvertNorm(CudaMex(...
+                        'Segment',tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),t,chan,[],[],true,true),...
+                        alpha,[oX,oY,oZ]),'uint8',true);
+                end
+            else
+                parfor t=1:imageData.NumberOfFrames
+                    segImage(:,:,:,1,t) = imageConvertNorm(CudaMex(...
+                        'Segment',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
+                        alpha,[oX,oY,oZ]),'uint8',true);
                 end
             end
             processTime = toc;
-            fprintf('Image Processing Took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
-            Segment(chan,dia);
-            if (~isempty(distanceImage))
+            fprintf('Image Processing Took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
+            tempData = imageData;
+            tempData.DatasetName = [imageData.DatasetName,'_segmentation'];
+            tiffWriter(segImage,fullfile(segMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
+            segMetadata.ChanProcessed(chan) = true;
+            Segment(segImage,chan,dia);
+            if (~isempty(distMetadata))
                 set(handles.m_DistanceChoice,'Enable','on');
+            end
+            clear segImage
+            save(fullfile(segMetadata.PathName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
+            msg = 'There are empty structures:';
+            if isempty(Hulls)
+                msg = [msg;{'Hulls'}];
+            end
+            if isempty(Tracks)
+                msg = [msg;{'Tracks'}];
+            end
+            if isempty(Families)
+                msg = [msg;{'Families'}];
+            end
+            
+            if (size(msg,1)>1)
+                warndlg(msg);
             end
         end
     case 'Distance Map'
+        if (isempty(distMetadata))
+            distMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+            distMetadata.FileName = [imageData.DatasetName '_distance.txt'];
+            distMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
+        end
         params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
         diaTitle = 'Distance Map';
         def = {'1.0', '2', '2', '1'};
@@ -510,44 +583,59 @@ switch processStr{processIdx}
             oX = str2double(response{2});
             oY = str2double(response{3});
             oZ = str2double(response{4});
-            if (isempty(distanceImage))
-                distanceImage = zeros(size(processedImage));
-            end
             tic
-            for t=1:size(processedImage,5)
-                temp = CudaMex('Segment',processedImage(:,:,:,chan,t),alpha,[oX,oY,oZ]);
-                temp = temp>=max(temp(:));
-                distanceImage(:,:,:,chan,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
+            distanceImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames);
+            if (get(handles.rb_Processed,'Value')==1  && ~isempty(processedMetadata)...
+                    && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
+                    && processedMetadata.ChanProcessed(chan))
+                parfor t=1:imageData.NumberOfFrames
+                    temp = CudaMex('Segment',tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),t,chan,[],[],true,true),...
+                        alpha,[oX,oY,oZ]);
+                    temp = temp>=max(temp(:));
+                    distanceImage(:,:,:,1,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
+                end
+            else
+                parfor t=1:imageData.NumberOfFrames
+                    temp = CudaMex('Segment',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
+                        alpha,[oX,oY,oZ]);
+                    temp = temp>=max(temp(:));
+                    distanceImage(:,:,:,1,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
+                end
             end
             processTime = toc;
-            fprintf('Distance Map: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
+            fprintf('Distance Map: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
+            tempData = imageData;
+            tempData.DatasetName = [imageData.DatasetName,'_distance'];
+            tiffWriter(distanceImage,fullfile(distMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            save(fullfile(distMetadata.PathName,'distMetadata.mat'),'distMetadata');
+            distMetadata.ChanProcessed(chan) = true;
             if (~isempty(Hulls))
-                SetDistances(chan);
+                SetDistances(distanceImage);
                 set(handles.m_DistanceChoice,'Enable','on');
             end
+            clear distanceImage
         end
+        delete(gcp('nocreate'));
 end
 
 if (processed>0)    
     set(handles.rb_Processed,'Enable','on','Value',1);
     set(handles.rb_orgImage,'Value',0);
     
-%     channelData(chan).alphaMod = 1.0;
-%     channelData(chan).minVal = 0.0;
-%     channelData(chan).midVal = 0.5;
-%     channelData(chan).maxVal = 1.0;
-%     channelData(chan).a = 0.0;
-%     channelData(chan).b = 1.0;
-%     channelData(chan).c = 0.0;
-    
-    viewImage = zeros(size(processedImage),'uint8');
-    for c=1:size(processedImage,4)
-        mx = max(processedImage(:,:,:,c,:));
-        mx = double(max(mx(:)));
-        viewImage(:,:,:,c,:) = uint8(double(processedImage(:,:,:,c,:)) ./mx .*255);
+    viewImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,imageData.NumberOfChannels,imageData.NumberOfFrames,'uint8');
+    for c=1:imageData.NumberOfChannels
+        if (c==chan)
+            viewImage(:,:,:,c,:) = imageConvertNorm(processedImage,'uint8',true);
+        elseif (processedMetadata.ChanProcessed(c))
+            viewImage(:,:,:,c,:) = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],c,[],'uint8',true,true);
+        else
+            viewImage(:,:,:,c,:) = tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),[],c,[],'uint8',true,true);
+        end
     end
     
-    lever_3d('loadTexture',imageConvertNorm(viewImage,imageData,'uint8',1),[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
+    clear processedImage
+    lever_3d('loadTexture',viewImage,[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
+    clear viewImage
     updateCurrentState(handles);
 end
 
@@ -559,6 +647,7 @@ if (~isempty(Hulls))
 end
 
 set(handles.m_imageProcessing,'Value',1);
+start(tmr);
 end
 
 % --- Executes on button press in cb_Wireframe.
@@ -626,11 +715,9 @@ end
 
 % --- Executes on button press in pb_SaveSegmentation.
 function pb_SaveSegmentation_Callback(hObject, eventdata, handles)
-global Hulls Tracks Families imageData hullChan
-folderName = uigetdir();
-if (folderName == 0), return, end
-
-save(fullfile(folderName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','hullChan','-v7.3');
+global Hulls Tracks Families segMetadata
+save(fullfile(segMetadata.PathName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
+save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
 msg = 'There are empty structures:';
 if isempty(Hulls)
     msg = [msg;{'Hulls'}];
@@ -736,9 +823,20 @@ end
 
 % --- Executes on selection change in m_DistanceChoice.
 function m_DistanceChoice_Callback(hObject, eventdata, handles)
-global useDistance Hulls
+global useDistance distMetadata distChanUsed
+
 chan = get(handles.m_channelPicker,'Value');
-SetDistances(chan);
+if (~isempty(distChanUsed))
+    distChanUsed = chan;
+elseif (distChanUsed~=chan)
+    if (~distMetadata.ChanProcessed(chan))
+        warndlg('There is no distance data for this channel.  Please process first');
+        return
+    end
+    distIm = tiffReader(fullfile(distMetadata.PathName,distMetadata.FileName),[],chan);
+    SetDistances(distIm);
+    clear distIm
+end
 
 useDistance = get(handles.m_DistanceChoice,'Value')-1;
 DrawTree();

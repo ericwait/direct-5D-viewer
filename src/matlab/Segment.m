@@ -13,16 +13,16 @@
 %LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function Segment(chan, minCellDia)
-global imageData orgImage segImage Hulls Tracks Families Costs hullChan
+function Segment(segImage, chan, minCellDia)
+global imageData orgMetadata Hulls Tracks Families Costs hullChan
 tic
 [Hulls,Tracks,Families] = GetEmptyStructs();
 
 hullChan = chan;
 
 for t=1:size(segImage,5)
-    bw = segImage(:,:,:,chan,t)>0;
-    newHulls = CreateHulls(bw,orgImage(:,:,:,chan,t),minCellDia,t);
+    bw = segImage(:,:,:,1,t)>0;
+    newHulls = CreateHulls(bw,tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],[],true),minCellDia,t);
     if (isempty(newHulls))
         warning('No hulls found on frame %d',t);
     end
@@ -34,7 +34,7 @@ for i=1:length(Hulls)
 end
 
 segTime = toc;
-fprintf('Segmentation took: %s or %f avg per frame and found %d cells\n',printTime(segTime),segTime/size(segImage,5),length(Hulls));
+fprintf('Segmentation took: %s or %s per frame and found %d cells\n',printTime(segTime),printTime(segTime/size(segImage,5)),length(Hulls));
 
 imageDims = [imageData.XDimension, imageData.YDimension, imageData.ZDimension];
 physDims = [imageData.XPixelPhysicalSize, imageData.YPixelPhysicalSize, imageData.ZPixelPhysicalSize];
@@ -77,7 +77,7 @@ if (~isempty(Hulls))
     
     ProcessNewborns(minCellDiaVox*6,minCellDiaVox*2);
     trackTime = toc;
-    fprintf('Tracking took: %s or %f avg per frame and found %d tracks\n',printTime(trackTime),trackTime/size(segImage,5),length(Tracks));
+    fprintf('Tracking took: %s or %s per frame and found %d tracks\n',printTime(trackTime),printTime(trackTime/size(segImage,5)),length(Tracks));
     
     lever_3d('loadHulls',Hulls);
     DrawTree();
