@@ -715,7 +715,7 @@ end
 
 % --- Executes on button press in pb_SaveSegmentation.
 function pb_SaveSegmentation_Callback(hObject, eventdata, handles)
-global Hulls Tracks Families segMetadata
+global Hulls Tracks Families segMetadata imageData
 save(fullfile(segMetadata.PathName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
 save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
 msg = 'There are empty structures:';
@@ -823,19 +823,21 @@ end
 
 % --- Executes on selection change in m_DistanceChoice.
 function m_DistanceChoice_Callback(hObject, eventdata, handles)
-global useDistance distMetadata distChanUsed
+global useDistance distMetadata
 
 chan = get(handles.m_channelPicker,'Value');
-if (~isempty(distChanUsed))
-    distChanUsed = chan;
-elseif (distChanUsed~=chan)
-    if (~distMetadata.ChanProcessed(chan))
-        warndlg('There is no distance data for this channel.  Please process first');
-        return
-    end
+if (isempty(distMetadata))
+    warndlg('There is no distance data for this channel.  Please process first');
+    set(handles.m_DistanceChoice,'Value',1);
+    return
+elseif (distMetadata.ChanProcessed(chan))
     distIm = tiffReader(fullfile(distMetadata.PathName,distMetadata.FileName),[],chan);
     SetDistances(distIm);
     clear distIm
+else
+    warndlg('There is no distance data for this channel.  Please process first');
+    set(handles.m_DistanceChoice,'Value',1);
+    return
 end
 
 useDistance = get(handles.m_DistanceChoice,'Value')-1;

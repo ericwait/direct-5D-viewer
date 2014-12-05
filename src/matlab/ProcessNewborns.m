@@ -56,19 +56,30 @@ for j=1:size
     
     %The root of the track to try to connect with another track
     childTrackID = Families(families(i)).rootTrack;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if (childTrackID == 129) %%%%%%% REMOVE THIS!!!!!!!!!!!!!!!!!!!!!!!!
+        continue;
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     familyTimeFrame = Families(families(i)).endFrame - Families(families(i)).startFrame;
 
     %Get all the possible hulls that could have been connected
     childHullID = Tracks(childTrackID).hulls(1);
-    if(childHullID>length(costMatrix) || childHullID==0),continue,end
+    if(childHullID>length(costMatrix) || childHullID==0),
+        continue
+    end
     parentHullCandidates = find(costMatrix(:,childHullID));
 
     % Don't consider deleted hulls as parents
 %     bDeleted = [Hulls(parentHullCandidates).deleted];
 %     parentHullCandidates = parentHullCandidates(~bDeleted);
     
-    if(isempty(parentHullCandidates)),continue,end
-    if(minFamilyTimeFrame >= familyTimeFrame),continue,end
+    if(isempty(parentHullCandidates))
+        continue
+    end
+    if(minFamilyTimeFrame >= familyTimeFrame)
+        continue
+    end
 
     %Get the costs of the possible connections
     parentCosts = costMatrix(parentHullCandidates,childHullID);
@@ -77,7 +88,9 @@ for j=1:size
     for j=1:length(parentHullCandidates)
         %Get the length of time that the parentCandidate exists
         parentTrackID = Hulls(parentHullCandidates(j)).track;
-        if(isempty(parentTrackID)),continue,end
+        if(isempty(parentTrackID))
+            continue
+        end
         parentTrackTimeFrame = Tracks(parentTrackID).endFrame - Tracks(parentTrackID).startFrame;
 
         %Change the cost of the candidates
@@ -103,7 +116,9 @@ for j=1:size
     %Pick the best candidate
     parentCosts = full(parentCosts);
     [minCost index] = min(parentCosts(find(parentCosts)));
-    if(isinf(minCost)),continue,end
+    if(isinf(minCost))
+        continue
+    end
     
     % Do not allow reconnect of removed edges
 %     if ( GraphEdits(parentHullCandidates(index),childHullID) < 0 )

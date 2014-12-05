@@ -31,6 +31,9 @@ orgMetadata.FileName = '';
 [orgMetadata.FileName,orgMetadata.PathName,~] = uigetfile('.txt');
 if (orgMetadata.FileName==0), return, end
 
+processedMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+segMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+distMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
 try
     if (~exist(fullfile(orgMetadata.PathName,'ScreenShots'),'file'))
         mkdir(orgMetadata.PathName,'ScreenShots');
