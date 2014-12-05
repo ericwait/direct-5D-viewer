@@ -272,11 +272,11 @@ end
 
 % --- Executes on button press in save.
 function saveData()
-% global imageData channelData
-% 
-% if (~isempty(imageData) && ~isempty(channelData))
-%     save([imageData.DatasetName '_Settings.mat'],'channelData');
-% end
+global imageData channelData
+
+if (~isempty(imageData) && ~isempty(channelData))
+    save([imageData.DatasetName '_Settings.mat'],'channelData');
+end
 end
 
 % --- Outputs from this function are returned to the command line.

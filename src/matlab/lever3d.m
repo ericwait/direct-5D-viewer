@@ -31,9 +31,6 @@ orgMetadata.FileName = '';
 [orgMetadata.FileName,orgMetadata.PathName,~] = uigetfile('.txt');
 if (orgMetadata.FileName==0), return, end
 
-processedMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
-segMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
-distMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
 try
     if (~exist(fullfile(orgMetadata.PathName,'ScreenShots'),'file'))
         mkdir(orgMetadata.PathName,'ScreenShots');
@@ -71,19 +68,22 @@ uiControlFig = ViewerControls();
 lever_3d('resetView');
 lever_3d('releaseControl');
 
-if (exist(fullfile(orgMetadata.PathName,'Processed'),'dir'))
-    if (exist(fullfile(orgMetadata.PathName,'Processed','processedMetadata.mat'),'file'))
-        load(fullfile(orgMetadata.PathName,'Processed','processedMetadata.mat'));
+if (exist(fullfile(imageData.imageDir,'Processed'),'dir'))
+    if (exist(fullfile(imageData.imageDir,'Processed','processedMetadata.mat'),'file'))
+        load(fullfile(imageData.imageDir,'Processed','processedMetadata.mat'));
+        processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
     end
-    if (exist(fullfile(orgMetadata.PathName,'Processed','distMetadata.mat'),'file'))
-        load(fullfile(orgMetadata.PathName,'Processed','distMetadata.mat'));
+    if (exist(fullfile(imageData.imageDir,'Processed','distMetadata.mat'),'file'))
+        load(fullfile(imageData.imageDir,'Processed','distMetadata.mat'));
         set(uiControlHandles.m_DistanceChoice,'Enable','on');
+        distMetadata.PathName = fullfile(imageData.imageDir,'Processed');
     end
-    if (exist(fullfile(orgMetadata.PathName,'Processed','segMetadata.mat'),'file'))
-        load(fullfile(orgMetadata.PathName,'Processed','segMetadata.mat'));
+    if (exist(fullfile(imageData.imageDir,'Processed','segMetadata.mat'),'file'))
+        load(fullfile(imageData.imageDir,'Processed','segMetadata.mat'));
+        segMetadata.PathName = fullfile(imageData.imageDir,'Processed');
     end
-    if (~isempty(segMetadata) && exist(fullfile(orgMetadata.PathName,'Processed',[imageData.DatasetName,'_Segmenation.mat']),'file'))
-        load(fullfile(orgMetadata.PathName,'Processed',[imageData.DatasetName,'_Segmenation.mat']));
+    if (~isempty(segMetadata) && exist(fullfile(imageData.imageDir,'Processed',[imageData.DatasetName,'_Segmenation.mat']),'file'))
+        load(fullfile(imageData.imageDir,'Processed',[imageData.DatasetName,'_Segmenation.mat']));
         if (~isempty(Hulls))
             set(uiControlHandles.cb_SegmentationResults,'Value',1,'Enable','on');
             set(uiControlHandles.cb_Wireframe,'Value',1,'Enable','on');
@@ -109,7 +109,7 @@ if (~isempty(processedMetadata) && exist(fullfile(processedMetadata.PathName,pro
         if (processedMetadata.ChanProcessed(c))
             viewImage(:,:,:,c,:) = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],c,[],'uint8',true,true);
         else
-            viewImage(:,:,:,c,:) = tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),[],c,[],'uint8',true,true);
+            viewImage(:,:,:,c,:) = tiffReader(fullfile(imageData.imageDir,orgMetadata.FileName),[],c,[],'uint8',true,true);
         end
     end
     lever_3d('loadTexture',viewImage,[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
