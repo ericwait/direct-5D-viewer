@@ -26,6 +26,11 @@ if ( ~exist(bindir,'dir') )
     mkdir(bindir);
 end
 
+depDirs = {'d:\Users\Eric.Bioimage29\Documents\Programming\cuda-image-processing-libarary\bin';...
+    'd:\Users\Eric.Bioimage29\Documents\Programming\general-matlab-tools\src\MATLAB'};
+
+copyDeps(depDirs);
+
 outputFiles = {};
 
 newOutput = compileMEX('lever-3d', vsStruct);
@@ -71,8 +76,38 @@ enableStartupScripts(true);
 
 fprintf('\n');
 
+rmDeps(depDirs);
+
 toc(totalTime)
 
+end
+
+function copyDeps(dirs)
+for i=1:numel(dirs)
+    dlist = dir(dirs{i});
+    for j=1:numel(dlist)
+        if (strcmpi(dlist(j).name,'.') || strcmpi(dlist(j).name,'..'))
+            continue
+        end
+        if (exist(fullfile(dirs{i},dlist(j).name),'file'))
+            copyfile(fullfile(dirs{i},dlist(j).name),'.');
+        end
+    end
+end
+end
+
+function rmDeps(dirs)
+for i=1:numel(dirs)
+    dlist = dir(dirs{i});
+    for j=1:numel(dlist)
+        if (strcmpi(dlist(j).name,'.') || strcmpi(dlist(j).name,'..'))
+            continue
+        end
+        if (exist(fullfile('.',dlist(j).name),'file'))
+            delete(fullfile('.',dlist(j).name),'.');
+        end
+    end
+end
 end
 
 function [vsStruct comparch] = setupCompileTools()
