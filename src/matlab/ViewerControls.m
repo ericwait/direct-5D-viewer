@@ -463,9 +463,9 @@ switch processStr{processIdx}
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_processed'];
             tiffWriter(processedImage,fullfile(processedMetadata.PathName,tempData.DatasetName),tempData,[],chan);
-            save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
             processed = 1;
             processedMetadata.ChanProcessed(chan) = true;
+            save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
         end
     case 'Markov Random Fields Denoise'
         if (isempty(processedMetadata))
@@ -502,8 +502,8 @@ switch processStr{processIdx}
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_processed'];
             tiffWriter(processedImage,fullfile(processedMetadata.PathName,tempData.DatasetName),tempData,[],chan);
-            save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
             processedMetadata.ChanProcessed(chan) = true;
+            save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
         end
     case 'Segment, Track, & Lineage'
         if (isempty(segMetadata))
@@ -545,8 +545,8 @@ switch processStr{processIdx}
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_segmentation'];
             tiffWriter(segImage,fullfile(segMetadata.PathName,tempData.DatasetName),tempData,[],chan);
-            save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
             segMetadata.ChanProcessed(chan) = true;
+            save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
             Segment(segImage,chan,dia);
             if (~isempty(distMetadata))
                 set(handles.m_DistanceChoice,'Enable','on');
