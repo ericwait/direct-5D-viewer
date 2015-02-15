@@ -423,6 +423,8 @@ processStr = get(handles.m_imageProcessing,'String');
 stop(tmr);
 
 processed = 0;
+numCudaDevices = CudaMex('DeviceCount');
+
 switch processStr{processIdx}
     case 'Contrast Enhancement'
         if (isempty(processedMetadata))
@@ -443,6 +445,9 @@ switch processStr{processIdx}
             mZ = str2double(response{6});
             tic
             processedImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,imageData.Type);
+            if (numCudaDevices==1)
+                lever_3d('takeControl');
+            end
             if (get(handles.rb_Processed,'Value')==1 ...
                     && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
                     && processedMetadata.ChanProcessed(chan))
@@ -457,6 +462,9 @@ switch processStr{processIdx}
                         'ContrastEnhancement',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
                         [gX,gY,gZ],[mX,mY,mZ]);
                 end
+            end
+            if (numCudaDevices==1)
+                lever_3d('releaseControl');
             end
             processTime = toc;
             fprintf('Contrast Enhancement took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
@@ -481,6 +489,9 @@ switch processStr{processIdx}
             iter = str2num(response{1});
             tic
             processedImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,imageData.Type);
+            if (numCudaDevices==1)
+                lever_3d('takeControl');
+            end
             if (get(handles.rb_Processed,'Value')==1 ...
                     && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
                     && processedMetadata.ChanProcessed(chan))
@@ -495,6 +506,9 @@ switch processStr{processIdx}
                         tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],'single',true,true),iter),...
                         imageData.Type,true);
                 end
+            end
+            if (numCudaDevices==1)
+                lever_3d('releaseControl');
             end
             processTime = toc;
             fprintf('Markov Random Fields Denoise: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
@@ -525,6 +539,9 @@ switch processStr{processIdx}
             dia = str2double(response{5});
             tic
             segImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,'uint8');
+            if (numCudaDevices==1)
+                lever_3d('takeControl');
+            end
             if (get(handles.rb_Processed,'Value')==1 ...
                     && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
                     && processedMetadata.ChanProcessed(chan))
@@ -539,6 +556,9 @@ switch processStr{processIdx}
                         'Segment',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
                         alpha,[oX,oY,oZ]),'uint8',true);
                 end
+            end
+            if (numCudaDevices==1)
+                lever_3d('releaseControl');
             end
             processTime = toc;
             fprintf('Image Processing Took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
