@@ -343,8 +343,23 @@ HRESULT loadHulls(const mxArray* hulls)
 		size_t numVerts = mxGetM(mxVerts);
 		size_t numNormals = mxGetM(mxNorms);
 
+		if(mxFaces==NULL)
+			mexErrMsgTxt("No faces field!");
+		if(mxVerts==NULL)
+			mexErrMsgTxt("No verts field!");
+		if(mxNorms==NULL)
+			mexErrMsgTxt("No norms field!");
+		if(mxColor==NULL)
+			mexErrMsgTxt("No color field!");
+		if(mxFrame==NULL)
+			mexErrMsgTxt("No frame field!");
+		if(mxLabel==NULL)
+			mexErrMsgTxt("No label field!");
+		if(mxTrack==NULL)
+			mexErrMsgTxt("No track field!");
+
 		if (numVerts<1)
-			mexErrMsgTxt("No Verts!");
+			mexErrMsgTxt("No verts!");
 
 		if (numFaces<1)
 			mexErrMsgTxt("No faces!");
