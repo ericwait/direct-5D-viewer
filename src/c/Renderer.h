@@ -165,7 +165,7 @@ private:
 	//Member variables 
 	Vec<float> backgroundColor;
 
-	HANDLE mutexDevice;
+	HANDLE mutexDevice; // comment this out
 	IDXGISwapChain*	swapChain;
 	ID3D11Device* d3dDevice;
 	ID3D11DeviceContext* immediateContext;
