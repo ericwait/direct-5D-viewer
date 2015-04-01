@@ -82,14 +82,18 @@ HRESULT loadHulls(const mxArray* hulls)
 	size_t numHulls = mxGetNumberOfElements(hulls);
 	for (size_t i = 0; i < numHulls; ++i)
 	{
+		// Polygon needs this
 		mxArray* mxFaces = mxGetField(hulls, i, "faces");
 		mxArray* mxVerts = mxGetField(hulls, i, "verts");
 		mxArray* mxNorms = mxGetField(hulls, i, "norms");
 		mxArray* mxColor = mxGetField(hulls, i, "color");
 		mxArray* mxFrame = mxGetField(hulls, i, "frame");
+
+
 		mxArray* mxLabel = mxGetField(hulls, i, "label");
 		mxArray* mxTrack = mxGetField(hulls, i, "track");
 
+		// Num of each
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
 		size_t numNormals = mxGetM(mxNorms);
@@ -121,11 +125,13 @@ HRESULT loadHulls(const mxArray* hulls)
 		if (numNormals != numVerts)
 			mexErrMsgTxt("Number of verts does not match the number of normals!");
 
+		// Store data like this
 		double* faceData = (double*)mxGetData(mxFaces);
 		double* vertData = (double*)mxGetData(mxVerts);
 		double* normData = (double*)mxGetData(mxNorms);
 		double* colorData = (double*)mxGetData(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
+		// end class
 
 		gRenderer->getMutex();
 

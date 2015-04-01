@@ -18,7 +18,7 @@
 #include <vector>
 #include "windows.h"
 
-struct Message
+struct OldMessage
 {
 	std::string command;
 	std::string message;
@@ -31,18 +31,18 @@ public:
 	MessageQueue();
 	~MessageQueue();
 
-	Message getNextMessage();
+	OldMessage getNextMessage();
 	void addMessage(std::string command, double val);
 	void addMessage(std::string command, std::string message);
 	void addMessage(std::string command, std::string message, double val);
 	void addErrorMessage(HRESULT hr);
 	void addErrorMessage(std::string message);
 	void clear();
-	std::vector<Message> flushQueue();
+	std::vector<OldMessage> flushQueue();
 
 private:
-	void addMessage(Message message);
+	void addMessage(OldMessage message);
 	bool validQueue;
 	HANDLE queueMutex;
-	std::queue<Message> messages;
+	std::queue<OldMessage> messages;
 };

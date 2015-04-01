@@ -3,6 +3,7 @@
 #include "mex.h"
 #include "MessageProcessor.h"
 #include "MexFunctions.h"
+#include "Image.h"
 
 HANDLE messageLoopHandle = NULL;
 DWORD threadID;
@@ -13,7 +14,7 @@ void pollCommand(int nlhs, mxArray** plhs)
 {
 	if (nlhs != 1) mexErrMsgTxt("Wrong number of return arguments");
 
-	std::vector<Message> curMsgs = gMexMessageQueueOut.flushQueue();
+	std::vector<OldMessage> curMsgs = gMexMessageQueueOut.flushQueue();
 
 	const char* fields[] = { "command", "message", "val" };
 	plhs[0] = mxCreateStructMatrix(curMsgs.size(), 1, 3, fields);
@@ -64,25 +65,35 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 		mexErrMsgTxt("Image must have at least three dimensions!");
 
 	const mwSize* DIMS = mxGetDimensions(prhs[1]);
+
+	// Dimensions 1-5
 	Vec<size_t> dims = Vec<size_t>(DIMS[0], DIMS[1], DIMS[2]);
 	int numChannels = 1;
 	int numFrames = 1;
+
+
 	if (numDims>3)
 		numChannels = int(DIMS[3]);
 
 	if (numDims > 4)
 		numFrames = int(DIMS[4]);
 
+	// ptr to image data
 	unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
 
 	Vec<float> scale(dims);
 	scale = scale / scale.maxValue();
 	if (nrhs > 2)
 	{
+		// Physical dimensions
 		double* physDims = (double*)mxGetData(prhs[2]);
 		scale.y *= float(physDims[1] / physDims[0]);
 		scale.z *= float(physDims[2] / physDims[0]);
 	}
+
+	/**/
+	Image* img = new Image(numChannels, numFrames, dims);
+	/**/
 
 	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
 	if (nrhs > 3)

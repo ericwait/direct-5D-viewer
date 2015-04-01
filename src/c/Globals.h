@@ -21,6 +21,7 @@
 #include "MessageQueue.h"
 #include "windows.h"
 #include "DirectXMath.h"
+#include "DataQueue.h"
 
 //Implemented in lever-3d_mex.cpp
 extern HANDLE gTermEvent;
@@ -45,3 +46,6 @@ extern bool gPlay;
 extern bool gRotate;
 extern bool gCapture;
 extern float gFramesPerSec;
+
+// Global Queue
+extern DataQueue dataQueue;

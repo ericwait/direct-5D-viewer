@@ -30,10 +30,10 @@ MessageQueue::~MessageQueue()
 	queueMutex = NULL;
 }
 
-Message MessageQueue::getNextMessage()
+OldMessage MessageQueue::getNextMessage()
 {
 	DWORD waitTime = INFINITE;
-	Message msgOut;
+	OldMessage msgOut;
 
 #ifdef _DEBUG
 	waitTime = 36000;
@@ -64,7 +64,7 @@ Message MessageQueue::getNextMessage()
 
 void MessageQueue::addMessage(std::string command, double val)
 {
-	Message msgIn;
+	OldMessage msgIn;
 	msgIn.command = command;
 	msgIn.message = "";
 	msgIn.val = val;
@@ -74,7 +74,7 @@ void MessageQueue::addMessage(std::string command, double val)
 
 void MessageQueue::addMessage(std::string command, std::string message)
 {
-	Message msgIn;
+	OldMessage msgIn;
 	msgIn.command = command;
 	msgIn.message = message;
 	msgIn.val = 0.0;
@@ -84,7 +84,7 @@ void MessageQueue::addMessage(std::string command, std::string message)
 
 void MessageQueue::addMessage(std::string command, std::string message, double val)
 {
-	Message msgIn;
+	OldMessage msgIn;
 	msgIn.command = command;
 	msgIn.message = message;
 	msgIn.val = val;
@@ -92,7 +92,7 @@ void MessageQueue::addMessage(std::string command, std::string message, double v
 	addMessage(msgIn);
 }
 
-void MessageQueue::addMessage(Message message)
+void MessageQueue::addMessage(OldMessage message)
 {
 	if (!validQueue) return;
 
@@ -118,7 +118,7 @@ void MessageQueue::addErrorMessage(HRESULT hr)
 	_com_error err(hr);
 	LPCTSTR errMsg = err.ErrorMessage();
 
-	Message msgIn;
+	OldMessage msgIn;
 	msgIn.command = "error";
 	msgIn.message = errMsg;
 	msgIn.val = hr;
@@ -128,7 +128,7 @@ void MessageQueue::addErrorMessage(HRESULT hr)
 
 void MessageQueue::addErrorMessage(std::string message)
 {
-	Message msgIn;
+	OldMessage msgIn;
 	msgIn.command = "error";
 	msgIn.message = message;
 	msgIn.val = -1.0;
@@ -160,10 +160,10 @@ void MessageQueue::clear()
 	ReleaseMutex(queueMutex);
 }
 
-std::vector<Message> MessageQueue::flushQueue()
+std::vector<OldMessage> MessageQueue::flushQueue()
 {
 	DWORD waitTime = INFINITE;
-	Message msgOut;
+	OldMessage msgOut;
 
 #ifdef _DEBUG
 	waitTime = 36000;
@@ -175,10 +175,10 @@ std::vector<Message> MessageQueue::flushQueue()
 		throw std::runtime_error("Could not acquire mutex for message queue!");
 	}
 
-	std::vector<Message> queueOut;
+	std::vector<OldMessage> queueOut;
 	if (messages.empty())
 	{
-		Message none;
+		OldMessage none;
 		none.command = "null";
 		none.message = "";
 		none.val = -1;

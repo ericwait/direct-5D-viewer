@@ -349,6 +349,7 @@ HRESULT messageProcess( MSG& msg )
 				if (gCapture)
 				{
 					++curAngle;
+					// This guy renders
 					gRenderer->renderAll();
 					gRenderer->captureWindow();
 					if (curAngle == numAngles)
@@ -395,6 +396,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 		try
 		{
+			// DirectX thread
 			while ( termWait != WAIT_OBJECT_0 && hr==S_OK)
 			{
 				if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )
@@ -403,6 +405,8 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 					DispatchMessage(&msg);
 				}
 
+				// Inside here check for a message from queue
+				// checkQueue();
 				hr = messageProcess(msg);
 
 				termWait = WaitForSingleObject(gTermEvent, 0);
