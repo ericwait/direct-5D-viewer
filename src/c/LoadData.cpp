@@ -5,6 +5,7 @@
 #include "Globals.h"
 #include "MexFunctions.h"
 #include <set>
+#include "QueuePolygon.h"
 
 CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
 	Camera* camera)
@@ -52,7 +53,7 @@ CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* 
 
 HRESULT loadHulls(const mxArray* hulls)
 {
-	if (gRenderer == NULL) return E_FAIL;
+	/*if (gRenderer == NULL) return E_FAIL;
 
 	if (!gGraphicObjectNodes[GraphicObjectTypes::CellHulls].empty())
 	{
@@ -78,6 +79,7 @@ HRESULT loadHulls(const mxArray* hulls)
 	hullRootNodes.resize(gRenderer->getNumberOfFrames());
 	for (unsigned int i = 0; i < gRenderer->getNumberOfFrames(); ++i)
 		hullRootNodes[i] = new SceneNode();
+	*/
 
 	size_t numHulls = mxGetNumberOfElements(hulls);
 	for (size_t i = 0; i < numHulls; ++i)
@@ -133,7 +135,17 @@ HRESULT loadHulls(const mxArray* hulls)
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 		// end class
 
-		gRenderer->getMutex();
+		/**/
+		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		//memcpy(this->pixels, pixels, dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
+		polygon->setfaceData(faceData);
+		polygon->setvertData(vertData);
+		polygon->setnormData(normData);
+		polygon->setcolorData(colorData);
+		dataQueue->writeMessage("loadHulls", (void*)polygon);
+		/**/
+
+		/*gRenderer->getMutex();
 
 		CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0], (float)colorData[1], (float)colorData[2]), 1.0f);
@@ -144,16 +156,16 @@ HRESULT loadHulls(const mxArray* hulls)
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
 
-		gRenderer->releaseMutex();
+		gRenderer->releaseMutex();*/
 	}
 
-	gRenderer->getMutex();
+	/*gRenderer->getMutex();
 
 	for (unsigned int i = 0; i < gRenderer->getNumberOfFrames(); ++i)
 		gRenderer->attachToRootScene(hullRootNodes[i], Renderer::Section::Main, i);
 
 	gRenderer->releaseMutex();
-
+	*/
 	return S_OK;
 }
 

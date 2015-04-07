@@ -17,6 +17,7 @@
 #include "MessageProcessor.h"
 #include "Initialization.h"
 #include <time.h>
+#include "DirectXCommands.h"
 
 bool gRendererOn = false;
 bool gPlay = false;
@@ -407,6 +408,12 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 				// Inside here check for a message from queue
 				// checkQueue();
+				if (dataQueue->getNumMessages() > 0){
+					checkMessage();
+				}
+
+
+				/**/
 				hr = messageProcess(msg);
 
 				termWait = WaitForSingleObject(gTermEvent, 0);
@@ -457,4 +464,97 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	}
 
 	return ((int)msg.wParam);
+}
+
+void checkMessage(){
+	Message m = dataQueue->getNextMessage();
+
+	if (m.command == "loadTexture"){
+		XloadTextureCommand(m);
+	}
+	else if (m.command == "init"){
+
+	}
+	else if (m.command == "close"){
+
+	}
+	else if (m.command == "poll"){
+
+	}
+	else if (m.command == "loadTexture"){
+
+	}
+	else if (m.command == "peelUpdate"){
+		XpeelUpdateCommand(m);
+	}
+	else if (m.command == "textureLightingUpdate"){
+		XtextureLightingUpdateCommand(m);
+	}
+	else if (m.command == "textureAttenUpdate"){
+
+	}
+	else if (m.command == "segmentationLighting"){
+		XsegmentationLighting(m);
+	}
+	else if (m.command == "play"){
+		XplayCommand(m);
+	}
+	else if (m.command == "rotate"){
+		XrotateCommand(m);
+	}
+	else if (m.command == "showLabels"){
+		XshowLabelsCommand(m);
+	}
+	else if (m.command == "resetView"){
+		XresetViewCommand(m);
+	}
+	else if (m.command == "captureSpinMovie"){
+		XcaptureSpinMovieCommand(m);
+	}
+	else if (m.command == "transferUpdate"){
+		XtransferUpdateCommand(m);
+	}
+	else if (m.command == "viewTexture"){
+		XviewTextureCommand(m);
+	}
+	else if (m.command == "viewSegmentation"){
+		XviewSegmentationCommand(m);
+	}
+	else if (m.command == "wireframeSegmentation"){
+		XwireframeSegmentationCommand(m);
+	}
+	else if (m.command == "loadHulls"){
+		XloadHullsCommand(m);
+	}
+	else if (m.command == "removeHull"){
+		XremoveHullCommand(m);
+	}
+	else if (m.command == "displayHulls"){
+		XdisplayHullsCommand(m);
+	}
+	else if (m.command == "setFrame"){
+		XsetFrameCommand(m);
+	}
+	else if (m.command == "setViewOrigin"){
+		XsetViewOriginCommand(m);
+	}
+	else if (m.command == "updateHulls"){
+
+	}
+	else if (m.command == "addHulls"){
+
+	}
+	else if (m.command == "setCapturePath"){
+
+	}
+	else if (m.command == "captureImage"){
+
+	}
+	else
+	{
+		// Print an error message
+		/*char buff[255];
+		sprintf_s(buff, "%s is not a valid command!\n", command);
+		mexErrMsgTxt(buff);*/
+	}
 }

@@ -70,7 +70,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				peelUpdateCommand(nrhs, prhs);
 
 			}
-			else if (_strcmpi("textureLightingUpdate", command) == 0)
+			/*else if (_strcmpi("textureLightingUpdate", command) == 0)
 			{
 				textureLightingUpdateCommand(nrhs, prhs);
 
@@ -81,7 +81,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			}
 
-			else if (_strcmpi("segmentationLighting", command) == 0)
+			*/else if (_strcmpi("segmentationLighting", command) == 0)
 			{
 				segmentationLightingCommand(nrhs, prhs);
 
@@ -110,7 +110,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				resetViewCommand();
 
 			}
-
+			
 			else if (_strcmpi("captureSpinMovie", command) == 0)
 			{
 				captureSpinMovieCommand();
@@ -122,7 +122,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				transferUpdateCommand(nrhs, nlhs, prhs);
 
 			}
-
+			
 			else if (_strcmpi("viewTexture", command) == 0)
 			{
 				viewTextureCommand(nrhs, prhs);
@@ -147,6 +147,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			}
 
+			else if (_strcmpi("removeHull", command) == 0)
+			{
+				removeHullCommand(nrhs, prhs);
+
+			}
+
 			else if (_strcmpi("displayHulls", command) == 0)
 			{
 				displayHullsCommand(nrhs, prhs);
@@ -159,7 +165,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			}
 
-			else if (_strcmpi("setViewOrigin", command) == 0)
+			/*else if (_strcmpi("setViewOrigin", command) == 0)
 			{
 				setViewOriginCommand(nrhs, prhs);
 
@@ -206,7 +212,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				char buff[255];
 				sprintf_s(buff, "%s is not a valid command!\n", command);
 				mexErrMsgTxt(buff);
-			}
+			}*/
 		}
 	}
 	catch (const std::exception& e)

@@ -69,7 +69,13 @@
     <ClCompile Include="Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Polygon.cpp">
+    <ClCompile Include="QueuePolygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXCommands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TransferObj.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -122,10 +128,16 @@
     <ClInclude Include="Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Polygon.h">
+    <ClInclude Include="DataQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DataQueue.h">
+    <ClInclude Include="QueuePolygon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXCommands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TransferObj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

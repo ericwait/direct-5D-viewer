@@ -103,7 +103,7 @@ public:
 	ID3D11SamplerState* getSamplerState();
 
 	DirectX::XMMATRIX getRootWorldRotation();
-	void getMutex();
+	void getMutex(); // comment these out
 	void releaseMutex();
 
 	int getHull(Vec<float> pnt, Vec<float> direction);

@@ -4,11 +4,13 @@
 #include "MessageProcessor.h"
 #include "MexFunctions.h"
 #include "Image.h"
+#include "TransferObj.h"
 
 HANDLE messageLoopHandle = NULL;
 DWORD threadID;
 HANDLE mexMessageMutex = NULL;
 bool registerExitFunction = false;
+DataQueue* dataQueue = new DataQueue();
 
 void pollCommand(int nlhs, mxArray** plhs)
 {
@@ -92,10 +94,48 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 	}
 
 	/**/
-	Image* img = new Image(numChannels, numFrames, dims);
+	char buff[96];
+	mxGetString(prhs[3], buff, 96);
+
+	Image* img = new Image(numChannels, numFrames, dims, buff);
+	img->setPixels(image);
+	if (nrhs > 3)
+	{
+		char buff[96];
+		mxGetString(prhs[3], buff, 96);
+
+		if (_strcmpi("original", buff) == 0)
+			img->setNumArgs(0);
+		else if (_strcmpi("processed", buff) == 0)
+			img->setNumArgs(1);
+	}
+	std::string s = "loadTexture";
+	dataQueue->writeMessage(s,(void*)img);
+	int x = 0;
+	x = x + 30;
+	/*if (dataQueue->getNumMessages() > 0){
+		Message m = dataQueue->getNextMessage();
+		Image* returnedImg = (Image*)m.data;
+		dims = returnedImg->getDimensions();
+		image = returnedImg->getPixels();
+		numChannels = returnedImg->getNumChannels();
+		numFrames = returnedImg->getNumFrames();
+
+		Vec<float> scale(dims);
+		scale = scale / scale.maxValue();
+		if (nrhs > 2)
+		{
+			// Physical dimensions
+			double* physDims = (double*)mxGetData(prhs[2]);
+			scale.y *= float(physDims[1] / physDims[0]);
+			scale.z *= float(physDims[2] / physDims[0]);
+		}
+
+	}*/
+
 	/**/
 
-	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+	/*GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
 	if (nrhs > 3)
 	{
 		char buff[96];
@@ -118,14 +158,16 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 	if (FAILED(hr))
 		mexErrMsgTxt("Could not load texture!");
 
-	setCurrentTexture(textureType);
+	setCurrentTexture(textureType);*/
 }
 
 void peelUpdateCommand(int nrhs, const mxArray** prhs)
 {
 	if (nrhs != 2) mexErrMsgTxt("not the right arguments for peelUpdate!");
 
-	gRenderer->setClipChunkPercent((float)mxGetScalar(prhs[1]));
+	float x = (float)mxGetScalar(prhs[1]);
+	float* ptr = &x;
+	dataQueue->writeMessage("peelUpdate", (void*)ptr);
 }
 
 void textureLightingUpdateCommand(int nrhs, const mxArray** prhs)
@@ -185,9 +227,9 @@ void segmentationLightingCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
 
 	double onD = mxGetScalar(prhs[1]);
-	bool on = onD > 0;
-
-	toggleSegmentaionLighting(on);
+	double* onD2 = new double;
+	*onD2 = onD;
+	dataQueue->writeMessage("showLabels", (void*)onD2);
 }
 
 void playCommand(int nrhs, const mxArray** prhs)
@@ -195,9 +237,9 @@ void playCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for play!");
 
 	double onD = mxGetScalar(prhs[1]);
-	bool on = onD > 0;
-
-	gPlay = on;
+	double* onD2 = new double;
+	*onD2 = onD;
+	dataQueue->writeMessage("play", (void*)onD2);
 }
 
 void rotateCommand(int nrhs, const mxArray** prhs)
@@ -205,9 +247,9 @@ void rotateCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for rotate!");
 
 	double onD = mxGetScalar(prhs[1]);
-	bool on = onD > 0;
-
-	gRotate = on;
+	double* onD2 = new double;
+	*onD2 = onD;
+	dataQueue->writeMessage("rotate", (void*)onD2);
 }
 
 void showLabelsCommand(int nrhs, const mxArray** prhs)
@@ -215,24 +257,20 @@ void showLabelsCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for showLabels!");
 
 	double onD = mxGetScalar(prhs[1]);
-	bool on = onD > 0;
-
-	gRenderer->setLabels(on);
+	double* onD2 = new double;
+	*onD2 = onD;
+	dataQueue->writeMessage("showLabels", (void*)onD2);
 }
 
 void resetViewCommand()
 {
-	gRenderer->resetRootWorldTransform();
-	gCameraDefaultMesh->resetCamera();
+	std::string s = "resetView";
+	dataQueue->writeMessage(s, NULL);
 }
 
 void captureSpinMovieCommand()
 {
-	gRenderer->resetRootWorldTransform();
-	//				gCameraDefaultMesh->resetCamera();
-
-	gCapture = true;
-	gRotate = true;
+	dataQueue->writeMessage("captureSpinMovie", (void*)NULL);
 }
 
 void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
@@ -260,6 +298,7 @@ void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
 
 	for (int chan = 0; chan < firstVolumeTextures[fvtIdx]->getNumberOfChannels(); ++chan)
 	{
+		// TODO Pull these out.. eventually 
 		Vec<float> transferFunction(0.0f, 0.0f, 0.0f);
 		Vec<float> ranges;
 		Vec<float> color;
@@ -288,9 +327,10 @@ void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
 		else
 			alphaMod = 0.0f;
 
-		firstVolumeTextures[fvtIdx]->setTransferFunction(chan, transferFunction);
-		firstVolumeTextures[fvtIdx]->setRange(chan, ranges);
-		firstVolumeTextures[fvtIdx]->setColor(chan, color, alphaMod);
+		/**/
+		TransferObj* transferObj = new TransferObj(fvtIdx, transferFunction, ranges, color, alphaMod, chan);
+		dataQueue->writeMessage("transferUpdate", (void*)transferObj);
+		/**/
 	}
 }
 
@@ -300,6 +340,8 @@ void viewTextureCommand(int nrhs, const mxArray** prhs)
 
 	char buff[96];
 	mxGetString(prhs[1], buff, 96);
+
+
 
 	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
 
@@ -316,9 +358,9 @@ void viewSegmentationCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for viewSegmentation!");
 
 	double onD = mxGetScalar(prhs[1]);
-	bool on = onD > 0;
-
-	toggleSegmentationResults(on);
+	double* onD2 = new double;
+	*onD2 = onD;
+	dataQueue->writeMessage("viewSegmentation", (void*)onD2);
 }
 
 void wireframeSegmentationCommand(int nrhs, const mxArray** prhs)
@@ -326,9 +368,9 @@ void wireframeSegmentationCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for wireframeSegmentation!");
 
 	double onD = mxGetScalar(prhs[1]);
-	bool on = onD > 0;
-
-	toggleSegmentaionWireframe(on);
+	double* onD2 = new double;
+	*onD2 = onD;
+	dataQueue->writeMessage("wireframeSegmentation", (void*)onD2);
 }
 
 void loadHullsCommand(int nrhs, const mxArray** prhs)
@@ -343,6 +385,13 @@ void loadHullsCommand(int nrhs, const mxArray** prhs)
 		mexErrMsgTxt("Could not load hulls!");
 }
 
+void removeHullCommand(int nrhs, const mxArray** prhs){
+	double d = mxGetScalar(prhs[1]);
+	int* label = new int;
+	*label = d;
+	dataQueue->writeMessage("removeHull", (void*)label);
+}
+
 void displayHullsCommand(int nrhs, const mxArray** prhs)
 {
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for displayHulls!");
@@ -350,11 +399,11 @@ void displayHullsCommand(int nrhs, const mxArray** prhs)
 	double* hullList = (double*)mxGetData(prhs[1]);
 	size_t numHulls = mxGetNumberOfElements(prhs[1]);
 
-	std::set<int> hullset;
+	std::set<int>* hullset = new std::set<int>;
 	for (size_t i = 0; i < numHulls; ++i)
-		hullset.insert((int)(hullList[i]));
+		hullset->insert((int)(hullList[i]));
 
-	toggleSelectedCell(hullset);
+	dataQueue->writeMessage("displayHulls", (void*)hullset);
 }
 
 void setFrameCommand(int nrhs, const mxArray** prhs)
@@ -362,7 +411,9 @@ void setFrameCommand(int nrhs, const mxArray** prhs)
 	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for setFrame!");
 
 	int curFrame = (int)mxGetScalar(prhs[1]);
-	gRenderer->setCurrentFrame(curFrame);
+	int* onD2 = new int;
+	*onD2 = curFrame;
+	dataQueue->writeMessage("setFrame", (void*)onD2);
 }
 
 void setViewOriginCommand(int nrhs, const mxArray** prhs)
@@ -374,7 +425,12 @@ void setViewOriginCommand(int nrhs, const mxArray** prhs)
 
 	if (numDims != 3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
 
-	gRenderer->setWorldOrigin(Vec<float>((float)(origin[0]), (float)(origin[1]), (float)(origin[2])));
+	double* originMsg = new double[3];
+	originMsg[0] = origin[0];
+	originMsg[1] = origin[1];
+	originMsg[2] = origin[2];
+
+	dataQueue->writeMessage("setViewOrigin", (void*)originMsg);
 }
 
 void updateHullsCommand(int nrhs, const mxArray** prhs)
