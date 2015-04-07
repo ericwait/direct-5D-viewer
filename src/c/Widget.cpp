@@ -13,7 +13,7 @@ HRESULT loadWidget(const mxArray* widget[])
 	while (!gRendererInit)
 		Sleep(10);
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	size_t numFaces = mxGetM(widget[0]);
 	size_t numVerts = mxGetM(widget[1]);
@@ -78,7 +78,7 @@ HRESULT loadWidget(const mxArray* widget[])
 	sphereNode->attachToParentNode(widgetScene);
 	gGraphicObjectNodes[GraphicObjectTypes::Widget].push_back(sphereNode);
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 
 	return S_OK;
 }

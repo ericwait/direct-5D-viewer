@@ -55,8 +55,8 @@ void initCommand(int nrhs, const mxArray** prhs)
 
 void closeCommand()
 {
+	dataQueue->writeMessage("close", NULL);
 	cleanUp();
-
 	gMexMessageQueueOut.clear();
 }
 
@@ -472,16 +472,16 @@ void setCapturePathCommand(int nrhs, const mxArray** prhs)
 
 void takeControlCommand()
 {
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 	gRendererOn = false;
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 void releaseControlCommand()
 {
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 	gRendererOn = true;
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs)

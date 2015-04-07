@@ -15,7 +15,7 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 
 	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	for (int i = 0; i < firstVolumeTextures.size(); ++i)
 	{
@@ -30,52 +30,52 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 
 	gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume][0]->setRenderable(textureType == GraphicObjectTypes::OriginalVolume, false);
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 void toggleSegmentationResults(bool on)
 {
 	if (gRenderer == NULL) return;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on, true);
 
 	gGraphicObjectNodes[GraphicObjectTypes::CellHulls][0]->setRenderable(on, false);
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 void toggleSegmentaionWireframe(bool wireframe)
 {
 	if (gRenderer == NULL) return;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setWireframe(wireframe);
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 void toggleSegmentaionLighting(bool lighting)
 {
 	if (gRenderer == NULL) return;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setLightOn(lighting);
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 void toggleSelectedCell(std::set<int> labels)
 {
 	if (gRenderer == NULL) return;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	for (int i = 0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
 	{
@@ -90,7 +90,7 @@ void toggleSelectedCell(std::set<int> labels)
 			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(false, delay);
 	}
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 }
 
 HRESULT updateHulls(const mxArray* hulls)
@@ -141,7 +141,7 @@ HRESULT updateHulls(const mxArray* hulls)
 			}
 		}
 
-		gRenderer->getMutex();
+		//gRenderer->getMutex();
 
 		SceneNode* parentSceneNode = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->getParentNode();
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->releaseRenderResources();
@@ -155,7 +155,7 @@ HRESULT updateHulls(const mxArray* hulls)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->setWireframe(true);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->attachToParentNode(parentSceneNode);
 
-		gRenderer->releaseMutex();
+		//gRenderer->releaseMutex();
 	}
 
 	return S_OK;
@@ -209,7 +209,7 @@ HRESULT addHulls(const mxArray* hulls)
 			}
 		}
 
-		gRenderer->getMutex();
+		//gRenderer->getMutex();
 
 		CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0], (float)colorData[1], (float)colorData[2]), 1.0f);
@@ -220,7 +220,7 @@ HRESULT addHulls(const mxArray* hulls)
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
 
-		gRenderer->releaseMutex();
+		//gRenderer->releaseMutex();
 	}
 
 	return S_OK;

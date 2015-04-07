@@ -103,8 +103,8 @@ public:
 	ID3D11SamplerState* getSamplerState();
 
 	DirectX::XMMATRIX getRootWorldRotation();
-	void getMutex(); // comment these out
-	void releaseMutex();
+	//void getMutex(); // comment these out
+	//void releaseMutex();
 
 	int getHull(Vec<float> pnt, Vec<float> direction);
 	float getClipChunkPercent(){return clipChunkPercent;}
@@ -165,7 +165,7 @@ private:
 	//Member variables 
 	Vec<float> backgroundColor;
 
-	HANDLE mutexDevice; // comment this out
+	//HANDLE mutexDevice; // comment this out
 	IDXGISwapChain*	swapChain;
 	ID3D11Device* d3dDevice;
 	ID3D11DeviceContext* immediateContext;

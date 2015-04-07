@@ -173,7 +173,7 @@ HRESULT createBorder(Vec<float> &scale)
 {
 	if (gRenderer == NULL) return E_FAIL;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<unsigned int>> faces;
@@ -252,7 +252,7 @@ HRESULT createBorder(Vec<float> &scale)
 
 	gGraphicObjectNodes[GraphicObjectTypes::Border].push_back(borderNode);
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 
 	return S_OK;
 }
@@ -261,7 +261,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 {
 	if (gRenderer == NULL) return E_FAIL;
 
-	gRenderer->getMutex();
+	//gRenderer->getMutex();
 
 	unsigned char* shaderConstMemory = NULL;
 
@@ -297,7 +297,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		}
 	}
 
-	gRenderer->releaseMutex();
+	//gRenderer->releaseMutex();
 
 	return S_OK;
 }

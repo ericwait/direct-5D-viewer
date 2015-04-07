@@ -82,6 +82,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gCameraDefaultMesh->zoomIncrement();
 		else
 			gCameraDefaultMesh->zoomDecrement();
+		gRenderer->renderAll();
 		break;
 	case WM_MOUSEMOVE:
 		if (leftButtonDown)
@@ -98,6 +99,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / gWindowHeight)*DirectX::XM_2PI);
 
 			gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
+			gRenderer->renderAll();
 		}
 		break;
 	case WM_LBUTTONDOWN:
@@ -113,6 +115,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
 		label = gRenderer->getHull(pnt,direction);
 		gMexMessageQueueOut.addMessage("cellSelected",label);
+		gRenderer->renderAll();
 		break;
 	case WM_LBUTTONUP:
 		leftButtonDown = false;
@@ -122,34 +125,42 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (VK_LEFT==wParam)
 		{
 			gCameraDefaultMesh->moveLeft();
+			gRenderer->renderAll();
 		}
 		else if (VK_RIGHT==wParam)
 		{
 			gCameraDefaultMesh->moveRight();
+			gRenderer->renderAll();
 		}
 		else if (VK_UP==wParam)
 		{
 			gCameraDefaultMesh->moveUp();
+			gRenderer->renderAll();
 		}
 		else if (VK_DOWN==wParam)
 		{
 			gCameraDefaultMesh->moveDown();
+			gRenderer->renderAll();
 		}
 		else if (VK_PRIOR==wParam) //Page Up key
 		{
 			gRenderer->incrementFrame();
+			gRenderer->renderAll();
 		}
 		else if (VK_NEXT==wParam) //Page Down key
 		{
 			gRenderer->decrementFrame();
+			gRenderer->renderAll();
 		}
 		else if (VK_HOME==wParam)
 		{
 			gRenderer->setCurrentFrame(0);
+			gRenderer->renderAll();
 		}
 		else if (VK_END==wParam)
 		{
 			gRenderer->setCurrentFrame(gRenderer->getNumberOfFrames() - 1);
+			gRenderer->renderAll();
 		}
 		else if (VK_SPACE==wParam)
 		{
@@ -171,22 +182,27 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			altDown = true;
 			gMexMessageQueueOut.addMessage("keyDown", "alt");
 		}
-		else if ('C'==wParam)
+		else if ('C' == wParam){
 			gCameraDefaultMesh->resetCamera();
-		else if ('H'==wParam)
+			gRenderer->renderAll();
+		}
+		else if ('H' == wParam)
 		{
 			gMexMessageQueueOut.addMessage("toggleHulls",0.0);
+			gRenderer->renderAll();
 		}
 		else if ('L'==wParam)
 		{
 			gRenderer->toggleLabels();
 			gMexMessageQueueOut.addMessage("toggleLabels",0.0);
+			gRenderer->renderAll();
 		}
 		else if ('P' == wParam)
 		{
 			if (ctrlDown)
 			{
 				gRenderer->captureWindow();
+				gRenderer->renderAll();
 			}
 		}
 		else if ('R'==wParam)
@@ -199,6 +215,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		else if ('X'==wParam)
 		{
 			gMexMessageQueueOut.addMessage("centerSelectedCell",1.0);
+			gRenderer->renderAll();
 		}
 		else if ('1' == wParam || VK_NUMPAD1 == wParam)
 		{
@@ -321,9 +338,11 @@ HRESULT messageProcess( MSG& msg )
 	if (msg.message==WM_QUIT)
 		return E_FAIL;
 
+	int pleaseRender = 0;
+
 	if (gRendererOn)
 	{
-		gRenderer->renderAll();
+		//gRenderer->renderAll();
 
 		if (gPlay)
 		{
@@ -332,9 +351,10 @@ HRESULT messageProcess( MSG& msg )
 			{
 				lastTimeUpdate = clock();
 				gRenderer->incrementFrame();
+				pleaseRender = 1;
 				if (gCapture)
 				{
-					gRenderer->renderAll();
+					//gRenderer->renderAll();
 					gRenderer->captureWindow();
 				}
 			}
@@ -347,11 +367,12 @@ HRESULT messageProcess( MSG& msg )
 				lastRotateUpdate = clock();
 				DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
 				gRenderer->setWorldRotation(previousWorldRotation*ROT_X);
+				pleaseRender = 1;
 				if (gCapture)
 				{
 					++curAngle;
 					// This guy renders
-					gRenderer->renderAll();
+					//gRenderer->renderAll();
 					gRenderer->captureWindow();
 					if (curAngle == numAngles)
 					{
@@ -362,6 +383,9 @@ HRESULT messageProcess( MSG& msg )
 				}
 			}
 		}
+	}
+	if (pleaseRender == 1){
+		gRenderer->renderAll();
 	}
 
 	return hr;
@@ -431,6 +455,39 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		{
 			gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");	
 		}
+
+		if (messageLoopHandle != NULL)
+		{
+			gRendererOn = false;
+
+			Sleep(1000);
+
+			if (gRenderer != NULL)
+				//gRenderer->getMutex();
+
+			for (int i = 0; i < GraphicObjectTypes::VTend; ++i)
+			{
+				if (gRenderer != NULL)
+				{
+					for (int j = 0; j < gGraphicObjectNodes[i].size(); ++j)
+					{
+						gGraphicObjectNodes[i][j]->releaseRenderResources();
+					}
+				}
+
+				gGraphicObjectNodes[i].clear();
+			}
+
+			gBorderObj = NULL;
+			firstVolumeTextures.clear();
+		}
+
+		if (mexMessageMutex != NULL)
+		{
+			CloseHandle(mexMessageMutex);
+			mexMessageMutex = NULL;
+		}
+
 	}
 	else
 	{
@@ -466,17 +523,19 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	return ((int)msg.wParam);
 }
 
-void checkMessage(){
+HRESULT checkMessage(){
+	HRESULT hr = S_OK;
 	Message m = dataQueue->getNextMessage();
 
 	if (m.command == "loadTexture"){
 		XloadTextureCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "init"){
 
 	}
 	else if (m.command == "close"){
-
+		hr = 1;
 	}
 	else if (m.command == "poll"){
 
@@ -486,15 +545,18 @@ void checkMessage(){
 	}
 	else if (m.command == "peelUpdate"){
 		XpeelUpdateCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "textureLightingUpdate"){
 		XtextureLightingUpdateCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "textureAttenUpdate"){
 
 	}
 	else if (m.command == "segmentationLighting"){
 		XsegmentationLighting(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "play"){
 		XplayCommand(m);
@@ -504,39 +566,51 @@ void checkMessage(){
 	}
 	else if (m.command == "showLabels"){
 		XshowLabelsCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "resetView"){
 		XresetViewCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "captureSpinMovie"){
 		XcaptureSpinMovieCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "transferUpdate"){
 		XtransferUpdateCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "viewTexture"){
 		XviewTextureCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "viewSegmentation"){
 		XviewSegmentationCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "wireframeSegmentation"){
 		XwireframeSegmentationCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "loadHulls"){
 		XloadHullsCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "removeHull"){
 		XremoveHullCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "displayHulls"){
 		XdisplayHullsCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "setFrame"){
 		XsetFrameCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "setViewOrigin"){
 		XsetViewOriginCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "updateHulls"){
 
@@ -557,4 +631,5 @@ void checkMessage(){
 		sprintf_s(buff, "%s is not a valid command!\n", command);
 		mexErrMsgTxt(buff);*/
 	}
+	return hr;
 }

@@ -23,7 +23,7 @@
 
 Renderer::Renderer()
 {
-	mutexDevice = CreateMutex(NULL,FALSE,NULL);
+	//mutexDevice = CreateMutex(NULL,FALSE,NULL);
 
 	swapChain = NULL;
 	d3dDevice = NULL;
@@ -52,7 +52,7 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-	DWORD waitTerm = WaitForSingleObject(mutexDevice,5000);
+	//DWORD waitTerm = WaitForSingleObject(mutexDevice,5000);
 
 	SAFE_DELETE(rootScene);
 
@@ -68,38 +68,38 @@ Renderer::~Renderer()
 	releaseDepthStencils();
 	releaseSwapChain();
 
-	CloseHandle(mutexDevice);
+	//CloseHandle(mutexDevice);
 }
 
 HRESULT Renderer::init()
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	HRESULT hr = initSwapChain();
 	if (FAILED(hr))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return hr;
 	}
 
 	hr = initDepthStencils();
 	if (FAILED(hr))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return hr;
 	}
 
 	hr = initRenderTarget();
 	if (FAILED(hr))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return hr;
 	}
 
 	hr = initRasterizerStates();
 	if (FAILED(hr))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return hr;
 	}
 
@@ -108,7 +108,7 @@ HRESULT Renderer::init()
 	hr = createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
 	if (FAILED(hr))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return hr;
 	}
 
@@ -116,14 +116,14 @@ HRESULT Renderer::init()
 
 	resetRootWorldTransform();
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return hr;
 }
 
 HRESULT Renderer::initSwapChain()
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	HRESULT hr = E_FAIL;
 	UINT createDeviceFlags = 0;
@@ -183,7 +183,7 @@ HRESULT Renderer::initSwapChain()
 	vp.TopLeftY = 0;
 	immediateContext->RSSetViewports( 1, &vp );
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return hr;
 }
@@ -199,9 +199,9 @@ HRESULT Renderer::initDepthStencils()
 {
 	HRESULT hr = E_FAIL;
 
-	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	if ( waitResult != WAIT_OBJECT_0 )
-		return E_FAIL;
+	//DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
+	//if ( waitResult != WAIT_OBJECT_0 )
+		//return E_FAIL;
 
 	// Create depth stencil texture
 	ID3D11Texture2D* depthStencil = NULL;
@@ -266,7 +266,7 @@ HRESULT Renderer::initDepthStencils()
 
 	depthStencil->Release();
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return S_OK;
 }
@@ -292,13 +292,13 @@ HRESULT Renderer::initRenderTarget()
 	if( FAILED(hr) )
 		return hr;
 
-	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	if ( waitResult != WAIT_OBJECT_0 )
-		return E_FAIL;
+	//DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
+	//if ( waitResult != WAIT_OBJECT_0 )
+		//return E_FAIL;
 
 	hr = d3dDevice->CreateRenderTargetView(backBuffer, NULL, &renderTargetView);
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	backBuffer->Release();
 
@@ -320,9 +320,9 @@ HRESULT Renderer::initRasterizerStates()
 {
 	D3D11_RASTERIZER_DESC d3d11rd;
 
-	DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	if ( waitResult != WAIT_OBJECT_0 )
-		return E_FAIL;
+	//DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
+	//if ( waitResult != WAIT_OBJECT_0 )
+		//return E_FAIL;
 
 	memset(&d3d11rd,0,sizeof(d3d11rd));
 	d3d11rd.FillMode=D3D11_FILL_SOLID;
@@ -350,7 +350,7 @@ HRESULT Renderer::initRasterizerStates()
 	d3d11rd.AntialiasedLineEnable=TRUE;
 	d3dDevice->CreateRasterizerState(&d3d11rd,&rasterizerStateFillClip);
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return S_OK;
 }
@@ -450,7 +450,7 @@ HRESULT Renderer::compilePixelShader(const wchar_t* fileName, const char* shader
 
 HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	if ( verts.size() == 0 )
 		return E_FAIL;
@@ -473,14 +473,14 @@ HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** 
 	if ( FAILED(result) )
 		*vertexBufferOut = NULL;
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return result;
 }
 
 HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	if (faces.size()==0)
 		return E_FAIL;
 
@@ -502,7 +502,7 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 	if ( FAILED(result) )
 		*indexBufferOut = NULL;
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return result;
 }
@@ -510,10 +510,10 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 	std::vector<Vec<float>> textureUV, VertexShaders shader)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, textureUV, shader);
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return newMesh;
 }
@@ -521,18 +521,18 @@ MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces,
 MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 	VertexShaders shader)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, shader);
 
 	//meshPrimitives.push_back(newMesh);
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return newMesh;
 }
 
 HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	D3D11_BUFFER_DESC bufferDesc;
 
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
@@ -543,21 +543,21 @@ HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOu
 
 	HRESULT hr = d3dDevice->CreateBuffer(&bufferDesc, NULL, constBufferOut);
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return hr;
 }
 
 void Renderer::updateShaderParams(const void* params, ID3D11Buffer* buffer)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	immediateContext->UpdateSubresource(buffer,0,NULL,params,0,0);
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 int Renderer::getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	std::string shaderLookupName = shaderFilename;
 	shaderLookupName += ":";
 	shaderLookupName += shaderFunction;
@@ -565,7 +565,7 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 	if (0!=vertexShaderMap.count(shaderLookupName))
 	{
 		int idx = vertexShaderMap[shaderLookupName];
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return idx;
 	}
 
@@ -577,7 +577,7 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 
 	if (FAILED(compileVertexShader(fn.c_str(), shaderFunction.c_str(),&newShader,&newLayout)))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return -1;
 	}
 
@@ -588,20 +588,20 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 
 	int idx = vertexShaderMap[shaderLookupName];
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return idx;
 }
 
 int Renderer::getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + shaderParams;
 
 	if (pixelShaderMap.count(shaderLookupName)!=0)
 	{
 		int idx = pixelShaderMap[shaderLookupName];
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return idx;
 	}
 
@@ -612,7 +612,7 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 
 	if (FAILED(compilePixelShader(fn.c_str(), shaderFunction.c_str(),&newShader)))
 	{
-		ReleaseMutex(mutexDevice);
+		//ReleaseMutex(mutexDevice);
 		return -1;
 	}
 
@@ -622,7 +622,7 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 
 	int idx = pixelShaderMap[shaderLookupName];
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return idx;
 }
@@ -653,7 +653,7 @@ void Renderer::clearPixelShaderList()
 
 void Renderer::renderAll()
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	startRender();
 	preRenderLoop();
 	mainRenderLoop();
@@ -661,16 +661,16 @@ void Renderer::renderAll()
 	gdiRenderLoop();
 	endRender();
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	sceneIn->attachToParentNode(rootScene->getRenderSectionNode(section,frame));
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::preRenderLoop()
@@ -988,29 +988,29 @@ DirectX::XMMATRIX Renderer::getRootWorldRotation()
 	return curRotationMatrix;
 }
 
-void Renderer::getMutex()
+/*void Renderer::getMutex()
 {
 	WaitForSingleObject(mutexDevice,INFINITE);
-}
+}*/
 
-void Renderer::releaseMutex()
+/*void Renderer::releaseMutex()
 {
 	ReleaseMutex(mutexDevice);
-}
+}*/
 
 int Renderer::getHull(Vec<float> pnt, Vec<float> direction)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 	float depth;
 	int label = rootScene->getHull(pnt,direction,currentFrame,depth);
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 
 	return label;
 }
 
 void Renderer::resizeViewPort()
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	DXGI_SWAP_CHAIN_DESC desc;  
 	swapChain->GetDesc( &desc );  
@@ -1031,7 +1031,7 @@ void Renderer::resizeViewPort()
 	gCameraWidget->updateProjectionTransform();
 	gCameraDefaultMesh->updateProjectionTransform();
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 HRESULT Renderer::resetViewPort()
@@ -1096,21 +1096,21 @@ void Renderer::resetRootWorldTransform()
 
 void Renderer::setClipChunkPercent(float ccp)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	clipChunkPercent = ccp;
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::setNumPlanes(int numPlanesIn)
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	if (numPlanes < numPlanesIn)
 		numPlanes = numPlanesIn;
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::updateRenderList()
@@ -1139,11 +1139,11 @@ DirectX::XMMATRIX Renderer::createWorldMatrix()
 
 void Renderer::updateWorldTransform()
 {
-	WaitForSingleObject(mutexDevice,INFINITE);
+	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	rootScene->setLocalToParent(createWorldMatrix());
 
-	ReleaseMutex(mutexDevice);
+	//ReleaseMutex(mutexDevice);
 }
 
 HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)

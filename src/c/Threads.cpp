@@ -78,38 +78,6 @@ void cleanUp()
 {
 	try
 	{
-		if (messageLoopHandle != NULL)
-		{
-			gRendererOn = false;
-
-			Sleep(1000);
-
-			if (gRenderer != NULL)
-				gRenderer->getMutex();
-
-			for (int i = 0; i < GraphicObjectTypes::VTend; ++i)
-			{
-				if (gRenderer != NULL)
-				{
-					for (int j = 0; j < gGraphicObjectNodes[i].size(); ++j)
-					{
-						gGraphicObjectNodes[i][j]->releaseRenderResources();
-					}
-				}
-
-				gGraphicObjectNodes[i].clear();
-			}
-
-			gBorderObj = NULL;
-			firstVolumeTextures.clear();
-		}
-
-		if (mexMessageMutex != NULL)
-		{
-			CloseHandle(mexMessageMutex);
-			mexMessageMutex = NULL;
-		}
-
 		termThread();
 	}
 	catch (const std::exception& e)
