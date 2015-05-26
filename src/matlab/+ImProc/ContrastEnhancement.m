@@ -30,7 +30,7 @@ if (~isempty(response))
     if (get(handles.rb_Processed,'Value')==1 ...
             && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file'))
         
-        pth = processedMetadata.Path;
+        pth = processedMetadata.PathName;
         fName = processedMetadata.FileName;
     else
         % use org images
@@ -70,7 +70,7 @@ if (~isempty(response))
             && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file'))
         
         % fill in the other channels with the previously processed images
-        pth = processedMetadata.Path;
+        pth = processedMetadata.PathName;
         fName = processedMetadata.FileName;
     end
     
