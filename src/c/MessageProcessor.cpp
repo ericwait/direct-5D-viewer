@@ -205,9 +205,11 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				gRenderer->renderAll();
 			}
 		}
-		else if ('R'==wParam)
+		else if ('R' == wParam){
 			gRenderer->resetRootWorldTransform();
-		else if ('S'==wParam)
+			gRenderer->renderAll();
+		}
+		else if ('S' == wParam)
 		{
 			gRotate = !gRotate;
 			gMexMessageQueueOut.addMessage("rotate",gRotate);
