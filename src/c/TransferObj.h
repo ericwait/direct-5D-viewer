@@ -8,12 +8,13 @@ class TransferObj
 {
 public:
 	int chan;
-	int fvtIdx;
+	size_t numElem;
 	Vec<float> transferFunction;
 	Vec<float> ranges;
 	Vec<float> color;
 	float alphaMod;
+	char buff[96];
 
-	TransferObj(int fvtIdx, Vec<float> transferFunction, Vec<float> ranges, Vec<float> color, float alphaMod, int chan);
+	TransferObj(Vec<float> transferFunction, Vec<float> ranges, Vec<float> color, float alphaMod, int chan, char* b, size_t numElem);
 	~TransferObj();
 };
