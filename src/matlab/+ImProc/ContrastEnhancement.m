@@ -87,8 +87,6 @@ if (~isempty(response))
     
     %% update the renderer
     Messaging.UpdateTexture(processedImage,false);
-    
-    UI.UpdateCurrentState(handles);
 end
 end
 

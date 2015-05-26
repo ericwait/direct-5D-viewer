@@ -347,9 +347,10 @@ switch processStr{processIdx}
         ImProc.DistMap();
 end
 
-if (processed>0)    
+if (processed>0)
     set(handles.rb_Processed,'Enable','on','Value',1);
     set(handles.rb_orgImage,'Value',0);
+    UI.UpdateCurrentState(handles);
 end
 
 if (~isempty(Hulls))
