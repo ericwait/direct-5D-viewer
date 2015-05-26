@@ -6,6 +6,7 @@
 #include "Image.h"
 #include "TransferObj.h"
 #include "QueuePolygon.h"
+#include "TextureLightingOBJ.h"
 
 void XloadTextureCommand(Message m){
 	Image* returnedImg = (Image*)m.data;
@@ -63,9 +64,6 @@ void XtransferUpdateCommand(Message m){
 	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
 	size_t numElem = sentTranfser->numElem;
-
-	if (firstVolumeTextures.size() - 1 < fvtIdx || NULL == firstVolumeTextures[fvtIdx] || numElem != firstVolumeTextures[fvtIdx]->getNumberOfChannels())
-		mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
 
 	firstVolumeTextures[fvtIdx]->setTransferFunction(sentTranfser->chan, sentTranfser->transferFunction);
 	firstVolumeTextures[fvtIdx]->setRange(sentTranfser->chan, sentTranfser->ranges);
@@ -175,7 +173,13 @@ void XshowLabelsCommand(Message m){
 
 
 void XtextureLightingUpdateCommand(Message m){
-	
+	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
+	firstVolumeTextures[localLightObj->index]->setLightOn(localLightObj->value);
+}
+
+void XtextureAttenUpdateCommand(Message m){
+	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
+	firstVolumeTextures[localLightObj->index]->setAttenuationOn(localLightObj->value);
 }
 
 void XsegmentationLighting(Message m){

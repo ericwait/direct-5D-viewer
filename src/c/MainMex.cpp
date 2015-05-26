@@ -70,7 +70,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				peelUpdateCommand(nrhs, prhs);
 
 			}
-			/*else if (_strcmpi("textureLightingUpdate", command) == 0)
+			else if (_strcmpi("textureLightingUpdate", command) == 0)
 			{
 				textureLightingUpdateCommand(nrhs, prhs);
 
@@ -81,7 +81,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			}
 
-			*/else if (_strcmpi("segmentationLighting", command) == 0)
+			else if (_strcmpi("segmentationLighting", command) == 0)
 			{
 				segmentationLightingCommand(nrhs, prhs);
 

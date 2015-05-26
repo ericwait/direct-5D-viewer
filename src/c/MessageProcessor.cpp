@@ -552,7 +552,8 @@ HRESULT checkMessage(){
 		gRenderer->renderAll();
 	}
 	else if (m.command == "textureAttenUpdate"){
-
+		XtextureAttenUpdateCommand(m);
+		gRenderer->renderAll();
 	}
 	else if (m.command == "segmentationLighting"){
 		XsegmentationLighting(m);

@@ -5,6 +5,7 @@
 #include "MexFunctions.h"
 #include "Image.h"
 #include "TransferObj.h"
+#include "TextureLightingObj.h"
 
 HANDLE messageLoopHandle = NULL;
 DWORD threadID;
@@ -178,7 +179,9 @@ void textureLightingUpdateCommand(int nrhs, const mxArray** prhs)
 		{
 			if (NULL != firstVolumeTextures[i])
 			{
-				firstVolumeTextures[i]->setLightOn(true);
+				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
+				dataQueue->writeMessage("textureLightingUpdate", (void*)textureLightObj);
+				//firstVolumeTextures[i]->setLightOn(true);
 			}
 		}
 	}
@@ -188,7 +191,9 @@ void textureLightingUpdateCommand(int nrhs, const mxArray** prhs)
 		{
 			if (NULL != firstVolumeTextures[i])
 			{
-				firstVolumeTextures[i]->setLightOn(false);
+				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
+				dataQueue->writeMessage("textureLightingUpdate", (void*)textureLightObj);
+				//firstVolumeTextures[i]->setLightOn(false);
 			}
 		}
 	}
@@ -204,7 +209,9 @@ void textureAttenUpdateCommand(int nrhs, const mxArray** prhs)
 		{
 			if (NULL != firstVolumeTextures[i])
 			{
-				firstVolumeTextures[i]->setAttenuationOn(true);
+				//firstVolumeTextures[i]->setAttenuationOn(true);
+				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
+				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
 			}
 		}
 	}
@@ -214,7 +221,9 @@ void textureAttenUpdateCommand(int nrhs, const mxArray** prhs)
 		{
 			if (NULL != firstVolumeTextures[i])
 			{
-				firstVolumeTextures[i]->setAttenuationOn(false);
+				//firstVolumeTextures[i]->setAttenuationOn(false);
+				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
+				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
 			}
 		}
 	}

@@ -21,5 +21,6 @@ void XwireframeSegmentationCommand(Message m);
 void XsetFrameCommand(Message m);
 void XsetViewOriginCommand(Message m);
 void XtextureLightingUpdateCommand(Message m);
+void XtextureAttenUpdateCommand(Message m);
 void XsegmentationLighting(Message m);
 void XdisplayHullsCommand(Message m);
