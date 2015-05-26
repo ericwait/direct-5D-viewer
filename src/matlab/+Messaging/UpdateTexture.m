@@ -8,9 +8,9 @@ sz = [imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixel
 im = imageConvertNorm(im,'uint8',true);
 
 if (~exist('isOrg','var') || isempty(isOrg) || true==isOrg)
-    lever_3d('loadTexture',im,sz,'processed');
-else
     lever_3d('loadTexture',im,sz);
+else
+    lever_3d('loadTexture',im,sz,'processed');
 end
 end
 
