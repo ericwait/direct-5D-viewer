@@ -49,7 +49,24 @@ void XresetViewCommand(Message m){
 
 void XtransferUpdateCommand(Message m){
 	TransferObj* sentTranfser = (TransferObj*)m.data;
-	int fvtIdx = sentTranfser->fvtIdx;
+
+	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+	char buff[96];
+
+	strncpy_s(buff, sentTranfser->buff, strlen(sentTranfser->buff));
+
+	if (_strcmpi("original", buff) == 0)
+		textureType = GraphicObjectTypes::OriginalVolume;
+	else if (_strcmpi("processed", buff) == 0)
+		textureType = GraphicObjectTypes::ProcessedVolume;
+
+	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
+
+	size_t numElem = sentTranfser->numElem;
+
+	if (firstVolumeTextures.size() - 1 < fvtIdx || NULL == firstVolumeTextures[fvtIdx] || numElem != firstVolumeTextures[fvtIdx]->getNumberOfChannels())
+		mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
+
 	firstVolumeTextures[fvtIdx]->setTransferFunction(sentTranfser->chan, sentTranfser->transferFunction);
 	firstVolumeTextures[fvtIdx]->setRange(sentTranfser->chan, sentTranfser->ranges);
 	firstVolumeTextures[fvtIdx]->setColor(sentTranfser->chan, sentTranfser->color, sentTranfser->alphaMod);

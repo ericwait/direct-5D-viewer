@@ -275,26 +275,15 @@ void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
 {
 	if (2 > nrhs || 3<nrhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
 
-	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+	char buff[96];
 	if (nrhs > 2)
 	{
-		char buff[96];
 		mxGetString(prhs[2], buff, 96);
-
-		if (_strcmpi("original", buff) == 0)
-			textureType = GraphicObjectTypes::OriginalVolume;
-		else if (_strcmpi("processed", buff) == 0)
-			textureType = GraphicObjectTypes::ProcessedVolume;
 	}
-
-	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
 	size_t numElem = mxGetNumberOfElements(prhs[1]);
 
-	if (firstVolumeTextures.size() - 1 < fvtIdx || NULL == firstVolumeTextures[fvtIdx] || numElem != firstVolumeTextures[fvtIdx]->getNumberOfChannels())
-		mexErrMsgTxt("Number of elements passed in do not match the number of channels in the image data!");
-
-	for (int chan = 0; chan < firstVolumeTextures[fvtIdx]->getNumberOfChannels(); ++chan)
+	for (int chan = 0; chan < numElem; ++chan)
 	{
 		// TODO Pull these out.. eventually 
 		Vec<float> transferFunction(0.0f, 0.0f, 0.0f);
@@ -325,10 +314,8 @@ void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
 		else
 			alphaMod = 0.0f;
 
-		/**/
-		TransferObj* transferObj = new TransferObj(fvtIdx, transferFunction, ranges, color, alphaMod, chan);
+		TransferObj* transferObj = new TransferObj(transferFunction, ranges, color, alphaMod, chan, buff, numElem);
 		dataQueue->writeMessage("transferUpdate", (void*)transferObj);
-		/**/
 	}
 }
 
