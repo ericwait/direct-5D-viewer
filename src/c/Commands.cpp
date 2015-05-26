@@ -273,7 +273,7 @@ void captureSpinMovieCommand()
 
 void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
 {
-	if (2 > nrhs || 3<nlhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
+	if (2 > nrhs || 3<nrhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
 
 	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
 	if (nrhs > 2)
