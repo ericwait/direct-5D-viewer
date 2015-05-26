@@ -83,22 +83,20 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 	// ptr to image data
 	unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
 
-	Vec<float> scale(dims);
-	scale = scale / scale.maxValue();
+	/**/
+	char buff[96];
+	mxGetString(prhs[3],buff,96);
+
+	Image* img = new Image(numChannels,numFrames,dims,buff);
+	img->setPixels(image);
+
 	if (nrhs > 2)
 	{
 		// Physical dimensions
 		double* physDims = (double*)mxGetData(prhs[2]);
-		scale.y *= float(physDims[1] / physDims[0]);
-		scale.z *= float(physDims[2] / physDims[0]);
+		img->setPhysicalDim(Vec<float>(physDims[0],physDims[1],physDims[2]));
 	}
 
-	/**/
-	char buff[96];
-	mxGetString(prhs[3], buff, 96);
-
-	Image* img = new Image(numChannels, numFrames, dims, buff);
-	img->setPixels(image);
 	if (nrhs > 3)
 	{
 		char buff[96];

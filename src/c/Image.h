@@ -20,10 +20,10 @@ public:
 	void setNumFrames(int numFrames);
 
 	Vec<size_t> getDimensions();
-	void setDimensions(Vec<size_t> dimensions);
+	void setDimensions(Vec<size_t> dims);
 
-	double* getPhysicalDim();
-	void setPhysicalDim();
+	Vec<float> getPhysicalDims();
+	void setPhysicalDim(Vec<float> pDims);
 
 	char* getBuff();
 	void setBuff(char buff[96]);
@@ -35,9 +35,8 @@ private:
 	int numArgs;
 	unsigned char* pixels;
 	Vec<size_t> dimensions;
-	void Dimensions(Vec<size_t> val) { dimensions = val; }
 	int numChannels;
 	int numFrames;
-	double* physicalDim;
+	Vec<float> physicalDims;
 	char* buff;
 };

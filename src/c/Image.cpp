@@ -17,7 +17,6 @@ Image::Image(int numChannels, int numFrames, Vec<size_t> dimensions, char buff[9
 
 Image::~Image(){
 	free(pixels);
-	free(physicalDim);
 }
 
 char* Image::getBuff(){
@@ -62,9 +61,10 @@ void Image::setDimensions(Vec<size_t> dimensions){
 	this->dimensions = dimensions;
 }
 
-double* Image::getPhysicalDim(){
-	return physicalDim;
+Vec<float> Image::getPhysicalDims(){
+	return physicalDims;
 }
-void Image::setPhysicalDim(){
-	this->physicalDim;
+void Image::setPhysicalDim(Vec<float> pDims)
+{
+	this->physicalDims = pDims;
 }

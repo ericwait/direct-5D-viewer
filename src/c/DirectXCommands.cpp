@@ -14,10 +14,12 @@ void XloadTextureCommand(Message m){
 	int numChannels = returnedImg->getNumChannels();
 	int numFrames = returnedImg->getNumFrames();
 
+	Vec<float> physDims = returnedImg->getPhysicalDims();
+
 	Vec<float> scale(dims);
 	scale = scale / scale.maxValue();
-	scale.y = 1;
-	scale.z = float(.05);
+	scale.y *= physDims.y/physDims.x;
+	scale.z *= physDims.z/physDims.x;
 
 	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
 
