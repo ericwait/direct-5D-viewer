@@ -18,8 +18,10 @@ void XloadTextureCommand(Message m){
 
 	Vec<float> scale(dims);
 	scale = scale / scale.maxValue();
-	scale.y *= physDims.y/physDims.x;
-	scale.z *= physDims.z/physDims.x;
+
+	scale.x *= physDims.x/physDims.minValue();
+	scale.y *= physDims.y/physDims.minValue();
+	scale.z *= physDims.z/physDims.minValue();
 
 	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
 
