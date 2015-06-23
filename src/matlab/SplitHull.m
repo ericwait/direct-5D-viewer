@@ -27,7 +27,7 @@ for i=1:k
     im(idx) = i;
 end
 
-newHulls = CreateHulls(im,tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),Hulls(hull).frame,segMetadata.HullsChan,[],[],[],true),...
+newHulls = CreateHulls(im,tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),Hulls(hull).frame,segMetadata.HullsChan,[],[],[],true),...
     1,Hulls(hull).frame,0,0,1);
 
 oldHull = Hulls(hull);

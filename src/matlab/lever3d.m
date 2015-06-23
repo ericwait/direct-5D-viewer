@@ -14,7 +14,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function lever3d()
-global imageData orgMetadata  processedMetadata segMetadata distMetadata Hulls Tracks Families tmr uiControlFig uiControlHandles useDistance
+global imageData  processedMetadata segMetadata distMetadata Hulls Tracks Families tmr uiControlFig uiControlHandles useDistance
 
 if (~isempty(uiControlFig) && ishandle(uiControlFig))
     close(uiControlFig);
@@ -22,23 +22,25 @@ end
 
 useDistance = 0;
 
-orgMetadata.PathName = '';
-orgMetadata.FileName = '';
-
 [arrowFaces, arrowVerts, arrowNorms] = MakeArrow(0.65,0.05,0.15,40);
 [sphereFaces, sphereVerts, shereNorms] = MakeSphere(0.20,40);
 
-[orgMetadata.FileName,orgMetadata.PathName,~] = uigetfile('.txt');
-if (orgMetadata.FileName==0), return, end
+tic
+[orgImage, imageData] = tiffReader([],[],[],[],'uint8',true);
+fprintf('Took %s to read\n',printTime(toc));
+
+if(isempty(imageData))
+   return; 
+end
 
 try
-    if (~exist(fullfile(orgMetadata.PathName,'ScreenShots'),'file'))
-        mkdir(orgMetadata.PathName,'ScreenShots');
+    if (~exist(fullfile(imageData.imageDir,'ScreenShots'),'file'))
+        mkdir(imageData.imageDir,'ScreenShots');
     end
-    captureFilePath = fullfile(orgMetadata.PathName,'ScreenShots');
+    captureFilePath = fullfile(imageData.imageDir,'ScreenShots');
 catch err
     disp('Choose folder to place screen shots...');
-    captureFilePath = uigetdir(orgMetadata.PathName);
+    captureFilePath = uigetdir(imageData.imageDir);
     if captureFilePath~=0
         try
             mkdir(captureFilePath)
@@ -47,10 +49,6 @@ catch err
         end
     end
 end
-
-tic
-[orgImage, imageData] = tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),[],[],[],'uint8',true);
-fprintf('Took %s to read\n',printTime(toc));
 
 tmr = timer('TimerFcn',@CheckMessage,'ExecutionMode','fixedSpacing','Period',0.1);
 start(tmr);
@@ -109,7 +107,7 @@ if (~isempty(processedMetadata) && exist(fullfile(processedMetadata.PathName,pro
         if (processedMetadata.ChanProcessed(c))
             viewImage(:,:,:,c,:) = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],c,[],'uint8',true,true);
         else
-            viewImage(:,:,:,c,:) = tiffReader(fullfile(imageData.imageDir,orgMetadata.FileName),[],c,[],'uint8',true,true);
+            viewImage(:,:,:,c,:) = tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),[],c,[],'uint8',true,true);
         end
     end
     lever_3d('loadTexture',viewImage,[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');

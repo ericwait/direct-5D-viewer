@@ -428,8 +428,8 @@ numCudaDevices = CudaMex('DeviceCount');
 switch processStr{processIdx}
     case 'Contrast Enhancement'
         if (isempty(processedMetadata))
-            processedMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
             processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
+            processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
             processedMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
         end
         params = {'Gaussian Sigma in X','Gaussian Sigma in Y', 'Gaussian Sigma in Z', 'Median Filter in X', 'Median Filter in Y','Median Filter in Z'};
@@ -459,7 +459,7 @@ switch processStr{processIdx}
             else
                 parfor t=1:imageData.NumberOfFrames
                     processedImage(:,:,:,1,t) = CudaMex(...
-                        'ContrastEnhancement',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
+                        'ContrastEnhancement',tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),t,chan,[],[],true,true),...
                         [gX,gY,gZ],[mX,mY,mZ]);
                 end
             end
@@ -477,8 +477,8 @@ switch processStr{processIdx}
         end
     case 'Markov Random Fields Denoise'
         if (isempty(processedMetadata))
-            processedMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
             processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
+            processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
             processedMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
         end
         params = {'Max iterations'};
@@ -503,7 +503,7 @@ switch processStr{processIdx}
             else
                 parfor t=1:imageData.NumberOfFrames
                     processedImage(:,:,:,1,t) = imageConvertNorm(CudaMex('MarkovRandomFieldDenoiser',...
-                        tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],'single',true,true),iter),...
+                        tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),t,chan,[],'single',true,true),iter),...
                         imageData.Type,true);
                 end
             end
@@ -521,7 +521,7 @@ switch processStr{processIdx}
         end
     case 'Segment, Track, & Lineage'
         if (isempty(segMetadata))
-            segMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+            segMetadata.PathName = fullfile(imageData.imageDir,'Processed');
             segMetadata.FileName = [imageData.DatasetName '_segmentation.txt'];
             segMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
             segMetadata.HullsChan = chan;%TODO this is prob not the right way to do this!
@@ -553,7 +553,7 @@ switch processStr{processIdx}
             else
                 parfor t=1:imageData.NumberOfFrames
                     segImage(:,:,:,1,t) = imageConvertNorm(CudaMex(...
-                        'Segment',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
+                        'Segment',tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),t,chan,[],[],true,true),...
                         alpha,[oX,oY,oZ]),'uint8',true);
                 end
             end
@@ -590,7 +590,7 @@ switch processStr{processIdx}
         end
     case 'Distance Map'
         if (isempty(distMetadata))
-            distMetadata.PathName = fullfile(orgMetadata.PathName,'Processed');
+            distMetadata.PathName = fullfile(imageData.imageDir,'Processed');
             distMetadata.FileName = [imageData.DatasetName '_distance.txt'];
             distMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
         end
@@ -616,7 +616,7 @@ switch processStr{processIdx}
                 end
             else
                 parfor t=1:imageData.NumberOfFrames
-                    temp = CudaMex('Segment',tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],true,true),...
+                    temp = CudaMex('Segment',tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),t,chan,[],[],true,true),...
                         alpha,[oX,oY,oZ]);
                     temp = temp>=max(temp(:));
                     distanceImage(:,:,:,1,t) = bwdist(temp,'euclidean'); %TODO make this in Cuda for anisotropic images
@@ -649,7 +649,7 @@ if (processed>0)
         elseif (processedMetadata.ChanProcessed(c))
             viewImage(:,:,:,c,:) = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],c,[],'uint8',true,true);
         else
-            viewImage(:,:,:,c,:) = tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),[],c,[],'uint8',true,true);
+            viewImage(:,:,:,c,:) = tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),[],c,[],'uint8',true,true);
         end
     end
     

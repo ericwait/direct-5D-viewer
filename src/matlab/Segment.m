@@ -14,7 +14,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function Segment(segImage, chan, minCellDia)
-global imageData orgMetadata Hulls Tracks Families Costs hullChan
+global imageData Hulls Tracks Families Costs hullChan
 tic
 [Hulls,Tracks,Families] = GetEmptyStructs();
 
@@ -22,7 +22,7 @@ hullChan = chan;
 
 for t=1:size(segImage,5)
     bw = segImage(:,:,:,1,t)>0;
-    newHulls = CreateHulls(bw,tiffReader(fullfile(orgMetadata.PathName,orgMetadata.FileName),t,chan,[],[],[],true),minCellDia,t);
+    newHulls = CreateHulls(bw,tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),t,chan,[],[],[],true),minCellDia,t);
     if (isempty(newHulls))
         warning('No hulls found on frame %d',t);
     end
