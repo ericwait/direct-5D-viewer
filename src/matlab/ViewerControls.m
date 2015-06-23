@@ -448,6 +448,9 @@ switch processStr{processIdx}
             if (numCudaDevices==1)
                 lever_3d('takeControl');
             end
+            
+            Threading.getPoolInfo(true);
+            
             if (get(handles.rb_Processed,'Value')==1 ...
                     && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
                     && processedMetadata.ChanProcessed(chan))
