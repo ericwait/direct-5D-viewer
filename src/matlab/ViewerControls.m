@@ -428,8 +428,8 @@ numCudaDevices = CudaMex('DeviceCount');
 switch processStr{processIdx}
     case 'Contrast Enhancement'
         if (isempty(processedMetadata))
-            processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
             processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
+            processedMetadata.FileName = [imageData.DatasetName '_processed'];
             processedMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
         end
         params = {'Gaussian Sigma in X','Gaussian Sigma in Y', 'Gaussian Sigma in Z', 'Median Filter in X', 'Median Filter in Y','Median Filter in Z'};
@@ -470,15 +470,15 @@ switch processStr{processIdx}
             fprintf('Contrast Enhancement took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/size(processedImage,5)));
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_processed'];
-            tiffWriter(processedImage,fullfile(processedMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            tiffWriter(processedImage,processedMetadata.PathName,tempData,[],chan);
             processed = 1;
             processedMetadata.ChanProcessed(chan) = true;
             save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
         end
     case 'Markov Random Fields Denoise'
         if (isempty(processedMetadata))
-            processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
             processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
+            processedMetadata.FileName = [imageData.DatasetName '_processed'];
             processedMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
         end
         params = {'Max iterations'};
@@ -515,7 +515,7 @@ switch processStr{processIdx}
             processed = 1;
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_processed'];
-            tiffWriter(processedImage,fullfile(processedMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            tiffWriter(processedImage,processedMetadata.PathName,tempData,[],chan);
             processedMetadata.ChanProcessed(chan) = true;
             save(fullfile(processedMetadata.PathName,'processedMetadata.mat'),'processedMetadata');
         end
@@ -564,7 +564,7 @@ switch processStr{processIdx}
             fprintf('Image Processing Took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_segmentation'];
-            tiffWriter(segImage,fullfile(segMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            tiffWriter(segImage,segMetadata.PathName,tempData,[],chan);
             segMetadata.ChanProcessed(chan) = true;
             save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
             Segment(segImage,chan,dia);
@@ -626,7 +626,7 @@ switch processStr{processIdx}
             fprintf('Distance Map: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
             tempData = imageData;
             tempData.DatasetName = [imageData.DatasetName,'_distance'];
-            tiffWriter(distanceImage,fullfile(distMetadata.PathName,tempData.DatasetName),tempData,[],chan);
+            tiffWriter(distanceImage,distMetadata.PathName,tempData,[],chan);
             save(fullfile(distMetadata.PathName,'distMetadata.mat'),'distMetadata');
             distMetadata.ChanProcessed(chan) = true;
             if (~isempty(Hulls))
