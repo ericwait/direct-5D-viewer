@@ -1,6 +1,8 @@
-function [ output_args ] = SegmentBlob( input_args )
+function SegmentBlob(  handles, chan  )
 %SEGMENTBLOB Summary of this function goes here
 %   Detailed explanation goes here
+
+global imageData segMetadata processedMetadata
 
 if (isempty(segMetadata))
     segMetadata.PathName = fullfile(imageData.imageDir,'Processed');
@@ -21,9 +23,13 @@ if (~isempty(response))
     dia = str2double(response{5});
     tic
     segImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,1,imageData.NumberOfFrames,'uint8');
+    
+    numCudaDevices = CudaMex('DeviceCount');
+    
     if (numCudaDevices==1)
         lever_3d('takeControl');
     end
+    
     if (get(handles.rb_Processed,'Value')==1 ...
             && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file')...
             && processedMetadata.ChanProcessed(chan))
@@ -39,9 +45,11 @@ if (~isempty(response))
                 alpha,[oX,oY,oZ]),'uint8',true);
         end
     end
+    
     if (numCudaDevices==1)
         lever_3d('releaseControl');
     end
+    
     processTime = toc;
     fprintf('Image Processing Took: %s, or %s avg per frame\n',printTime(processTime),printTime(processTime/imageData.NumberOfFrames));
     tempData = imageData;
@@ -49,10 +57,12 @@ if (~isempty(response))
     tiffWriter(segImage,segMetadata.PathName,tempData,[],chan);
     segMetadata.ChanProcessed(chan) = true;
     save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
-    ImProc.Segment(segImage,chan,dia);
+    Seg.Segment(segImage,chan,dia);
+    
     if (~isempty(distMetadata))
         set(handles.m_DistanceChoice,'Enable','on');
     end
+    
     clear segImage
     save(fullfile(segMetadata.PathName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
     msg = 'There are empty structures:';

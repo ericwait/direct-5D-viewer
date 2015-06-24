@@ -342,7 +342,7 @@ switch processStr{processIdx}
     case 'Markov Random Fields Denoise'
         processed = ImProc.MRFDenoise(handles, chan);
     case 'Segment, Track, & Lineage'
-        Seg.SegmentBlob();
+        Seg.SegmentBlob(handles, chan);
     case 'Distance Map'
         ImProc.DistMap(handles, chan);
 end
