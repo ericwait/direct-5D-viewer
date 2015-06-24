@@ -98,7 +98,7 @@ if (exist(fullfile(imageData.imageDir,'Processed'),'dir'))
     end
 end
 
-if (~isempty(processedMetadata) && exist(fullfile(processedMetadata.PathName,processedMetadata.FileName),'file'))
+if (~isempty(processedMetadata) && ~isempty(readMetadata(fullfile(processedMetadata.PathName,processedMetadata.FileName))))
     set(uiControlHandles.rb_Processed,'Enable','on','Value',1);
     set(uiControlHandles.rb_orgImage,'Value',0);
     
