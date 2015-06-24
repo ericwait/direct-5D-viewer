@@ -344,7 +344,7 @@ switch processStr{processIdx}
     case 'Segment, Track, & Lineage'
         Seg.SegmentBlob();
     case 'Distance Map'
-        ImProc.DistMap();
+        ImProc.DistMap(handles, chan);
 end
 
 if (processed>0)

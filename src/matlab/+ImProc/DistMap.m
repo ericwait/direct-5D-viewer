@@ -1,10 +1,13 @@
-function [ output_args ] = DistMap( input_args )
+function DistMap(  handles, chan  )
 %DISTMAP Summary of this function goes here
 %   Detailed explanation goes here
+
+global imageData distMetadata processedMetadata
+
 if (isempty(distMetadata))
     distMetadata.PathName = fullfile(imageData.imageDir,'Processed');
     distMetadata.FileName = [imageData.DatasetName '_distance.txt'];
-    distMetadata.ChanProcessed = logical(zeros(1,imageData.NumberOfChannels));
+    distMetadata.ChanProcessed = false(1,imageData.NumberOfChannels);
 end
 params = {'alpha','Opening Radius in X','Opening Radius in Y','Opening Radius in Z'};
 diaTitle = 'Distance Map';
