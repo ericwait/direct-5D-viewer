@@ -165,12 +165,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			}
 
-			/*else if (_strcmpi("setViewOrigin", command) == 0)
+			else if (_strcmpi("setViewOrigin", command) == 0)
 			{
 				setViewOriginCommand(nrhs, prhs);
 
 			}
-
+			/*
 			else if (_strcmpi("updateHulls", command) == 0)
 			{
 				updateHullsCommand(nrhs, prhs);

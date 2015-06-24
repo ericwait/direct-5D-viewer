@@ -627,6 +627,9 @@ HRESULT checkMessage(){
 	else if (m.command == "captureImage"){
 
 	}
+	else if (m.command == "centerSelectedCell"){
+
+	}
 	else
 	{
 		// Print an error message
