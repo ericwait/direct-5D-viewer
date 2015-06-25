@@ -89,7 +89,7 @@ public:
 	static const Vec<float> triVertices[4];
 
 	VolumeTextureObject(Renderer* renderer, Vec<size_t> dimsIn, int numChannels, unsigned char* image, Vec<float> scaleFactorIn, Camera* camera,
-		unsigned char* constMemIn=NULL);
+		unsigned char** constMemIn=NULL);
 	~VolumeTextureObject();
 
 	void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
@@ -105,7 +105,7 @@ public:
 
 private:
 	VolumeTextureObject();
-	void initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char* shaderMemIn=NULL);
+	void initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char** shaderMemIn=NULL);
 
 	void createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces, std::vector<Vec<float>> &normals, std::vector<Vec<float>> &textureUVs);
 

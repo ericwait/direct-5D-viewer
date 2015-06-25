@@ -117,11 +117,11 @@ void SingleColoredMaterial::updateParams()
 
 
 StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image,
-														 unsigned char* shaderConstMemoryIn/*=NULL*/) : Material(rendererIn)
+	unsigned char** shaderConstMemoryIn/*=NULL*/) : Material(rendererIn)
 {
 	numChannels = numChannelsIn;
 	dims = dimsIn;
-	shaderConstMemory = shaderConstMemoryIn;
+	shaderConstMemory = *shaderConstMemoryIn;
 
 	cullBackFace = false;
 	testDepth = false;
@@ -130,7 +130,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	attenuationOn = false;
 
 	char cBuffer[3];
-	sprintf_s(cBuffer,"%d",numChannels);
+	sprintf_s(cBuffer, "%d", numChannels);
 	std::string strChans = cBuffer;
 	createStaticVolumeShaderText(strChans);
 
@@ -138,9 +138,20 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	volPixShaderConsts.ranges.resize(numChannels);
 	volPixShaderConsts.transferFunctions.resize(numChannels);
 
-	if (shaderConstMemory==NULL)
+	if (shaderConstMemory == NULL)
+	{
 		shaderConstMemory = new unsigned char[volPixShaderConsts.sizeOf()];
+		*shaderConstMemoryIn = shaderConstMemory;
 
+		for (int i = 0; i < numChannels; ++i)
+		{
+			setTransferFunction(i, Vec<float>(0.0f, 1.0f, 0.0f));
+			setRange(i, Vec<float>(0.0f, 1.0f, 0.0f));
+			setColor(i, colors[i % 6], 1.0f);
+			setAttenuationOn(false);
+			setLightOn(false);
+		}
+	}
 	renderer->createConstantBuffer(volPixShaderConsts.sizeOf(),&constBuffer);
 
 	setShader("StaticVolumePixelShader.fx","MultiChanVolumePixelShader",strChans);
@@ -152,11 +163,6 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	{
 		samplerState[i] = renderer->getSamplerState();
 		shaderResourceView[i] = renderer->createTextureResourceView(dims, image + dims.product()*i);
-		setTransferFunction(i,Vec<float>(0.0f,1.0f,0.0f));
-		setRange(i,Vec<float>(0.0f,1.0f,0.0f));
-		setColor(i,colors[i%6],1.0f);
-		setAttenuationOn(false);
-		setLightOn(false);
 	}
 }
 

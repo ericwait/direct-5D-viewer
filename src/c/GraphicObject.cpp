@@ -316,7 +316,7 @@ bool CellHullObject::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPnt
 
 
 VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image, 
-										 Vec<float> scaleFactorIn, Camera* camera, unsigned char* constMemIn/*=NULL*/)
+										 Vec<float> scaleFactorIn, Camera* camera, unsigned char** constMemIn/*=NULL*/)
 {
 	renderer = rendererIn;
 	dims = dimsIn;
@@ -377,7 +377,7 @@ void VolumeTextureObject::setWireframe(bool wireframe)
 	gMexMessageQueueOut.addErrorMessage("You cannot set wire frame on a VolumeTextureObject!");
 }
 
-void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char* shaderMemIn/*=NULL*/)
+void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char** shaderMemIn/*=NULL*/)
 {
 	if (rendererPackage==NULL)
 	{

@@ -277,10 +277,16 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		gGraphicObjectNodes[typ].clear();
 	}
 
+	if (!firstVolumeTextures.empty())
+	{
+		VolumeTextureObject* volumeTexture = firstVolumeTextures[0];
+		shaderConstMemory = volumeTexture->getShaderConstMemory();
+	}
+
 	for (int i = 0; i < numFrames; ++i)
 	{
 		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer, dims, numChannel, image + i*numChannel*dims.product(), scales,
-			gCameraDefaultMesh, shaderConstMemory);
+			gCameraDefaultMesh, &shaderConstMemory);
 		shaderConstMemory = volumeTexture->getShaderConstMemory();
 
 		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);

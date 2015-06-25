@@ -78,7 +78,7 @@ class StaticVolumeTextureMaterial : public Material
 {
 public:
 	StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dims, int numChannels, unsigned char* image,
-		unsigned char* shaderConstMemoryIn=NULL);
+		unsigned char** shaderConstMemoryIn=NULL);
 	~StaticVolumeTextureMaterial();
 
 	static const Vec<float> colors[6];
