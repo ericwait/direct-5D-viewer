@@ -170,19 +170,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				setViewOriginCommand(nrhs, prhs);
 
 			}
-			/*
+			
 			else if (_strcmpi("updateHulls", command) == 0)
 			{
 				updateHullsCommand(nrhs, prhs);
 
 			}
-
+			
 			else if (_strcmpi("addHulls", command) == 0)
 			{
 				addHullsCommand(nrhs, prhs);
 
 			}
-
+			/*
 			else if (_strcmpi("setCapturePath", command) == 0)
 			{
 				setCapturePathCommand(nrhs, prhs);

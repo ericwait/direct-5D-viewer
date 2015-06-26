@@ -596,7 +596,7 @@ HRESULT checkMessage(){
 		gRenderer->renderAll();
 	}
 	else if (m.command == "loadHulls"){
-		XloadHullsCommand(m);
+		XaddHullCommand(m);
 		gRenderer->renderAll();
 	}
 	else if (m.command == "removeHull"){

@@ -4,6 +4,7 @@
 #include "windows.h"
 #include "Globals.h"
 #include "MexFunctions.h"
+#include "QueuePolygon.h"
 #include <set>
 
 std::vector<VolumeTextureObject*> firstVolumeTextures;
@@ -130,7 +131,8 @@ HRESULT updateHulls(const mxArray* hulls)
 		double* colorData = (double*)mxGetData(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
-		int hullIdx = -1;
+		/*DirectX Side*/
+		/*int hullIdx = -1;
 		for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
 		{
 			int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
@@ -141,12 +143,24 @@ HRESULT updateHulls(const mxArray* hulls)
 			}
 		}
 
-		//gRenderer->getMutex();
-
 		SceneNode* parentSceneNode = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->getParentNode();
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->releaseRenderResources();
-		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];
+		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];*/
+		/*DirectX Side*/
 
+		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		//memcpy(this->pixels, pixels, dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
+		polygon->setfaceData(faceData);
+		polygon->setvertData(vertData);
+		polygon->setnormData(normData);
+		polygon->setcolorData(colorData);
+		int* intptr = &(polygon->label);
+		dataQueue->writeMessage("removeHull", (void*)intptr);
+		dataQueue->writeMessage("loadHulls", (void*)polygon);
+
+		//gRenderer->getMutex();
+
+		/*
 		CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0], (float)colorData[1], (float)colorData[2]), 1.0f);
 		curHullObj->setLabel((int)mxGetScalar(mxLabel));
@@ -154,7 +168,7 @@ HRESULT updateHulls(const mxArray* hulls)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx] = new GraphicObjectNode(curHullObj);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->setWireframe(true);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->attachToParentNode(parentSceneNode);
-
+		*/
 		//gRenderer->releaseMutex();
 	}
 
@@ -198,20 +212,17 @@ HRESULT addHulls(const mxArray* hulls)
 		double* colorData = (double*)mxGetData(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
-		int hullIdx = -1;
-		for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
-		{
-			int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
-			if (label == (int)mxGetScalar(mxLabel))
-			{
-				hullIdx = j;
-				break;
-			}
-		}
+		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		//memcpy(this->pixels, pixels, dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
+		polygon->setfaceData(faceData);
+		polygon->setvertData(vertData);
+		polygon->setnormData(normData);
+		polygon->setcolorData(colorData);
+		dataQueue->writeMessage("loadHulls", (void*)polygon);
 
 		//gRenderer->getMutex();
 
-		CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
+		/*CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
 		curHullObj->setColor(Vec<float>((float)colorData[0], (float)colorData[1], (float)colorData[2]), 1.0f);
 		curHullObj->setLabel((int)mxGetScalar(mxLabel));
 		curHullObj->setTrack((int)mxGetScalar(mxTrack));
@@ -219,7 +230,7 @@ HRESULT addHulls(const mxArray* hulls)
 		curHullNode->setWireframe(true);
 		curHullNode->attachToParentNode(hullRootNodes[frame]);
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
-
+		*/
 		//gRenderer->releaseMutex();
 	}
 

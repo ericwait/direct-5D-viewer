@@ -70,7 +70,7 @@ void XtransferUpdateCommand(Message m){
 	firstVolumeTextures[fvtIdx]->setColor(sentTranfser->chan, sentTranfser->color, sentTranfser->alphaMod);
 }
 
-void XloadHullsCommand(Message m){
+void XaddHullCommand(Message m){
 	if (gRenderer == NULL) return;
 
 	/*if (!gGraphicObjectNodes[GraphicObjectTypes::CellHulls].empty())
@@ -107,6 +107,19 @@ void XloadHullsCommand(Message m){
 		gRenderer->attachToRootScene(hullRootNodes[polygon->frame], Renderer::Section::Main, polygon->frame);
 	}
 
+	int hullIdx = -1;
+	for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+	{
+		int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
+		if (label == polygon->label)
+		{
+			// Throw Matlab error if we try to add a hull that exists
+			gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+			hullIdx = j;
+			break;
+		}
+	}
+
 	CellHullObject* curHullObj = createCellHullObject(polygon->getfaceData(), polygon->numFaces, polygon->getvertData(), polygon->numVerts, polygon->getnormData(), polygon->numNormals, gCameraDefaultMesh);
 	curHullObj->setColor(Vec<float>((float)polygon->getcolorData()[0], (float)polygon->getcolorData()[1], (float)polygon->getcolorData()[2]), 1.0f);
 	curHullObj->setLabel(polygon->label);
@@ -120,7 +133,7 @@ void XloadHullsCommand(Message m){
 void XremoveHullCommand(Message m){
 	int* labelPtr = (int*)m.data;
 	int inputLabel = *labelPtr;
-	delete labelPtr;
+
 	int hullIdx = -1;
 	for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
 	{
@@ -132,10 +145,11 @@ void XremoveHullCommand(Message m){
 		}
 	}
 
-	delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];
-	gGraphicObjectNodes[GraphicObjectTypes::CellHulls].erase(gGraphicObjectNodes[GraphicObjectTypes::CellHulls].begin() + hullIdx);
-	gRenderer->updateRenderList();
-	int x = 1;
+	if (hullIdx > -1){
+		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].erase(gGraphicObjectNodes[GraphicObjectTypes::CellHulls].begin() + hullIdx);
+		gRenderer->updateRenderList();
+	}
 }
 
 void XpeelUpdateCommand(Message m){
