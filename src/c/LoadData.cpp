@@ -132,6 +132,7 @@ HRESULT loadHulls(const mxArray* hulls)
 		double* vertData = (double*)mxGetData(mxVerts);
 		double* normData = (double*)mxGetData(mxNorms);
 		double* colorData = (double*)mxGetData(mxColor);
+		size_t numColor = mxGetNumberOfElements(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 		// end class
 

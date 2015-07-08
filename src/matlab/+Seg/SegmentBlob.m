@@ -2,7 +2,7 @@ function SegmentBlob(  handles, chan  )
 %SEGMENTBLOB Summary of this function goes here
 %   Detailed explanation goes here
 
-global imageData segMetadata processedMetadata
+global imageData segMetadata distMetadata processedMetadata Hulls Tracks Families
 
 if (isempty(segMetadata))
     segMetadata.PathName = fullfile(imageData.imageDir,'Processed');
