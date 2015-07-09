@@ -14,7 +14,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function lever3d()
-global imageData  processedMetadata segMetadata distMetadata Hulls Tracks Families tmr uiControlFig uiControlHandles useDistance
+global imageData  processedMetadata segMetadata distMetadata Hulls Tracks Families tmr uiControlFig uiControlHandles useDistance gSavingData
+
+gSavingData = 0;
 
 if (~isempty(uiControlFig) && ishandle(uiControlFig))
     close(uiControlFig);

@@ -153,42 +153,53 @@ set(handles.m_imageProcessing,'String',procStr);
 UI.UpdateCurrentState(handles);
 end
 
+function bSavingData = checkSavingDataGlobal()
+global gSavingData
+
+bSavingData = gSavingData;
+end
+
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
-global tmr Hulls Tracks Families orgMetadata processedMetadata segMetadata distMetadata imageData Costs Colors selectedHull uiTreeFig uiControlHandles segImage channelData familyHulls trackHulls useDistance distChanUsed
-lever_3d('close');
+global tmr Hulls Tracks Families orgMetadata processedMetadata segMetadata distMetadata imageData Costs Colors selectedHull uiTreeFig uiControlHandles segImage channelData familyHulls trackHulls useDistance distChanUsed gSavingData
 
-if ~isempty(tmr)
-    stop(tmr);
-    delete(tmr);
-    tmr = [];
+if gSavingData == 0
+    lever_3d('close');
+
+    if ~isempty(tmr)
+        stop(tmr);
+        delete(tmr);
+        tmr = [];
+    end
+
+    if ~isempty(uiTreeFig)
+        close(uiTreeFig);
+    end
+
+    clear mex
+    Hulls = [];
+    Tracks = [];
+    Families = [];
+    imageData = [];
+    Costs = [];
+    Colors = [];
+    selectedHull = [];
+    uiControlHandles = [];
+    segImage = [];
+    channelData = [];
+    familyHulls = [];
+    trackHulls = [];
+    useDistance = [];
+    orgMetadata = [];
+    processedMetadata = [];
+    segMetadata = [];
+    distMetadata = [];
+    distChanUsed = [];
+
+    delete(hObject);
+else
+   warndlg('Saving... Please wait.'); 
 end
-
-if ~isempty(uiTreeFig)
-    close(uiTreeFig);
-end
-
-clear mex
-Hulls = [];
-Tracks = [];
-Families = [];
-imageData = [];
-Costs = [];
-Colors = [];
-selectedHull = [];
-uiControlHandles = [];
-segImage = [];
-channelData = [];
-familyHulls = [];
-trackHulls = [];
-useDistance = [];
-orgMetadata = [];
-processedMetadata = [];
-segMetadata = [];
-distMetadata = [];
-distChanUsed = [];
-
-delete(hObject);
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -429,9 +440,12 @@ end
 
 % --- Executes on button press in pb_SaveSegmentation.
 function pb_SaveSegmentation_Callback(hObject, eventdata, handles)
-global Hulls Tracks Families segMetadata imageData
+global Hulls Tracks Families segMetadata imageData gSavingData
+
+gSavingData = 1;
 save(fullfile(segMetadata.PathName,[imageData.DatasetName '_Segmenation.mat']),'Hulls','Tracks','Families','-v7.3');
 save(fullfile(segMetadata.PathName,'segMetadata.mat'),'segMetadata');
+
 msg = 'There are empty structures:';
 if isempty(Hulls)
     msg = [msg;{'Hulls'}];
@@ -446,6 +460,8 @@ end
 if (size(msg,1)>1)
     warndlg(msg);
 end
+
+gSavingData = 0;
 end
 
 % --- Executes on button press in pb_SaveImages.
