@@ -7,7 +7,7 @@ processed = false;
 
 if (isempty(processedMetadata))
     processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
-    processedMetadata.FileName = [imageData.DatasetName '_processed.txt'];
+    processedMetadata.FileName = [imageData.DatasetName '_processed'];
 end
 
 %% setup question dialog

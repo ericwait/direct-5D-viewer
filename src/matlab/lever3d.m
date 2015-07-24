@@ -72,6 +72,8 @@ if (exist(fullfile(imageData.imageDir,'Processed'),'dir'))
     if (exist(fullfile(imageData.imageDir,'Processed','processedMetadata.mat'),'file'))
         load(fullfile(imageData.imageDir,'Processed','processedMetadata.mat'));
         processedMetadata.PathName = fullfile(imageData.imageDir,'Processed');
+        %set(uiControlHandles.rb_Processed,'Enable','on','Value',1);
+        %set(uiControlHandles.rb_orgImage,'Value',0);
     end
     if (exist(fullfile(imageData.imageDir,'Processed','distMetadata.mat'),'file'))
         load(fullfile(imageData.imageDir,'Processed','distMetadata.mat'));
@@ -104,14 +106,8 @@ if (~isempty(processedMetadata) && ~isempty(readMetadata(fullfile(processedMetad
     set(uiControlHandles.rb_Processed,'Enable','on','Value',1);
     set(uiControlHandles.rb_orgImage,'Value',0);
     
-    viewImage = zeros(imageData.YDimension,imageData.XDimension,imageData.ZDimension,imageData.NumberOfChannels,imageData.NumberOfFrames,'uint8');
-    for c=1:imageData.NumberOfChannels
-        if (processedMetadata.ChanProcessed(c))
-            viewImage(:,:,:,c,:) = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],c,[],'uint8',true,true);
-        else
-            viewImage(:,:,:,c,:) = tiffReader(fullfile(imageData.imageDir,imageData.DatasetName),[],c,[],'uint8',true,true);
-        end
-    end
+    viewImage = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],[],[],'uint8',true,true);
+    
     lever_3d('loadTexture',viewImage,[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
     clear viewImage
 end
