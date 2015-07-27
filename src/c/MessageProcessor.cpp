@@ -74,8 +74,10 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		gWindowWidth = LOWORD( lParam );
 		gWindowHeight = HIWORD( lParam );
-		if (gRenderer!=NULL)
+		if (gRenderer != NULL){
 			gRenderer->resizeViewPort();
+			gRenderer->renderAll();
+		}
 		break;
 	case WM_MOUSEWHEEL:
 		if (GET_WHEEL_DELTA_WPARAM(wParam)>0)
