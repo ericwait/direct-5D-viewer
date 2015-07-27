@@ -188,7 +188,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				setCapturePathCommand(nrhs, prhs);
 
 			}
-
+			*/
 			else if (_strcmpi("takeControl", command) == 0)
 			{
 				takeControlCommand();
@@ -200,7 +200,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				releaseControlCommand();
 
 			}
-
+			/*
 			else if (_strcmpi("captureImage", command) == 0)
 			{
 				captureImageCommand(nlhs, nrhs, prhs, plhs);
