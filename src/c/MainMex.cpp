@@ -200,13 +200,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 				releaseControlCommand();
 
 			}
-			/*
+
 			else if (_strcmpi("captureImage", command) == 0)
 			{
 				captureImageCommand(nlhs, nrhs, prhs, plhs);
 
 			}
 
+			else if (_strcmpi("deleteAllHulls", command) == 0){
+				deleteAllHullsCommand();
+			}
+			/*
 			else
 			{
 				char buff[255];

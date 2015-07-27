@@ -37,6 +37,7 @@ void takeControlCommand();
 void releaseControlCommand();
 void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs);
 void removeHullCommand(int nrhs, const mxArray** prhs);
+void deleteAllHullsCommand();
 extern "C" void exitFunc();
 
 

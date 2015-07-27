@@ -480,7 +480,7 @@ void releaseControlCommand()
 
 void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs)
 {
-	if (gRendererOn == true) mexErrMsgTxt("MATLAB does not have exclusive control over the renderer! Call takeControl before using this command");
+	//if (gRendererOn == true) mexErrMsgTxt("MATLAB does not have exclusive control over the renderer! Call takeControl before using this command");
 
 	//if (nrhs != 3) mexErrMsgTxt("Usage is lever_3d('captureImage',folderPath,fileNamePrefix); ");
 	if (nlhs != 1) mexErrMsgTxt("There must be one output argument to hold the file path/name that was captured!");
@@ -506,6 +506,10 @@ void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plh
 	if (FAILED(hr)) mexErrMsgTxt("Unable to capture the screen!");
 
 	plhs[0] = mxCreateString(fileNameOut.c_str());
+}
+
+void deleteAllHullsCommand(){
+	dataQueue->writeMessage("deleteAllHulls", (void*)NULL);
 }
 
 extern "C" void exitFunc()

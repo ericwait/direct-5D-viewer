@@ -630,6 +630,10 @@ HRESULT checkMessage(){
 	else if (m.command == "centerSelectedCell"){
 
 	}
+	else if (m.command == "deleteAllHulls"){
+		XdeleteAllHullsCommand(m);
+		gRenderer->renderAll();
+	}
 	else
 	{
 		// Print an error message

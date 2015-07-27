@@ -146,6 +146,7 @@ void XremoveHullCommand(Message m){
 	}
 
 	if (hullIdx > -1){
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->detatchFromParentNode();
 		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].erase(gGraphicObjectNodes[GraphicObjectTypes::CellHulls].begin() + hullIdx);
 		gRenderer->updateRenderList();
@@ -269,4 +270,17 @@ void XdisplayHullsCommand(Message m){
 
 	toggleSelectedCell(*hullset);
 	delete hullset;
+}
+
+void XdeleteAllHullsCommand(Message m){
+	for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+	{
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->detatchFromParentNode();
+		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j];
+	}
+
+	gGraphicObjectNodes[GraphicObjectTypes::CellHulls].clear();
+	gRenderer->updateRenderList();
+
+	printf("Deleted Hulls!\n");
 }

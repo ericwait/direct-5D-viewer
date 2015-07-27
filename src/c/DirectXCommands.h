@@ -24,3 +24,4 @@ void XtextureLightingUpdateCommand(Message m);
 void XtextureAttenUpdateCommand(Message m);
 void XsegmentationLighting(Message m);
 void XdisplayHullsCommand(Message m);
+void XdeleteAllHullsCommand(Message m);
