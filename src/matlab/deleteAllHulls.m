@@ -10,4 +10,3 @@ trackHulls = [];
 lever_3d('deleteAllHulls');
 
 end
-

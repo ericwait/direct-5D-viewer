@@ -72,7 +72,7 @@ if(isempty(firstHull))
     oldEmptied = 1;
 else
     firstHull = Tracks(oldTrackID).hulls(firstHull);
-    RehashCellTracks(oldTrackID,Hulls(firstHull).time);
+    RehashTracksHulls(oldTrackID);
 end
 
 if(oldEmptied)
@@ -155,15 +155,15 @@ end
 
 %check to see if either of the tracks are dead
 familyIDs = [];
-if(~isempty(GetTimeOfDeath(oldTrackID)))
-    familyIDs = StraightenTrack(oldTrackID);
-end
-if(~isempty(GetTimeOfDeath(newTrackID)))
-    familyIDs = [familyIDs StraightenTrack(newTrackID)];
-end
-if(~isempty(familyIDs))
-    ProcessNewborns(familyIDs, SegmentationEdits.maxEditedFrame);
-end
+% if(~isempty(GetTimeOfDeath(oldTrackID)))
+%     familyIDs = StraightenTrack(oldTrackID);
+% end
+% if(~isempty(GetTimeOfDeath(newTrackID)))
+%     familyIDs = [familyIDs StraightenTrack(newTrackID)];
+% end
+% if(~isempty(familyIDs))
+%     ProcessNewborns(familyIDs, SegmentationEdits.maxEditedFrame);
+% end
 end
 
 function moveChildren(oldTrackID,newTrackID)

@@ -28,11 +28,11 @@ useDistance = 0;
 [sphereFaces, sphereVerts, shereNorms] = MakeSphere(0.20,40);
 
 tic
-[orgImage, imageData] = tiffReader([],[],[],[],'uint8',true);
+[orgImage, imageData] = tiffReader([],[],[],[],'uint8',true, false, true);
 fprintf('Took %s to read\n',printTime(toc));
 
 if(isempty(imageData))
-   return; 
+    return;
 end
 
 try
@@ -103,12 +103,14 @@ if (exist(fullfile(imageData.imageDir,'Processed'),'dir'))
 end
 
 if (~isempty(processedMetadata) && ~isempty(readMetadata(fullfile(processedMetadata.PathName,processedMetadata.FileName))))
+    
     set(uiControlHandles.rb_Processed,'Enable','on','Value',1);
     set(uiControlHandles.rb_orgImage,'Value',0);
     
     viewImage = tiffReader(fullfile(processedMetadata.PathName,processedMetadata.FileName),[],[],[],'uint8',true,true);
     
     lever_3d('loadTexture',viewImage,[imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize],'processed');
+    
     clear viewImage
 end
 fprintf('Done loading\n');
