@@ -1055,7 +1055,6 @@ void Renderer::setCurrentFrame(int frame)
 
 	currentFrame = frame;
 
-	gMexMessageQueueOut.addMessage("timeChange",currentFrame);
 }
 
 void Renderer::incrementFrame()
