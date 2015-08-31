@@ -114,9 +114,14 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gRenderer->setClipChunkPercent(0.1f);
 		break;
 	case WM_RBUTTONDOWN:
-		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
-		label = gRenderer->getHull(pnt,direction);
-		gMexMessageQueueOut.addMessage("cellSelected",label);
+		gCameraDefaultMesh->getRay(iMouseX, iMouseY, pnt, direction);
+		label = gRenderer->getHull(pnt, direction);
+		if (ctrlDown){
+			gMexMessageQueueOut.addMessage("cellSelected", label);
+		}
+		else{
+			gMexMessageQueueOut.addMessage("changeLabel", label);
+		}
 		gRenderer->renderAll();
 		break;
 	case WM_LBUTTONUP:
