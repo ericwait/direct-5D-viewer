@@ -42,7 +42,7 @@ protected:
 	void setParentNode(SceneNode* parent);
 	virtual const std::vector<SceneNode*>& getChildren();
 	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
-	virtual void addChildNode(SceneNode* child);
+	virtual bool addChildNode(SceneNode* child);
 	virtual void requestUpdate();
 	virtual void detatchChildNode(SceneNode* child);
 
@@ -59,7 +59,6 @@ public:
 	GraphicObjectNode(GraphicObject* graphicObjectIn);
 	~GraphicObjectNode();
 
-	virtual void attachToParentNode(SceneNode* parent);
 	void releaseRenderResources();
 	void setLightOn(bool on){graphicObject->setLightOn(on);}
 	void setRenderable(bool render, bool delayUpdate=false);
@@ -71,7 +70,8 @@ public:
 	virtual int getHullLabel(){return graphicObject->getHullLabel();}
 
 protected:
-	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
+	virtual bool addChildNode(SceneNode* child) { return false; }; //TODO: should probably be an error
+	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 
 private:
 	GraphicObjectNode();
@@ -90,17 +90,22 @@ public:
 	SceneNode* getRenderSectionNode(Renderer::Section section, int frame);
 	size_t getNumRenderableObjects(Renderer::Section section){return renderList[section].size();}
 	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section, unsigned int frame);
-	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
-	void resetWorldTransform();
 	int getNumFrames();
 	int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
 	int getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
-	virtual void addChildNode(SceneNode* child);
 
 	virtual void requestUpdate();
+	void updateRenderableList();
+
+protected:
+	virtual bool addChildNode(SceneNode* child);
+	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 
 private:
 	void makeRenderableList();
+
+	bool bRenderListDirty;
+
 	std::vector<SceneNode*> rootChildrenNodes[Renderer::Section::SectionEnd];
 	std::vector<std::vector<GraphicObjectNode*>> renderList[Renderer::Section::SectionEnd];
 };

@@ -46,7 +46,9 @@ void SceneNode::update()
 
 void SceneNode::attachToParentNode(SceneNode* parent)
 {
-	parent->addChildNode(this);
+	if ( !parent->addChildNode(this) )
+		return;
+
 	parentNode = parent;
 	updateTransforms(parent->getLocalToWorldTransform());
 	requestUpdate();
@@ -112,10 +114,12 @@ void SceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 	}
 }
 
-void SceneNode::addChildNode(SceneNode* child)
+bool SceneNode::addChildNode(SceneNode* child)
 {
 	//TODO check for dups
 	childrenNodes.push_back(child);
+
+	return true;
 }
 
 void SceneNode::requestUpdate()
@@ -141,12 +145,6 @@ GraphicObjectNode::GraphicObjectNode(GraphicObject* graphicObjectIn)
 {
 	graphicObject = graphicObjectIn;
 	renderable = true;
-}
-
-
-void GraphicObjectNode::attachToParentNode(SceneNode* parent)
-{
-	SceneNode::attachToParentNode(parent);
 }
 
 void GraphicObjectNode::releaseRenderResources()
@@ -299,13 +297,22 @@ int RootSceneNode::getHull(Vec<float> pnt, Vec<float> direction, unsigned int cu
 	return labelOut;
 }
 
-void RootSceneNode::addChildNode(SceneNode* child)
+bool RootSceneNode::addChildNode(SceneNode* child)
 {
 	gMexMessageQueueOut.addErrorMessage("You cannot attach to a root node using this method!");
+	return false;
 }
 
 void RootSceneNode::requestUpdate()
 {
+	bRenderListDirty = true;
+}
+
+void RootSceneNode::updateRenderableList()
+{
+	if ( !bRenderListDirty )
+		return;
+
 	makeRenderableList();
 }
 
@@ -338,4 +345,6 @@ void RootSceneNode::makeRenderableList()
 			curChildList.clear();
 		}
 	}
+
+	bRenderListDirty = false;
 }

@@ -653,6 +653,7 @@ void Renderer::clearPixelShaderList()
 
 void Renderer::renderAll()
 {
+	rootScene->updateRenderableList();
 	//WaitForSingleObject(mutexDevice,INFINITE);
 	startRender();
 	preRenderLoop();
