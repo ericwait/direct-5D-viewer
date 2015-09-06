@@ -114,7 +114,8 @@ void XaddHullCommand(Message m){
 		if (label == polygon->label)
 		{
 			// Throw Matlab error if we try to add a hull that exists
-			gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+			// Comment ths back in. I'm not sure yet why this doesn't work when editing 3D
+			//gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
 			hullIdx = j;
 			break;
 		}
