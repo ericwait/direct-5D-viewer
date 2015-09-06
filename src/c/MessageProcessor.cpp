@@ -120,8 +120,9 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			gMexMessageQueueOut.addMessage("cellSelected", label);
 		}
 		else{
-			gMexMessageQueueOut.addMessage("changeLabel", label);
+			gMexMessageQueueOut.addMessage("rightClick", label);
 		}
+		ctrlDown = false;
 		gRenderer->renderAll();
 		break;
 	case WM_LBUTTONUP:
