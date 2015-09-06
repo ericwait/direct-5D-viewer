@@ -38,10 +38,6 @@ void loadHulls( const mxArray * hulls, int numFrames )
 		if (comPtr==NULL) mexErrMsgTxt("Missing Center of Mass!\n");
 		hull.setCenterOfMass((double*)mxGetData(comPtr));
 
-		mxArray* boundingBoxPtr = mxGetField(hulls,hullIdx,"boundingBox");
-		if (boundingBoxPtr==NULL) mexErrMsgTxt("Missing Bounding Box!\n");
-		hull.setBoundingBox((double*)mxGetData(boundingBoxPtr));
-
 		mxArray* colorPtr = mxGetField(hulls,hullIdx,"color");
 		if (colorPtr==NULL) mexErrMsgTxt("Missing Color!\n");
 		double* colorData = (double*)mxGetData(colorPtr);
