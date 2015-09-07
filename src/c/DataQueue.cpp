@@ -29,6 +29,10 @@ Message DataQueue::getNextMessage()
 
 		return message;
 	}
+
+	// TODO: fix the compiler warning associated with this:
+	// Error message: It is invalid to pull off an empty queue
+	mexErrMsgTxt("No messages available in queue!");
 }
 
 size_t DataQueue::getNumMessages(){
