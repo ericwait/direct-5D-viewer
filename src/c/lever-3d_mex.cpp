@@ -28,10 +28,44 @@ HINSTANCE gDllInstance = NULL;
 
 MessageQueue gMexMessageQueueOut;
 
-std::vector<GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
+std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 CellHullObject* gBorderObj = NULL;
 
 extern std::vector<DirectX::XMVECTOR> volumeBoundingVerts;
+
+// A few of global helper functions for managing the graphic object node list
+void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* node, int forceLabel /* = -1*/)
+{
+	int uniqueID = forceLabel;
+	if ( forceLabel < 0 )
+		uniqueID = node->getHullLabel();
+
+	if (gGraphicObjectNodes[objType].count(uniqueID) > 0)
+	{
+		gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+		return;
+	}
+
+	std::pair<int, GraphicObjectNode*> newHull(uniqueID, node);
+	gGraphicObjectNodes[objType].insert(newHull);
+}
+
+void removeGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID)
+{
+	if (gGraphicObjectNodes[objType].count(uniqueID) == 0)
+		return;
+
+	gGraphicObjectNodes[objType].erase(uniqueID);
+}
+
+GraphicObjectNode* getGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID)
+{
+	if (gGraphicObjectNodes[objType].count(uniqueID) == 0)
+		return NULL;
+
+	return gGraphicObjectNodes[objType][uniqueID];
+}
+
 
 BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
 {

@@ -18,6 +18,7 @@
 
 #undef max
 
+// Class method implementations
 SceneNode::SceneNode()
 {
 	localToParentTransform = DirectX::XMMatrixIdentity();

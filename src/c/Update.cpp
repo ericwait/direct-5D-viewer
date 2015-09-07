@@ -24,9 +24,10 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 		if (idx == GraphicObjectTypes::VTend)
 			break;
 
-		bool render = i == fvtIdx;
-		for (int j = 0; j < gGraphicObjectNodes[idx].size(); ++j)
-			gGraphicObjectNodes[idx][j]->setRenderable(render);
+		bool render = (i == fvtIdx);
+		std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[idx].begin();
+		for ( ; objectIter != gGraphicObjectNodes[idx].end(); ++objectIter )
+			objectIter->second->setRenderable(render);
 	}
 
 	//gRenderer->releaseMutex();
@@ -38,8 +39,10 @@ void toggleSegmentationResults(bool on)
 
 	//gRenderer->getMutex();
 
-	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on);
+	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
+	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
+		objectIter->second->setRenderable(on);
 
 	//gRenderer->releaseMutex();
 }
@@ -50,8 +53,10 @@ void toggleSegmentaionWireframe(bool wireframe)
 
 	//gRenderer->getMutex();
 
-	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setWireframe(wireframe);
+	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
+	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
+		objectIter->second->setWireframe(wireframe);
 
 	//gRenderer->releaseMutex();
 }
@@ -62,8 +67,10 @@ void toggleSegmentaionLighting(bool lighting)
 
 	//gRenderer->getMutex();
 
-	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setLightOn(lighting);
+	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
+	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
+		objectIter->second->setLightOn(lighting);
 
 	//gRenderer->releaseMutex();
 }
@@ -74,17 +81,15 @@ void toggleSelectedCell(std::set<int> labels)
 
 	//gRenderer->getMutex();
 
-	for (int i = 0; i<gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
+	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
+	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
 	{
-		bool delay = true;
-
-		if (i == gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size() - 1)
-			delay = false;
-
-		if (labels.count(gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->getHullLabel())>0)
-			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(true);
+		GraphicObjectNode* node = objectIter->second;
+		if ( labels.count(node->getHullLabel()) > 0 )
+			node->setRenderable(true);
 		else
-			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(false);
+			node->setRenderable(false);
 	}
 
 	//gRenderer->releaseMutex();

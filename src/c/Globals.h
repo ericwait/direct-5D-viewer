@@ -30,7 +30,7 @@ extern HINSTANCE gDllInstance;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
 extern CellHullObject* gBorderObj;
-extern std::vector<GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
+extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 extern MessageQueue gMexMessageQueueOut;
 
 //Implemented in Initialization.cpp

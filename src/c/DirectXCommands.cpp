@@ -107,18 +107,11 @@ void XaddHullCommand(Message m){
 		gRenderer->attachToRootScene(hullRootNodes[polygon->frame], Renderer::Section::Main, polygon->frame);
 	}
 
-	int hullIdx = -1;
-	for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+	GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::CellHulls, polygon->label);
+	if (oldNode)
 	{
-		int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
-		if (label == polygon->label)
-		{
-			// Throw Matlab error if we try to add a hull that exists
-			// Comment ths back in. I'm not sure yet why this doesn't work when editing 3D
-			//gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
-			hullIdx = j;
-			break;
-		}
+		gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+		return;
 	}
 
 	CellHullObject* curHullObj = createCellHullObject(polygon->getfaceData(), polygon->numFaces, polygon->getvertData(), polygon->numVerts, polygon->getnormData(), polygon->numNormals, gCameraDefaultMesh);
@@ -128,30 +121,24 @@ void XaddHullCommand(Message m){
 	GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
 	curHullNode->setWireframe(true);
 	curHullNode->attachToParentNode(hullRootNodes[polygon->frame]);
-	gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
+
+	insertGlobalGraphicsObject(GraphicObjectTypes::CellHulls, curHullNode);
 }
 
 void XremoveHullCommand(Message m){
 	int* labelPtr = (int*)m.data;
 	int inputLabel = *labelPtr;
 
-	int hullIdx = -1;
-	for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
-	{
-		int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
-		if (label == inputLabel)
-		{
-			hullIdx = j;
-			break;
-		}
-	}
+	GraphicObjectNode* removeNode = getGlobalGraphicsObject(GraphicObjectTypes::CellHulls,inputLabel);
+	if (!removeNode)
+		return;
 
-	if (hullIdx > -1){
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->detatchFromParentNode();
-		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].erase(gGraphicObjectNodes[GraphicObjectTypes::CellHulls].begin() + hullIdx);
-		gRenderer->updateRenderList();
-	}
+	removeGlobalGraphicsObject(GraphicObjectTypes::CellHulls, inputLabel);
+	removeNode->detatchFromParentNode();
+
+	delete removeNode;
+
+	gRenderer->updateRenderList();
 }
 
 void XpeelUpdateCommand(Message m){
@@ -274,13 +261,17 @@ void XdisplayHullsCommand(Message m){
 }
 
 void XdeleteAllHullsCommand(Message m){
-	for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+	const GraphicObjectTypes objType = GraphicObjectTypes::CellHulls;
+
+	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[objType].begin();
+	for ( ; objectIter != gGraphicObjectNodes[objType].end(); ++objectIter )
 	{
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->detatchFromParentNode();
-		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j];
+		GraphicObjectNode* node = objectIter->second;
+		node->detatchFromParentNode();
+		delete node;
 	}
 
-	gGraphicObjectNodes[GraphicObjectTypes::CellHulls].clear();
+	gGraphicObjectNodes[objType].clear();
 	gRenderer->updateRenderList();
 
 	printf("Deleted Hulls!\n");

@@ -251,7 +251,7 @@ HRESULT createBorder(Vec<float> &scale)
 	gBorderObj->setColor(Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);
 	gRenderer->attachToRootScene(borderNode, Renderer::Pre, 0);
 
-	gGraphicObjectNodes[GraphicObjectTypes::Border].push_back(borderNode);
+	insertGlobalGraphicsObject(GraphicObjectTypes::Border, borderNode);
 
 	//gRenderer->releaseMutex();
 
@@ -270,9 +270,12 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 
 	if (!firstVolumeTextures.empty() && fvtIdx < firstVolumeTextures.size() && NULL != firstVolumeTextures[fvtIdx])
 	{
-		for (int i = 0; i < gGraphicObjectNodes[typ].size(); ++i)
+		std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[typ].begin();
+		for ( ; objectIter != gGraphicObjectNodes[typ].end(); ++objectIter )
 		{
-			delete gGraphicObjectNodes[typ][i];
+			GraphicObjectNode* node = objectIter->second;
+			node->detatchFromParentNode();
+			delete node;
 		}
 
 		gGraphicObjectNodes[typ].clear();
@@ -293,7 +296,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
 		gRenderer->attachToRootScene(volumeTextureNode, Renderer::Section::Main, i);
 
-		gGraphicObjectNodes[typ].push_back(volumeTextureNode);
+		insertGlobalGraphicsObject(typ,volumeTextureNode,i);
 
 		if (0 == i)
 		{

@@ -18,6 +18,11 @@
 #include <DirectXMath.h>
 #include <vector>
 
+// A few of global helper functions for managing the graphic object node list
+void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* node, int forceLabel = -1);
+void removeGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID);
+GraphicObjectNode* getGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID);
+
 class SceneNode
 {
 public:

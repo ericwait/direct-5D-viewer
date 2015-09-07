@@ -472,16 +472,18 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 			Sleep(1000);
 
-			if (gRenderer != NULL)
+			//if (gRenderer != NULL)
 				//gRenderer->getMutex();
 
 			for (int i = 0; i < GraphicObjectTypes::VTend; ++i)
 			{
 				if (gRenderer != NULL)
 				{
-					for (int j = 0; j < gGraphicObjectNodes[i].size(); ++j)
+					std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[i].begin();
+					for ( ; objectIter != gGraphicObjectNodes[i].end(); ++objectIter )
 					{
-						gGraphicObjectNodes[i][j]->releaseRenderResources();
+						GraphicObjectNode* node = objectIter->second;
+						node->releaseRenderResources();
 					}
 				}
 
