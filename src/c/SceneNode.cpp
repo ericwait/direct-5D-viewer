@@ -157,11 +157,10 @@ void GraphicObjectNode::releaseRenderResources()
 	renderable = false;
 }
 
-void GraphicObjectNode::setRenderable(bool render, bool delayUpdate/*=false*/)
+void GraphicObjectNode::setRenderable(bool render)
 {
 	renderable = render;
-	if (!delayUpdate)
-		requestUpdate();
+	requestUpdate();
 }
 
 void GraphicObjectNode::setWireframe(bool wireframe)

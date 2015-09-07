@@ -26,10 +26,8 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 
 		bool render = i == fvtIdx;
 		for (int j = 0; j < gGraphicObjectNodes[idx].size(); ++j)
-			gGraphicObjectNodes[idx][j]->setRenderable(render, true);
+			gGraphicObjectNodes[idx][j]->setRenderable(render);
 	}
-
-	gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume][0]->setRenderable(textureType == GraphicObjectTypes::OriginalVolume, false);
 
 	//gRenderer->releaseMutex();
 }
@@ -41,9 +39,7 @@ void toggleSegmentationResults(bool on)
 	//gRenderer->getMutex();
 
 	for (int i = 0; i < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++i)
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on, true);
-
-	gGraphicObjectNodes[GraphicObjectTypes::CellHulls][0]->setRenderable(on, false);
+		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(on);
 
 	//gRenderer->releaseMutex();
 }
@@ -86,9 +82,9 @@ void toggleSelectedCell(std::set<int> labels)
 			delay = false;
 
 		if (labels.count(gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->getHullLabel())>0)
-			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(true, delay);
+			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(true);
 		else
-			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(false, delay);
+			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][i]->setRenderable(false);
 	}
 
 	//gRenderer->releaseMutex();
