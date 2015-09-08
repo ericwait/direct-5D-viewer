@@ -9,6 +9,7 @@ void XloadTextureCommand(Message m);
 void XresetViewCommand(Message m);
 void XtransferUpdateCommand(Message m);
 void XaddHullCommand(Message m);
+void XaddHullsCommand(Message m);
 void XpeelUpdateCommand(Message m);
 void XremoveHullCommand(Message m);
 void XplayCommand(Message m);

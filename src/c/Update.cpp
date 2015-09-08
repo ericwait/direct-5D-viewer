@@ -6,6 +6,9 @@
 #include "MexFunctions.h"
 #include "QueuePolygon.h"
 #include <set>
+#include <vector>
+
+using std::vector;
 
 std::vector<VolumeTextureObject*> firstVolumeTextures;
 std::vector<SceneNode*> hullRootNodes;
@@ -157,7 +160,7 @@ HRESULT updateHulls(const mxArray* hulls)
 		polygon->setcolorData(colorData);
 		int* intptr = &(polygon->label);
 		dataQueue->writeMessage("removeHull", (void*)intptr);
-		dataQueue->writeMessage("loadHulls", (void*)polygon);
+		dataQueue->writeMessage("loadHull", (void*)polygon);
 
 		//gRenderer->getMutex();
 
@@ -181,6 +184,9 @@ HRESULT addHulls(const mxArray* hulls)
 	if (gRenderer == NULL) return E_FAIL;
 
 	size_t numHulls = mxGetNumberOfElements(hulls);
+
+	vector<QueuePolygon*>* polygons = new vector<QueuePolygon*>(numHulls);
+
 	for (size_t i = 0; i < numHulls; ++i)
 	{
 		mxArray* mxFaces = mxGetField(hulls, i, "faces");
@@ -213,27 +219,14 @@ HRESULT addHulls(const mxArray* hulls)
 		double* colorData = (double*)mxGetData(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
-		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
-		//memcpy(this->pixels, pixels, dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
-		polygon->setfaceData(faceData);
-		polygon->setvertData(vertData);
-		polygon->setnormData(normData);
-		polygon->setcolorData(colorData);
-		dataQueue->writeMessage("loadHulls", (void*)polygon);
-
-		//gRenderer->getMutex();
-
-		/*CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
-		curHullObj->setColor(Vec<float>((float)colorData[0], (float)colorData[1], (float)colorData[2]), 1.0f);
-		curHullObj->setLabel((int)mxGetScalar(mxLabel));
-		curHullObj->setTrack((int)mxGetScalar(mxTrack));
-		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
-		curHullNode->setWireframe(true);
-		curHullNode->attachToParentNode(hullRootNodes[frame]);
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].push_back(curHullNode);
-		*/
-		//gRenderer->releaseMutex();
+		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		polygons->at(i)->setfaceData(faceData);
+		polygons->at(i)->setvertData(vertData);
+		polygons->at(i)->setnormData(normData);
+		polygons->at(i)->setcolorData(colorData);
 	}
+
+	dataQueue->writeMessage("loadHulls", (void*)polygons);
 
 	return S_OK;
 }

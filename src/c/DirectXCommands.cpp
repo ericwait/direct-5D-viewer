@@ -7,6 +7,9 @@
 #include "TransferObj.h"
 #include "QueuePolygon.h"
 #include "TextureLightingOBJ.h"
+#include <vector>
+
+using std::vector;
 
 void XloadTextureCommand(Message m){
 	Image* returnedImg = (Image*)m.data;
@@ -123,6 +126,45 @@ void XaddHullCommand(Message m){
 	curHullNode->attachToParentNode(hullRootNodes[polygon->frame]);
 
 	insertGlobalGraphicsObject(GraphicObjectTypes::CellHulls, curHullNode);
+}
+
+void XaddHullsCommand(Message m){
+	vector<QueuePolygon*>* polygons = (vector<QueuePolygon*>*)m.data;
+
+	for (vector<QueuePolygon*>::iterator polygon = polygons->begin(); polygon != polygons->end(); ++polygon) {
+		if (gRenderer == NULL) return;
+
+		if (hullRootNodes.empty()){
+			hullRootNodes.resize(gRenderer->getNumberOfFrames());
+			for (unsigned int i = 0; i < gRenderer->getNumberOfFrames(); ++i)
+				hullRootNodes[i] = NULL;
+		}
+
+		if (hullRootNodes[(*polygon)->frame] == NULL){
+			hullRootNodes[(*polygon)->frame] = new SceneNode();
+			gRenderer->attachToRootScene(hullRootNodes[(*polygon)->frame], Renderer::Section::Main, (*polygon)->frame);
+		}
+
+		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::CellHulls, (*polygon)->label);
+		if (oldNode)
+		{
+			gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+			return;
+		}
+
+		CellHullObject* curHullObj = createCellHullObject((*polygon)->getfaceData(), (*polygon)->numFaces, (*polygon)->getvertData(), (*polygon)->numVerts, (*polygon)->getnormData(), (*polygon)->numNormals, gCameraDefaultMesh);
+		curHullObj->setColor(Vec<float>((float)(*polygon)->getcolorData()[0], (float)(*polygon)->getcolorData()[1], (float)(*polygon)->getcolorData()[2]), 1.0f);
+		curHullObj->setLabel((*polygon)->label);
+		curHullObj->setTrack((*polygon)->track);
+		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
+		curHullNode->setWireframe(true);
+		curHullNode->attachToParentNode(hullRootNodes[(*polygon)->frame]);
+
+		insertGlobalGraphicsObject(GraphicObjectTypes::CellHulls, curHullNode);
+
+		delete *polygon;
+	}
+	delete polygons;
 }
 
 void XremoveHullCommand(Message m){

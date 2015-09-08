@@ -605,8 +605,12 @@ HRESULT checkMessage(){
 		XwireframeSegmentationCommand(m);
 		gRenderer->renderAll();
 	}
-	else if (m.command == "loadHulls"){
+	else if (m.command == "loadHull"){
 		XaddHullCommand(m);
+		gRenderer->renderAll();
+	}
+	else if (m.command == "loadHulls"){
+		XaddHullsCommand(m);
 		gRenderer->renderAll();
 	}
 	else if (m.command == "removeHull"){
