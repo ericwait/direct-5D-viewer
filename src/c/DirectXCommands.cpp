@@ -126,6 +126,8 @@ void XaddHullCommand(Message m){
 	curHullNode->attachToParentNode(hullRootNodes[polygon->frame]);
 
 	insertGlobalGraphicsObject(GraphicObjectTypes::CellHulls, curHullNode);
+
+	delete polygon;
 }
 
 void XaddHullsCommand(Message m){

@@ -152,12 +152,12 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		else if (VK_PRIOR==wParam) //Page Up key
 		{
-			gRenderer->incrementFrame();
+			gRenderer->decrementFrame();
 			gRenderer->renderAll();
 		}
 		else if (VK_NEXT==wParam) //Page Down key
 		{
-			gRenderer->decrementFrame();
+			gRenderer->incrementFrame();
 			gRenderer->renderAll();
 		}
 		else if (VK_HOME==wParam)
