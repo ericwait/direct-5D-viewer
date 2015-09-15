@@ -155,7 +155,11 @@ void CellHullObject::setTrack(int labelIn)
 	else
 	{
 		char buff[255];
-		sprintf_s(buff,"%d",labelIn);
+		
+		//if (this->getHullLabel() >= 0)
+			//sprintf_s(buff, "%d / %d", labelIn, this->getHullLabel());
+		//else
+		sprintf_s(buff, "%d", labelIn);
 		rendererPackage->setLabel(buff);
 	}
 }

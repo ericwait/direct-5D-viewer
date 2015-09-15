@@ -45,7 +45,7 @@ Renderer::Renderer()
 	currentFrame = 0;
 	clipChunkPercent = 0.0f;
 	numPlanes = 0;
-	labelsOn = false;
+	labelsOn = true;
 	captureFilePath = "./";
 	captureFileName = "";
 }
