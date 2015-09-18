@@ -95,7 +95,7 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 	{
 		// Physical dimensions
 		double* physDims = (double*)mxGetData(prhs[2]);
-		img->setPhysicalDim(Vec<float>(physDims[0],physDims[1],physDims[2]));
+		img->setPhysicalDim(Vec<float>(float(physDims[0]),float(physDims[1]),float(physDims[2])));
 	}
 
 	if (nrhs > 3)
@@ -382,7 +382,7 @@ void loadHullsCommand(int nrhs, const mxArray** prhs)
 void removeHullCommand(int nrhs, const mxArray** prhs){
 	double d = mxGetScalar(prhs[1]);
 	int* label = new int;
-	*label = d;
+	*label = (int)d;
 	dataQueue->writeMessage("removeHull", (void*)label);
 }
 
