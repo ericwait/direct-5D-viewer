@@ -19,16 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0B138E7E-3592-4A72-B601-2E0213A1C152}</ProjectGuid>
-    <Keyword>Win32Proj</Keyword>
-    <RootNamespace>lever3d</RootNamespace>
+    <ProjectGuid>{C904939E-783D-418F-B5AD-38F40BD81A0D}</ProjectGuid>
+    <RootNamespace>d3dViewer</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -37,11 +36,11 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -66,116 +65,86 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Output\$(ProjectName)\$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)_$(PlatformName)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Output\$(ProjectName)\$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)_$(PlatformName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LEVER3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>lever-3d_Mex.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LEVER3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;</AdditionalIncludeDirectories>
-      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>lever-3d.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>d3dViewer.def</ModuleDefinitionFile>
     </Link>
-    <PostBuildEvent>
-      <Command>echo copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
-copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
-</Command>
-    </PostBuildEvent>
-    <Bscmake>
-      <PreserveSbr>true</PreserveSbr>
-    </Bscmake>
     <PreBuildEvent>
-      <Command>Del $(ProjectDir)..\matlab\lever_3d.mexw64</Command>
+      <Command>echo del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64
+del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"
+copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LEVER3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>lever-3d_Mex.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LEVER3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>lever-3d.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>d3dViewer.def</ModuleDefinitionFile>
     </Link>
+    <PreBuildEvent>
+      <Command>echo del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64
+del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64</Command>
+    </PreBuildEvent>
     <PostBuildEvent>
-      <Command>echo copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
-copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
-</Command>
+      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"
+copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="lever-3d.def" />
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Commands.cpp" />
@@ -184,12 +153,12 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClCompile Include="GraphicObject.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Initialization.cpp" />
-    <ClCompile Include="lever-3d_mex.cpp" />
+    <ClCompile Include="d3dViewer.cpp" />
     <ClCompile Include="LoadData.cpp" />
     <ClCompile Include="MainMex.cpp" />
     <ClCompile Include="Material.cpp" />
-    <ClCompile Include="MessageProcessor.cpp" />
     <ClCompile Include="MeshPrimitive.cpp" />
+    <ClCompile Include="MessageProcessor.cpp" />
     <ClCompile Include="MessageQueue.cpp" />
     <ClCompile Include="QueuePolygon.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -201,6 +170,9 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClCompile Include="Widget.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="d3dViewer.def" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DataQueue.h" />
     <ClInclude Include="Defines.h" />
@@ -210,8 +182,8 @@ copy $(OutDir)lever-3d.dll $(ProjectDir)..\matlab\lever_3d.mexw64
     <ClInclude Include="Image.h" />
     <ClInclude Include="Initialization.h" />
     <ClInclude Include="Material.h" />
-    <ClInclude Include="MessageProcessor.h" />
     <ClInclude Include="MeshPrimitive.h" />
+    <ClInclude Include="MessageProcessor.h" />
     <ClInclude Include="MessageQueue.h" />
     <ClInclude Include="MexFunctions.h" />
     <ClInclude Include="QueuePolygon.h" />

@@ -1,4 +1,4 @@
-LIBRARY	"lever-3d"
+LIBRARY	"d3dViewer"
 EXPORTS DllMain
 EXPORTS mexFunction
 EXPORTS exitFunc
