@@ -60,3 +60,11 @@ void DataQueue::writeMessage(std::string cmd, void* data)
 	// Add it to the queue
 	addMessage(constructedMessage);
 }
+
+void DataQueue::clear()
+{
+	while(!messages.empty())
+	{
+		messages.pop();
+	}
+}

@@ -15,7 +15,7 @@ public:
 	Message getNextMessage();
 	void writeMessage(std::string cmd, void* data);
 	size_t DataQueue::getNumMessages();
-
+	void clear();
 
 private:
 	HANDLE mutex;

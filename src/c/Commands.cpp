@@ -59,6 +59,7 @@ void closeCommand()
 	dataQueue->writeMessage("close", NULL);
 	cleanUp();
 	gMexMessageQueueOut.clear();
+	dataQueue->clear();
 }
 
 void loadTextureCommand(const mxArray** prhs, int nrhs)
