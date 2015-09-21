@@ -18,8 +18,8 @@ end
 [sphereFaces, sphereVerts, shereNorms] = Ploygons.makeSphere(0.20,40);
 
 %% start a timer that will check for any messages that the viewer might want to return
-% tmr = timer('TimerFcn',@d3dViewer.checkMessage,'ExecutionMode','fixedSpacing','Period',0.1);
-% start(tmr);
+tmr = timer('TimerFcn',@d3dViewer.checkMessage,'ExecutionMode','fixedSpacing','Period',0.1);
+start(tmr);
 
 %% start the viewer dll
 d3dViewer.d3dViewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
