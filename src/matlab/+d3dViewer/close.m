@@ -3,5 +3,6 @@ function [ output_args ] = close( input_args )
 %   Detailed explanation goes here
 
 d3dViewer.d3dViewer('close');
+clear mex
 end
 
