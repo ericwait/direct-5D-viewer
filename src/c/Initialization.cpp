@@ -68,7 +68,7 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	RECT rc = { 0, 0, gWindowWidth, gWindowHeight};
 	AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 	gWindowHandle = CreateWindow(szWndClassName, "LEVer 3D viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left,
-		rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
+		rc.bottom - rc.top,NULL,NULL,hInstance,NULL);
 
 	if( !gWindowHandle )
 	{

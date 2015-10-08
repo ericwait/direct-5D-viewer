@@ -515,7 +515,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		DestroyWindow(gWindowHandle);
 		UnregisterClass(szWndClassName, gDllInstance);
 
-		gRendererInit = true;
+		gRendererInit = false;
 
 		gMexMessageQueueOut.addMessage("close",1.0);
 	}

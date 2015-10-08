@@ -27,9 +27,9 @@ void XloadTextureCommand(Message m){
 	scale.y *= physDims.y/physDims.minValue();
 	scale.z *= physDims.z/physDims.minValue();
 
-	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+	GraphicObjectTypes textureType = returnedImg->getTextureType();
 
-	if (returnedImg->getNumArgs() == 1)
+	if (returnedImg->getTextureType() == 1)
 		textureType = GraphicObjectTypes::ProcessedVolume;
 
 	if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())

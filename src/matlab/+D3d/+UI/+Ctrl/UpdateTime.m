@@ -13,11 +13,23 @@
 %LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function TreeClose(src,evnt)
-global uiTreeFig uiTreeAx uiTimeLine
-delete(uiTreeFig);
-uiTreeFig = [];
-uiTreeAx = [];
-uiTimeLine = [];
-end
+function UpdateTime(time, fromC)
+global D3dUICtrlHandles
 
+if (~isempty(D3dUICtrlHandles))
+    
+    [imageData, ~, ~] = D3d.UI.Ctrl.GetUserData();
+    if(time < 0)
+        time = 0;
+    elseif(time >= imageData.NumberOfFrames -1 )
+        time = imageData.NumberOfFrames  - 1;
+    end
+    
+    set(D3dUICtrlHandles.handles.tb_curFrame,'String',num2str(time+1));
+    set(D3dUICtrlHandles.handles.s_curFrame,'Value', time+1);
+    
+    if (~exist('fromC','var') || isempty(fromC) || fromC~=1)
+        D3d.Viewer('setFrame',time);
+    end
+end
+end

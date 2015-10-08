@@ -203,5 +203,5 @@ private:
 	std::string captureFileName;
 };
 
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshShaders.fx","ViewAlignedVertexShader.fx"};
+const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {".\\+D3d\\DefaultMeshShaders.fx",".\\+D3d\\ViewAlignedVertexShader.fx"};
 const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshVertexShader","ViewAlignedVertexShader"};

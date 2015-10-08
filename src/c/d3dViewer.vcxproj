@@ -97,12 +97,12 @@
       <ModuleDefinitionFile>d3dViewer.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>echo del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64
-del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"
-copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"</Command>
+      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"
+copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,12 +137,12 @@ copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectNam
       <ModuleDefinitionFile>d3dViewer.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>echo del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64
-del $(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"
-copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+d3dViewer\$(ProjectName).mexw64"</Command>
+      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"
+copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

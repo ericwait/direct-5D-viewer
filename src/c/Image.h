@@ -3,11 +3,12 @@
 #include "mex.h"
 #include "MessageProcessor.h"
 #include "MexFunctions.h"
+#include "Vec.h"
 
 class Image
 {
 public:
-	Image(int numChannels, int numFrames, Vec<size_t> dimensions, char buff[96]);
+	Image(int numChannels, int numFrames, Vec<size_t> dimensions);
 	~Image();
 
 	unsigned char* getPixels();
@@ -25,18 +26,17 @@ public:
 	Vec<float> getPhysicalDims();
 	void setPhysicalDim(Vec<float> pDims);
 
-	char* getBuff();
-	void setBuff(char buff[96]);
-
-	void setNumArgs(int numArgs);
-	int getNumArgs();
+	void setTextureType(GraphicObjectTypes numArgs);
+	GraphicObjectTypes getTextureType();
 
 private:
-	int numArgs;
+	Image();
+	void setDefauts();
+
+	GraphicObjectTypes textureType;
 	unsigned char* pixels;
 	Vec<size_t> dimensions;
 	int numChannels;
 	int numFrames;
 	Vec<float> physicalDims;
-	char* buff;
 };

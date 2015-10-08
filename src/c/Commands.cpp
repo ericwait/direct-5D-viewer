@@ -64,6 +64,9 @@ void closeCommand()
 
 void loadTextureCommand(const mxArray** prhs, int nrhs)
 {
+	if(!mxIsClass(prhs[1],"uint8"))
+		mexErrMsgTxt("Image must be of uint8 class!");
+
 	size_t numDims = mxGetNumberOfDimensions(prhs[1]);
 	if (numDims<3)
 		mexErrMsgTxt("Image must have at least three dimensions!");
@@ -85,18 +88,14 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 	// ptr to image data
 	unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
 
-	/**/
-	char buff[96];
-	mxGetString(prhs[3],buff,96);
-
-	Image* img = new Image(numChannels,numFrames,dims,buff);
+	Image* img = new Image(numChannels,numFrames,dims);
 	img->setPixels(image);
 
 	if (nrhs > 2)
 	{
 		// Physical dimensions
 		double* physDims = (double*)mxGetData(prhs[2]);
-		img->setPhysicalDim(Vec<float>(float(physDims[0]),float(physDims[1]),float(physDims[2])));
+		img->setPhysicalDim(Vec<float>(float(physDims[1]),float(physDims[0]),float(physDims[2])));
 	}
 
 	if (nrhs > 3)
@@ -105,60 +104,19 @@ void loadTextureCommand(const mxArray** prhs, int nrhs)
 		mxGetString(prhs[3], buff, 96);
 
 		if (_strcmpi("original", buff) == 0)
-			img->setNumArgs(0);
+			img->setTextureType(GraphicObjectTypes::OriginalVolume);
 		else if (_strcmpi("processed", buff) == 0)
-			img->setNumArgs(1);
+			img->setTextureType(GraphicObjectTypes::ProcessedVolume);
 	}
+	else
+	{
+		img->setTextureType(GraphicObjectTypes::OriginalVolume);
+	}
+
 	std::string s = "loadTexture";
 	dataQueue->writeMessage(s,(void*)img);
 	int x = 0;
 	x = x + 30;
-	/*if (dataQueue->getNumMessages() > 0){
-		Message m = dataQueue->getNextMessage();
-		Image* returnedImg = (Image*)m.data;
-		dims = returnedImg->getDimensions();
-		image = returnedImg->getPixels();
-		numChannels = returnedImg->getNumChannels();
-		numFrames = returnedImg->getNumFrames();
-
-		Vec<float> scale(dims);
-		scale = scale / scale.maxValue();
-		if (nrhs > 2)
-		{
-			// Physical dimensions
-			double* physDims = (double*)mxGetData(prhs[2]);
-			scale.y *= float(physDims[1] / physDims[0]);
-			scale.z *= float(physDims[2] / physDims[0]);
-		}
-
-	}*/
-
-	/**/
-
-	/*GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
-	if (nrhs > 3)
-	{
-		char buff[96];
-		mxGetString(prhs[3], buff, 96);
-
-		if (_strcmpi("original", buff) == 0)
-			textureType = GraphicObjectTypes::OriginalVolume;
-		else if (_strcmpi("processed", buff) == 0)
-			textureType = GraphicObjectTypes::ProcessedVolume;
-	}
-
-	if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
-	{
-		HRESULT hr = createBorder(scale);
-		if (FAILED(hr))
-			mexErrMsgTxt("Could not create border!");
-	}
-
-	HRESULT hr = loadVolumeTexture(image, dims, numChannels, numFrames, scale, textureType);
-	if (FAILED(hr))
-		mexErrMsgTxt("Could not load texture!");
-
-	setCurrentTexture(textureType);*/
 }
 
 void peelUpdateCommand(int nrhs, const mxArray** prhs)
@@ -515,5 +473,5 @@ void deleteAllHullsCommand(){
 
 extern "C" void exitFunc()
 {
-	cleanUp();
+	closeCommand();
 }
