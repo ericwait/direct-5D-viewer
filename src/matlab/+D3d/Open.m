@@ -36,7 +36,8 @@ d3dtimer = timer('TimerFcn',@D3d.Messaging.Check,'ExecutionMode','fixedSpacing',
 start(d3dtimer);
 
 %% start the viewer dll
-D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms);
+[pathstr,~,~] = fileparts(which('D3d.Viewer'));
+D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
 
 %% check if there should be an image loaded right away.
 [im,imData] = D3d.Messaging.LoadImage(im, imData, imagePath);

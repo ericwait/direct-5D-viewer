@@ -403,10 +403,11 @@ HRESULT messageProcess( MSG& msg )
 
 DWORD WINAPI messageLoop(LPVOID lpParam)
 {
+	std::string* rootDir = (std::string*)lpParam;
 	HRESULT hr;
 	try 
 	{
-		hr = windowInit(gDllInstance,true);
+		hr = windowInit(gDllInstance,true,*rootDir);
 	}
 	catch (const std::exception& e)
 	{
@@ -420,6 +421,8 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	{
 		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");	
 	}
+
+	delete rootDir;
 	
 	MSG msg = {0};
 

@@ -60,7 +60,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 
 HRESULT loadWidget(const mxArray* widget[]);
 
-void startThread();
+void startThread(std::string rootDir);
 bool checkRenderThread();
 void termThread();
 void cleanUp();

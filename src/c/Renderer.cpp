@@ -48,6 +48,7 @@ Renderer::Renderer()
 	labelsOn = true;
 	captureFilePath = "./";
 	captureFileName = "";
+	dllRoot = "";
 }
 
 Renderer::~Renderer()
@@ -71,8 +72,10 @@ Renderer::~Renderer()
 	//CloseHandle(mutexDevice);
 }
 
-HRESULT Renderer::init()
+HRESULT Renderer::init(std::string rootDir)
 {
+	dllRoot = rootDir;
+
 	//WaitForSingleObject(mutexDevice,INFINITE);
 
 	HRESULT hr = initSwapChain();

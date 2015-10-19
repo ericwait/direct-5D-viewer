@@ -3,7 +3,7 @@
 #include "MessageProcessor.h"
 #include "MexFunctions.h"
 
-void startThread()
+void startThread(std::string rootDir)
 {
 	if (gTermEvent == NULL)
 	{
@@ -14,7 +14,10 @@ void startThread()
 
 	if (messageLoopHandle == NULL)
 	{
-		messageLoopHandle = CreateThread(NULL, 0, messageLoop, (LPVOID)(NULL), 0, &threadID);
+		std::string* rootDirPtr = new std::string;
+		*rootDirPtr = rootDir;
+
+		messageLoopHandle = CreateThread(NULL, 0, messageLoop, (LPVOID)(rootDirPtr), 0, &threadID);
 		if (!messageLoopHandle)
 		{
 			mexErrMsgTxt("Could not create thread");

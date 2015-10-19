@@ -86,14 +86,14 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	return S_OK;
 }
 
-HRESULT createRenderResources()
+HRESULT createRenderResources(std::string rootDir)
 {
 	Vec<float> eye = Vec<float>(0.0f,0.0f,-3.0f);
 	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	
 	gRenderer = new Renderer();//delete on message loop exit
-	HRESULT hr = gRenderer->init();
+	HRESULT hr = gRenderer->init(rootDir);
 
 	if (FAILED(hr))
 		return hr;
@@ -104,7 +104,7 @@ HRESULT createRenderResources()
 	return S_OK;
 }
 
-HRESULT windowInit(HINSTANCE hInstance, int nCmdShow)
+HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir)
 {
 	HRESULT hr = registerWindowClass(hInstance,nCmdShow);
 	if ( FAILED(hr) )
@@ -125,5 +125,5 @@ HRESULT windowInit(HINSTANCE hInstance, int nCmdShow)
 		DEFAULT_PITCH|FF_DONTCARE, //Pitch and Family
 		"Arial");
 
-	return createRenderResources();
+	return createRenderResources(rootDir);
 }

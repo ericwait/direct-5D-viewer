@@ -66,7 +66,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // Class setup including getters and setters
 //////////////////////////////////////////////////////////////////////////
-	HRESULT init();
+	HRESULT init(std::string rootDir);
 
 //Setters	
 	void setCurrentFrame(int frame);
@@ -110,6 +110,7 @@ public:
 	float getClipChunkPercent(){return clipChunkPercent;}
 	HRESULT captureWindow(std::string* filenameOut=NULL);
 	HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut);
+	std::string getDllDir() { return dllRoot; }
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
@@ -201,6 +202,7 @@ private:
 	bool labelsOn;
 	std::string captureFilePath;
 	std::string captureFileName;
+	std::string dllRoot;
 };
 
 const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {".\\+D3d\\DefaultMeshShaders.fx",".\\+D3d\\ViewAlignedVertexShader.fx"};
