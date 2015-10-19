@@ -11,6 +11,9 @@ D3d.Viewer('close');
 stop(d3dtimer);
 delete(d3dtimer);
 
+D3dUICtrlHandles = [];
+d3dtimer = [];
+
 clear mex
 
 end
