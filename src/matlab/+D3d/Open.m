@@ -28,8 +28,8 @@ if (~exist('imagePath','var'))
 end
 
 %% make a widget to show the orentation of the current view in 3D
-[arrowFaces, arrowVerts, arrowNorms] = Ploygons.makeArrow(0.65,0.05,0.15,40);
-[sphereFaces, sphereVerts, shereNorms] = Ploygons.makeSphere(0.20,40);
+[arrowFaces, arrowVerts, arrowNorms] = Polygons.makeArrow(0.65,0.05,0.15,40);
+[sphereFaces, sphereVerts, shereNorms] = Polygons.makeSphere(0.20,40);
 
 %% start a timer that will check for any messages that the viewer might want to return
 d3dtimer = timer('TimerFcn',@D3d.Messaging.Check,'ExecutionMode','fixedSpacing','Period',0.1);
