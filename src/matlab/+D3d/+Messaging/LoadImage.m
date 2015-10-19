@@ -24,7 +24,7 @@ if (isempty(imData))
     % there is no image data passed in to load
     if (isempty(im))
         % there is also no image to load, so we should read one in
-        [im,imData] = MicroscopeData.Tiff.Reader(imagePath,[],[],[],'uint8',true,[],true);
+        [im,imData] = MicroscopeData.Reader(imagePath,[],[],[],'uint8',true,[],true);
     else
         % there is an image to load just no metadat to go with it
         % assume that the voxels are isomorphic
