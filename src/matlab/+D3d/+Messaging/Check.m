@@ -16,9 +16,7 @@
 function Check(src, evnt)
 persistent shift ctrl alt selectedHullsList
 global D3dUICtrlHandles
-
-if (~isempty(D3dUICtrlHandles))
-    
+  
     msgs = D3d.Viewer('poll');
     
     for i=1:length(msgs)
@@ -32,11 +30,15 @@ if (~isempty(D3dUICtrlHandles))
             case 'close'
                 D3d.Close();
             case 'timeChange'
-                UpdateTime(msgs(i).val,true);
+                D3d.UI.Ctrl.UpdateTime(msgs(i).val,true);
             case 'play'
-                set(D3dUICtrlHandles.handles.cb_Play,'Value',msgs(i).val);
+                if (~isempty(D3dUICtrlHandles))
+                    set(D3dUICtrlHandles.handles.cb_Play,'Value',msgs(i).val);
+                end
             case 'rotate'
-                set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
+                if (~isempty(D3dUICtrlHandles))
+                    set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
+                end
             case 'keyDown'
                 if (strcmp(msgs(i).message,'shift'))
                     shift = 1;
@@ -55,8 +57,4 @@ if (~isempty(D3dUICtrlHandles))
                 end
         end
     end
-else
-    warning('Timer needs to be closed because no control handle exist!');
 end
-end
-
