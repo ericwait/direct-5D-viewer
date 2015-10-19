@@ -26,7 +26,7 @@ const Vec<float> StaticVolumeTextureMaterial::colors[6] =
 };
 
 
-void createStaticVolumeShaderText(std::string strChans);
+void createStaticVolumeShaderText(std::string strChans, Renderer* renderer);
 
 
 Material::Material(Renderer* rendererIn)
@@ -64,7 +64,9 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn) : Material(re
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
-	setShader(".\\+D3d\\DefaultMeshShaders.fx","DefaultMeshPixelShader","");
+	std::string root = renderer->getDllDir();
+	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
+		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS],"");
 }
 
 SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn) : Material(rendererIn)
@@ -74,7 +76,9 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
-	setShader(".\\+D3d\\DefaultMeshShaders.fx","DefaultMeshPixelShader","");
+	std::string root = renderer->getDllDir();
+	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
+		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS],"");
 }
 
 SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn, float alpha) : Material(rendererIn)
@@ -84,7 +88,9 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
-	setShader(".\\+D3d\\DefaultMeshShaders.fx","DefaultMeshPixelShader","");
+	std::string root = renderer->getDllDir();
+	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
+		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS],"");
 }
 
 SingleColoredMaterial::~SingleColoredMaterial()
@@ -132,7 +138,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	char cBuffer[3];
 	sprintf_s(cBuffer, "%d", numChannels);
 	std::string strChans = cBuffer;
-	createStaticVolumeShaderText(strChans);
+	createStaticVolumeShaderText(strChans,renderer);
 
 	volPixShaderConsts.channelColors.resize(numChannels);
 	volPixShaderConsts.ranges.resize(numChannels);
@@ -154,7 +160,9 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 	}
 	renderer->createConstantBuffer(volPixShaderConsts.sizeOf(),&constBuffer);
 
-	setShader("StaticVolumePixelShader.fx","MultiChanVolumePixelShader",strChans);
+	std::string root = renderer->getDllDir();
+	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::StaticVolume],
+		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::StaticVolume],strChans);
 
 	samplerState.resize(numChannels);
 	shaderResourceView.resize(numChannels);
@@ -250,7 +258,7 @@ void StaticVolumeTextureMaterial::setShaderResources()
 	renderer->setPixelShaderTextureSamplers(0,(int)samplerState.size(),samplerState.data());
 }
 
-void createStaticVolumeShaderText(std::string strChans)
+void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)
 {
 	std::string shaderText = "";
 
@@ -368,8 +376,10 @@ void createStaticVolumeShaderText(std::string strChans)
 	shaderText += "\treturn output;\n";
 	shaderText += "}\n";
 
+	std::string root = renderer->getDllDir();
+
 	FILE* file;
-	fopen_s(&file,"StaticVolumePixelShader.fx","w");
+	fopen_s(&file,(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::StaticVolume]).c_str(),"w");
 
 	fprintf(file,shaderText.c_str());
 

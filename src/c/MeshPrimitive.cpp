@@ -44,7 +44,8 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	numFaces = faces.size();
 
-	shaderIdx = renderer->getVertexShader(VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
+	std::string root = renderer->getDllDir();
+	shaderIdx = renderer->getVertexShader(root+VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
 }
 
 MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
@@ -77,7 +78,8 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	numFaces = faces.size();
 
-	shaderIdx = renderer->getVertexShader(VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
+	std::string root = renderer->getDllDir();
+	shaderIdx = renderer->getVertexShader(root+VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
 
 	if (shaderIdx == -1)
 		throw std::runtime_error("Cannot get vertex shader!");

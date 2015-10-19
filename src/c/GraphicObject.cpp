@@ -198,7 +198,7 @@ void CellHullObject::initalizeRendererResources(Camera* camera)
 {
 	if (rendererPackage==NULL)
 	{
-		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,Renderer::VertexShaders::Default);
+		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,Renderer::VertexShaders::DefaultVS);
 		material = new SingleColoredMaterial(renderer);//delete in destructor
 
 		rendererPackage = new RendererPackage(camera);//delete in destructor

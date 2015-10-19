@@ -47,9 +47,16 @@ public:
 
 	enum VertexShaders
 	{
-		Default,
+		DefaultVS,
 		ViewAligned,
 		VertexShadersEnd
+	};
+
+	enum PixelShaders
+	{
+		DefaultPS,
+		StaticVolume,
+		PixelShadersEnd
 	};
 
 	struct VertexShaderConstBuffer
@@ -205,5 +212,9 @@ private:
 	std::string dllRoot;
 };
 
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {".\\+D3d\\DefaultMeshShaders.fx",".\\+D3d\\ViewAlignedVertexShader.fx"};
+
+const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"\\DefaultMeshShaders.fx","\\ViewAlignedVertexShader.fx"};
 const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshVertexShader","ViewAlignedVertexShader"};
+
+const std::string PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::PixelShadersEnd] ={"\\DefaultMeshShaders.fx","\\StaticVolumePixelShader.fx"};
+const std::string PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::PixelShadersEnd] ={"DefaultMeshPixelShader","MultiChanVolumePixelShader"};
