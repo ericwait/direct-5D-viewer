@@ -14,47 +14,41 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function Check(src, evnt)
-persistent shift ctrl alt selectedHullsList
-global D3dUICtrlHandles
-  
-    msgs = D3d.Viewer('poll');
+global D3dUICtrlHandles EXT_MESAGE_FUNC
+
+msgs = D3d.Viewer('poll');
+
+for i=1:length(msgs)
+    %% run these commands reguardless of what any other function does
+    switch msgs(i).command
+        case 'null'
+            continue
+        case 'error'
+            msg = sprintf('Error from C code: %s\n\tError Code:%f',msgs(i).message,msgs(i).val);
+            errordlg(msg,'','modal');
+            warning(msg);
+        case 'close'
+            D3d.Close();
+        case 'timeChange'
+            D3d.UI.Ctrl.UpdateTime(msgs(i).val,true);
+        case 'play'
+            if (~isempty(D3dUICtrlHandles))
+                set(D3dUICtrlHandles.handles.cb_Play,'Value',msgs(i).val);
+            end
+        case 'rotate'
+            if (~isempty(D3dUICtrlHandles))
+                set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
+            end
+    end
     
-    for i=1:length(msgs)
-        switch msgs(i).command
-            case 'error'
-                msg = sprintf('Error from C code: %s\n\tError Code:%f',msgs(i).message,msgs(i).val);
-                errordlg(msg,'','modal');
-                warning(msg);
-            case 'null'
-                return
-            case 'close'
-                D3d.Close();
-            case 'timeChange'
-                D3d.UI.Ctrl.UpdateTime(msgs(i).val,true);
-            case 'play'
-                if (~isempty(D3dUICtrlHandles))
-                    set(D3dUICtrlHandles.handles.cb_Play,'Value',msgs(i).val);
-                end
-            case 'rotate'
-                if (~isempty(D3dUICtrlHandles))
-                    set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
-                end
-            case 'keyDown'
-                if (strcmp(msgs(i).message,'shift'))
-                    shift = 1;
-                elseif (strcmp(msgs(i).message,'ctrl'))
-                    ctrl = 1;
-                elseif (strcmp(msgs(i).message,'alt'))
-                    alt = 1;
-                end
-            case 'keyUp'
-                if (strcmp(msgs(i).message,'shift'))
-                    shift = 0;
-                elseif (strcmp(msgs(i).message,'ctrl'))
-                    ctrl = 0;
-                elseif (strcmp(msgs(i).message,'alt'))
-                    alt = 0;
-                end
+    if (~isempty(EXT_MESAGE_FUNC))
+        %% pass the message on
+        EXT_MESAGE_FUNC(msgs(i));
+    else
+        if (~strcmp(msgs(i).message,'null'))
+            fprintf('%s',msgs(i).command);
+            disp(msgs(i).message);
         end
     end
+end
 end

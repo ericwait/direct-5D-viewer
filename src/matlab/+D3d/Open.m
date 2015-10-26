@@ -1,4 +1,4 @@
-function [varargout] = Open( im, imData, imagePath )
+function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
 %OPEN [varargout] = open( im, imData, imagePath )
 %Opens the directX 3D-5D viewer with either and image, imData, imagePath,
 %or empty.  Will return the image and image data if requested.
@@ -14,7 +14,7 @@ function [varargout] = Open( im, imData, imagePath )
 % d3dtimer - makes a timer that will call checkMessage
 %*******************************************************************
 
-global d3dtimer
+global d3dtimer EXT_MESAGE_FUNC
 
 %% check the optional arguments and set the non-existant ones to empty
 if (~exist('im','var'))
@@ -26,14 +26,15 @@ end
 if (~exist('imagePath','var'))
     imagePath = [];
 end
+if (~exist('mesagePkgStr','var'))
+    EXT_MESAGE_FUNC = [];
+else
+    EXT_MESAGE_FUNC = mesagePkgStr;
+end
 
 %% make a widget to show the orentation of the current view in 3D
 [arrowFaces, arrowVerts, arrowNorms] = Polygons.makeArrow(0.65,0.05,0.15,40);
 [sphereFaces, sphereVerts, shereNorms] = Polygons.makeSphere(0.20,40);
-
-%% start a timer that will check for any messages that the viewer might want to return
-d3dtimer = timer('TimerFcn',@D3d.Messaging.Check,'ExecutionMode','fixedSpacing','Period',0.1);
-start(d3dtimer);
 
 %% start the viewer dll
 [pathstr,~,~] = fileparts(which('D3d.Viewer'));
@@ -52,6 +53,10 @@ if (~isempty(im))
     if (nargout>0)
         varargout{1} = im;
     end
+    
+    %% start a timer that will check for any messages that the viewer might want to return
+    d3dtimer = timer('TimerFcn',@D3d.Messaging.Check,'ExecutionMode','fixedSpacing','Period',0.1);
+    start(d3dtimer);
 else
     D3d.Close();
 end
