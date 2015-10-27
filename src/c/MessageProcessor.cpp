@@ -446,7 +446,9 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 				// Inside here check for a message from queue
 				// checkQueue();
 				if (dataQueue->getNumMessages() > 0){
-					checkMessage();
+					hr = checkMessage();
+					if(hr==S_FALSE)
+						break;
 				}
 
 
@@ -550,7 +552,7 @@ HRESULT checkMessage(){
 
 	}
 	else if (m.command == "close"){
-		hr = 1;
+		hr = S_FALSE;
 	}
 	else if (m.command == "poll"){
 
