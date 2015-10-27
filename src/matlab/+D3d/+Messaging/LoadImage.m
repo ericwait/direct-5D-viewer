@@ -34,7 +34,7 @@ if (isempty(imData))
     end
 elseif (isempty(im))
     % there is image data that will allow us to load up the missing image
-    [im,imData] = tiffReader(imData,[],[],[],'uint8',true,[],true);
+    [im,imData] = MicroscopeData.Reader(imData,[],[],[],'uint8',true,[],true);
 else
     % we should have everything we need to load the image in the viewer
 end
