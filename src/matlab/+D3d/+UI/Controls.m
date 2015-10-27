@@ -121,6 +121,8 @@ if (~isfield(savedData,'channelData') || isempty(savedData.channelData))
         localStruct.color = colors(i,:);
         channelData(i) = localStruct;
     end
+else
+    channelData = savedData.channelData;
 end
 
 D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
