@@ -317,6 +317,4 @@ void XdeleteAllHullsCommand(Message m){
 
 	gGraphicObjectNodes[objType].clear();
 	gRenderer->updateRenderList();
-
-	printf("Deleted Hulls!\n");
 }
