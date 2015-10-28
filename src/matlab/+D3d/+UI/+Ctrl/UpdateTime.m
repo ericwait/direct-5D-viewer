@@ -19,8 +19,8 @@ global D3dUICtrlHandles
 if (~isempty(D3dUICtrlHandles))
     
     [imageData, ~, ~] = D3d.UI.Ctrl.GetUserData();
-    if(time < 0)
-        time = 0;
+    if(time < 1)
+        time = 1;
     elseif(time > imageData.NumberOfFrames)
         time = imageData.NumberOfFrames;
     end
