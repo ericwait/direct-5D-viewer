@@ -128,6 +128,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONUP:
 		leftButtonDown = false;
 		gRenderer->setClipChunkPercent(previousPeel);
+		gRenderer->renderAll();
 		break;
 	case WM_KEYDOWN:
 		if (VK_LEFT==wParam)
@@ -408,6 +409,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	try 
 	{
 		hr = windowInit(gDllInstance,true,*rootDir);
+		gRenderer->renderAll();
 	}
 	catch (const std::exception& e)
 	{
