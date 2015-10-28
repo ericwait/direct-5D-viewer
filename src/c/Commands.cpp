@@ -126,9 +126,10 @@ void peelUpdateCommand(int nrhs, const mxArray** prhs)
 {
 	if (nrhs != 2) mexErrMsgTxt("not the right arguments for peelUpdate!");
 
-	float x = (float)mxGetScalar(prhs[1]);
-	float* ptr = &x;
-	dataQueue->writeMessage("peelUpdate", (void*)ptr);
+	float* x = new float;
+	*x = (float)mxGetScalar(prhs[1]);
+
+	dataQueue->writeMessage("peelUpdate", (void*)x);
 }
 
 void textureLightingUpdateCommand(int nrhs, const mxArray** prhs)
