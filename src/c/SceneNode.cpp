@@ -216,7 +216,15 @@ RootSceneNode::RootSceneNode() : SceneNode()
 		rootChildrenNodes[i][0]->setParentNode(this);
 	}
 
+	resetWorldTransform();
 	makeRenderableList();
+}
+
+void RootSceneNode::resetWorldTransform()
+{
+	origin = Vec<float>(0.0f,0.0f,0.0f);
+	curRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(0.0f,0.0f,DirectX::XM_PI);
+	updateTransforms(parentToWorld);
 }
 
 RootSceneNode::~RootSceneNode()
@@ -258,9 +266,25 @@ void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 {
 	parentToWorld = parentToWorldIn;
 
-	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
-		for (int j=0; j<rootChildrenNodes[i].size(); ++j)
-			rootChildrenNodes[i][j]->updateTransforms(localToParentTransform*parentToWorld);
+	DirectX::XMMATRIX transMatrix = DirectX::XMMatrixTranslation(-origin.x,-origin.y,-origin.z);
+
+	for(int i=0; i<rootChildrenNodes[Renderer::Section::Pre].size(); ++i)
+	{
+		SceneNode* node = rootChildrenNodes[Renderer::Section::Pre][i];
+		node->updateTransforms(transMatrix * curRotationMatrix * parentToWorld);
+	}
+
+	for(int i=0; i<rootChildrenNodes[Renderer::Section::Main].size(); ++i)
+	{
+		SceneNode* node = rootChildrenNodes[Renderer::Section::Main][i];
+		node->updateTransforms(transMatrix * curRotationMatrix * parentToWorld);
+	}
+
+	for(int i=0; i<rootChildrenNodes[Renderer::Section::Post].size(); ++i)
+	{
+		SceneNode* node = rootChildrenNodes[Renderer::Section::Post][i];
+		node->updateTransforms(curRotationMatrix * parentToWorld);
+	}
 }
 
 int RootSceneNode::getNumFrames()
@@ -297,6 +321,11 @@ int RootSceneNode::getHull(Vec<float> pnt, Vec<float> direction, unsigned int cu
 	return labelOut;
 }
 
+DirectX::XMMATRIX RootSceneNode::getWorldRotation()
+{
+	return curRotationMatrix;
+}
+
 bool RootSceneNode::addChildNode(SceneNode* child)
 {
 	gMexMessageQueueOut.addErrorMessage("You cannot attach to a root node using this method!");
@@ -316,6 +345,18 @@ void RootSceneNode::updateRenderableList()
 	makeRenderableList();
 }
 
+
+void RootSceneNode::updateTranslation(Vec<float> origin)
+{
+	this->origin = origin;
+	updateTransforms(parentToWorld);
+}
+
+void RootSceneNode::updateRotation(DirectX::XMMATRIX& rotation)
+{
+	curRotationMatrix = rotation;
+	updateTransforms(parentToWorld);
+}
 
 void RootSceneNode::makeRenderableList()
 {

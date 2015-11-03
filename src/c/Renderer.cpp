@@ -989,7 +989,7 @@ void Renderer::setPixelShaderTextureSamplers(int startIdx, int length, ID3D11Sam
 
 DirectX::XMMATRIX Renderer::getRootWorldRotation()
 {
-	return curRotationMatrix;
+	return rootScene->getWorldRotation();
 }
 
 /*void Renderer::getMutex()
@@ -1092,9 +1092,7 @@ unsigned int Renderer::getNumberOfFrames()
 
 void Renderer::resetRootWorldTransform()
 {
-	origin = Vec<float>(0.0f,0.0f,0.0f);
-	curRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(0.0f,0.0f,DirectX::XM_PI);
-	updateWorldTransform();
+	rootScene->resetWorldTransform();
 }
 
 void Renderer::setClipChunkPercent(float ccp)
@@ -1123,30 +1121,12 @@ void Renderer::updateRenderList()
 
 void Renderer::setWorldOrigin(Vec<float> org)
 {
-	origin = org;
-	updateWorldTransform();
+	rootScene->updateTranslation(org);
 }
 
 void Renderer::setWorldRotation(DirectX::XMMATRIX rotation)
 {
-	curRotationMatrix = rotation;
-	updateWorldTransform();
-}
-
-DirectX::XMMATRIX Renderer::createWorldMatrix()
-{
-	DirectX::XMMATRIX transMatrix = DirectX::XMMatrixTranslation(-origin.x,-origin.y,-origin.z);
-
-	return transMatrix * curRotationMatrix;
-}
-
-void Renderer::updateWorldTransform()
-{
-	//WaitForSingleObject(mutexDevice,INFINITE);
-
-	rootScene->setLocalToParent(createWorldMatrix());
-
-	//ReleaseMutex(mutexDevice);
+	rootScene->updateRotation(rotation);
 }
 
 HRESULT Renderer::captureWindow(std::string* filenameOut)

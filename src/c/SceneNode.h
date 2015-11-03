@@ -98,9 +98,13 @@ public:
 	int getNumFrames();
 	int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
 	int getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
+	DirectX::XMMATRIX getWorldRotation();
 
+	void resetWorldTransform();
 	virtual void requestUpdate();
 	void updateRenderableList();
+	void updateTranslation(Vec<float> origin);
+	void updateRotation(DirectX::XMMATRIX& rotation);
 
 protected:
 	virtual bool addChildNode(SceneNode* child);
@@ -110,6 +114,8 @@ private:
 	void makeRenderableList();
 
 	bool bRenderListDirty;
+	Vec<float> origin;
+	DirectX::XMMATRIX curRotationMatrix;
 
 	std::vector<SceneNode*> rootChildrenNodes[Renderer::Section::SectionEnd];
 	std::vector<std::vector<GraphicObjectNode*>> renderList[Renderer::Section::SectionEnd];

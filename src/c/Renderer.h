@@ -170,8 +170,7 @@ private:
 
 	void renderPackage(const RendererPackage* package, float frontClip=-10, float backClip=10);
 	void renderLabel(const RendererPackage* package, HDC hdc);
-	DirectX::XMMATRIX createWorldMatrix();
-	void updateWorldTransform();
+
 	//Member variables 
 	Vec<float> backgroundColor;
 
@@ -203,8 +202,6 @@ private:
 	ID3D11SamplerState* linearTextureSampler;
 
 	RootSceneNode* rootScene;
-	Vec<float> origin;
-	DirectX::XMMATRIX curRotationMatrix;
 	unsigned int currentFrame;
 	float clipChunkPercent;
 	int numPlanes;
