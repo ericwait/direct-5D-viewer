@@ -40,9 +40,9 @@ void pollCommand(int nlhs, mxArray** plhs)
 			dims[1] = numCols;
 			dims[2] = 3;//TODO This needs to change for any messages that are not 3D
 
-			aray = mxCreateNumericArray(3,dims,mxDOUBLE_CLASS,mxREAL);
+			aray = mxCreateNumericArray(3,dims,mxUINT8_CLASS,mxREAL);
 			void* arayPtr = mxGetData(aray);
-			memcpy(arayPtr,m.aray,sizeof(double)*numRows*numCols*3);
+			memcpy(arayPtr,m.aray,sizeof(unsigned char)*numRows*numCols*3);
 
 			delete[] m.aray;
 		}

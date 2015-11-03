@@ -113,7 +113,7 @@ void MessageQueue::addMessage(RtnMessage message)
 	ReleaseMutex(queueMutex);
 }
 
-void MessageQueue::addMessage(std::string command,std::string message,double val1,double val2,double* aray)
+void MessageQueue::addMessage(std::string command,std::string message,double val1,double val2,unsigned char* aray)
 {
 	RtnMessage msg;
 	msg.command = command;

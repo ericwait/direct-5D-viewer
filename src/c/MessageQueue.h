@@ -48,7 +48,7 @@ public:
 	void addMessage(std::string command, double val);
 	void addMessage(std::string command, std::string message);
 	void addMessage(std::string command, std::string message, double val);
-	void addMessage(std::string command,std::string message,double val1,double val2,double* aray);
+	void addMessage(std::string command,std::string message,double val1,double val2,unsigned char* aray);
 	void addErrorMessage(HRESULT hr);
 	void addErrorMessage(std::string message);
 	void clear();
