@@ -5,7 +5,7 @@ if (~isempty(d3dtimer) && isvalid(d3dtimer))
     stop(d3dtimer);
     delete(d3dtimer);
 else
-    t = fimerfindall('Name','d3dtimer');
+    t = timerfindall('Name','d3dtimer');
     if (~isempty(t) && isvalid(t))
         delete(t);
     else
