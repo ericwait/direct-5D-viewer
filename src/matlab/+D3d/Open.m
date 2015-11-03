@@ -14,7 +14,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
 % d3dtimer - makes a timer that will call checkMessage
 %*******************************************************************
 
-global d3dtimer EXT_MESAGE_FUNC
+global EXT_MESAGE_FUNC
 
 %% check the optional arguments and set the non-existant ones to empty
 if (~exist('im','var'))
@@ -55,8 +55,7 @@ if (~isempty(im))
     end
     
     %% start a timer that will check for any messages that the viewer might want to return
-    d3dtimer = timer('TimerFcn',@D3d.Messaging.Check,'ExecutionMode','fixedSpacing','Period',0.1);
-    start(d3dtimer);
+    D3d.Messaging.StartTimer();
 else
     D3d.Close();
 end
