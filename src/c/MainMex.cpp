@@ -161,6 +161,17 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 			{
 				dataQueue->writeMessage("captureWindow",(void*)NULL);
 			}
+			else if(_strcmpi("setRotation",command) == 0)
+			{
+				if(nrhs<3)
+					mexErrMsgTxt("setRotation takes two arguments rotationX and rotationY!");
+
+				double* rotations = new double[2];
+				rotations[0] = mxGetScalar(prhs[1]);
+				rotations[1] = mxGetScalar(prhs[2]);
+
+				dataQueue->writeMessage(command,rotations);
+			}
 			else
 			{
 				char buff[255];

@@ -692,6 +692,24 @@ HRESULT checkMessage()
 	{
 		XdeleteAllHullsCommand(m);
 		gRenderer->renderAll();
+	}
+	else if (m.command == "setRotation")
+	{
+		double* rotations = (double*)m.data;
+		rotations[0] = rotations[0]/180.0 * DirectX::XM_PI;
+		rotations[1] = rotations[1]/180.0 * DirectX::XM_PI;
+
+		DirectX::XMMATRIX rotX,rotY;
+		rotX = DirectX::XMMatrixRotationY(rotations[0]);
+		rotY = DirectX::XMMatrixRotationX(rotations[1]);
+
+		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
+		gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
+		gRenderer->renderAll();
+
+		delete[] rotations;
+	}
+	else
 	{
 		// Print an error message
 		/*char buff[255];
