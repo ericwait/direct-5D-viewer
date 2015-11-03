@@ -65,7 +65,8 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gRendererOn = false;
 			minimized = true;
 			break;
-		} else if(wParam == SIZE_MAXIMIZED || (wParam == SIZE_RESTORED && minimized))
+		}
+		else if(wParam == SIZE_MAXIMIZED || (wParam == SIZE_RESTORED && minimized))
 		{
 			gRendererOn = true;
 			minimized = false;
@@ -119,7 +120,8 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		if(ctrlDown)
 		{
 			gMexMessageQueueOut.addMessage("cellSelected",label);
-		} else
+		}
+		else
 		{
 			gMexMessageQueueOut.addMessage("rightClick",label);
 		}
@@ -136,89 +138,109 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		{
 			gCameraDefaultMesh->moveLeft();
 			gRenderer->renderAll();
-		} else if(VK_RIGHT==wParam)
+		}
+		else if(VK_RIGHT==wParam)
 		{
 			gCameraDefaultMesh->moveRight();
 			gRenderer->renderAll();
-		} else if(VK_UP==wParam)
+		}
+		else if(VK_UP==wParam)
 		{
 			gCameraDefaultMesh->moveUp();
 			gRenderer->renderAll();
-		} else if(VK_DOWN==wParam)
+		}
+		else if(VK_DOWN==wParam)
 		{
 			gCameraDefaultMesh->moveDown();
 			gRenderer->renderAll();
-		} else if(VK_PRIOR==wParam) //Page Up key
+		}
+		else if(VK_PRIOR==wParam) //Page Up key
 		{
 			gRenderer->decrementFrame();
 			gRenderer->renderAll();
-		} else if(VK_NEXT==wParam) //Page Down key
+		}
+		else if(VK_NEXT==wParam) //Page Down key
 		{
 			gRenderer->incrementFrame();
 			gRenderer->renderAll();
-		} else if(VK_HOME==wParam)
+		}
+		else if(VK_HOME==wParam)
 		{
 			gRenderer->setCurrentFrame(0);
 			gRenderer->renderAll();
-		} else if(VK_END==wParam)
+		}
+		else if(VK_END==wParam)
 		{
 			gRenderer->setCurrentFrame(gRenderer->getNumberOfFrames() - 1);
 			gRenderer->renderAll();
-		} else if(VK_SPACE==wParam)
+		}
+		else if(VK_SPACE==wParam)
 		{
 			gPlay = !gPlay;
 			gMexMessageQueueOut.addMessage("play",gPlay);
-		} else if(VK_SHIFT==wParam)
+		}
+		else if(VK_SHIFT==wParam)
 		{
 			shiftDown = true;
 			gMexMessageQueueOut.addMessage("keyDown","shift");
-		} else if(VK_CONTROL==wParam)
+		}
+		else if(VK_CONTROL==wParam)
 		{
 			ctrlDown = true;
 			gMexMessageQueueOut.addMessage("keyDown","ctrl");
-		} else if(VK_MENU == wParam)
+		}
+		else if(VK_MENU == wParam)
 		{
 			altDown = true;
 			gMexMessageQueueOut.addMessage("keyDown","alt");
-		} else if('C' == wParam)
+		}
+		else if('C' == wParam)
 		{
 			gCameraDefaultMesh->resetCamera();
 			gRenderer->renderAll();
-		} else if('H' == wParam)
+		}
+		else if('H' == wParam)
 		{
 			gMexMessageQueueOut.addMessage("toggleHulls",0.0);
 			gRenderer->renderAll();
-		} else if('L'==wParam)
+		}
+		else if('L'==wParam)
 		{
 			gRenderer->toggleLabels();
 			gMexMessageQueueOut.addMessage("toggleLabels",0.0);
 			gRenderer->renderAll();
-		} else if('P' == wParam)
+		}
+		else if('P' == wParam)
 		{
 			if(ctrlDown)
 			{
 				gRenderer->captureWindow(NULL);
 				gRenderer->renderAll();
 			}
-		} else if('R' == wParam)
+		}
+		else if('R' == wParam)
 		{
 			gRenderer->resetRootWorldTransform();
 			gRenderer->renderAll();
-		} else if('S' == wParam)
+		}
+		else if('S' == wParam)
 		{
 			gRotate = !gRotate;
 			gMexMessageQueueOut.addMessage("rotate",gRotate);
-		} else if('X'==wParam)
+		}
+		else if('X'==wParam)
 		{
 			gMexMessageQueueOut.addMessage("centerSelectedCell",1.0);
 			gRenderer->renderAll();
-		} else if('1' == wParam || VK_NUMPAD1 == wParam)
+		}
+		else if('1' == wParam || VK_NUMPAD1 == wParam)
 		{
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a 1080p movie
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 + 16,1080 + 39,SWP_NOMOVE);
-			} else if(ctrlDown && altDown && !shiftDown)
+			}
+			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a 4k movie (UHD = 3840 x 2160)
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 + 16,2160 + 39,0);
@@ -226,13 +248,15 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",1.0);
 			}
-		} else if('2' == wParam || VK_NUMPAD2 == wParam)
+		}
+		else if('2' == wParam || VK_NUMPAD2 == wParam)
 		{
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a two panel 1080p movie
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 / 2 + 16,1080 + 39,SWP_NOMOVE);
-			} else if(ctrlDown && altDown && !shiftDown)
+			}
+			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a two panel 4k movie (UHD = 3840 x 2160)
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 / 2 + 16,2160 + 39,0);
@@ -240,13 +264,15 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",2.0);
 			}
-		} else if('3' == wParam || VK_NUMPAD3 == wParam)
+		}
+		else if('3' == wParam || VK_NUMPAD3 == wParam)
 		{
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a three panel 1080p movie
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 / 3 + 16,1080 + 39,SWP_NOMOVE);
-			} else if(ctrlDown && altDown && !shiftDown)
+			}
+			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a three panel 4k movie (UHD = 3840 x 2160)
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 / 3 + 16,2160 + 39,0);
@@ -254,13 +280,15 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",3.0);
 			}
-		} else if('4' == wParam || VK_NUMPAD4 == wParam)
+		}
+		else if('4' == wParam || VK_NUMPAD4 == wParam)
 		{
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a four panel 1080p movie
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 / 2 + 16,1080 / 2 + 39,SWP_NOMOVE);
-			} else if(ctrlDown && altDown && !shiftDown)
+			}
+			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a four panel 4k movie (UHD = 3840 x 2160)
 				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 / 2 + 16,2160 / 2 + 39,0);
@@ -268,22 +296,28 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",4.0);
 			}
-		} else if('5' == wParam || VK_NUMPAD5 == wParam)
+		}
+		else if('5' == wParam || VK_NUMPAD5 == wParam)
 		{
 			gMexMessageQueueOut.addMessage("keyDown","number",5.0);
-		} else if('6' == wParam || VK_NUMPAD6 == wParam)
+		}
+		else if('6' == wParam || VK_NUMPAD6 == wParam)
 		{
 			gMexMessageQueueOut.addMessage("keyDown","number",6.0);
-		} else if('7' == wParam || VK_NUMPAD7 == wParam)
+		}
+		else if('7' == wParam || VK_NUMPAD7 == wParam)
 		{
 			gMexMessageQueueOut.addMessage("keyDown","number",7.0);
-		} else if('8' == wParam || VK_NUMPAD8 == wParam)
+		}
+		else if('8' == wParam || VK_NUMPAD8 == wParam)
 		{
 			gMexMessageQueueOut.addMessage("keyDown","number",8.0);
-		} else if('9' == wParam || VK_NUMPAD9 == wParam)
+		}
+		else if('9' == wParam || VK_NUMPAD9 == wParam)
 		{
 			gMexMessageQueueOut.addMessage("keyDown","number",9.0);
-		} else if('0' == wParam || VK_NUMPAD0 == wParam)
+		}
+		else if('0' == wParam || VK_NUMPAD0 == wParam)
 		{
 			gMexMessageQueueOut.addMessage("keyDown","number",0.0);
 		}
@@ -293,11 +327,13 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		{
 			shiftDown = false;
 			gMexMessageQueueOut.addMessage("keyUp","shift");
-		} else if(VK_CONTROL==wParam)
+		}
+		else if(VK_CONTROL==wParam)
 		{
 			ctrlDown = false;
 			gMexMessageQueueOut.addMessage("keyUp","ctrl");
-		} else if(VK_MENU)
+		}
+		else if(VK_MENU)
 		{
 			altDown = false;
 			gMexMessageQueueOut.addMessage("keyUp","alt");
@@ -380,13 +416,16 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	{
 		hr = windowInit(gDllInstance,true,*rootDir);
 		gRenderer->renderAll();
-	} catch(const std::exception& e)
+	}
+	catch(const std::exception& e)
 	{
 		gMexMessageQueueOut.addErrorMessage(e.what());
-	} catch(const std::string& e)
+	}
+	catch(const std::string& e)
 	{
 		gMexMessageQueueOut.addErrorMessage(e);
-	} catch(...)
+	}
+	catch(...)
 	{
 		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");
 	}
@@ -427,13 +466,16 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 				termWait = WaitForSingleObject(gTermEvent,0);
 			}
-		} catch(const std::exception& e)
+		}
+		catch(const std::exception& e)
 		{
 			gMexMessageQueueOut.addErrorMessage(e.what());
-		} catch(const std::string& e)
+		}
+		catch(const std::string& e)
 		{
 			gMexMessageQueueOut.addErrorMessage(e);
-		} catch(...)
+		}
+		catch(...)
 		{
 			gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");
 		}
@@ -472,7 +514,8 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 			mexMessageMutex = NULL;
 		}
 
-	} else
+	}
+	else
 	{
 		gMexMessageQueueOut.addErrorMessage(hr);
 	}
@@ -489,13 +532,16 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		gRendererInit = false;
 
 		gMexMessageQueueOut.addMessage("close",1.0);
-	} catch(const std::exception& e)
+	}
+	catch(const std::exception& e)
 	{
 		gMexMessageQueueOut.addErrorMessage(e.what());
-	} catch(const std::string& e)
+	}
+	catch(const std::string& e)
 	{
 		gMexMessageQueueOut.addErrorMessage(e);
-	} catch(...)
+	}
+	catch(...)
 	{
 		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");
 	}
@@ -512,112 +558,140 @@ HRESULT checkMessage()
 	{
 		XloadTextureCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "init")
+	}
+	else if(m.command == "init")
 	{
 
-	} else if(m.command == "close")
+	}
+	else if(m.command == "close")
 	{
 		hr = S_FALSE;
-	} else if(m.command == "poll")
+	}
+	else if(m.command == "poll")
 	{
 
-	} else if(m.command == "loadTexture")
+	}
+	else if(m.command == "loadTexture")
 	{
 
-	} else if(m.command == "peelUpdate")
+	}
+	else if(m.command == "peelUpdate")
 	{
 		XpeelUpdateCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "textureLightingUpdate")
+	}
+	else if(m.command == "textureLightingUpdate")
 	{
 		XtextureLightingUpdateCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "textureAttenUpdate")
+	}
+	else if(m.command == "textureAttenUpdate")
 	{
 		XtextureAttenUpdateCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "segmentationLighting")
+	}
+	else if(m.command == "segmentationLighting")
 	{
 		XsegmentationLighting(m);
 		gRenderer->renderAll();
-	} else if(m.command == "play")
+	}
+	else if(m.command == "play")
 	{
 		XplayCommand(m);
-	} else if(m.command == "rotate")
+	}
+	else if(m.command == "rotate")
 	{
 		XrotateCommand(m);
-	} else if(m.command == "showLabels")
+	}
+	else if(m.command == "showLabels")
 	{
 		XshowLabelsCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "resetView")
+	}
+	else if(m.command == "resetView")
 	{
 		XresetViewCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "captureSpinMovie")
+	}
+	else if(m.command == "captureSpinMovie")
 	{
 		XcaptureSpinMovieCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "transferUpdate")
+	}
+	else if(m.command == "transferUpdate")
 	{
 		XtransferUpdateCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "viewTexture")
+	}
+	else if(m.command == "viewTexture")
 	{
 		XviewTextureCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "viewSegmentation")
+	}
+	else if(m.command == "viewSegmentation")
 	{
 		XviewSegmentationCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "wireframeSegmentation")
+	}
+	else if(m.command == "wireframeSegmentation")
 	{
 		XwireframeSegmentationCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "loadHull")
+	}
+	else if(m.command == "loadHull")
 	{
 		XaddHullCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "loadHulls")
+	}
+	else if(m.command == "loadHulls")
 	{
 		XaddHullsCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "removeHull")
+	}
+	else if(m.command == "removeHull")
 	{
 		XremoveHullCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "displayHulls")
+	}
+	else if(m.command == "displayHulls")
 	{
 		XdisplayHullsCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "setFrame")
+	}
+	else if(m.command == "setFrame")
 	{
 		XsetFrameCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "setViewOrigin")
+	}
+	else if(m.command == "setViewOrigin")
 	{
 		XsetViewOriginCommand(m);
 		gRenderer->renderAll();
-	} else if(m.command == "updateHulls")
+	}
+	else if(m.command == "updateHulls")
 	{
 
-	} else if(m.command == "addHulls")
+	}
+	else if(m.command == "addHulls")
 	{
 
-	} else if(m.command == "setCapturePath")
+	}
+	else if(m.command == "setCapturePath")
 	{
 
-	} else if(m.command == "captureWindow")
+	}
+	else if(m.command == "captureWindow")
 	{
 		XcaptureWindow();
-	} else if(m.command == "centerSelectedCell")
+	}
+	else if(m.command == "centerSelectedCell")
 	{
 
-	} else if(m.command == "deleteAllHulls")
+	}
+	else if(m.command == "deleteAllHulls")
 	{
 		XdeleteAllHullsCommand(m);
 		gRenderer->renderAll();
-	} else
 	{
 		// Print an error message
 		/*char buff[255];
