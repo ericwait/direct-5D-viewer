@@ -113,6 +113,18 @@ void MessageQueue::addMessage(RtnMessage message)
 	ReleaseMutex(queueMutex);
 }
 
+void MessageQueue::addMessage(std::string command,std::string message,double val1,double val2,double* aray)
+{
+	RtnMessage msg;
+	msg.command = command;
+	msg.message = message;
+	msg.val1 = val1;
+	msg.val2 = val2;
+	msg.aray = (void*)aray;
+
+	addMessage(msg);
+}
+
 void MessageQueue::addErrorMessage(HRESULT hr)
 {
 	_com_error err(hr);

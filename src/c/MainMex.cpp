@@ -3,6 +3,7 @@
 #include "mex.h"
 #include "MessageProcessor.h"
 #include "MexFunctions.h"
+#include "DirectXCommands.h"
 
 /* This is the entry point for Matlab
 http://www.mathworks.com/help/matlab/apiref/mexfunction.html
@@ -207,8 +208,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 			}
 
-			else if (_strcmpi("deleteAllHulls", command) == 0){
+			else if (_strcmpi("deleteAllHulls", command) == 0)
+			{
 				deleteAllHullsCommand();
+			}
+
+			else if((_strcmpi("captureWindow",command) == 0))
+			{
+				dataQueue->writeMessage("captureWindow",(void*)NULL);
 			}
 			/*
 			else

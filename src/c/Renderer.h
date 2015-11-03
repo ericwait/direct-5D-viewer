@@ -115,8 +115,10 @@ public:
 
 	int getHull(Vec<float> pnt, Vec<float> direction);
 	float getClipChunkPercent(){return clipChunkPercent;}
-	HRESULT captureWindow(std::string* filenameOut=NULL);
-	HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut);
+	HRESULT captureWindow(std::string* filenameOut);
+	HRESULT captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut);
+	unsigned char* captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi);
+
 	std::string getDllDir() { return dllRoot; }
 
 //////////////////////////////////////////////////////////////////////////

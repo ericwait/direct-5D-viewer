@@ -1149,7 +1149,7 @@ void Renderer::updateWorldTransform()
 	//ReleaseMutex(mutexDevice);
 }
 
-HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
+HRESULT Renderer::captureWindow(std::string* filenameOut)
 {
 	// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 	// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
@@ -1170,12 +1170,10 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	//     
 	static int nt = 0;
 	//HDC hdcScreen;
-	HDC hdcWindow;
-	HDC hdcMemDC = NULL;
-	HBITMAP hbmScreen = NULL;
-	BITMAP bmpScreen;
+
 	CHAR wsz[1024];
 	DWORD dwError;
+	HRESULT hr = S_FALSE;
 
 	nt++;
 
@@ -1185,105 +1183,9 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	if (filenameOut!=NULL)
 		*filenameOut = wsz;
 
-	// Retrieve the handle to a display device context for the client 
-	// area of the window. 
-	immediateContext->OMSetRenderTargets(0, 0, 0);
-	HRESULT hr = IDXGIBackBuffer->GetDC(FALSE, &hdcWindow);
-	if (FAILED(hr))
-	{
-		MessageBox(gWindowHandle, "GetDC has failed", "Failed", MB_OK);
-		goto done;
-	}
-
-	// Create a compatible DC which is used in a BitBlt from the window DC
-	hdcMemDC = CreateCompatibleDC(hdcWindow);
-
-	if (!hdcMemDC)
-	{
-		MessageBox(gWindowHandle, "CreateCompatibleDC has failed", "Failed", MB_OK);
-		hr = E_FAIL;
-		goto done;
-	}
-
-	// Get the client area for size calculation
-	RECT rcClient;
-	GetClientRect(gWindowHandle, &rcClient);
-
-	//This is the best stretch mode
-	SetStretchBltMode(hdcWindow, HALFTONE);
-
-	////The source DC is the entire screen and the destination DC is the current window (HWND)
-	//if(!StretchBlt(hdcWindow, 
-	//           0,0, 
-	//           rcClient.right, rcClient.bottom, 
-	//           hdcScreen, 
-	//           0,0,
-	//           GetSystemMetrics (SM_CXSCREEN),
-	//           GetSystemMetrics (SM_CYSCREEN),
-	//           SRCCOPY))
-	//{
-	//    MessageBox(gWindowHandle, L"StretchBlt has failed",L"Failed", MB_OK);
-	//    goto done;
-	//}
-
-	// Create a compatible bitmap from the Window DC
-	hbmScreen = CreateCompatibleBitmap(hdcWindow, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
-
-	if (!hbmScreen)
-	{
-		MessageBox(gWindowHandle, "CreateCompatibleBitmap Failed", "Failed", MB_OK);
-		hr = E_FAIL;
-		goto done;
-	}
-
-	// Select the compatible bitmap into the compatible memory DC.
-	SelectObject(hdcMemDC, hbmScreen);
-
-	// Bit block transfer into our compatible memory DC.
-	if (!BitBlt(hdcMemDC,
-		0, 0,
-		rcClient.right - rcClient.left, rcClient.bottom - rcClient.top,
-		hdcWindow,
-		0, 0,
-		SRCCOPY))
-	{
-		MessageBox(gWindowHandle, "BitBlt has failed", "Failed", MB_OK);
-		hr = E_FAIL;
-		goto done;
-	}
-
-	// Get the BITMAP from the HBITMAP
-	GetObject(hbmScreen, sizeof(BITMAP), &bmpScreen);
-
-	BITMAPFILEHEADER   bmfHeader;
-	BITMAPINFOHEADER   bi;
-
-	bi.biSize = sizeof(BITMAPINFOHEADER);
-	bi.biWidth = bmpScreen.bmWidth;
-	bi.biHeight = bmpScreen.bmHeight;
-	bi.biPlanes = 1;
-	bi.biBitCount = 32;
-	bi.biCompression = BI_RGB;
-	bi.biSizeImage = 0;
-	bi.biXPelsPerMeter = 0;
-	bi.biYPelsPerMeter = 0;
-	bi.biClrUsed = 0;
-	bi.biClrImportant = 0;
-
-	DWORD dwBmpSize = ((bmpScreen.bmWidth * bi.biBitCount + 31) / 32) * 4 * bmpScreen.bmHeight;
-
-	// Starting with 32-bit Windows, GlobalAlloc and LocalAlloc are implemented as wrapper functions that 
-	// call HeapAlloc using a handle to the process's default heap. Therefore, GlobalAlloc and LocalAlloc 
-	// have greater overhead than HeapAlloc.
-	HANDLE hDIB = GlobalAlloc(GHND, dwBmpSize);
-	char *lpbitmap = (char *)GlobalLock(hDIB);
-
-	// Gets the "bits" from the bitmap and copies them into a buffer 
-	// which is pointed to by lpbitmap.
-	GetDIBits(hdcWindow, hbmScreen, 0,
-		(UINT)bmpScreen.bmHeight,
-		lpbitmap,
-		(BITMAPINFO *)&bi, DIB_RGB_COLORS);
+	DWORD dwBmpSize = 0;
+	BITMAPINFOHEADER bi;
+	unsigned char* lpbitmap = captureWindow(dwBmpSize,bi);
 
 
 	// A file is created, this is where we will save the screen capture.
@@ -1296,8 +1198,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	if (INVALID_HANDLE_VALUE == hFile)
 	{
 		dwError = GetLastError();
-		hr = E_FAIL;
-		goto done;
+		return hr;
 	}
 
 
@@ -1305,6 +1206,7 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	DWORD dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
 	//Offset to where the actual bitmap bits start.
+	BITMAPFILEHEADER   bmfHeader;
 	bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
 
 	//Size of the file
@@ -1318,18 +1220,8 @@ HRESULT Renderer::captureWindow(std::string* filenameOut/*=NULL*/)
 	WriteFile(hFile, (LPSTR)&bi, sizeof(BITMAPINFOHEADER), &dwBytesWritten, NULL);
 	WriteFile(hFile, (LPSTR)lpbitmap, dwBmpSize, &dwBytesWritten, NULL);
 
-	//Unlock and Free the DIB from the heap
-	GlobalUnlock(hDIB);
-	GlobalFree(hDIB);
-
 	//Close the handle for the file that was created
 	CloseHandle(hFile);
-
-	//Clean up
-done:
-	DeleteObject(hdcMemDC);
-	IDXGIBackBuffer->ReleaseDC(NULL);
-	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 
 	return hr;
 }
@@ -1349,4 +1241,111 @@ HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, 
 	captureFileName = oldCaptureFileName;
 
 	return hr;
+}
+
+unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
+{
+	HDC hdcWindow;
+	HDC hdcMemDC = NULL;
+	HBITMAP hbmScreen = NULL;
+	BITMAP bmpScreen;
+	unsigned char* lpbitmap = NULL;
+
+	dwBmpSize = 0;
+
+	// Retrieve the handle to a display device context for the client 
+	// area of the window. 
+	immediateContext->OMSetRenderTargets(0,0,0);
+	HRESULT hr = IDXGIBackBuffer->GetDC(FALSE,&hdcWindow);
+	if(FAILED(hr))
+	{
+		MessageBox(gWindowHandle,"GetDC has failed","Failed",MB_OK);
+		return lpbitmap;
+	}
+
+	// Create a compatible DC which is used in a BitBlt from the window DC
+	hdcMemDC = CreateCompatibleDC(hdcWindow);
+
+	if(!hdcMemDC)
+	{
+		MessageBox(gWindowHandle,"CreateCompatibleDC has failed","Failed",MB_OK);
+		hr = E_FAIL;
+		return lpbitmap;
+	}
+
+	// Get the client area for size calculation
+	RECT rcClient;
+	GetClientRect(gWindowHandle,&rcClient);
+
+	//This is the best stretch mode
+	SetStretchBltMode(hdcWindow,HALFTONE);
+
+	// Create a compatible bitmap from the Window DC
+	hbmScreen = CreateCompatibleBitmap(hdcWindow,rcClient.right - rcClient.left,rcClient.bottom - rcClient.top);
+
+	if(!hbmScreen)
+	{
+		MessageBox(gWindowHandle,"CreateCompatibleBitmap Failed","Failed",MB_OK);
+		hr = E_FAIL;
+		return lpbitmap;
+	}
+
+	// Select the compatible bitmap into the compatible memory DC.
+	SelectObject(hdcMemDC,hbmScreen);
+
+	// Bit block transfer into our compatible memory DC.
+	if(!BitBlt(hdcMemDC,
+		0,0,
+		rcClient.right - rcClient.left,rcClient.bottom - rcClient.top,
+		hdcWindow,
+		0,0,
+		SRCCOPY))
+	{
+		MessageBox(gWindowHandle,"BitBlt has failed","Failed",MB_OK);
+		hr = E_FAIL;
+		return lpbitmap;
+	}
+
+	// Get the BITMAP from the HBITMAP
+	GetObject(hbmScreen,sizeof(BITMAP),&bmpScreen);
+
+	bi.biSize = sizeof(BITMAPINFOHEADER);
+	bi.biWidth = bmpScreen.bmWidth;
+	bi.biHeight = bmpScreen.bmHeight;
+	bi.biPlanes = 1;
+	bi.biBitCount = 32;
+	bi.biCompression = BI_RGB;
+	bi.biSizeImage = 0;
+	bi.biXPelsPerMeter = 0;
+	bi.biYPelsPerMeter = 0;
+	bi.biClrUsed = 0;
+	bi.biClrImportant = 0;
+
+	dwBmpSize = ((bmpScreen.bmWidth * bi.biBitCount + 31) / 32) * 4 * bmpScreen.bmHeight;
+
+	// Starting with 32-bit Windows, GlobalAlloc and LocalAlloc are implemented as wrapper functions that 
+	// call HeapAlloc using a handle to the process's default heap. Therefore, GlobalAlloc and LocalAlloc 
+	// have greater overhead than HeapAlloc.
+	HANDLE hDIB = GlobalAlloc(GHND,dwBmpSize);
+	lpbitmap = (unsigned char *)GlobalLock(hDIB);
+
+	// Gets the "bits" from the bitmap and copies them into a buffer 
+	// which is pointed to by lpbitmap.
+	GetDIBits(hdcWindow,hbmScreen,0,
+		(UINT)bmpScreen.bmHeight,
+		lpbitmap,
+		(BITMAPINFO *)&bi,DIB_RGB_COLORS);
+
+	unsigned char* imOut = new unsigned char[dwBmpSize];
+	memcpy(imOut,lpbitmap,sizeof(char)*dwBmpSize);
+
+	//Unlock and Free the DIB from the heap
+	GlobalUnlock(hDIB);
+	GlobalFree(hDIB);
+
+	DeleteObject(hdcMemDC);
+	IDXGIBackBuffer->ReleaseDC(NULL);
+	immediateContext->OMSetRenderTargets(1,&renderTargetView,depthStencilView);
+
+	return imOut;
 }
