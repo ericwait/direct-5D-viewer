@@ -6,6 +6,7 @@
 #include "Image.h"
 #include "TransferObj.h"
 #include "TextureLightingObj.h"
+#include "MessageQueue.h"
 
 HANDLE messageLoopHandle = NULL;
 DWORD threadID;
@@ -17,19 +18,41 @@ void pollCommand(int nlhs, mxArray** plhs)
 {
 	if (nlhs != 1) mexErrMsgTxt("Wrong number of return arguments");
 
-	std::vector<OldMessage> curMsgs = gMexMessageQueueOut.flushQueue();
+	std::vector<RtnMessage> curMsgs = gMexMessageQueueOut.flushQueue();
 
-	const char* fields[] = { "command", "message", "val" };
-	plhs[0] = mxCreateStructMatrix(curMsgs.size(), 1, 3, fields);
+	const char* fields[] = { "command", "message", "val", "array" };
+	plhs[0] = mxCreateStructMatrix(curMsgs.size(), 1, 4, fields);
 
 	for (int i = 0; i < curMsgs.size(); ++i)
 	{
-		mxArray* cmd = mxCreateString(curMsgs[i].command.c_str());
-		mxArray* msg = mxCreateString(curMsgs[i].message.c_str());
-		mxArray* val = mxCreateDoubleScalar(curMsgs[i].val);
+		RtnMessage m = curMsgs[i];
+		mxArray* cmd = mxCreateString(m.command.c_str());
+		mxArray* msg = mxCreateString(m.message.c_str());
+		mxArray* val = mxCreateDoubleScalar(m.val1);
+		mxArray* aray;
+		if(m.aray!=NULL)
+		{
+			unsigned int numRows = (unsigned int)m.val1;
+			unsigned int numCols = (unsigned int)m.val2;
+
+			size_t dims[3];
+			dims[0] = numRows;
+			dims[1] = numCols;
+			dims[2] = 3;//TODO This needs to change for any messages that are not 3D
+
+			aray = mxCreateNumericArray(3,dims,mxDOUBLE_CLASS,mxREAL);
+			void* arayPtr = mxGetData(aray);
+			memcpy(arayPtr,m.aray,sizeof(double)*numRows*numCols*3);
+
+			delete[] m.aray;
+		}
+		else
+			aray = mxCreateDoubleMatrix(0,0,mxREAL);
+
 		mxSetField(plhs[0], i, fields[0], cmd);
 		mxSetField(plhs[0], i, fields[1], msg);
 		mxSetField(plhs[0], i, fields[2], val);
+		mxSetField(plhs[0], i, fields[3], aray);
 	}
 }
 

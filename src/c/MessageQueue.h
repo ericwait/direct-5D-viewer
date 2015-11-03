@@ -18,11 +18,24 @@
 #include <vector>
 #include "windows.h"
 
-struct OldMessage
+class RtnMessage
 {
+public:
+	RtnMessage()
+	{
+		command = "";
+		message = "";
+		val1 = 0;
+		val2 = 0;
+		aray = NULL;
+	}
+
+
 	std::string command;
 	std::string message;
-	double val;
+	double val1;
+	double val2;
+	void* aray;
 };
 
 class MessageQueue
@@ -31,18 +44,19 @@ public:
 	MessageQueue();
 	~MessageQueue();
 
-	OldMessage getNextMessage();
+	RtnMessage getNextMessage();
 	void addMessage(std::string command, double val);
 	void addMessage(std::string command, std::string message);
 	void addMessage(std::string command, std::string message, double val);
+	void addMessage(std::string command,std::string message,double val1,double val2,double* aray);
 	void addErrorMessage(HRESULT hr);
 	void addErrorMessage(std::string message);
 	void clear();
-	std::vector<OldMessage> flushQueue();
+	std::vector<RtnMessage> flushQueue();
 
 private:
-	void addMessage(OldMessage message);
+	void addMessage(RtnMessage message);
 	bool validQueue;
 	HANDLE queueMutex;
-	std::queue<OldMessage> messages;
+	std::queue<RtnMessage> messages;
 };
