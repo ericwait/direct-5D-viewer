@@ -44,11 +44,11 @@ for i=1:length(msgs)
     if (~isempty(EXT_MESAGE_FUNC))
         %% pass the message on
         EXT_MESAGE_FUNC(msgs(i));
-    else
-        if (~strcmp(msgs(i).message,'null'))
-            fprintf('%s',msgs(i).command);
-            disp(msgs(i).message);
-        end
+%     else
+%         if (~strcmp(msgs(i).message,'null'))
+%             fprintf('%s',msgs(i).command);
+%             disp(msgs(i).message);
+%         end
     end
 end
 end
