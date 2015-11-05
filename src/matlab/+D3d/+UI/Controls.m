@@ -159,6 +159,7 @@ end
 % --- Executes when user attempts to close Controls.
 function Controls_CloseRequestFcn(hObject, eventdata, handles)
 D3d.Viewer('close');
+delete(hObject);
 end
 
 % --- Outputs from this function are returned to the command line.
