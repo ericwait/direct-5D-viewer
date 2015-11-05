@@ -46,6 +46,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	static DirectX::XMMATRIX previousWorldRotation;
 	static float previousPeel;
 	static bool minimized = false;
+	static bool hullsOn = true;
 
 	int label;
 	Vec<float> pnt;
@@ -201,7 +202,16 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if('H' == wParam)
 		{
-			gMexMessageQueueOut.addMessage("toggleHulls",0.0);
+			hullsOn = !hullsOn;
+			gMexMessageQueueOut.addMessage("toggleHulls",double(hullsOn));
+
+			for(std::map<int,GraphicObjectNode*>::iterator it=gGraphicObjectNodes[GraphicObjectTypes::CellHulls].begin();
+				it!=gGraphicObjectNodes[GraphicObjectTypes::CellHulls].end(); ++it)
+			{
+				it->second->setRenderable(hullsOn);
+			}
+
+			gRenderer->updateRenderList();
 			gRenderer->renderAll();
 		}
 		else if('L'==wParam)
@@ -700,8 +710,8 @@ HRESULT checkMessage()
 		rotations[1] = rotations[1]/180.0 * DirectX::XM_PI;
 
 		DirectX::XMMATRIX rotX,rotY;
-		rotX = DirectX::XMMatrixRotationY(rotations[0]);
-		rotY = DirectX::XMMatrixRotationX(rotations[1]);
+		rotX = DirectX::XMMatrixRotationY(float(rotations[0]));
+		rotY = DirectX::XMMatrixRotationX(float(rotations[1]));
 
 		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
 		gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
