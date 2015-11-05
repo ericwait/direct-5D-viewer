@@ -44,6 +44,8 @@ void XloadTextureCommand(Message m){
 		mexErrMsgTxt("Could not load texture!");
 
 	setCurrentTexture(textureType);
+
+	delete returnedImg;
 }
 
 void XresetViewCommand(Message m){
@@ -71,6 +73,8 @@ void XtransferUpdateCommand(Message m){
 	firstVolumeTextures[fvtIdx]->setTransferFunction(sentTranfser->chan, sentTranfser->transferFunction);
 	firstVolumeTextures[fvtIdx]->setRange(sentTranfser->chan, sentTranfser->ranges);
 	firstVolumeTextures[fvtIdx]->setColor(sentTranfser->chan, sentTranfser->color, sentTranfser->alphaMod);
+
+	delete sentTranfser;
 }
 
 void XaddHullCommand(Message m){
@@ -183,11 +187,15 @@ void XremoveHullCommand(Message m){
 	delete removeNode;
 
 	gRenderer->updateRenderList();
+
+	delete labelPtr;
 }
 
 void XpeelUpdateCommand(Message m){
 	float* x = (float*)m.data;
 	gRenderer->setClipChunkPercent(*x);
+
+	delete x;
 }
 
 void XplayCommand(Message m){
@@ -216,17 +224,23 @@ void XshowLabelsCommand(Message m){
 	bool on = onD > 0;
 
 	gRenderer->setLabels(on);
+
+	delete doublePtr;
 }
 
 
 void XtextureLightingUpdateCommand(Message m){
 	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
 	firstVolumeTextures[localLightObj->index]->setLightOn(localLightObj->value);
+
+	delete localLightObj;
 }
 
 void XtextureAttenUpdateCommand(Message m){
 	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
 	firstVolumeTextures[localLightObj->index]->setAttenuationOn(localLightObj->value);
+
+	delete localLightObj;
 }
 
 void XsegmentationLighting(Message m){
