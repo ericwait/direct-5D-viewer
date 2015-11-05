@@ -1,4 +1,4 @@
-function [varargout] = LoadImage( im, imData, imagePath )
+function [varargout] = LoadImage( im, imData, imagePath, bufferType )
 %LOADIMAGE [varargout] = loadImage( im, imData, imagePath )
 %sends the image data to the directX viewer.
 %
@@ -17,6 +17,9 @@ if (~exist('imData','var'))
 end
 if (~exist('imagePath','var'))
     imagePath = [];
+end
+if (~exist('bufferType','var') || isempty(bufferType))
+    bufferType = 'orginal';
 end
 
 %% check for missing data that we might need and load 
@@ -43,7 +46,7 @@ end
 if (~isempty(im) && ~isempty(imData))
     % these structures could still be empty if the user cancelled the image
     % reading
-    D3d.Viewer('loadTexture',im,[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize]);
+    D3d.Viewer('loadTexture',im,[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
 end
 
 %% return the image and data that might have been read in durring the load
