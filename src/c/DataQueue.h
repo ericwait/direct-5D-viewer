@@ -1,8 +1,10 @@
 #include <queue>
 #include "windows.h"
 
-struct Message
+class Message
 {
+public:
+	Message() { command="null"; data=NULL; }
 	std::string command;
 	void *data;
 };
