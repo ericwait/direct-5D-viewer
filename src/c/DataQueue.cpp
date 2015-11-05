@@ -19,25 +19,26 @@ DataQueue::~DataQueue()
 
 Message DataQueue::getNextMessage()
 {
+	Message message;
 	if (!messages.empty()){
 		DWORD waitTerm = WaitForSingleObject(mutex, INFINITE);
 
-		Message message = messages.front();
+		message = messages.front();
 		messages.pop();
 
 		ReleaseMutex(mutex);
-
-		return message;
+	}
+	else
+	{
+		mexErrMsgTxt("No messages available in queue!");
 	}
 
-	// TODO: fix the compiler warning associated with this:
-	// Error message: It is invalid to pull off an empty queue
-	mexErrMsgTxt("No messages available in queue!");
+	return message;
 }
 
-size_t DataQueue::getNumMessages(){
+size_t DataQueue::getNumMessages()
+{
 	return messages.size();
-
 }
 
 void DataQueue::addMessage(Message msg)
