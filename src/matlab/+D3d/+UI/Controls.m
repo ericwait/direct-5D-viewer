@@ -158,7 +158,7 @@ end
 
 % --- Executes when user attempts to close Controls.
 function Controls_CloseRequestFcn(hObject, eventdata, handles)
-D3d.Viewer('close');
+D3d.Close();
 delete(hObject);
 end
 
@@ -290,20 +290,12 @@ end
 
 % --- Executes on button press in rb_orgImage.
 function rb_orgImage_Callback(hObject, eventdata, handles)
-set(handles.rb_Processed,'Value',0);
-set(handles.rb_orgImage,'Value',1);
-
-D3d.Viewer('viewTexture','original'); %TODO can this be split out into channels?
-D3d.UI.Ctrl.UpdateCurrentState();
+D3d.UI.Ctrl.EnableBuffer(1);
 end
 
 % --- Executes on button press in rb_Processed.
 function rb_Processed_Callback(hObject, eventdata, handles)
-set(handles.rb_Processed,'Value',1);
-set(handles.rb_orgImage,'Value',0);
-
-D3d.Viewer('viewTexture','processed'); %TODO can this be split out into channels?
-D3d.UI.Ctrl.UpdateCurrentState();
+D3d.UI.Ctrl.EnableBuffer(2);
 end
 
 % --- Executes on button press in cb_Wireframe.

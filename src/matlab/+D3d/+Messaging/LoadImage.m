@@ -19,7 +19,7 @@ if (~exist('imagePath','var'))
     imagePath = [];
 end
 if (~exist('bufferNum','var') || isempty(bufferNum))
-    bufferNum = '1';
+    bufferNum = 1;
 else
     if (~bufferNum==1 && ~bufferNum==2)
         error('bufferType can only be 1 or 2!');
@@ -58,7 +58,7 @@ if (~isempty(im) && ~isempty(imData))
     if (~strcmpi('unit8',class(im)))
         im = ImUtils.ConvertType(im,'uint8',true);
     end
-    D3d.Viewer('loadTexture',im,[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
+    D3d.Viewer('loadTexture',ImUtils.ConvertType(im,'uint8'),[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
     D3d.UI.Ctrl.EnableBuffer(bufferNum);
 end
 

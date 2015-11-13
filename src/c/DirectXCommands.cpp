@@ -262,14 +262,9 @@ void XcaptureSpinMovieCommand(Message m){
 
 void XviewTextureCommand(Message m){
 
-	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+	GraphicObjectTypes* textureType = (GraphicObjectTypes*)m.data;
 
-	if (_strcmpi("original", (char*)m.data) == 0)
-		textureType = GraphicObjectTypes::OriginalVolume;
-	else if (_strcmpi("processed", (char*)m.data) == 0)
-		textureType = GraphicObjectTypes::ProcessedVolume;
-
-	setCurrentTexture(textureType);
+	setCurrentTexture(*textureType);
 
 	delete[] m.data;
 }

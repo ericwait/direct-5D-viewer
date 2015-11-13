@@ -569,21 +569,17 @@ HRESULT checkMessage()
 		XloadTextureCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "init")
-	{
-
-	}
 	else if(m.command == "close")
 	{
 		hr = S_FALSE;
 	}
-	else if(m.command == "poll")
+	else if(m.command == "viewTexture")
 	{
-
-	}
-	else if(m.command == "loadTexture")
-	{
-
+		GraphicObjectTypes* typ = (GraphicObjectTypes*)m.data;
+		
+		setCurrentTexture(*typ);
+		gRenderer->renderAll();
+		delete typ;
 	}
 	else if(m.command == "peelUpdate")
 	{
@@ -633,11 +629,11 @@ HRESULT checkMessage()
 		XtransferUpdateCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "viewTexture")
-	{
-		XviewTextureCommand(m);
-		gRenderer->renderAll();
-	}
+// 	else if(m.command == "viewTexture")
+// 	{
+// 		XviewTextureCommand(m);
+// 		gRenderer->renderAll();
+// 	}
 	else if(m.command == "viewSegmentation")
 	{
 		XviewSegmentationCommand(m);

@@ -321,16 +321,14 @@ void viewTextureCommand(int nrhs, const mxArray** prhs)
 	char buff[96];
 	mxGetString(prhs[1], buff, 96);
 
-
-
-	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
+	GraphicObjectTypes* textureType = new GraphicObjectTypes;// GraphicObjectTypes::OriginalVolume;
 
 	if (_strcmpi("original", buff) == 0)
-		textureType = GraphicObjectTypes::OriginalVolume;
+		*textureType = GraphicObjectTypes::OriginalVolume;
 	else if (_strcmpi("processed", buff) == 0)
-		textureType = GraphicObjectTypes::ProcessedVolume;
+		*textureType = GraphicObjectTypes::ProcessedVolume;
 
-	setCurrentTexture(textureType);
+	dataQueue->writeMessage("viewTexture",(void*)textureType);
 }
 
 void viewSegmentationCommand(int nrhs, const mxArray** prhs)

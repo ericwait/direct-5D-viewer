@@ -5,7 +5,6 @@ if (~isempty(D3dUICtrlHandles))
     if (isvalid(D3dUICtrlHandles.hObject))
         delete(D3dUICtrlHandles.hObject);
     end
-    clear D3dUICtrlHandles
 end
 
 D3d.Viewer('close');
