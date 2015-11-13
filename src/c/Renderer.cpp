@@ -53,8 +53,6 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-	//DWORD waitTerm = WaitForSingleObject(mutexDevice,5000);
-
 	SAFE_DELETE(rootScene);
 
 	clearVertexShaderList();
@@ -68,8 +66,6 @@ Renderer::~Renderer()
 	releaseRenderTarget();
 	releaseDepthStencils();
 	releaseSwapChain();
-
-	//CloseHandle(mutexDevice);
 }
 
 HRESULT Renderer::init(std::string rootDir)
@@ -513,10 +509,7 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 	std::vector<Vec<float>> textureUV, VertexShaders shader)
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
 	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, textureUV, shader);
-
-	//ReleaseMutex(mutexDevice);
 
 	return newMesh;
 }
@@ -991,16 +984,6 @@ DirectX::XMMATRIX Renderer::getRootWorldRotation()
 {
 	return rootScene->getWorldRotation();
 }
-
-/*void Renderer::getMutex()
-{
-	WaitForSingleObject(mutexDevice,INFINITE);
-}*/
-
-/*void Renderer::releaseMutex()
-{
-	ReleaseMutex(mutexDevice);
-}*/
 
 int Renderer::getHull(Vec<float> pnt, Vec<float> direction)
 {

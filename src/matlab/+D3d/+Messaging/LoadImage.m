@@ -1,4 +1,4 @@
-function [varargout] = LoadImage( im, imData, imagePath, bufferType )
+function [varargout] = LoadImage( im, imData, imagePath, bufferNum )
 %LOADIMAGE [varargout] = loadImage( im, imData, imagePath )
 %sends the image data to the directX viewer.
 %
@@ -18,8 +18,17 @@ end
 if (~exist('imagePath','var'))
     imagePath = [];
 end
-if (~exist('bufferType','var') || isempty(bufferType))
-    bufferType = 'orginal';
+if (~exist('bufferNum','var') || isempty(bufferNum))
+    bufferNum = '1';
+else
+    if (~bufferNum==1 && ~bufferNum==2)
+        error('bufferType can only be 1 or 2!');
+    end
+end
+
+bufferType = 'original';
+if (bufferNum==2)
+    bufferType = 'processed';
 end
 
 %% check for missing data that we might need and load 
@@ -46,7 +55,11 @@ end
 if (~isempty(im) && ~isempty(imData))
     % these structures could still be empty if the user cancelled the image
     % reading
+    if (~strcmpi('unit8',class(im)))
+        im = ImUtils.ConvertType(im,'uint8',true);
+    end
     D3d.Viewer('loadTexture',im,[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
+    D3d.UI.Ctrl.EnableBuffer(bufferNum);
 end
 
 %% return the image and data that might have been read in durring the load
