@@ -176,7 +176,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, V
 
 StaticVolumeTextureMaterial::~StaticVolumeTextureMaterial()
 {
-	for (int i=0; i<numChannels; ++i)
+	for(int i=0; i<shaderResourceView.size(); ++i)
 	{
 		SAFE_RELEASE(shaderResourceView[i]);
 	}
