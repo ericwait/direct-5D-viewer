@@ -56,9 +56,11 @@ if (~isempty(im) && ~isempty(imData))
     % these structures could still be empty if the user cancelled the image
     % reading
     if (~strcmpi('unit8',class(im)))
-        im = ImUtils.ConvertType(im,'uint8',true);
+        im8 = ImUtils.ConvertType(im,'uint8',true);
+    else
+        im8 = im;
     end
-    D3d.Viewer('loadTexture',ImUtils.ConvertType(im,'uint8'),[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
+    D3d.Viewer('loadTexture',im8,[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
     D3d.UI.Ctrl.EnableBuffer(bufferNum);
 end
 
