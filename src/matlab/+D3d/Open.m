@@ -41,7 +41,7 @@ end
 D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
 
 %% check if there should be an image loaded right away.
-[im,imData] = D3d.Messaging.LoadImage(im, imData, imagePath);
+[im,imData] = D3d.LoadImage(im, imData, imagePath);
 
 if (~isempty(im))
     D3d.UI.Controls(imData);
