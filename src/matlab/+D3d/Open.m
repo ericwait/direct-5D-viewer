@@ -46,18 +46,18 @@ D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, s
 if (~isempty(im))
     D3d.UI.Controls(imData);
     
-    %% return the image and data that might have been read in durring the load
-    if (nargout>1)
-        varargout{2} = imData;
-    end
-    if (nargout>0)
-        varargout{1} = im;
-    end
-    
     %% start a timer that will check for any messages that the viewer might want to return
     D3d.Messaging.StartTimer();
 else
     D3d.Close();
+end
+
+%% return the image and data that might have been read in durring the load
+if (nargout>1)
+    varargout{2} = imData;
+end
+if (nargout>0)
+    varargout{1} = im;
 end
 end
 
