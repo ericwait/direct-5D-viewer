@@ -36,7 +36,7 @@ if (isempty(imData))
     % there is no image data passed in to load
     if (isempty(im))
         % there is also no image to load, so we should read one in
-        [im,imData] = MicroscopeData.Reader(imagePath,[],[],[],'uint8',true,[],true);
+        [im,imData] = MicroscopeData.Reader(imagePath,[],[],[],[],true,[],true);
     else
         % there is an image to load just no metadat to go with it
         % assume that the voxels are isomorphic
@@ -46,7 +46,7 @@ if (isempty(imData))
     end
 elseif (isempty(im))
     % there is image data that will allow us to load up the missing image
-    [im,imData] = MicroscopeData.Reader(imData,[],[],[],'uint8',true,[],true);
+    [im,imData] = MicroscopeData.Reader(imData,[],[],[],[],true,[],true);
 else
     % we should have everything we need to load the image in the viewer
 end
