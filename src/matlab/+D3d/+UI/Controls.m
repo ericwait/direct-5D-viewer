@@ -182,7 +182,11 @@ chan = get(handles.m_channelPicker,'Value');
 mxVal = get(handles.s_ceil,'Value');
 mnVal = get(handles.s_floor,'Value');
 
-if (mxVal<=mnVal-0.01)
+if (mxVal<0.01)
+    mxVal = 0.01;
+end
+
+if (mxVal<=mnVal+0.01)
     mnVal = mxVal-0.015;
     if (mnVal<0)
         mnVal = 0;
@@ -216,6 +220,10 @@ function s_floor_Callback(hObject, eventdata, handles)
 chan = get(handles.m_channelPicker,'Value');
 mxVal = get(handles.s_ceil,'Value');
 mnVal = get(handles.s_floor,'Value');
+
+if (mnVal>0.99)
+    mnVal = 0.99;
+end
 
 if (mxVal<=mnVal+0.01)
     mxVal = mnVal+0.015;
