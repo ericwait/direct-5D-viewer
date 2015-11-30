@@ -16,13 +16,17 @@ if (length(reductions)==1)
     reductions = repmat(reductions,1,size(pixelList_xy,2));
 end
 
+% padd the subimage to get some room to blur
 PADDING = 3*reductions;
 
+% get bounding box
 bb_xy = [min(pixelList_xy,[],1);max(pixelList_xy,[],1)];
 
+% make a sub image this size
 subImSize_rc = Utils.SwapXY_RC(bb_xy(2,:) - bb_xy(1,:) + 2*PADDING +1);
 
-shiftCoords_xy = max(zeros(1,size(bb_xy,2)),bb_xy(1,:) - PADDING +1);
+%shiftCoords_xy = max(zeros(1,size(bb_xy,2)),bb_xy(1,:) - PADDING +1);
+shiftCoords_xy = bb_xy(1,:) - PADDING +1;
 shiftPixelCoords_xy = pixelList_xy - repmat(shiftCoords_xy,size(pixelList_xy,1),1);
 shiftPixelInd = Utils.CoordToInd(subImSize_rc,Utils.SwapXY_RC(shiftPixelCoords_xy));
 
@@ -34,17 +38,23 @@ centerOfMass_xy = rp.Centroid + shiftCoords_xy;
 
 [x,y,z,D] = reducevolume(im,reductions);
 D = smooth3(D);
-[faces, v] = isosurface(x,y,z,D,1/3);
-verts = Utils.SwapXY_RC(v) + repmat(shiftCoords_xy,size(v,1),1);
+[faces, v_xy] = isosurface(x,y,z,D,1/3);
+
+if (isempty(v_xy))
+    polygon = [];
+    return
+end
+
+verts_xy = v_xy + repmat(shiftCoords_xy,size(v_xy,1),1);
 
 if (any(faces(:)==0))
     error('there is a zero index in the faces structure!');
 end
 
 for j=1:size(faces,1)
-    v1 = verts(faces(j,1),:);
-    v2 = verts(faces(j,2),:);
-    v3 = verts(faces(j,3),:);
+    v1 = verts_xy(faces(j,1),:);
+    v2 = verts_xy(faces(j,2),:);
+    v3 = verts_xy(faces(j,3),:);
     
     e1 = v2-v1;
     e2 = v3-v1;
@@ -57,14 +67,14 @@ for j=1:size(faces,1)
     end
 end
 
-norms = D3d.Polygon.CalcNorms(verts,faces);
+norms = D3d.Polygon.CalcNorms(verts_xy,faces);
 
 polygon.index = polyIdx;
 polygon.frame = frame;
 polygon.label = label;
 polygon.color = color;
 polygon.faces = faces;
-polygon.verts = verts;
+polygon.verts = verts_xy;
 polygon.norms = norms;
 end
 
