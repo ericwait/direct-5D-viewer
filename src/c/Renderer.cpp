@@ -526,6 +526,26 @@ MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces,
 	return newMesh;
 }
 
+void Renderer::convertToScreenSpace(double* verts, size_t numVerts)
+{
+	GraphicObjectNode* volumePtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].at(0);
+	VolumeTextureObject* volumeObject = (VolumeTextureObject*)volumePtr->getGraphicObjectPtr();
+	Vec<size_t> dims = volumeObject->getDims();
+	Vec<double> scales = Vec<double>(volumeObject->getScales());
+
+	Vec<double> dimsNeg1to1 = Vec<double>(dims) / 2.0;
+
+	for (size_t i = 0; i < numVerts; ++i)
+	{
+		Vec<double> newVert = Vec<double>(verts[i],verts[i+numVerts],verts[i+2*numVerts]);
+		newVert = (newVert / dimsNeg1to1 - 1) * scales;
+
+		verts[i] = newVert.x; 
+		verts[i+numVerts] = newVert.y;
+		verts[i+2*numVerts] = newVert.z;
+	}
+}
+
 HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);

@@ -145,6 +145,8 @@ public:
 	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 		VertexShaders shader);
 
+	void convertToScreenSpace(double* verts, size_t numVerts);
+
 private:
 	HRESULT initSwapChain();
 	HRESULT initDepthStencils();
