@@ -18,11 +18,13 @@ global D3dUICtrlHandles EXT_MESAGE_FUNC
 
 msgs = D3d.Viewer('poll');
 
+if (strcmp(msgs(1).command,'null'))
+    return
+end
+
 for i=1:length(msgs)
     %% run these commands reguardless of what any other function does
     switch msgs(i).command
-        case 'null'
-            continue
         case 'error'
             msg = sprintf('Error from C code: %s\n\tError Code:%f',msgs(i).message,msgs(i).val);
             errordlg(msg,'','modal');
