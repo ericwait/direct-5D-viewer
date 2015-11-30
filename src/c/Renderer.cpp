@@ -538,7 +538,7 @@ void Renderer::convertToScreenSpace(double* verts, size_t numVerts)
 	for (size_t i = 0; i < numVerts; ++i)
 	{
 		Vec<double> newVert = Vec<double>(verts[i],verts[i+numVerts],verts[i+2*numVerts]);
-		newVert = (newVert / dimsNeg1to1 - 1) * scales;
+		newVert = ((newVert-1) / dimsNeg1to1 - 1) * scales;
 
 		verts[i] = newVert.x; 
 		verts[i+numVerts] = newVert.y;
