@@ -154,6 +154,8 @@ HRESULT updatePolygons(const mxArray* hulls)
 		char buff[255];
 		mxGetString(mxlabel, buff, 255);
 
+		gRenderer->convertToScreenSpace(vertData,numVerts);
+
 		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
 		//memcpy(this->pixels, pixels, dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
 		polygon->setfaceData(faceData);
@@ -224,6 +226,9 @@ HRESULT addPolygons(const mxArray* polygonsIn)
 
 		char* buff = new char[255];
 		mxGetString(mxLabel, buff, 255);
+
+		gRenderer->convertToScreenSpace(vertData,numVerts);
+
 		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
 		polygons->at(i)->setfaceData(faceData);
 		polygons->at(i)->setvertData(vertData);

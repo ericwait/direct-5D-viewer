@@ -408,6 +408,8 @@ void setViewOriginCommand(int nrhs, const mxArray** prhs)
 	originMsg[1] = origin[1];
 	originMsg[2] = origin[2];
 
+	gRenderer->convertToScreenSpace(originMsg,3);
+
 	dataQueue->writeMessage("setViewOrigin", (void*)originMsg);
 }
 
