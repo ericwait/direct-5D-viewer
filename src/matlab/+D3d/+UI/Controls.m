@@ -172,7 +172,7 @@ end
 % --- Executes on slider movement.
 function s_curFrame_Callback(hObject, eventdata, handles)
 frame = round(get(handles.s_curFrame,'Value'));
-D3d.UI.Ctrl.UpdateTime(frame-1);
+D3d.UI.Ctrl.UpdateTime(frame);
 end
 
 % --- Executes on slider movement.

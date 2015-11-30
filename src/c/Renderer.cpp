@@ -1040,6 +1040,9 @@ void Renderer::setCurrentFrame(int frame)
 	if (frame>rootScene->getNumFrames())
 		frame = rootScene->getNumFrames()-1;
 
+	if (frame<0)
+		frame = 0;
+
 	currentFrame = frame;
 
 }

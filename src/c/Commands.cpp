@@ -390,7 +390,7 @@ void setFrameCommand(int nrhs, const mxArray** prhs)
 
 	int curFrame = (int)mxGetScalar(prhs[1]);
 	int* onD2 = new int;
-	*onD2 = curFrame;
+	*onD2 = curFrame-1;
 	dataQueue->writeMessage("setFrame", (void*)onD2);
 }
 
