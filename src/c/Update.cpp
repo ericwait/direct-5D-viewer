@@ -135,22 +135,6 @@ HRESULT updatePolygons(const mxArray* hulls)
 		double* colorData = (double*)mxGetData(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
-		/*DirectX Side*/
-		/*int hullIdx = -1;
-		for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
-		{
-			int label = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->getHullLabel();
-			if (label == (int)mxGetScalar(mxLabel))
-			{
-				hullIdx = j;
-				break;
-			}
-		}
-
-		SceneNode* parentSceneNode = gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->getParentNode();
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->releaseRenderResources();
-		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];*/
-		/*DirectX Side*/
 		char buff[255];
 		mxGetString(mxlabel, buff, 255);
 
@@ -162,19 +146,6 @@ HRESULT updatePolygons(const mxArray* hulls)
 		polygon->setvertData(vertData);
 		polygon->setnormData(normData);
 		polygon->setcolorData(colorData);
-
-		//gRenderer->getMutex();
-
-		/*
-		CellHullObject* curHullObj = createCellHullObject(faceData, numFaces, vertData, numVerts, normData, numNormals, gCameraDefaultMesh);
-		curHullObj->setColor(Vec<float>((float)colorData[0], (float)colorData[1], (float)colorData[2]), 1.0f);
-		curHullObj->setLabel((int)mxGetScalar(mxLabel));
-		curHullObj->setTrack((int)mxGetScalar(mxTrack));
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx] = new GraphicObjectNode(curHullObj);
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->setWireframe(true);
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->attachToParentNode(parentSceneNode);
-		*/
-		//gRenderer->releaseMutex();
 		int* intptr = new int;
 		*intptr = polygon->getIndex();
 		dataQueue->writeMessage("removePolygon", (void*)intptr);
