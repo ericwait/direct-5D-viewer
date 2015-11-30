@@ -113,7 +113,7 @@ public:
 	//void getMutex(); // comment these out
 	//void releaseMutex();
 
-	int getHull(Vec<float> pnt, Vec<float> direction);
+	int getPolygon(Vec<float> pnt, Vec<float> direction);
 	float getClipChunkPercent(){return clipChunkPercent;}
 	HRESULT captureWindow(std::string* filenameOut);
 	HRESULT captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut);

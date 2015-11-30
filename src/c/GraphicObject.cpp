@@ -65,7 +65,7 @@ void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 	setLocalToWorld(parentToWorld);
 }
 
-int GraphicObject::getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut)
+int GraphicObject::getPolygon(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut)
 {
 	depthOut = std::numeric_limits<float>::max();
 	return -1;
@@ -81,17 +81,17 @@ void GraphicObject::setLocalToWorld(DirectX::XMMATRIX localToWorld)
 }
 
 
-CellHullObject::CellHullObject()
+PolygonObject::PolygonObject()
 {
 	meshPrimitive = NULL;
 	material = NULL;
 
 	curBoundingBox[0] = Vec<float>(0.0f,0.0f,0.0f);
 	curBoundingBox[1] = Vec<float>(0.0f,0.0f,0.0f);
-	label = -1;
+	index = -1;
 }
 
-CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
+PolygonObject::PolygonObject(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 	std::vector<Vec<float>>& normals, Camera* camera)
 {
 	meshPrimitive = NULL;
@@ -113,7 +113,7 @@ CellHullObject::CellHullObject(Renderer* rendererIn, std::vector<Vec<unsigned in
 	initalizeRendererResources(camera);
 }
 
-CellHullObject::~CellHullObject()
+PolygonObject::~PolygonObject()
 {
 	//TODO remove meshPrimitive or just set to NULL
 
@@ -126,51 +126,40 @@ CellHullObject::~CellHullObject()
 	GraphicObject::~GraphicObject();
 }
 
-void CellHullObject::setColor(Vec<float> color, float alpha)
+void PolygonObject::setColor(Vec<float> color, float alpha)
 {
 	if (material!=NULL)
 		material->setColor(color,alpha);
 }
 
-void CellHullObject::setColorMod(Vec<float> colorMod, float alpha)
+void PolygonObject::setColorMod(Vec<float> colorMod, float alpha)
 {
 	if (material!=NULL)
 		material->setColorModifier(colorMod,alpha);
 }
 
-void CellHullObject::setWireframe(bool wireframe)
+void PolygonObject::setWireframe(bool wireframe)
 {
 	material->setWireframe(wireframe);
 }
 
-void CellHullObject::setLabel(int labelIn)
+void PolygonObject::setIndex(int index)
 {
-	label = labelIn;
+	this->index = index;
 }
 
-void CellHullObject::setTrack(int labelIn)
+void PolygonObject::setLabel(std::string label)
 {
-	if (labelIn==-1)
-		rendererPackage->setLabel("");
-	else
-	{
-		char buff[255];
-		
-		//if (this->getHullLabel() >= 0)
-			//sprintf_s(buff, "%d / %d", labelIn, this->getHullLabel());
-		//else
-		sprintf_s(buff, "%d", labelIn);
-		rendererPackage->setLabel(buff);
-	}
+	rendererPackage->setLabel(label);
 }
 
-void CellHullObject::getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals)
+void PolygonObject::getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals)
 {
 	minVals = curBoundingBox[0];
 	maxVals = curBoundingBox[1];
 }
 
-int CellHullObject::getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut)
+int PolygonObject::getPolygon(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut)
 {
 	depthOut = std::numeric_limits<float>::max();
 	bool found = false;
@@ -188,13 +177,13 @@ int CellHullObject::getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& d
 	}
 
 	if (found)
-		return label;
+		return index;
 
 	return -1;
 }
 
 
-void CellHullObject::initalizeRendererResources(Camera* camera)
+void PolygonObject::initalizeRendererResources(Camera* camera)
 {
 	if (rendererPackage==NULL)
 	{
@@ -207,7 +196,7 @@ void CellHullObject::initalizeRendererResources(Camera* camera)
 	}
 }
 
-void CellHullObject::updateBoundingBox(DirectX::XMMATRIX localToWorld)
+void PolygonObject::updateBoundingBox(DirectX::XMMATRIX localToWorld)
 {
 	float mx = std::numeric_limits<float>::max();
 	float mn = std::numeric_limits<float>::lowest();
@@ -226,7 +215,7 @@ void CellHullObject::updateBoundingBox(DirectX::XMMATRIX localToWorld)
 	}
 }
 
-bool CellHullObject::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord)
+bool PolygonObject::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord)
 {
 // 	/* a = b - c */
 // #define vector(a,b,c) \

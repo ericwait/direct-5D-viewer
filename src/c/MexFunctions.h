@@ -26,18 +26,18 @@ void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs);
 void viewTextureCommand(int nrhs, const mxArray** prhs);
 void viewSegmentationCommand(int nrhs, const mxArray** prhs);
 void wireframeSegmentationCommand(int nrhs, const mxArray** prhs);
-void loadHullsCommand(int nrhs, const mxArray** prhs);
-void displayHullsCommand(int nrhs, const mxArray** prhs);
+void loadPolygonsCommand(int nrhs, const mxArray** prhs);
+void displayPolygonsCommand(int nrhs, const mxArray** prhs);
 void setFrameCommand(int nrhs, const mxArray** prhs);
 void setViewOriginCommand(int nrhs, const mxArray** prhs);
-void updateHullsCommand(int nrhs, const mxArray** prhs);
-void addHullsCommand(int nrhs, const mxArray** prhs);
+void updatePolygonsCommand(int nrhs, const mxArray** prhs);
+void addPolygonsCommand(int nrhs, const mxArray** prhs);
 void setCapturePathCommand(int nrhs, const mxArray** prhs);
 void takeControlCommand();
 void releaseControlCommand();
 void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs);
-void removeHullCommand(int nrhs, const mxArray** prhs);
-void deleteAllHullsCommand();
+void removePolygonCommand(int nrhs, const mxArray** prhs);
+void deleteAllPolygonsCommand();
 extern "C" void exitFunc();
 
 
@@ -49,12 +49,12 @@ void toggleSegmentationResults(bool on);
 void toggleSegmentaionWireframe(bool wireframe);
 void toggleSegmentaionLighting(bool lighting);
 void toggleSelectedCell(std::set<int> labels);
-HRESULT updateHulls(const mxArray* hulls);
-HRESULT addHulls(const mxArray* hulls);
+HRESULT updatePolygons(const mxArray* hulls);
+HRESULT addPolygons(const mxArray* hulls);
 
-CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
+PolygonObject* createPolygonObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
 	Camera* camera);
-HRESULT loadHulls(const mxArray* hulls);
+HRESULT loadPolygons(const mxArray* hulls);
 HRESULT createBorder(Vec<float> &scale);
 HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ);
 

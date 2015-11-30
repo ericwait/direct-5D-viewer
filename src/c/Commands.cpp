@@ -351,37 +351,37 @@ void wireframeSegmentationCommand(int nrhs, const mxArray** prhs)
 	dataQueue->writeMessage("wireframeSegmentation", (void*)onD2);
 }
 
-void loadHullsCommand(int nrhs, const mxArray** prhs)
+void loadPolygonsCommand(int nrhs, const mxArray** prhs)
 {
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
 
-	const mxArray* hulls = prhs[1];
-	if (hulls == NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
+	const mxArray* polygons = prhs[1];
+	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
 
-	HRESULT hr = loadHulls(hulls);
+	HRESULT hr = loadPolygons(polygons);
 	if (FAILED(hr))
-		mexErrMsgTxt("Could not load hulls!");
+		mexErrMsgTxt("Could not load polygons!");
 }
 
-void removeHullCommand(int nrhs, const mxArray** prhs){
+void removePolygonCommand(int nrhs, const mxArray** prhs){
 	double d = mxGetScalar(prhs[1]);
 	int* label = new int;
 	*label = (int)d;
-	dataQueue->writeMessage("removeHull", (void*)label);
+	dataQueue->writeMessage("removePolygon", (void*)label);
 }
 
-void displayHullsCommand(int nrhs, const mxArray** prhs)
+void displayPolygonsCommand(int nrhs, const mxArray** prhs)
 {
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for displayHulls!");
+	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for displayPolygons!");
 
 	double* hullList = (double*)mxGetData(prhs[1]);
-	size_t numHulls = mxGetNumberOfElements(prhs[1]);
+	size_t numPolygons = mxGetNumberOfElements(prhs[1]);
 
-	std::set<int>* hullset = new std::set<int>;
-	for (size_t i = 0; i < numHulls; ++i)
-		hullset->insert((int)(hullList[i]));
+	std::set<int>* polygonset = new std::set<int>;
+	for (size_t i = 0; i < numPolygons; ++i)
+		polygonset->insert((int)(hullList[i]));
 
-	dataQueue->writeMessage("displayHulls", (void*)hullset);
+	dataQueue->writeMessage("displayPolygons", (void*)polygonset);
 }
 
 void setFrameCommand(int nrhs, const mxArray** prhs)
@@ -411,28 +411,28 @@ void setViewOriginCommand(int nrhs, const mxArray** prhs)
 	dataQueue->writeMessage("setViewOrigin", (void*)originMsg);
 }
 
-void updateHullsCommand(int nrhs, const mxArray** prhs)
+void updatePolygonsCommand(int nrhs, const mxArray** prhs)
 {
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
 
-	const mxArray* hulls = prhs[1];
-	if (hulls == NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
+	const mxArray* polygons = prhs[1];
+	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
 
-	HRESULT hr = updateHulls(hulls);
+	HRESULT hr = updatePolygons(polygons);
 	if (FAILED(hr))
-		mexErrMsgTxt("Could not update hulls!");
+		mexErrMsgTxt("Could not update polygons!");
 }
 
-void addHullsCommand(int nrhs, const mxArray** prhs)
+void addPolygonsCommand(int nrhs, const mxArray** prhs)
 {
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadHulls!");
+	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
 
-	const mxArray* hulls = prhs[1];
-	if (hulls == NULL) mexErrMsgTxt("No hulls passed as the second argument!\n");
+	const mxArray* polygons = prhs[1];
+	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
 
-	HRESULT hr = addHulls(hulls);
+	HRESULT hr = addPolygons(polygons);
 	if (FAILED(hr))
-		mexErrMsgTxt("Could not add hulls!");
+		mexErrMsgTxt("Could not add polygons!");
 }
 
 void setCapturePathCommand(int nrhs, const mxArray** prhs)
@@ -492,8 +492,8 @@ void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plh
 	plhs[0] = mxCreateString(fileNameOut.c_str());
 }
 
-void deleteAllHullsCommand(){
-	dataQueue->writeMessage("deleteAllHulls", (void*)NULL);
+void deleteAllPolygonsCommand(){
+	dataQueue->writeMessage("deleteAllPolygons", (void*)NULL);
 }
 
 extern "C" void exitFunc()

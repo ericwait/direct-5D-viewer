@@ -38,8 +38,8 @@ public:
 	virtual bool isRenderable(){return false;}
 	DirectX::XMMATRIX getLocalToWorldTransform();
 
-	virtual int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut);
-	virtual int getHullLabel(){return -1;}
+	virtual int getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut);
+	virtual int getPolygonLabel(){return -1;}
 
 	SceneNode* getParentNode(){return parentNode;}
 
@@ -71,8 +71,9 @@ public:
 
 	virtual bool isRenderable(){return renderable;}
 	const RendererPackage* getRenderPackage();
-	virtual int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut);
-	virtual int getHullLabel(){return graphicObject->getHullLabel();}
+	virtual int getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut);
+	virtual int getPolygonLabel(){return graphicObject->getIndex();}
+	GraphicObject* getGraphicObjectPtr() { return graphicObject; }
 
 protected:
 	virtual bool addChildNode(SceneNode* child) { return false; }; //TODO: should probably be an error
@@ -96,8 +97,8 @@ public:
 	size_t getNumRenderableObjects(Renderer::Section section){return renderList[section].size();}
 	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section, unsigned int frame);
 	int getNumFrames();
-	int getHull(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
-	int getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
+	int getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
+	int getPolygon(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
 	DirectX::XMMATRIX getWorldRotation();
 
 	void resetWorldTransform();

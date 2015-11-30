@@ -74,7 +74,7 @@ DirectX::XMMATRIX SceneNode::getLocalToWorldTransform()
 }
 
 
-int SceneNode::getHull(Vec<float> pnt, Vec<float> direction,float& depthOut)
+int SceneNode::getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut)
 {
 	depthOut = std::numeric_limits<float>::max();
 	int labelOut = -1;
@@ -82,7 +82,7 @@ int SceneNode::getHull(Vec<float> pnt, Vec<float> direction,float& depthOut)
 	for (int i=0; i<childrenNodes.size(); ++i)
 	{
 		float curDepth;
-		int label = childrenNodes[i]->getHull(pnt,direction,curDepth);
+		int label = childrenNodes[i]->getPolygon(pnt,direction,curDepth);
 
 		if (curDepth < depthOut)
 		{
@@ -176,7 +176,7 @@ const RendererPackage* GraphicObjectNode::getRenderPackage()
 }
 
 
-int GraphicObjectNode::getHull(Vec<float> pnt, Vec<float> direction,float& depthOut)
+int GraphicObjectNode::getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut)
 {
 	DirectX::XMVECTOR det;
 	DirectX::XMMATRIX locl = DirectX::XMMatrixInverse(&det,getLocalToWorldTransform());
@@ -192,7 +192,7 @@ int GraphicObjectNode::getHull(Vec<float> pnt, Vec<float> direction,float& depth
 	Vec<float> lclPntVec(DirectX::XMVectorGetX(lclPnt),DirectX::XMVectorGetY(lclPnt),DirectX::XMVectorGetZ(lclPnt));
 	Vec<float> lclDirVec(DirectX::XMVectorGetX(lclDir),DirectX::XMVectorGetY(lclDir),DirectX::XMVectorGetZ(lclDir));
 
-	return graphicObject->getHull(lclPntVec,lclDirVec,depthOut);
+	return graphicObject->getPolygon(lclPntVec,lclDirVec,depthOut);
 }
 
 
@@ -299,7 +299,7 @@ int RootSceneNode::getNumFrames()
 }
 
 
-int RootSceneNode::getHull(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, float& depthOut)
+int RootSceneNode::getPolygon(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, float& depthOut)
 {
 	std::vector<SceneNode*> children = rootChildrenNodes[Renderer::Section::Main][currentFrame]->getChildren();
 
@@ -309,7 +309,7 @@ int RootSceneNode::getHull(Vec<float> pnt, Vec<float> direction, unsigned int cu
 	for (int i=0; i<children.size(); ++i)
 	{
 		float curDepth;
-		int label = children[i]->getHull(pnt,direction,curDepth);
+		int label = children[i]->getPolygon(pnt,direction,curDepth);
 
 		if (curDepth < depthOut)
 		{

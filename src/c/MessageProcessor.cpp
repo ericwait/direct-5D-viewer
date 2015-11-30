@@ -117,7 +117,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		break;
 	case WM_RBUTTONDOWN:
 		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
-		label = gRenderer->getHull(pnt,direction);
+		label = gRenderer->getPolygon(pnt,direction);
 		if(ctrlDown)
 		{
 			gMexMessageQueueOut.addMessage("cellSelected",label);
@@ -203,10 +203,10 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		else if('H' == wParam)
 		{
 			hullsOn = !hullsOn;
-			gMexMessageQueueOut.addMessage("toggleHulls",double(hullsOn));
+			gMexMessageQueueOut.addMessage("togglePolygons",double(hullsOn));
 
-			for(std::map<int,GraphicObjectNode*>::iterator it=gGraphicObjectNodes[GraphicObjectTypes::CellHulls].begin();
-				it!=gGraphicObjectNodes[GraphicObjectTypes::CellHulls].end(); ++it)
+			for(std::map<int,GraphicObjectNode*>::iterator it=gGraphicObjectNodes[GraphicObjectTypes::Polygons].begin();
+				it!=gGraphicObjectNodes[GraphicObjectTypes::Polygons].end(); ++it)
 			{
 				it->second->setRenderable(hullsOn);
 			}
@@ -644,24 +644,24 @@ HRESULT checkMessage()
 		XwireframeSegmentationCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "loadHull")
+	else if(m.command == "loadPolygon")
 	{
-		XaddHullCommand(m);
+		XaddPolygonCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "loadHulls")
+	else if(m.command == "loadPolygons")
 	{
-		XaddHullsCommand(m);
+		XaddPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "removeHull")
+	else if(m.command == "removePolygon")
 	{
-		XremoveHullCommand(m);
+		XremovePolygonCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "displayHulls")
+	else if(m.command == "displayPolygons")
 	{
-		XdisplayHullsCommand(m);
+		XdisplayPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
 	else if(m.command == "setFrame")
@@ -674,11 +674,11 @@ HRESULT checkMessage()
 		XsetViewOriginCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "updateHulls")
+	else if(m.command == "updatePolygons")
 	{
 
 	}
-	else if(m.command == "addHulls")
+	else if(m.command == "addPolygons")
 	{
 
 	}
@@ -694,9 +694,9 @@ HRESULT checkMessage()
 	{
 
 	}
-	else if(m.command == "deleteAllHulls")
+	else if(m.command == "deleteAllPolygons")
 	{
-		XdeleteAllHullsCommand(m);
+		XdeleteAllPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
 	else if (m.command == "setRotation")

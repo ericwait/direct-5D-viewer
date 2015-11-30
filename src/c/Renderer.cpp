@@ -1005,11 +1005,11 @@ DirectX::XMMATRIX Renderer::getRootWorldRotation()
 	return rootScene->getWorldRotation();
 }
 
-int Renderer::getHull(Vec<float> pnt, Vec<float> direction)
+int Renderer::getPolygon(Vec<float> pnt, Vec<float> direction)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 	float depth;
-	int label = rootScene->getHull(pnt,direction,currentFrame,depth);
+	int label = rootScene->getPolygon(pnt,direction,currentFrame,depth);
 	//ReleaseMutex(mutexDevice);
 
 	return label;

@@ -29,7 +29,7 @@ HINSTANCE gDllInstance = NULL;
 MessageQueue gMexMessageQueueOut;
 
 std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
-CellHullObject* gBorderObj = NULL;
+PolygonObject* gBorderObj = NULL;
 
 extern std::vector<DirectX::XMVECTOR> volumeBoundingVerts;
 
@@ -38,7 +38,7 @@ void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* n
 {
 	int uniqueID = forceLabel;
 	if ( forceLabel < 0 )
-		uniqueID = node->getHullLabel();
+		uniqueID = node->getPolygonLabel();
 
 	if (gGraphicObjectNodes[objType].count(uniqueID) > 0)
 	{
@@ -46,8 +46,8 @@ void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* n
 		return;
 	}
 
-	std::pair<int, GraphicObjectNode*> newHull(uniqueID, node);
-	gGraphicObjectNodes[objType].insert(newHull);
+	std::pair<int, GraphicObjectNode*> newPolygon(uniqueID, node);
+	gGraphicObjectNodes[objType].insert(newPolygon);
 }
 
 void removeGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID)

@@ -42,7 +42,7 @@ void toggleSegmentationResults(bool on)
 
 	//gRenderer->getMutex();
 
-	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
 	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
 	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
 		objectIter->second->setRenderable(on);
@@ -56,7 +56,7 @@ void toggleSegmentaionWireframe(bool wireframe)
 
 	//gRenderer->getMutex();
 
-	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
 	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
 	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
 		objectIter->second->setWireframe(wireframe);
@@ -70,7 +70,7 @@ void toggleSegmentaionLighting(bool lighting)
 
 	//gRenderer->getMutex();
 
-	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
 	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
 	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
 		objectIter->second->setLightOn(lighting);
@@ -84,12 +84,12 @@ void toggleSelectedCell(std::set<int> labels)
 
 	//gRenderer->getMutex();
 
-	const GraphicObjectTypes cellType = GraphicObjectTypes::CellHulls;
+	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
 	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
 	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
 	{
 		GraphicObjectNode* node = objectIter->second;
-		if ( labels.count(node->getHullLabel()) > 0 )
+		if ( labels.count(node->getPolygonLabel()) > 0 )
 			node->setRenderable(true);
 		else
 			node->setRenderable(false);
@@ -98,20 +98,20 @@ void toggleSelectedCell(std::set<int> labels)
 	//gRenderer->releaseMutex();
 }
 
-HRESULT updateHulls(const mxArray* hulls)
+HRESULT updatePolygons(const mxArray* hulls)
 {
 	if (gRenderer == NULL) return E_FAIL;
 
-	size_t numHulls = mxGetNumberOfElements(hulls);
-	for (size_t i = 0; i < numHulls; ++i)
+	size_t numPolygons = mxGetNumberOfElements(hulls);
+	for (size_t i = 0; i < numPolygons; ++i)
 	{
 		mxArray* mxFaces = mxGetField(hulls, i, "faces");
 		mxArray* mxVerts = mxGetField(hulls, i, "verts");
 		mxArray* mxNorms = mxGetField(hulls, i, "norms");
 		mxArray* mxColor = mxGetField(hulls, i, "color");
 		mxArray* mxFrame = mxGetField(hulls, i, "frame");
-		mxArray* mxLabel = mxGetField(hulls, i, "label");
-		mxArray* mxTrack = mxGetField(hulls, i, "track");
+		mxArray* mxIndex = mxGetField(hulls, i, "index");
+		mxArray* mxlabel = mxGetField(hulls, i, "label");
 
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
@@ -151,16 +151,15 @@ HRESULT updateHulls(const mxArray* hulls)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->releaseRenderResources();
 		delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx];*/
 		/*DirectX Side*/
+		char buff[255];
+		mxGetString(mxlabel, buff, 255);
 
-		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		QueuePolygon* polygon = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
 		//memcpy(this->pixels, pixels, dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
 		polygon->setfaceData(faceData);
 		polygon->setvertData(vertData);
 		polygon->setnormData(normData);
 		polygon->setcolorData(colorData);
-		int* intptr = &(polygon->label);
-		dataQueue->writeMessage("removeHull", (void*)intptr);
-		dataQueue->writeMessage("loadHull", (void*)polygon);
 
 		//gRenderer->getMutex();
 
@@ -174,28 +173,32 @@ HRESULT updateHulls(const mxArray* hulls)
 		gGraphicObjectNodes[GraphicObjectTypes::CellHulls][hullIdx]->attachToParentNode(parentSceneNode);
 		*/
 		//gRenderer->releaseMutex();
+		int* intptr = new int;
+		*intptr = polygon->getIndex();
+		dataQueue->writeMessage("removePolygon", (void*)intptr);
+		dataQueue->writeMessage("loadPolygon", (void*)polygon);
 	}
 
 	return S_OK;
 }
 
-HRESULT addHulls(const mxArray* hulls)
+HRESULT addPolygons(const mxArray* polygonsIn)
 {
 	if (gRenderer == NULL) return E_FAIL;
 
-	size_t numHulls = mxGetNumberOfElements(hulls);
+	size_t numPolygons = mxGetNumberOfElements(polygonsIn);
 
-	vector<QueuePolygon*>* polygons = new vector<QueuePolygon*>(numHulls);
+	vector<QueuePolygon*>* polygons = new vector<QueuePolygon*>(numPolygons);
 
-	for (size_t i = 0; i < numHulls; ++i)
+	for (size_t i = 0; i < numPolygons; ++i)
 	{
-		mxArray* mxFaces = mxGetField(hulls, i, "faces");
-		mxArray* mxVerts = mxGetField(hulls, i, "verts");
-		mxArray* mxNorms = mxGetField(hulls, i, "norms");
-		mxArray* mxColor = mxGetField(hulls, i, "color");
-		mxArray* mxFrame = mxGetField(hulls, i, "frame");
-		mxArray* mxLabel = mxGetField(hulls, i, "label");
-		mxArray* mxTrack = mxGetField(hulls, i, "track");
+		mxArray* mxFaces = mxGetField(polygonsIn, i, "faces");
+		mxArray* mxVerts = mxGetField(polygonsIn, i, "verts");
+		mxArray* mxNorms = mxGetField(polygonsIn, i, "norms");
+		mxArray* mxColor = mxGetField(polygonsIn, i, "color");
+		mxArray* mxFrame = mxGetField(polygonsIn, i, "frame");
+		mxArray* mxIndex = mxGetField(polygonsIn, i, "index");
+		mxArray* mxLabel = mxGetField(polygonsIn, i, "label");
 
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
@@ -219,14 +222,16 @@ HRESULT addHulls(const mxArray* hulls)
 		double* colorData = (double*)mxGetData(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
-		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		char* buff = new char[255];
+		mxGetString(mxLabel, buff, 255);
+		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
 		polygons->at(i)->setfaceData(faceData);
 		polygons->at(i)->setvertData(vertData);
 		polygons->at(i)->setnormData(normData);
 		polygons->at(i)->setcolorData(colorData);
 	}
 
-	dataQueue->writeMessage("loadHulls", (void*)polygons);
+	dataQueue->writeMessage("loadPolygons", (void*)polygons);
 
 	return S_OK;
 }

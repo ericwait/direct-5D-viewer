@@ -29,7 +29,7 @@ extern HWND gWindowHandle;
 extern HINSTANCE gDllInstance;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
-extern CellHullObject* gBorderObj;
+extern PolygonObject* gBorderObj;
 extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 extern MessageQueue gMexMessageQueueOut;
 

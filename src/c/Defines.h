@@ -54,7 +54,7 @@
 enum GraphicObjectTypes
 {
 	Widget,
-	CellHulls,
+	Polygons,
 	Border,
 	OriginalVolume,
 	ProcessedVolume,

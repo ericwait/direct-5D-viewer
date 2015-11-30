@@ -77,19 +77,19 @@ void XtransferUpdateCommand(Message m){
 	delete sentTranfser;
 }
 
-void XaddHullCommand(Message m){
+void XaddPolygonCommand(Message m){
 	if (gRenderer == NULL) return;
 
-	/*if (!gGraphicObjectNodes[GraphicObjectTypes::CellHulls].empty())
+	/*if (!gGraphicObjectNodes[GraphicObjectTypes::CellPolygons].empty())
 	{
 		//gRenderer->getMutex();
-		for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellHulls].size(); ++j)
+		for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellPolygons].size(); ++j)
 		{
-			gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j]->releaseRenderResources();
-			delete gGraphicObjectNodes[GraphicObjectTypes::CellHulls][j];
+			gGraphicObjectNodes[GraphicObjectTypes::CellPolygons][j]->releaseRenderResources();
+			delete gGraphicObjectNodes[GraphicObjectTypes::CellPolygons][j];
 		}
 
-		gGraphicObjectNodes[GraphicObjectTypes::CellHulls].clear();
+		gGraphicObjectNodes[GraphicObjectTypes::CellPolygons].clear();
 
 		gRenderer->updateRenderList();
 		//gRenderer->releaseMutex();
@@ -109,36 +109,38 @@ void XaddHullCommand(Message m){
 
 	QueuePolygon* polygon = (QueuePolygon*)m.data;
 
-	if (hullRootNodes[polygon->frame] == NULL){
-		hullRootNodes[polygon->frame] = new SceneNode();
-		gRenderer->attachToRootScene(hullRootNodes[polygon->frame], Renderer::Section::Main, polygon->frame);
+	if (hullRootNodes[polygon->getFrame()] == NULL){
+		hullRootNodes[polygon->getFrame()] = new SceneNode();
+		gRenderer->attachToRootScene(hullRootNodes[polygon->getFrame()], Renderer::Section::Main, polygon->getFrame());
 	}
 
-	GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::CellHulls, polygon->label);
+	GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, polygon->getIndex());
 	if (oldNode)
 	{
 		gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
 		return;
 	}
 
-	CellHullObject* curHullObj = createCellHullObject(polygon->getfaceData(), polygon->numFaces, polygon->getvertData(), polygon->numVerts, polygon->getnormData(), polygon->numNormals, gCameraDefaultMesh);
-	curHullObj->setColor(Vec<float>((float)polygon->getcolorData()[0], (float)polygon->getcolorData()[1], (float)polygon->getcolorData()[2]), 1.0f);
-	curHullObj->setLabel(polygon->label);
-	curHullObj->setTrack(polygon->track);
-	GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
-	curHullNode->setWireframe(true);
-	curHullNode->attachToParentNode(hullRootNodes[polygon->frame]);
+	PolygonObject* curPolygonObj = createPolygonObject(polygon->getfaceData(), polygon->getNumFaces(), polygon->getvertData(), polygon->getNumVerts(), polygon->getnormData(), polygon->getNumNormals(), gCameraDefaultMesh);
+	curPolygonObj->setColor(Vec<float>((float)polygon->getcolorData()[0], (float)polygon->getcolorData()[1], (float)polygon->getcolorData()[2]), 1.0f);
+	curPolygonObj->setIndex(polygon->getIndex());
+	curPolygonObj->setLabel(polygon->getLabel());
+	GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);
+	curPolygonNode->setWireframe(true);
+	curPolygonNode->attachToParentNode(hullRootNodes[polygon->getFrame()]);
 
-	insertGlobalGraphicsObject(GraphicObjectTypes::CellHulls, curHullNode);
+	insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, curPolygonNode);
 
 	delete polygon;
 }
 
-void XaddHullsCommand(Message m){
+void XaddPolygonsCommand(Message m){
 	vector<QueuePolygon*>* polygons = (vector<QueuePolygon*>*)m.data;
 
 	for (vector<QueuePolygon*>::iterator polygon = polygons->begin(); polygon != polygons->end(); ++polygon) {
 		if (gRenderer == NULL) return;
+
+		int frame = (*polygon)->getFrame();
 
 		if (hullRootNodes.empty()){
 			hullRootNodes.resize(gRenderer->getNumberOfFrames());
@@ -146,42 +148,42 @@ void XaddHullsCommand(Message m){
 				hullRootNodes[i] = NULL;
 		}
 
-		if (hullRootNodes[(*polygon)->frame] == NULL){
-			hullRootNodes[(*polygon)->frame] = new SceneNode();
-			gRenderer->attachToRootScene(hullRootNodes[(*polygon)->frame], Renderer::Section::Main, (*polygon)->frame);
+		if (hullRootNodes[frame] == NULL){
+			hullRootNodes[frame] = new SceneNode();
+			gRenderer->attachToRootScene(hullRootNodes[frame], Renderer::Section::Main, frame);
 		}
 
-		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::CellHulls, (*polygon)->label);
+		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, (*polygon)->getIndex());
 		if (oldNode)
 		{
 			gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
 			return;
 		}
 
-		CellHullObject* curHullObj = createCellHullObject((*polygon)->getfaceData(), (*polygon)->numFaces, (*polygon)->getvertData(), (*polygon)->numVerts, (*polygon)->getnormData(), (*polygon)->numNormals, gCameraDefaultMesh);
-		curHullObj->setColor(Vec<float>((float)(*polygon)->getcolorData()[0], (float)(*polygon)->getcolorData()[1], (float)(*polygon)->getcolorData()[2]), 1.0f);
-		curHullObj->setLabel((*polygon)->label);
-		curHullObj->setTrack((*polygon)->track);
-		GraphicObjectNode* curHullNode = new GraphicObjectNode(curHullObj);
-		curHullNode->setWireframe(true);
-		curHullNode->attachToParentNode(hullRootNodes[(*polygon)->frame]);
+		PolygonObject* curPolygonObj = createPolygonObject((*polygon)->getfaceData(), (*polygon)->getNumFaces(), (*polygon)->getvertData(), (*polygon)->getNumVerts(), (*polygon)->getnormData(), (*polygon)->getNumNormals(), gCameraDefaultMesh);
+		curPolygonObj->setColor(Vec<float>((float)(*polygon)->getcolorData()[0], (float)(*polygon)->getcolorData()[1], (float)(*polygon)->getcolorData()[2]), 1.0f);
+		curPolygonObj->setIndex((*polygon)->getIndex());
+		curPolygonObj->setLabel((*polygon)->getLabel());
+		GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);
+		curPolygonNode->setWireframe(true);
+		curPolygonNode->attachToParentNode(hullRootNodes[(*polygon)->getFrame()]);
 
-		insertGlobalGraphicsObject(GraphicObjectTypes::CellHulls, curHullNode);
+		insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, curPolygonNode);
 
 		delete *polygon;
 	}
 	delete polygons;
 }
 
-void XremoveHullCommand(Message m){
+void XremovePolygonCommand(Message m){
 	int* labelPtr = (int*)m.data;
 	int inputLabel = *labelPtr;
 
-	GraphicObjectNode* removeNode = getGlobalGraphicsObject(GraphicObjectTypes::CellHulls,inputLabel);
+	GraphicObjectNode* removeNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons,inputLabel);
 	if (!removeNode)
 		return;
 
-	removeGlobalGraphicsObject(GraphicObjectTypes::CellHulls, inputLabel);
+	removeGlobalGraphicsObject(GraphicObjectTypes::Polygons, inputLabel);
 	removeNode->detatchFromParentNode();
 
 	delete removeNode;
@@ -306,15 +308,15 @@ void XsetViewOriginCommand(Message m){
 	delete[] doublePtr;
 }
 
-void XdisplayHullsCommand(Message m){
+void XdisplayPolygonsCommand(Message m){
 	std::set<int>* hullset = (std::set<int>*)m.data;
 
 	toggleSelectedCell(*hullset);
 	delete hullset;
 }
 
-void XdeleteAllHullsCommand(Message m){
-	const GraphicObjectTypes objType = GraphicObjectTypes::CellHulls;
+void XdeleteAllPolygonsCommand(Message m){
+	const GraphicObjectTypes objType = GraphicObjectTypes::Polygons;
 
 	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[objType].begin();
 	for ( ; objectIter != gGraphicObjectNodes[objType].end(); ++objectIter )

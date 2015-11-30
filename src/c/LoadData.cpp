@@ -10,7 +10,7 @@
 
 using std::vector;
 
-CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
+PolygonObject* createPolygonObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
 	Camera* camera)
 {
 	std::vector<Vec<unsigned int>> faces;
@@ -48,30 +48,30 @@ CellHullObject* createCellHullObject(double* faceData, size_t numFaces, double* 
 		normals[i] = curNormal;
 	}
 
-	CellHullObject* cho = new CellHullObject(gRenderer, faces, verts, normals, camera);
+	PolygonObject* cho = new PolygonObject(gRenderer, faces, verts, normals, camera);
 
 	return cho;
 }
 
 
-HRESULT loadHulls(const mxArray* hulls)
+HRESULT loadPolygons(const mxArray* polygonsIn)
 {
-	size_t numHulls = mxGetNumberOfElements(hulls);
+	size_t numPolygons = mxGetNumberOfElements(polygonsIn);
 
-	vector<QueuePolygon*>* polygons = new vector<QueuePolygon*>(numHulls);
+	vector<QueuePolygon*>* polygons = new vector<QueuePolygon*>(numPolygons);
 
-	for (size_t i = 0; i < numHulls; ++i)
+	for (size_t i = 0; i < numPolygons; ++i)
 	{
 		// Polygon needs this
-		mxArray* mxFaces = mxGetField(hulls, i, "faces");
-		mxArray* mxVerts = mxGetField(hulls, i, "verts");
-		mxArray* mxNorms = mxGetField(hulls, i, "norms");
-		mxArray* mxColor = mxGetField(hulls, i, "color");
-		mxArray* mxFrame = mxGetField(hulls, i, "frame");
+		mxArray* mxFaces = mxGetField(polygonsIn, i, "faces");
+		mxArray* mxVerts = mxGetField(polygonsIn, i, "verts");
+		mxArray* mxNorms = mxGetField(polygonsIn, i, "norms");
+		mxArray* mxColor = mxGetField(polygonsIn, i, "color");
+		mxArray* mxFrame = mxGetField(polygonsIn, i, "frame");
 
 
-		mxArray* mxLabel = mxGetField(hulls, i, "label");
-		mxArray* mxTrack = mxGetField(hulls, i, "track");
+		mxArray* mxIndex = mxGetField(polygonsIn, i, "index");
+		mxArray* mxLabel = mxGetField(polygonsIn, i, "label");
 
 		// Num of each
 		size_t numFaces = mxGetM(mxFaces);
@@ -88,10 +88,10 @@ HRESULT loadHulls(const mxArray* hulls)
 			mexErrMsgTxt("No color field!");
 		if (mxFrame == NULL)
 			mexErrMsgTxt("No frame field!");
+		if (mxIndex == NULL)
+			mexErrMsgTxt("No index field!");
 		if (mxLabel == NULL)
 			mexErrMsgTxt("No label field!");
-		if (mxTrack == NULL)
-			mexErrMsgTxt("No track field!");
 
 		if (numVerts < 1)
 			mexErrMsgTxt("No verts!");
@@ -112,14 +112,17 @@ HRESULT loadHulls(const mxArray* hulls)
 		size_t numColor = mxGetNumberOfElements(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
-		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxLabel), (int)mxGetScalar(mxTrack));
+		char buff[255];
+		mxGetString(mxLabel, buff, 255);
+
+		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
 		polygons->at(i)->setfaceData(faceData);
 		polygons->at(i)->setvertData(vertData);
 		polygons->at(i)->setnormData(normData);
 		polygons->at(i)->setcolorData(colorData);
 	}
 
-	dataQueue->writeMessage("loadHulls", (void*)polygons);
+	dataQueue->writeMessage("loadPolygons", (void*)polygons);
 
 	return S_OK;
 }
@@ -199,7 +202,7 @@ HRESULT createBorder(Vec<float> &scale)
 			normals[faces[2 * i].x + j] = norm;
 	}
 
-	gBorderObj = new CellHullObject(gRenderer, faces, vertices, normals, gCameraDefaultMesh);
+	gBorderObj = new PolygonObject(gRenderer, faces, vertices, normals, gCameraDefaultMesh);
 
 	GraphicObjectNode* borderNode = new GraphicObjectNode(gBorderObj);
 	gBorderObj->setColor(Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);

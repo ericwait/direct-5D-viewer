@@ -36,8 +36,8 @@ public:
 	virtual void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
 
 	const RendererPackage* getRenderPackage(){return rendererPackage;}
-	virtual int getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
-	virtual int getHullLabel(){return -1;}
+	virtual int getPolygon(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
+	virtual int getIndex(){return -1;}
 
 protected:
 	GraphicObject();
@@ -49,25 +49,25 @@ protected:
 };
 
 
-class CellHullObject : public GraphicObject
+class PolygonObject : public GraphicObject
 {
 public:
-	CellHullObject(Renderer* renderer, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
+	PolygonObject(Renderer* renderer, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 		std::vector<Vec<float>>& normals, Camera* camera);
-	~CellHullObject();
+	~PolygonObject();
 
 	void setLightOn(bool on){}
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
 	void setWireframe(bool wireframe);
-	void setLabel(int labelIn);
-	void setTrack(int track);
+	void setIndex(int labelIn);
+	void setLabel(std::string label);
 	void getAxisAlignedBoundingBox(Vec<float>& minVals, Vec<float>& maxVals);
-	virtual int getHull(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
-	virtual int getHullLabel(){return label;}
+	virtual int getPolygon(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
+	virtual int getIndex(){return index;}
 
 private:
-	CellHullObject();
+	PolygonObject();
 	void initalizeRendererResources(Camera* camera);
 	virtual void updateBoundingBox(DirectX::XMMATRIX localToWorld);
 	bool intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord);
@@ -78,7 +78,7 @@ private:
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<float>> normals;
 	Vec<float> curBoundingBox[2];
-	int label;
+	int index;
 };
 
 
@@ -102,6 +102,8 @@ public:
 	void setWireframe(bool wireframe);
 
 	int getNumberOfChannels(){return numChannels;}
+	Vec<size_t> getDims() { return dims; }
+	Vec<float> getScales() { return scaleFactor; }
 
 private:
 	VolumeTextureObject();

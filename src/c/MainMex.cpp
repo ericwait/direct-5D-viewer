@@ -113,17 +113,17 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 			{
 				wireframeSegmentationCommand(nrhs,prhs);
 			}
-			else if(_strcmpi("loadHulls",command) == 0)
+			else if(_strcmpi("loadPolygons",command) == 0)
 			{
-				loadHullsCommand(nrhs,prhs);
+				loadPolygonsCommand(nrhs,prhs);
 			}
-			else if(_strcmpi("removeHull",command) == 0)
+			else if(_strcmpi("removePolygon",command) == 0)
 			{
-				removeHullCommand(nrhs,prhs);
+				removePolygonCommand(nrhs,prhs);
 			}
-			else if(_strcmpi("displayHulls",command) == 0)
+			else if(_strcmpi("displayPolygons",command) == 0)
 			{
-				displayHullsCommand(nrhs,prhs);
+				displayPolygonsCommand(nrhs,prhs);
 			}
 			else if(_strcmpi("setFrame",command) == 0)
 			{
@@ -133,13 +133,13 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 			{
 				setViewOriginCommand(nrhs,prhs);
 			}
-			else if(_strcmpi("updateHulls",command) == 0)
+			else if(_strcmpi("updatePolygons",command) == 0)
 			{
-				updateHullsCommand(nrhs,prhs);
+				updatePolygonsCommand(nrhs,prhs);
 			}
-			else if(_strcmpi("addHulls",command) == 0)
+			else if(_strcmpi("addPolygons",command) == 0)
 			{
-				addHullsCommand(nrhs,prhs);
+				addPolygonsCommand(nrhs,prhs);
 			}
 			else if(_strcmpi("takeControl",command) == 0)
 			{
@@ -153,9 +153,9 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 			{
 				captureImageCommand(nlhs,nrhs,prhs,plhs);
 			}
-			else if(_strcmpi("deleteAllHulls",command) == 0)
+			else if(_strcmpi("deleteAllPolygons",command) == 0)
 			{
-				deleteAllHullsCommand();
+				deleteAllPolygonsCommand();
 			}
 			else if(_strcmpi("captureWindow",command) == 0)
 			{
