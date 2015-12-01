@@ -31,7 +31,7 @@ if (bufferNum==2)
     bufferType = 'processed';
 end
 
-%% check for missing data that we might need and load 
+%% check for missing data that we might need and load
 if (isempty(imData))
     % there is no image data passed in to load
     if (isempty(im))
@@ -40,9 +40,7 @@ if (isempty(imData))
     else
         % there is an image to load just no metadat to go with it
         % assume that the voxels are isomorphic
-        imData.XPixelPhysicalSize = 1.0;
-        imData.YPixelPhysicalSize = 1.0;
-        imData.ZPixelPhysicalSize = 1.0;
+        imData.PixelPhysicalSize = [1.0,1.0,1.0];
     end
 elseif (isempty(im))
     % there is image data that will allow us to load up the missing image
@@ -60,7 +58,7 @@ if (~isempty(im) && ~isempty(imData))
     else
         im8 = im;
     end
-    D3d.Viewer('loadTexture',im8,[imData.XPixelPhysicalSize,imData.YPixelPhysicalSize,imData.ZPixelPhysicalSize],bufferType);
+    D3d.Viewer('loadTexture',im8,imData.PixelPhysicalSize,bufferType);
     D3d.UI.Ctrl.EnableBuffer(bufferNum);
 end
 

@@ -96,7 +96,7 @@ savedData = [];
 if (exist([imageData.DatasetName '_Settings.mat'],'file'))
     savedData = load([imageData.DatasetName '_Settings.mat']);
 end
-    
+
 colors = [[0.0, 1.0, 0.0];...
     [1.0, 0.0, 0.0];...
     [0.0, 0.0, 1.0];...
@@ -145,12 +145,12 @@ end
 set(handles.tb_numChan,'string',num2str(imageData.NumberOfChannels));
 set(handles.tb_title,'string',imageData.DatasetName);
 set(handles.tb_curFrame,'string',num2str(1));
-set(handles.tb_xDim,'string',num2str(imageData.XDimension));
-set(handles.tb_yDim,'string',num2str(imageData.YDimension));
-set(handles.tb_zDim,'string',num2str(imageData.ZDimension));
-set(handles.tb_phyX,'string',num2str(imageData.XPixelPhysicalSize));
-set(handles.tb_phyY,'string',num2str(imageData.YPixelPhysicalSize));
-set(handles.tb_phyZ,'string',num2str(imageData.ZPixelPhysicalSize));
+set(handles.tb_xDim,'string',num2str(imageData.Dimensions(1)));
+set(handles.tb_yDim,'string',num2str(imageData.Dimensions(2)));
+set(handles.tb_zDim,'string',num2str(imageData.Dimensions(3)));
+set(handles.tb_phyX,'string',num2str(imageData.PixelPhysicalSize(1)));
+set(handles.tb_phyY,'string',num2str(imageData.PixelPhysicalSize(2)));
+set(handles.tb_phyZ,'string',num2str(imageData.PixelPhysicalSize(3)));
 
 D3d.UI.Ctrl.UpdateCurrentState();
 end
@@ -163,7 +163,7 @@ delete(hObject);
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = Controls_OutputFcn(hObject, eventdata, handles) 
+function varargout = Controls_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 end
 

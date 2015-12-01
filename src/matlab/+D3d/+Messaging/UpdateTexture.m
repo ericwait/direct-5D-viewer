@@ -3,14 +3,12 @@ function UpdateTexture( im, isOrg)
 %   Detailed explanation goes here
 global imageData
 
-sz = [imageData.XPixelPhysicalSize,imageData.YPixelPhysicalSize,imageData.ZPixelPhysicalSize];
-
 im = imageConvertNorm(im,'uint8',true);
 
 if (~exist('isOrg','var') || isempty(isOrg) || true==isOrg)
-    lever_3d('loadTexture',im,sz);
+    lever_3d('loadTexture',im,imageData.PixelPhysicalSize);
 else
-    lever_3d('loadTexture',im,sz,'processed');
+    lever_3d('loadTexture',im,imageData.PixelPhysicalSize,'processed');
 end
 end
 
