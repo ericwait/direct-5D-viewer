@@ -97,12 +97,16 @@ if (exist([imageData.DatasetName '_Settings.mat'],'file'))
     savedData = load([imageData.DatasetName '_Settings.mat']);
 end
 
-colors = [[0.0, 1.0, 0.0];...
-    [1.0, 0.0, 0.0];...
-    [0.0, 0.0, 1.0];...
-    [1.0, 1.0, 0.0];...
-    [0.0, 1.0, 1.0];...
-    [1.0, 0.0, 1.0]];
+if (isfield(imageData,'ChannelColors') && ~isempty(imageData.ChannelColors))
+    colors = imageData.ChannelColors;
+else
+    colors = [[0.0, 1.0, 0.0];...
+        [1.0, 0.0, 0.0];...
+        [0.0, 0.0, 1.0];...
+        [1.0, 1.0, 0.0];...
+        [0.0, 1.0, 1.0];...
+        [1.0, 0.0, 1.0]];
+end
 
 localStruct = struct(...
     'color',[0,0,0],...
@@ -128,11 +132,15 @@ end
 D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
 
 if (imageData.NumberOfChannels>0)
-    for i=1:imageData.NumberOfChannels
-        if i==1
-            strng = {sprintf('Channel %d',i)};
-        else
-            strng = [strng; {sprintf('Channel %d',i)}];
+    if (isfield(imageData,'ChannelNames') && ~isempty(imageData.ChannelNames))
+        strng = imageData.ChannelNames;
+    else
+        for i=1:imageData.NumberOfChannels
+            if i==1
+                strng = {sprintf('Channel %d',i)};
+            else
+                strng = [strng; {sprintf('Channel %d',i)}];
+            end
         end
     end
 end
