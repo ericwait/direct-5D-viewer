@@ -1,4 +1,4 @@
-function [varargout] = LoadImage( im, imData, imagePath, bufferNum )
+function [im,imData] = LoadImage( im, imData, imagePath, bufferNum )
 %LOADIMAGE [varargout] = loadImage( im, imData, imagePath )
 %sends the image data to the directX viewer.
 %
@@ -53,21 +53,23 @@ end
 if (~isempty(im) && ~isempty(imData))
     % these structures could still be empty if the user cancelled the image
     % reading
+    
+    % if this is a 2D image, we will put time in the z dimension
+    if (imData.Dimensions(3)==1)
+        im = permute(im,[1,2,5,4,3]);
+        imData.Dimensions(3) = imData.NumberOfFrames;
+        imData.NumberOfFrames = 1;
+        imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]));
+    end
+    
     if (~strcmpi('unit8',class(im)))
         im8 = ImUtils.ConvertType(im,'uint8',true);
     else
         im8 = im;
     end
+    
     D3d.Viewer('loadTexture',im8,imData.PixelPhysicalSize,bufferType);
     D3d.UI.Ctrl.EnableBuffer(bufferNum);
-end
-
-%% return the image and data that might have been read in durring the load
-if (nargout>1)
-    varargout{2} = imData;
-end
-if (nargout>0)
-    varargout{1} = im;
 end
 end
 
