@@ -115,8 +115,6 @@ HRESULT loadPolygons(const mxArray* polygonsIn)
 		char buff[255];
 		mxGetString(mxLabel, buff, 255);
 
-		gRenderer->convertToScreenSpace(vertData,numVerts);
-
 		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
 		polygons->at(i)->setfaceData(faceData);
 		polygons->at(i)->setvertData(vertData);
