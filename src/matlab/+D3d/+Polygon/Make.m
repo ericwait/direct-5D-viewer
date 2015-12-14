@@ -45,7 +45,7 @@ if (isempty(v_xy))
     return
 end
 
-verts_xy = v_xy + repmat(shiftCoords_xy,size(v_xy,1),1);
+verts_xy = v_xy + repmat(shiftCoords_xy,size(v_xy,1),1) +0.5;
 
 if (any(faces(:)==0))
     error('there is a zero index in the faces structure!');
