@@ -1,4 +1,4 @@
-function [ polygon ] = Make( pixelList_xy, polyIdx, label, frame, color, reductions )
+function [ polygon ] = Make( pixelList_xy, polyIdx, label, frame, color, reductions, quiet )
 if (~exist('color','var') || isempty(color))
     color = [1,1,1];
 end
@@ -15,6 +15,11 @@ end
 if (length(reductions)==1)
     reductions = repmat(reductions,1,size(pixelList_xy,2));
 end
+if (~exist('quiet','var') || isempty(quiet))
+    quiet = false;
+end
+
+polygon = [];
 
 % padd the subimage to get some room to blur
 PADDING = 3*reductions;
@@ -34,6 +39,16 @@ im = zeros(subImSize_rc);
 im(shiftPixelInd) = 1;
 
 rp = regionprops(im>0,'Centroid','PixelList');
+if (isempty(rp))
+    return
+elseif (length(rp)>1)
+    if (~quiet)
+        warning('Trying to make a hull from more than one connected component. Frame: %d, PolyIdx: %d',frame,polyIdx);
+    end
+    [~,I] = max(arrayfun(@(x)(size(x.PixelList,1)),rp));
+    rp = rp(I);
+end
+
 centerOfMass_xy = rp.Centroid + shiftCoords_xy;
 
 [x,y,z,D] = reducevolume(im,reductions);
