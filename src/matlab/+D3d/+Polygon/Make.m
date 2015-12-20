@@ -53,7 +53,8 @@ centerOfMass_xy = rp.Centroid + shiftCoords_xy;
 
 [x,y,z,D] = reducevolume(im,reductions);
 D = smooth3(D);
-[faces, v_xy] = isosurface(x,y,z,D,1/3);
+
+[faces, v_xy] = isosurface(x,y,z,D,graythresh(D));
 
 if (isempty(v_xy))
     polygon = [];
