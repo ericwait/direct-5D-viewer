@@ -22,7 +22,7 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 	lookPosition = defaultLookPosition = lookPositionIn;
 	upDirection = defaultUpDirection = upDirectionIn;
 
-	zoomFactor = 50;
+	zoomFactor = 25;
 
 	updateViewTransform();
 	updateProjectionTransform();
