@@ -15,6 +15,7 @@
 
 #include "GraphicObject.h"
 #include "Globals.h"
+#include "MexErrorMsg.h"
 #undef min
 #undef max
 
@@ -57,7 +58,7 @@ void GraphicObject::removeRendererResources()
 
 void GraphicObject::setWireframe(bool wireframe)
 {
-	gMexMessageQueueOut.addErrorMessage("You cannot set wire frame on a GraphicObject!");
+	sendErrMessage("You cannot set wire frame on a GraphicObject!");
 }
 
 void GraphicObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
@@ -367,7 +368,7 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 
 void VolumeTextureObject::setWireframe(bool wireframe)
 {
-	gMexMessageQueueOut.addErrorMessage("You cannot set wire frame on a VolumeTextureObject!");
+	sendErrMessage("You cannot set wire frame on a VolumeTextureObject!");
 }
 
 void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char** shaderMemIn/*=NULL*/)

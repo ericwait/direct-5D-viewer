@@ -18,6 +18,7 @@
 #include "Initialization.h"
 #include <time.h>
 #include "DirectXCommands.h"
+#include "MexErrorMsg.h"
 
 bool gRendererOn = false;
 bool gPlay = false;
@@ -429,15 +430,15 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	}
 	catch(const std::exception& e)
 	{
-		gMexMessageQueueOut.addErrorMessage(e.what());
+		sendErrMessage(e.what());
 	}
 	catch(const std::string& e)
 	{
-		gMexMessageQueueOut.addErrorMessage(e);
+		sendErrMessage(e);
 	}
 	catch(...)
 	{
-		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");
+		sendErrMessage("Caught an unknown error!");
 	}
 
 	delete rootDir;
@@ -479,15 +480,15 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		}
 		catch(const std::exception& e)
 		{
-			gMexMessageQueueOut.addErrorMessage(e.what());
+			sendErrMessage(e.what());
 		}
 		catch(const std::string& e)
 		{
-			gMexMessageQueueOut.addErrorMessage(e);
+			sendErrMessage(e);
 		}
 		catch(...)
 		{
-			gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");
+			sendErrMessage("Caught an unknown error!");
 		}
 
 		if(messageLoopHandle != NULL)
@@ -527,7 +528,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	}
 	else
 	{
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 	}
 
 	try
@@ -545,15 +546,15 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	}
 	catch(const std::exception& e)
 	{
-		gMexMessageQueueOut.addErrorMessage(e.what());
+		sendErrMessage(e.what());
 	}
 	catch(const std::string& e)
 	{
-		gMexMessageQueueOut.addErrorMessage(e);
+		sendErrMessage(e);
 	}
 	catch(...)
 	{
-		gMexMessageQueueOut.addErrorMessage("Caught an unknown error!");
+		sendErrMessage("Caught an unknown error!");
 	}
 
 	return ((int)msg.wParam);

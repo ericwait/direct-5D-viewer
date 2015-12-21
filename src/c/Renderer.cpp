@@ -20,6 +20,7 @@
 #include "MeshPrimitive.h"
 #include "Camera.h"
 #include "RendererPackage.h"
+#include "MexErrorMsg.h"
 
 Renderer::Renderer()
 {
@@ -752,7 +753,7 @@ void Renderer::gdiRenderLoop()
 	HRESULT hr=IDXGIBackBuffer->GetDC(FALSE,&hdc );
 	if (FAILED(hr))
 	{
-		gMexMessageQueueOut.addErrorMessage("Unable to get window's GDI device context!");
+		sendErrMessage("Unable to get window's GDI device context!");
 		return;
 	}
 
@@ -850,7 +851,7 @@ void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
 void Renderer::setVertexShader(int vertexShaderListIdx)
 {
 	if (vertexShaderListIdx>vertexShaderList.size()-1)
-		gMexMessageQueueOut.addErrorMessage("There is no shader in the list of this type!");
+		sendErrMessage("There is no shader in the list of this type!");
 
 	immediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	immediateContext->VSSetShader(vertexShaderList[vertexShaderListIdx],NULL,0);
@@ -869,7 +870,7 @@ void Renderer::setRasterizerState(bool wireframe)
 void Renderer::setPixelShader(int pixelShaderListIdx)
 {
 	if (pixelShaderListIdx>pixelShaderList.size()-1)
-		gMexMessageQueueOut.addErrorMessage("No pixel shader found in list with this index!");
+		sendErrMessage("No pixel shader found in list with this index!");
 
 	immediateContext->PSSetShader(pixelShaderList[pixelShaderListIdx],NULL,0);
 }
@@ -919,7 +920,7 @@ ID3D11SamplerState* Renderer::getSamplerState()
 
 		HRESULT hr = d3dDevice->CreateSamplerState(&samDesc,&linearTextureSampler);
 		if (FAILED(hr))
-			gMexMessageQueueOut.addErrorMessage(hr);
+			sendHrErrMessage(hr);
 	}
 
 	return linearTextureSampler;
@@ -951,13 +952,13 @@ ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, 
 
 	hr = d3dDevice->CreateTexture3D( &desc, &initData, &pTex3D );
 	if( FAILED( hr ))
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 
 	ID3D11ShaderResourceView* localSRV;
 	hr = d3dDevice->CreateShaderResourceView( pTex3D, NULL, &localSRV);
 	SAFE_RELEASE( pTex3D );
 	if( FAILED( hr ))
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 
 	return localSRV;
 }

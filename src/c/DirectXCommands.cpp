@@ -8,6 +8,7 @@
 #include "QueuePolygon.h"
 #include "TextureLightingOBJ.h"
 #include <vector>
+#include "MexErrorMsg.h"
 
 using std::vector;
 
@@ -41,7 +42,7 @@ void XloadTextureCommand(Message m){
 
 	HRESULT hr = loadVolumeTexture(image, dims, numChannels, numFrames, scale, textureType);
 	if (FAILED(hr))
-		mexErrMsgTxt("Could not load texture!");
+		sendHrErrMessage(hr);
 
 	setCurrentTexture(textureType);
 
@@ -117,7 +118,7 @@ void XaddPolygonCommand(Message m){
 	GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, polygon->getIndex());
 	if (oldNode)
 	{
-		gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+		sendErrMessage("You can't add a hull that already exists!");
 		return;
 	}
 
@@ -156,7 +157,7 @@ void XaddPolygonsCommand(Message m){
 		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, (*polygon)->getIndex());
 		if (oldNode)
 		{
-			gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+			sendErrMessage("You can't add a hull that already exists!");
 			return;
 		}
 

@@ -146,6 +146,9 @@
     <ClInclude Include="VecFuncs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MexErrorMsg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="d3dViewer.def">

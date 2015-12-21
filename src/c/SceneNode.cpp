@@ -15,6 +15,7 @@
 
 #include "SceneNode.h"
 #include "Globals.h"
+#include "MexErrorMsg.h"
 
 #undef max
 
@@ -257,7 +258,7 @@ const std::vector<GraphicObjectNode*>& RootSceneNode::getRenderableList(Renderer
 {
 	frame = frame % rootChildrenNodes[section].size();
 	if (renderList[section].size()<=frame)
-		gMexMessageQueueOut.addErrorMessage("Render list is malformed!");
+		sendErrMessage("Render list is malformed!");
 
 	return renderList[section][frame];
 }
@@ -328,7 +329,7 @@ DirectX::XMMATRIX RootSceneNode::getWorldRotation()
 
 bool RootSceneNode::addChildNode(SceneNode* child)
 {
-	gMexMessageQueueOut.addErrorMessage("You cannot attach to a root node using this method!");
+	sendErrMessage("You cannot attach to a root node using this method!");
 	return false;
 }
 

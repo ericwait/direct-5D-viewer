@@ -15,6 +15,7 @@
 
 #include "MeshPrimitive.h"
 #include "Globals.h"
+#include "MexErrorMsg.h"
 
 MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 	std::vector<Vec<float>>& normals,std::vector<Vec<float>> textureUV, Renderer::VertexShaders shader)
@@ -36,11 +37,11 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	HRESULT hr = renderer->createVertexBuffer(vert,&vertexBuffer);
 	if (FAILED(hr))
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 
 	hr = renderer->createIndexBuffer(faces,&indexBuffer);
 	if (FAILED(hr))
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 
 	numFaces = faces.size();
 
@@ -70,11 +71,11 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>
 
 	HRESULT hr = renderer->createVertexBuffer(vert,&vertexBuffer);
 	if (FAILED(hr))
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 
 	hr = renderer->createIndexBuffer(faces,&indexBuffer);
 	if (FAILED(hr))
-		gMexMessageQueueOut.addErrorMessage(hr);
+		sendHrErrMessage(hr);
 
 	numFaces = faces.size();
 

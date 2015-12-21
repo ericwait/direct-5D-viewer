@@ -20,6 +20,7 @@
 #include "Globals.h"
 #include "MexFunctions.h"
 #include <set>
+#include "MexErrorMsg.h"
 
 HANDLE gTermEvent = NULL;
 volatile bool gRendererInit = false;
@@ -42,7 +43,7 @@ void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* n
 
 	if (gGraphicObjectNodes[objType].count(uniqueID) > 0)
 	{
-		gMexMessageQueueOut.addErrorMessage("You can't add a hull that already exists!");
+		sendErrMessage("You can't add a hull that already exists!");
 		return;
 	}
 

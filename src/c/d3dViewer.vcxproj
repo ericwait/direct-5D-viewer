@@ -187,6 +187,7 @@ copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Co
     <ClInclude Include="MeshPrimitive.h" />
     <ClInclude Include="MessageProcessor.h" />
     <ClInclude Include="MessageQueue.h" />
+    <ClInclude Include="MexErrorMsg.h" />
     <ClInclude Include="MexFunctions.h" />
     <ClInclude Include="QueuePolygon.h" />
     <ClInclude Include="Renderer.h" />

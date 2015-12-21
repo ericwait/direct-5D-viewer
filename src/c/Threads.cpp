@@ -2,6 +2,7 @@
 #include "mex.h"
 #include "MessageProcessor.h"
 #include "MexFunctions.h"
+#include "MexErrorMsg.h"
 
 void startThread(std::string rootDir)
 {
@@ -27,7 +28,7 @@ void startThread(std::string rootDir)
 			Sleep(1000);
 
 		if (!checkRenderThread())
-			gMexMessageQueueOut.addErrorMessage("Failed to initialize the renderer thread!");
+			sendErrMessage("Failed to initialize the renderer thread!");
 	}
 }
 
