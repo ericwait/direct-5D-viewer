@@ -62,6 +62,7 @@ if (isempty(v_xy))
 end
 
 verts_xy = v_xy + repmat(shiftCoords_xy,size(v_xy,1),1) +0.5;
+com = rp.Centroid + shiftCoords_xy + 0.5;
 
 if (any(faces(:)==0))
     error('there is a zero index in the faces structure!');
@@ -92,5 +93,6 @@ polygon.color = color;
 polygon.faces = faces;
 polygon.verts = verts_xy;
 polygon.norms = norms;
+polygon.CenterOfMass = com;
 end
 
