@@ -43,7 +43,7 @@ if (isempty(rp))
     return
 elseif (length(rp)>1)
     if (~quiet)
-        warning('Trying to make a hull from more than one connected component. Frame: %d, PolyIdx: %d',frame,polyIdx);
+        warning('Trying to make a hull from more than one connected component. Frame: %d, PolyIdx: %d, Num: %d',frame,polyIdx,length(rp));
     end
     [~,I] = max(arrayfun(@(x)(size(x.PixelList,1)),rp));
     rp = rp(I);
