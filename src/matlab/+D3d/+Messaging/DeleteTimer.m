@@ -9,7 +9,7 @@ else
     if (~isempty(t) && isvalid(t))
         delete(t);
     else
-        warning('Cannot find d3dtimer!');
+        %warning('Cannot find d3dtimer!');
     end
 end
 
