@@ -36,17 +36,24 @@ if (isempty(imData))
     % there is no image data passed in to load
     if (isempty(im))
         % there is also no image to load, so we should read one in
-        [im,imData] = MicroscopeData.Reader(imagePath,[],[],[],[],true,[],true);
+        imData = MicroscopeData.ReadMetadata(imagePath,true);
+        imagePath = imData.imageDir;
     else
-        % there is an image to load just no metadat to go with it
+        % there is an image to load just no metadata to go with it
         % assume that the voxels are isomorphic
+        imData.DatasetName = sprintf('%d-D image',ndims(im));
+        imData.Dimensions = Utils.SwapXY_RC(size(im(:,:,:)));
+        imData.NumberOfChannels = size(im,4);
+        imData.NumberOfFrames = size(im,5);
         imData.PixelPhysicalSize = [1.0,1.0,1.0];
     end
+end
+
+%% open the missing image if it is small enough
+if (all(imData.Dimensions<2048) && isempty(im))
+    [im,imData] = MicroscopeData.Reader(imagePath,[],[],[],[],true,[],true);
 elseif (isempty(im))
-    % there is image data that will allow us to load up the missing image
-    [im,imData] = MicroscopeData.Reader(imData,[],[],[],[],true,[],true);
-else
-    % we should have everything we need to load the image in the viewer
+    D3d.UI.InitializeMipFigure(imData.imageDir);
 end
 
 %% send the image to the viewer
