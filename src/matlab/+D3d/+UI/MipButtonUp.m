@@ -1,5 +1,5 @@
 function MipButtonUp( hObject,callbackdata )
-global MipAxesHandle MipPrevRectangleHandle MipDragRectangleHandle MipAnnotationLeftHandle MipAnnotationRightHandle MipDragLineHangle
+global MipAxesHandle MipPrevRectangleHandle MipDragRectangleHandle MipAnnotationLeftHandle MipAnnotationRightHandle MipDragLineHangle MipFullIm
 
 ud = get(MipAxesHandle,'UserData');
 ud.IsDown = false;
@@ -28,10 +28,10 @@ if (any(abs(dists_xy)>1023))
     
     rad = 1023;
 else
-    rad = max(abs(dists_xy));
+    rad = floor(max(abs(dists_xy)));
 end
 
-startPnt = oldPnt_xy - rad;
+startPnt = ceil(oldPnt_xy - rad);
 
 set(MipDragRectangleHandle,'Visible','on','Position',[startPnt(1:2),2*rad,2*rad]);
 
@@ -41,7 +41,28 @@ if (strcmp(send,'Yes'))
     pos = get(MipDragRectangleHandle,'Position');
     set(MipPrevRectangleHandle,'Position',pos,'Visible','on');
     
-    fprintf('(%.0f, %.0f, %.0f, %.0f)\n',startPnt(1),startPnt(2),startPnt(1)+rad,startPnt(2)+rad);   
+    %fprintf('(%.0f, %.0f, %.0f, %.0f)\n',startPnt(1),startPnt(2),startPnt(1)+rad,startPnt(2)+rad);   
+    if (isempty(MipFullIm))
+        [im,imD] = MicroscopeData.ReaderParZ(ud.ImData.imageDir,[],[],[],[],[],true,[],startPnt(1:2),[rad,rad]);
+    else
+        im = MipFullIm(startPnt(1):startPnt(1)+rad,startPnt(2):startPnt(2)+rad,:,:,:);
+        imD = ud.ImData;
+        imD.Dimensions = [size(im,2),size(im,1),size(im,3)];
+    end
+    
+    goodZ = squeeze(max(max(max(im,[],1),[],2),[],4));
+    zStart = find(goodZ,1,'first');
+    if (isempty(zStart))
+        zStart = 1;
+    end
+    zEnd = find(goodZ,1,'last');
+    if (isempty(zEnd))
+        zEnd = size(im,3);
+    end
+    im = im(:,:,zStart:zEnd,:,:);
+    imD.Dimensions(3) = size(im,3);
+    D3d.Close();
+    D3d.Open(im,imD);
 end
 
 set(MipAnnotationLeftHandle,'Visible','off');
