@@ -166,6 +166,11 @@ end
 
 % --- Executes when user attempts to close Controls.
 function Controls_CloseRequestFcn(hObject, eventdata, handles)
+global EXT_MESAGE_FUNC
+if (~isempty(EXT_MESAGE_FUNC))
+    msg.command = 'close';
+    EXT_MESAGE_FUNC(msg);
+end
 D3d.Close();
 delete(hObject);
 end
