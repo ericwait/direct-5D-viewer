@@ -51,7 +51,7 @@ end
 
 %% open the missing image if it is small enough
 if (all(imData.Dimensions<2048) && isempty(im))
-    [im,imData] = MicroscopeData.Reader(imagePath,[],[],[],[],true,[],true);
+    [im,imData] = MicroscopeData.Reader(imData,[],[],[],'uint8',true,false,true);
 elseif (isempty(im))
     D3d.UI.InitializeMipFigure(imData.imageDir);
 end
