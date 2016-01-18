@@ -44,7 +44,7 @@ Renderer::Renderer()
 
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 	currentFrame = 0;
-	clipChunkPercent = 0.0f;
+	clipChunkPercent = 1.0f;
 	numPlanes = 0;
 	labelsOn = true;
 	captureFilePath = "./";
