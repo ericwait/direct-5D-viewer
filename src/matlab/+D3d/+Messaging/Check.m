@@ -23,6 +23,21 @@ if (strcmp(msgs(1).command,'null'))
 end
 
 for i=1:length(msgs)
+    %% inform the master program of the events 
+    % Send these first otherwise if D3d closes, none of the other messages
+    % gets handled.
+    if (~isempty(EXT_MESAGE_FUNC))
+        %% pass the message on
+        EXT_MESAGE_FUNC(msgs(i));
+    else
+        switch msgs(i).command
+            case 'rightClick'
+                if (msgs(i).val ~= -1)
+                    fprintf('Right click value: %d\n',msgs(i).val);
+                end
+        end
+    end
+    
     %% run these commands reguardless of what any other function does
     switch msgs(i).command
         case 'error'
@@ -41,18 +56,6 @@ for i=1:length(msgs)
             if (~isempty(D3dUICtrlHandles))
                 set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
             end
-    end
-    
-    if (~isempty(EXT_MESAGE_FUNC))
-        %% pass the message on
-        EXT_MESAGE_FUNC(msgs(i));
-    else
-        switch msgs(i).command
-            case 'rightClick'
-                if (msgs(i).val ~= -1)
-                    fprintf('Right click value: %d\n',msgs(i).val);
-                end
-        end
     end
 end
 end
