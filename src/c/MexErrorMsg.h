@@ -3,6 +3,7 @@
 #include <string>
 #include "Globals.h"
 #include "MessageQueue.h"
+#include <comdef.h>
 
 inline void errMessage(std::string message, char *file, int line)
 {
