@@ -426,7 +426,6 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	try
 	{
 		hr = windowInit(gDllInstance,true,*rootDir);
-		gRenderer->renderAll();
 	}
 	catch(const std::exception& e)
 	{
