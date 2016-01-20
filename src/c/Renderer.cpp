@@ -1013,10 +1013,10 @@ int Renderer::getPolygon(Vec<float> pnt, Vec<float> direction)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 	float depth;
-	int label = rootScene->getPolygon(pnt,direction,currentFrame,depth);
+	int index = rootScene->getPolygon(pnt,direction,currentFrame,depth);
 	//ReleaseMutex(mutexDevice);
 
-	return label;
+	return index;
 }
 
 void Renderer::resizeViewPort()

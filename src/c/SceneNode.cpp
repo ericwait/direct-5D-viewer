@@ -83,11 +83,11 @@ int SceneNode::getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut)
 	for (int i=0; i<childrenNodes.size(); ++i)
 	{
 		float curDepth;
-		int label = childrenNodes[i]->getPolygon(pnt,direction,curDepth);
+		int index = childrenNodes[i]->getPolygon(pnt,direction,curDepth);
 
 		if (curDepth < depthOut)
 		{
-			labelOut = label;
+			labelOut = index;
 			depthOut = curDepth;
 		}
 	}
@@ -305,21 +305,21 @@ int RootSceneNode::getPolygon(Vec<float> pnt, Vec<float> direction, unsigned int
 	std::vector<SceneNode*> children = rootChildrenNodes[Renderer::Section::Main][currentFrame]->getChildren();
 
 	depthOut = std::numeric_limits<float>::max();
-	int labelOut = -1;
+	int indexOut = -1;
 
 	for (int i=0; i<children.size(); ++i)
 	{
 		float curDepth;
-		int label = children[i]->getPolygon(pnt,direction,curDepth);
+		int index = children[i]->getPolygon(pnt,direction,curDepth);
 
 		if (curDepth < depthOut)
 		{
-			labelOut = label;
+			indexOut = index;
 			depthOut = curDepth;
 		}
 	}
 
-	return labelOut;
+	return indexOut;
 }
 
 DirectX::XMMATRIX RootSceneNode::getWorldRotation()

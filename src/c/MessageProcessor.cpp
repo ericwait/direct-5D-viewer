@@ -49,7 +49,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	static bool minimized = false;
 	static bool hullsOn = true;
 
-	int label;
+	int index;
 	Vec<float> pnt;
 	Vec<float> direction;
 
@@ -118,14 +118,14 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		break;
 	case WM_RBUTTONDOWN:
 		gCameraDefaultMesh->getRay(iMouseX,iMouseY,pnt,direction);
-		label = gRenderer->getPolygon(pnt,direction);
+		index = gRenderer->getPolygon(pnt,direction);
 		if(ctrlDown)
 		{
-			gMexMessageQueueOut.addMessage("cellSelected",label);
+			gMexMessageQueueOut.addMessage("cellSelected",index);
 		}
 		else
 		{
-			gMexMessageQueueOut.addMessage("rightClick",label);
+			gMexMessageQueueOut.addMessage("rightClick",index);
 		}
 		ctrlDown = false;
 		gRenderer->renderAll();
@@ -241,7 +241,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if('X'==wParam)
 		{
-			gMexMessageQueueOut.addMessage("centerSelectedCell",1.0);
+			gMexMessageQueueOut.addMessage("centerSelectedPolygon",1.0);
 			gRenderer->renderAll();
 		}
 		else if('1' == wParam || VK_NUMPAD1 == wParam)
