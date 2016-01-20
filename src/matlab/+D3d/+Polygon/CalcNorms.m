@@ -38,5 +38,5 @@ function vertNormals = CalcNorms(vertList, faceList)
         end
     end
     vertLengths = sqrt(sum(vertNormals.^2,2));
-    vertNormals = vertNormals ./ repmat(vertLengths,1,3);
+    vertNormals = -(vertNormals ./ repmat(vertLengths,1,3));
 end
