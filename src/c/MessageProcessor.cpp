@@ -722,6 +722,7 @@ HRESULT checkMessage()
 	else if(m.command=="releaseControl")
 	{
 		gRendererOn = true;
+		gRenderer->renderAll();
 	}
 	else
 	{
