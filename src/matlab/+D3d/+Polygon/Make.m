@@ -77,11 +77,11 @@ for j=1:size(faces,1)
     e2 = v3-v1;
     uNrm = cross(e1,e2);
     
-    dst = centerOfMass_xy - v1;
-    nrmDir = dot(uNrm,dst);
-    if (nrmDir>0)
-        faces(j,[1,2]) = faces(j,[2,1]);
-    end
+%     dst = centerOfMass_xy - v1;
+%     nrmDir = dot(uNrm,dst);
+%     if (nrmDir>0)
+%         faces(j,[1,2]) = faces(j,[2,1]);
+%     end
 end
 
 norms = D3d.Polygon.CalcNorms(verts_xy,faces);
