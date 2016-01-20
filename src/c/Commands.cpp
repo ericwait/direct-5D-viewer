@@ -450,16 +450,12 @@ void setCapturePathCommand(int nrhs, const mxArray** prhs)
 
 void takeControlCommand()
 {
-	//gRenderer->getMutex();
-	gRendererOn = false;
-	//gRenderer->releaseMutex();
+	dataQueue->writeMessage("takeControl",NULL);
 }
 
 void releaseControlCommand()
 {
-	//gRenderer->getMutex();
-	gRendererOn = true;
-	//gRenderer->releaseMutex();
+	dataQueue->writeMessage("releaseControl", NULL);
 }
 
 void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs)

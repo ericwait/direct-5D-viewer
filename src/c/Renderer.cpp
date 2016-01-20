@@ -670,14 +670,17 @@ void Renderer::clearPixelShaderList()
 
 void Renderer::renderAll()
 {
-	rootScene->updateRenderableList();
-	//WaitForSingleObject(mutexDevice,INFINITE);
-	startRender();
-	preRenderLoop();
-	mainRenderLoop();
-	postRenderLoop();
-	gdiRenderLoop();
-	endRender();
+	if (gRendererOn)
+	{
+		rootScene->updateRenderableList();
+		//WaitForSingleObject(mutexDevice,INFINITE);
+		startRender();
+		preRenderLoop();
+		mainRenderLoop();
+		postRenderLoop();
+		gdiRenderLoop();
+		endRender();
+	}
 
 	//ReleaseMutex(mutexDevice);
 }

@@ -716,6 +716,14 @@ HRESULT checkMessage()
 
 		delete[] rotations;
 	}
+	else if(m.command=="takeControl")
+	{
+		gRendererOn = false;
+	}
+	else if(m.command=="releaseControl")
+	{
+		gRendererOn = true;
+	}
 	else
 	{
 		// Print an error message
