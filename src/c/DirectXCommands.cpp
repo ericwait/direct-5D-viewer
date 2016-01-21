@@ -21,12 +21,8 @@ void XloadTextureCommand(Message m){
 
 	Vec<float> physDims = returnedImg->getPhysicalDims();
 
-	Vec<float> scale(dims);
+	Vec<float> scale(Vec<float>(dims) * physDims);
 	scale = scale / scale.maxValue();
-
-	scale.x *= physDims.x/physDims.minValue();
-	scale.y *= physDims.y/physDims.minValue();
-	scale.z *= physDims.z/physDims.minValue();
 
 	GraphicObjectTypes textureType = returnedImg->getTextureType();
 
