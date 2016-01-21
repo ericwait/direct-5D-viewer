@@ -1,5 +1,5 @@
 function [im,imData] = LoadImage( im, imData, imagePath, bufferNum )
-%LOADIMAGE [varargout] = loadImage( im, imData, imagePath )
+%LOADIMAGE [varargout] = D3d.LoadImage( im, imData, imagePath, bufferNum )
 %sends the image data to the directX viewer.
 %
 %IM is an 'uint8' image 3D-5D image matrix, optional.
