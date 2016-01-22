@@ -69,5 +69,6 @@ end
 
 set(MipDragRectangleHandle,'Visible','off');
 set(MipDragLineHandle,'Visible','off');
+set(MipTextHandle,'Visible','off');
 end
 

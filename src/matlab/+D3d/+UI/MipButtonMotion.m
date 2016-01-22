@@ -27,11 +27,16 @@ if (ud.IsDown)
         rad = 1023;
     else
         rad = max(abs(dists_xy));
-    end
+    end   
     
-    startPnt = oldPnt_xy - rad;
+    startPnt_xy = oldPnt_xy - rad;
     
-    set(MipDragRectangleHandle,'Visible','on','Position',[startPnt(1:2),2*rad,2*rad]);
+    set(MipDragRectangleHandle,'Visible','on',...
+        'Position',[startPnt_xy(1:2),2*rad,2*rad]);
+    
+    set(MipTextHandle,'Visible','on',...
+        'Position',oldPnt_xy(1:2),'String',{'Edge Length:',num2str(floor(rad)*2 +2)});
+        
     set(MipDragLineHandle,'Visible','on','XData',[oldPnt_xy(1),newPnt_xy(1)],'YData',[oldPnt_xy(2),newPnt_xy(2)]);
 end
 end
