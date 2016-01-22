@@ -1,22 +1,33 @@
-function InitializeMipFigure( metadataPath, prompt)
+function InitializeMipFigure(im, imD, metadataPath, prompt)
 %InitializeMipFigure( metadataPath, prompt)
 
 global MipFigureHandle MipAxesHandle MipPrevRectangleHandle MipDragRectangleHandle MipTextHandle MipDragLineHandle MipFullIm
 if (~exist('prompt','var'))
     prompt = [];
 end
-imD = MicroscopeData.ReadMetadata(metadataPath,prompt);
 
-[clss, imInfo] = MicroscopeData.GetImageClass(imD);
+if (~exist('imD','var') || isempty(imD))
+    if (~exist('metadataPath','var') || isempty(metadataPat))
+        error('No image or metadata to read!');
+    end
+imD = MicroscopeData.ReadMetadata(metadataPath,prompt);
+end
+
+[~, imInfo] = MicroscopeData.GetImageClass(imD);
 mem = memory;
 memNeeded = imInfo(1).BitDepth * prod(imD.Dimensions) * imD.NumberOfChannels * imD.NumberOfFrames;
 
+if (~exist('im','var') || isempty(im))
 if (mem.MemAvailableAllArrays>memNeeded)
     MipFullIm = MicroscopeData.Reader(imD,[],[],[],[],[],true);
     imMIP = max(MipFullIm,[],3);
 else
     MipFullIm = [];
     imMIP = MicroscopeData.ReaderMIP(imD,[],[],[],[],[],true);
+end
+else
+    MipFullIm = im;
+    imMIP = max(MipFullIm,[],3);
 end
 
 colors = MicroscopeData.Colors.GetChannelColors(imD);

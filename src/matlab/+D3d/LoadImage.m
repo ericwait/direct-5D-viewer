@@ -46,14 +46,17 @@ if (isempty(imData))
         imData.NumberOfChannels = size(im,4);
         imData.NumberOfFrames = size(im,5);
         imData.PixelPhysicalSize = [1.0,1.0,1.0];
+        imData.imageDir = '.';
     end
 end
 
 %% open the missing image if it is small enough
 if (all(imData.Dimensions<2048) && isempty(im))
     [im,imData] = MicroscopeData.Reader(imData,[],[],[],'uint8',true,false,true);
-elseif (isempty(im))
-    D3d.UI.InitializeMipFigure(imData.imageDir);
+elseif (isempty(im) || any(imData.Dimensions>2048))
+    D3d.UI.InitializeMipFigure(im,imData,imData.imageDir,true);
+    imData = [];
+    im = [];
 end
 
 %% send the image to the viewer

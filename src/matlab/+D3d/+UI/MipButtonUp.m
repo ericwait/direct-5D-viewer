@@ -31,9 +31,9 @@ else
     rad = floor(max(abs(dists_xy)));
 end
 
-startPnt = ceil(oldPnt_xy - rad);
+startPnt_xy = ceil(oldPnt_xy - rad);
 
-set(MipDragRectangleHandle,'Visible','on','Position',[startPnt(1:2),2*rad,2*rad]);
+set(MipDragRectangleHandle,'Visible','on','Position',[startPnt_xy(1:2),2*rad,2*rad]);
 
 send = questdlg('Send this Region of Intrest to the 3-D viewer?','Select ROI?','Yes','No','Yes');
 
@@ -43,11 +43,11 @@ if (strcmp(send,'Yes'))
     
     %fprintf('(%.0f, %.0f, %.0f, %.0f)\n',startPnt(1),startPnt(2),startPnt(1)+rad,startPnt(2)+rad);   
     if (isempty(MipFullIm))
-        [im,imD] = MicroscopeData.ReaderParZ(ud.ImData.imageDir,[],[],[],[],[],true,[],startPnt(1:2),[rad,rad]);
+        [MipROIim,MipROIimData] = MicroscopeData.ReaderParZ(ud.ImData.imageDir,[],[],[],[],[],true,[],startPnt_xy(1:2),[rad,rad]);
     else
-        im = MipFullIm(startPnt(1):startPnt(1)+rad,startPnt(2):startPnt(2)+rad,:,:,:);
-        imD = ud.ImData;
-        imD.Dimensions = [size(im,2),size(im,1),size(im,3)];
+        MipROIim = MipFullIm(startPnt_xy(2):startPnt_xy(2)+rad,startPnt_xy(1):startPnt_xy(1)+rad,:,:,:);
+        MipROIimData = ud.ImData;
+        MipROIimData.Dimensions = [size(MipROIim,2),size(MipROIim,1),size(MipROIim,3)];
     end
     
     goodZ = squeeze(max(max(max(im,[],1),[],2),[],4));
@@ -59,10 +59,10 @@ if (strcmp(send,'Yes'))
     if (isempty(zEnd))
         zEnd = size(im,3);
     end
-    im = im(:,:,zStart:zEnd,:,:);
-    imD.Dimensions(3) = size(im,3);
+    MipROIim = MipROIim(:,:,zStart:zEnd,:,:);
+    MipROIimData.Dimensions(3) = size(MipROIim,3);
     D3d.Close();
-    D3d.Open(im,imD);
+    D3d.Open(MipROIim,MipROIimData);
 end
 
 set(MipDragRectangleHandle,'Visible','off');
