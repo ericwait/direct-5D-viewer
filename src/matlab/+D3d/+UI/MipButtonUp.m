@@ -50,14 +50,16 @@ if (strcmp(send,'Yes'))
         MipROIimData.Dimensions = [size(MipROIim,2),size(MipROIim,1),size(MipROIim,3)];
     end
     
-    goodZ = squeeze(max(max(max(im,[],1),[],2),[],4));
-    zStart = find(goodZ,1,'first');
+    [~,~,maxVal] = Utils.GetClassBits(MipROIim);
+    
+    goodZ = squeeze(max(max(max(MipROIim,[],1),[],2),[],4));
+    zStart = find(goodZ>maxVal*0.04,1,'first');
     if (isempty(zStart))
         zStart = 1;
     end
-    zEnd = find(goodZ,1,'last');
+    zEnd = find(goodZ>maxVal*0.04,1,'last');
     if (isempty(zEnd))
-        zEnd = size(im,3);
+        zEnd = size(MipROIim,3);
     end
     MipROIim = MipROIim(:,:,zStart:zEnd,:,:);
     MipROIimData.Dimensions(3) = size(MipROIim,3);
