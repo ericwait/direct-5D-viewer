@@ -1,6 +1,5 @@
 function MipButtonMotion( hObject,callbackdata )
-global MipAxesHandle MipDragRectangleHandle MipAnnotationLeftHandle MipAnnotationRightHandle MipDragLineHangle
-
+global MipAxesHandle MipDragRectangleHandle MipDragLineHandle MipTextHandle
 
 ud = get(MipAxesHandle,'UserData');
 if (ud.IsDown)

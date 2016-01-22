@@ -1,5 +1,5 @@
 function MipButtonUp( hObject,callbackdata )
-global MipAxesHandle MipPrevRectangleHandle MipDragRectangleHandle MipAnnotationLeftHandle MipAnnotationRightHandle MipDragLineHangle MipFullIm
+global MipAxesHandle MipPrevRectangleHandle MipDragRectangleHandle MipDragLineHandle MipTextHandle MipFullIm MipROIim MipROIimData
 
 ud = get(MipAxesHandle,'UserData');
 ud.IsDown = false;
@@ -65,8 +65,6 @@ if (strcmp(send,'Yes'))
     D3d.Open(im,imD);
 end
 
-set(MipAnnotationLeftHandle,'Visible','off');
-set(MipAnnotationRightHandle,'Visible','off');
 set(MipDragRectangleHandle,'Visible','off');
 set(MipDragLineHangle,'Visible','off');
 end
