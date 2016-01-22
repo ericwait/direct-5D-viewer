@@ -32,7 +32,7 @@ if (ud.IsDown)
     startPnt = oldPnt_xy - rad;
     
     set(MipDragRectangleHandle,'Visible','on','Position',[startPnt(1:2),2*rad,2*rad]);
-    set(MipDragLineHangle,'Visible','on','XData',[oldPnt_xy(1),newPnt_xy(1)],'YData',[oldPnt_xy(2),newPnt_xy(2)]);
+    set(MipDragLineHandle,'Visible','on','XData',[oldPnt_xy(1),newPnt_xy(1)],'YData',[oldPnt_xy(2),newPnt_xy(2)]);
 end
 end
 

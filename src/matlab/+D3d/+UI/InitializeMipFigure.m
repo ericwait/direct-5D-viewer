@@ -33,11 +33,11 @@ set(MipAxesHandle,'UserData',ud);
 
 MipPrevRectangleHandle = rectangle('Position',[0,0,0.1,0.1],'EdgeColor',[0.88,0.88,0.3],'LineStyle','-','LineWidth',1.0,'Parent',MipAxesHandle);
 MipDragRectangleHandle = rectangle('Position',[0,0,0.1,0.1],'EdgeColor',[1/3,0.61,0.84],'LineStyle','--','LineWidth',1.0,'Parent',MipAxesHandle);
-MipDragLineHangle = plot(0,0,'Color',[1.0,0.13,0.11],'LineStyle','-','Parent',MipAxesHandle);
+MipDragLineHandle = plot(0,0,'Color',[1.0,0.13,0.11],'LineStyle','-','Parent',MipAxesHandle);
 
 set(MipPrevRectangleHandle,'Visible','off');
 set(MipDragRectangleHandle,'Visible','off');
-set(MipDragLineHangle,'Visible','off');
+set(MipDragLineHandle,'Visible','off');
 
 set(MipFigureHandle,'WindowButtonDownFcn',@D3d.UI.MipButtonDown,...
     'WindowButtonMotionFcn',@D3d.UI.MipButtonMotion,...

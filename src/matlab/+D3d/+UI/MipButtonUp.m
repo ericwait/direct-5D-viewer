@@ -66,6 +66,6 @@ if (strcmp(send,'Yes'))
 end
 
 set(MipDragRectangleHandle,'Visible','off');
-set(MipDragLineHangle,'Visible','off');
+set(MipDragLineHandle,'Visible','off');
 end
 
