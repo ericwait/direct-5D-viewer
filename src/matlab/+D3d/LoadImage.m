@@ -8,6 +8,13 @@ function [im,imData] = LoadImage( im, imData, imagePath, bufferNum )
 %IMAGE_PATH is a path to the metadata file that can be read by
 %   tiffReader, optional.
 
+global D3dIsOpen
+
+if (~D3dIsOpen)
+    [im,imData] = D3d.Open(im, imData, imagePath);
+    return
+end
+
 %% check the optional arguments and set the non-existant ones to empty
 if (~exist('im','var'))
     im = [];

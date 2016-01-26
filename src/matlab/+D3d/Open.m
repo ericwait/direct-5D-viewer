@@ -1,5 +1,5 @@
 function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
-%OPEN [varargout] = open( im, imData, imagePath )
+%OPEN [varargout] = D3d.Open( im, imData, imagePath )
 %Opens the directX 3D-5D viewer with either and image, imData, imagePath,
 %or empty.  Will return the image and image data if requested.
 %
@@ -14,7 +14,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
 % d3dtimer - makes a timer that will call checkMessage
 %*******************************************************************
 
-global EXT_MESAGE_FUNC
+global EXT_MESAGE_FUNC D3dIsOpen
 
 %% check the optional arguments and set the non-existant ones to empty
 if (~exist('im','var'))
@@ -31,14 +31,20 @@ if (~exist('mesagePkgStr','var'))
 else
     EXT_MESAGE_FUNC = mesagePkgStr;
 end
+if (isempty(D3dIsOpen))
+    D3dIsOpen = false;
+end
 
-%% make a widget to show the orentation of the current view in 3D
-[arrowFaces, arrowVerts, arrowNorms] = D3d.Polygon.MakeArrow(0.65,0.05,0.15,40);
-[sphereFaces, sphereVerts, shereNorms] = D3d.Polygon.MakeSphere(0.20,40);
-
-%% start the viewer dll
-[pathstr,~,~] = fileparts(which('D3d.Viewer'));
-D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
+if (~D3dIsOpen)
+    %% make a widget to show the orentation of the current view in 3D
+    [arrowFaces, arrowVerts, arrowNorms] = D3d.Polygon.MakeArrow(0.65,0.05,0.15,40);
+    [sphereFaces, sphereVerts, shereNorms] = D3d.Polygon.MakeSphere(0.20,40);
+    
+    %% start the viewer dll
+    [pathstr,~,~] = fileparts(which('D3d.Viewer'));
+    D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
+    D3dIsOpen = true;
+end
 
 %% check if there should be an image loaded right away.
 [im,imData] = D3d.LoadImage(im, imData, imagePath);
@@ -50,6 +56,7 @@ if (~isempty(im))
     D3d.Messaging.StartTimer();
 else
     D3d.Close();
+    D3dIsOpen = false;
 end
 
 %% return the image and data that might have been read in durring the load

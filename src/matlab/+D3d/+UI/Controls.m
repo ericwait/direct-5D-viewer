@@ -82,7 +82,7 @@ setupData(hObject, handles, varargin);
 end
 
 function setupData(hObject, handles, varargin)
-global D3dUICtrlHandles
+global D3dUICtrlHandles D3dIsOpen
 if (nargin<3)
     error('No image metadata sent!');
 end
@@ -161,18 +161,20 @@ set(handles.tb_phyY,'string',num2str(imageData.PixelPhysicalSize(2)));
 set(handles.tb_phyZ,'string',num2str(imageData.PixelPhysicalSize(3)));
 
 D3d.UI.Ctrl.UpdateCurrentState();
+D3dIsOpen = true;
 end
 
 
 % --- Executes when user attempts to close Controls.
 function Controls_CloseRequestFcn(hObject, eventdata, handles)
-global EXT_MESAGE_FUNC
+global EXT_MESAGE_FUNC D3dIsOpen
 if (~isempty(EXT_MESAGE_FUNC))
     msg.command = 'close';
     EXT_MESAGE_FUNC(msg);
 end
 D3d.Close();
 delete(hObject);
+D3dIsOpen = false;
 end
 
 % --- Outputs from this function are returned to the command line.

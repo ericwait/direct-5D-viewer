@@ -1,5 +1,5 @@
 function Close()
-global d3dtimer D3dUICtrlHandles
+global d3dtimer D3dUICtrlHandles D3dIsOpen
 
 if (~isempty(D3dUICtrlHandles))
     if (isvalid(D3dUICtrlHandles.hObject))
@@ -16,4 +16,5 @@ d3dtimer = [];
 
 clear mex
 
+D3dIsOpen = false;
 end
