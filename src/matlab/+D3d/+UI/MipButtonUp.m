@@ -45,7 +45,7 @@ if (strcmp(send,'Yes'))
     if (isempty(MipFullIm))
         [MipROIim,MipROIimData] = MicroscopeData.ReaderParZ(ud.ImData.imageDir,[],[],[],[],[],true,[],startPnt_xy(1:2),[rad,rad]);
     else
-        MipROIim = MipFullIm(startPnt_xy(2):startPnt_xy(2)+rad,startPnt_xy(1):startPnt_xy(1)+rad,:,:,:);
+        MipROIim = MipFullIm(startPnt_xy(2):startPnt_xy(2)+2*rad,startPnt_xy(1):startPnt_xy(1)+2*rad,:,:,:);
         MipROIimData = ud.ImData;
         MipROIimData.Dimensions = [size(MipROIim,2),size(MipROIim,1),size(MipROIim,3)];
     end
@@ -63,6 +63,7 @@ if (strcmp(send,'Yes'))
     end
     MipROIim = MipROIim(:,:,zStart:zEnd,:,:);
     MipROIimData.Dimensions(3) = size(MipROIim,3);
+    MipROIimData.Position = [oldPnt_xy,floor((zEnd-zStart)/2)];
     D3d.Close();
     D3d.Open(MipROIim,MipROIimData);
 end
