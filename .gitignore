@@ -34,3 +34,4 @@ StaticVolumePixelShader.fx
 *.opensdf
 *.tif
 src/matlab/1.24Experiment.lif - Series019.tif_Settings.mat
+src/c/d3dViewer.VC.opendb
