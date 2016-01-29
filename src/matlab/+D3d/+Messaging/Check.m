@@ -28,7 +28,11 @@ for i=1:length(msgs)
     % gets handled.
     if (~isempty(EXT_MESAGE_FUNC))
         %% pass the message on
-        EXT_MESAGE_FUNC(msgs(i));
+        try
+            EXT_MESAGE_FUNC(msgs(i));
+        catch err
+            warning(err.message)
+        end
     else
         switch msgs(i).command
             case 'rightClick'
@@ -39,23 +43,27 @@ for i=1:length(msgs)
     end
     
     %% run these commands reguardless of what any other function does
-    switch msgs(i).command
-        case 'error'
-            msg = sprintf('Error from C code: %s\n\tError Code:%f',msgs(i).message,msgs(i).val);
-            errordlg(msg,'','modal');
-            warning(msg);
-        case 'close'
-            D3d.Close();
-        case 'timeChange'
-            D3d.UI.Ctrl.UpdateTime(msgs(i).val,true);
-        case 'play'
-            if (~isempty(D3dUICtrlHandles))
-                set(D3dUICtrlHandles.handles.cb_Play,'Value',msgs(i).val);
-            end
-        case 'rotate'
-            if (~isempty(D3dUICtrlHandles))
-                set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
-            end
+    try
+        switch msgs(i).command
+            case 'error'
+                msg = sprintf('Error from C code: %s\n\tError Code:%f',msgs(i).message,msgs(i).val);
+                %errordlg(msg,'','modal');
+                warning(msg);
+            case 'close'
+                D3d.Close();
+            case 'timeChange'
+                D3d.UI.Ctrl.UpdateTime(msgs(i).val,true);
+            case 'play'
+                if (~isempty(D3dUICtrlHandles))
+                    set(D3dUICtrlHandles.handles.cb_Play,'Value',msgs(i).val);
+                end
+            case 'rotate'
+                if (~isempty(D3dUICtrlHandles))
+                    set(D3dUICtrlHandles.handles.cb_Rotate,'Value',msgs(i).val);
+                end
+        end
+    catch err
+        warning(err.message)
     end
 end
 end
