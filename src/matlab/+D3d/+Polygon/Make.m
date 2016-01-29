@@ -1,4 +1,5 @@
 function [ polygon ] = Make( pixelList_xy, polyIdx, label, frame, color, reductions, quiet )
+%[ polygon ] = D3d.Polygon.Make( pixelList_xy, polyIdx, label, frame, color, reductions, quiet )
 if (~exist('color','var') || isempty(color))
     color = [1,1,1];
 end
@@ -19,7 +20,7 @@ if (~exist('quiet','var') || isempty(quiet))
     quiet = false;
 end
 
-polygon = [];
+polygon = D3d.Polygon.MakeEmptyStruct();
 
 % padd the subimage to get some room to blur
 PADDING = 3*reductions;
@@ -57,7 +58,6 @@ D = smooth3(D);
 [faces, v_xy] = isosurface(x,y,z,D,graythresh(D));
 
 if (isempty(v_xy))
-    polygon = [];
     return
 end
 
