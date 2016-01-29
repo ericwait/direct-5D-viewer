@@ -68,22 +68,6 @@ if (any(faces(:)==0))
     error('there is a zero index in the faces structure!');
 end
 
-for j=1:size(faces,1)
-    v1 = verts_xy(faces(j,1),:);
-    v2 = verts_xy(faces(j,2),:);
-    v3 = verts_xy(faces(j,3),:);
-    
-    e1 = v2-v1;
-    e2 = v3-v1;
-    uNrm = cross(e1,e2);
-    
-%     dst = centerOfMass_xy - v1;
-%     nrmDir = dot(uNrm,dst);
-%     if (nrmDir>0)
-%         faces(j,[1,2]) = faces(j,[2,1]);
-%     end
-end
-
 norms = D3d.Polygon.CalcNorms(verts_xy,faces);
 
 polygon.index = polyIdx;
