@@ -25,32 +25,11 @@ polygon = D3d.Polygon.MakeEmptyStruct();
 % padd the subimage to get some room to blur
 PADDING = 3*reductions;
 
-% get bounding box
-bb_xy = [min(pixelList_xy,[],1);max(pixelList_xy,[],1)];
+maxExtent_rc = Utils.SwapXY_RC(max(pixelList_xy,[],1)) + PADDING;
+indList = Utils.CoordToInd(maxExtent_rc,Utils.SwapXY_RC(pixelList_xy));
+[im,shiftCoords_rcz] = ImUtils.ROI.MakeSubImBW(maxExtent_rc,indList,PADDING);
+shiftCoords_xy = Utils.SwapXY_RC(shiftCoords_rcz);
 
-% make a sub image this size
-subImSize_rc = Utils.SwapXY_RC(bb_xy(2,:) - bb_xy(1,:) + 2*PADDING +1);
-
-%shiftCoords_xy = max(zeros(1,size(bb_xy,2)),bb_xy(1,:) - PADDING +1);
-shiftCoords_xy = bb_xy(1,:) - PADDING +1;
-shiftPixelCoords_xy = pixelList_xy - repmat(shiftCoords_xy,size(pixelList_xy,1),1);
-shiftPixelInd = Utils.CoordToInd(subImSize_rc,Utils.SwapXY_RC(shiftPixelCoords_xy));
-
-im = zeros(subImSize_rc);
-im(shiftPixelInd) = 1;
-
-rp = regionprops(im>0,'Centroid','PixelList');
-if (isempty(rp))
-    return
-elseif (length(rp)>1)
-    if (~quiet)
-        warning('Trying to make a hull from more than one connected component. Frame: %d, PolyIdx: %d, Num: %d',frame,polyIdx,length(rp));
-    end
-    [~,I] = max(arrayfun(@(x)(size(x.PixelList,1)),rp));
-    rp = rp(I);
-end
-
-centerOfMass_xy = rp.Centroid + shiftCoords_xy;
 cc.Connectivity = 26;
 cc.ImageSize = size(im);
 cc.NumObjects = 1;
