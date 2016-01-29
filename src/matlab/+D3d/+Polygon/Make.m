@@ -27,8 +27,8 @@ PADDING = 3*reductions;
 
 maxExtent_rc = Utils.SwapXY_RC(max(pixelList_xy,[],1)) + PADDING;
 indList = Utils.CoordToInd(maxExtent_rc,Utils.SwapXY_RC(pixelList_xy));
-[im,shiftCoords_rcz] = ImUtils.ROI.MakeSubImBW(maxExtent_rc,indList,PADDING);
-shiftCoords_xy = Utils.SwapXY_RC(shiftCoords_rcz);
+[im,startCoords_rcz] = ImUtils.ROI.MakeSubImBW(maxExtent_rc,indList,PADDING);
+startCoords_xy = Utils.SwapXY_RC(startCoords_rcz);
 
 cc.Connectivity = 26;
 cc.ImageSize = size(im);
