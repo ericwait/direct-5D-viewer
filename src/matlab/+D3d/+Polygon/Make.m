@@ -51,6 +51,11 @@ elseif (length(rp)>1)
 end
 
 centerOfMass_xy = rp.Centroid + shiftCoords_xy;
+cc.Connectivity = 26;
+cc.ImageSize = size(im);
+cc.NumObjects = 1;
+cc.PixelIdxList = {find(im)};
+rp = regionprops(cc,'Centroid');
 
 [x,y,z,D] = reducevolume(im,reductions);
 D = smooth3(D);
