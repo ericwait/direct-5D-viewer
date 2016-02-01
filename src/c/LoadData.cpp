@@ -223,9 +223,16 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 
 	unsigned char* shaderConstMemory = NULL;
 
-	int fvtIdx = typ - GraphicObjectTypes::OriginalVolume;
+	GraphicObjectNode* firstVolTextPtr = NULL;
+	if (!gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].empty())
+		firstVolTextPtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].begin()->second;
+	else if (!gGraphicObjectNodes[GraphicObjectTypes::ProcessedVolume].empty())
+		firstVolTextPtr = gGraphicObjectNodes[GraphicObjectTypes::ProcessedVolume].begin()->second;
+	
+	if (firstVolTextPtr!=NULL)
+		shaderConstMemory = ((VolumeTextureObject*)(firstVolTextPtr->getGraphicObjectPtr()))->getShaderConstMemory();
 
-	if (!firstVolumeTextures.empty() && fvtIdx < firstVolumeTextures.size() && NULL != firstVolumeTextures[fvtIdx])
+	if (!gGraphicObjectNodes[typ].empty())
 	{
 		std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[typ].begin();
 		for ( ; objectIter != gGraphicObjectNodes[typ].end(); ++objectIter )
@@ -238,11 +245,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		gGraphicObjectNodes[typ].clear();
 	}
 
-	if (!firstVolumeTextures.empty())
-	{
-		VolumeTextureObject* volumeTexture = firstVolumeTextures[0];
-		shaderConstMemory = volumeTexture->getShaderConstMemory();
-	}
+	int fvtIdx = typ-GraphicObjectTypes::OriginalVolume;
 
 	for (int i = 0; i < numFrames; ++i)
 	{
@@ -255,10 +258,10 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 
 		insertGlobalGraphicsObject(typ,volumeTextureNode,i);
 
-		if (0 == i)
+		if(0==i)
 		{
-			if (fvtIdx + 1 > firstVolumeTextures.size())
-				firstVolumeTextures.resize(fvtIdx + 1);
+			if(fvtIdx+1 > firstVolumeTextures.size())
+				firstVolumeTextures.resize(fvtIdx+1);
 
 			firstVolumeTextures[fvtIdx] = volumeTexture;
 		}
