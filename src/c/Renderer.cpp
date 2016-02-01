@@ -533,8 +533,9 @@ void Renderer::convertToScreenSpace(double* verts, size_t numVerts)
 	VolumeTextureObject* volumeObject = (VolumeTextureObject*)volumePtr->getGraphicObjectPtr();
 	Vec<size_t> dims = volumeObject->getDims();
 	Vec<double> scales = Vec<double>(volumeObject->getScales());
+	scales = Vec<double>(scales.y, scales.x, scales.z);
 
-	Vec<double> dimsNeg1to1 = Vec<double>(dims) / 2.0;
+	Vec<double> dimsNeg1to1 = Vec<double>(dims.y,dims.x,dims.z) / 2.0;
 
 	for (size_t i = 0; i < numVerts; ++i)
 	{
