@@ -44,6 +44,9 @@ if (isempty(imData))
     if (isempty(im))
         % there is also no image to load, so we should read one in
         imData = MicroscopeData.ReadMetadata(imagePath,true);
+        if (isempty(imData))
+            return
+        end
         imagePath = imData.imageDir;
     else
         % there is an image to load just no metadata to go with it
