@@ -79,7 +79,9 @@ if (~isempty(im) && ~isempty(imData))
         im = permute(im,[1,2,5,4,3]);
         imData.Dimensions(3) = imData.NumberOfFrames;
         imData.NumberOfFrames = 1;
-        imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]));
+        if (length(imData.PixelPhysicalSize)<3)
+            imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]));
+        end
     end
     
     if (~strcmpi('unit8',class(im)))
