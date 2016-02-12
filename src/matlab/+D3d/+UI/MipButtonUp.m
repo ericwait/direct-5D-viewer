@@ -79,7 +79,7 @@ if (~isempty(answer))
         end
         MipROIim = MipROIim(:,:,zStart:zEnd,:,:);
         MipROIimData.Dimensions(3) = size(MipROIim,3);
-        MipROIimData.Position = [oldPnt_xy,floor((zEnd-zStart)/2)];
+        MipROIimData.Position = [startPnt_xy,zStart];
         D3d.Close();
         D3d.Open(MipROIim,MipROIimData);
     end
