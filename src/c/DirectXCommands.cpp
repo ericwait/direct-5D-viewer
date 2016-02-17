@@ -333,35 +333,5 @@ void XcaptureWindow()
 {
 	gRenderer->renderAll();
 
-	DWORD dwBmpSize = 0;
-	BITMAPINFOHEADER bi;
-	unsigned char* screen = gRenderer->captureWindow(dwBmpSize,bi);
-
-	if(screen==NULL)
-		return;
-
-	unsigned int numCols = bi.biWidth;
-	unsigned int numRows = bi.biHeight;
-
-	unsigned char* rowMajorImage = new unsigned char[numCols*numRows*3];
-
-	unsigned int rowLength = (numCols * bi.biBitCount + 31) / 32;
-
-	for(unsigned int y=0; y<numRows; ++y)
-	{
-		for(unsigned int x=0; x < numCols; ++x)
-		{
-			for(unsigned int color=0; color<3; ++color)
-			{
-				size_t rowMajorIdx = numRows-y-1 + x*numRows + (3-color-1)*numCols*numRows;
-				size_t imIdx = x*4 + y*numCols*4 + color;
-
-				rowMajorImage[rowMajorIdx] = screen[imIdx];
-			}
-		}
-	}
-
-	delete[] screen;
-
-	gMexMessageQueueOut.addMessage("screenCapture","",numRows,numCols,rowMajorImage);
+	gRenderer->captureWindow(NULL);
 }

@@ -161,6 +161,10 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 			{
 				dataQueue->writeMessage("captureWindow",(void*)NULL);
 			}
+			else if(_strcmpi("setCapturePath", command)==0)
+			{
+				setCapturePathCommand(nrhs, prhs);
+			}
 			else if(_strcmpi("setRotation",command) == 0)
 			{
 				if(nrhs<3)
