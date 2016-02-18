@@ -92,3 +92,10 @@ fNames = cellfun(@(x)(fullfile(outputPath,x)),{dList.name},'uniformOutput',false
 
 %% make the movie
 MovieUtils.MakeFromFileNames(fNames,60,fullfile(outputPath,[imD.DatasetName '.mp4']));
+
+%% If you have the ffmpeg toolbox installed from http://www.mathworks.com/matlabcentral/fileexchange/42296-ffmpeg-toolbox
+% tokenString = regexptranslate('escape',fullfile(outputPath,imD.DatasetName));
+% imageNumbers = regexpi(fNames,[tokenString, '_(\d+)\.bmp'],'tokens','once');
+% imageNumbers = cellfun(@(x)(str2double(x)),imageNumbers);
+% range = [min(imageNumbers),max(imageNumbers)];
+% ffmpegimages2video(fullfile(outputRoot,imD.DatasetName,[imD.DatasetName, '_%05d.bmp']),fullfile(outputRoot,[imD.DatasetName,'.mp4']),'InputFrameRate',60,'InputStartNumber',range,'x264Preset','veryslow');
