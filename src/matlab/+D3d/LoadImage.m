@@ -43,7 +43,9 @@ if (isempty(imData))
     % there is no image data passed in to load
     if (isempty(im))
         % there is also no image to load, so we should read one in
-        imData = MicroscopeData.ReadMetadata(imagePath,true);
+%         imData = MicroscopeData.ReadMetadata(imagePath,true);
+        % ac changed !!!
+        imData = MicroscopeData.ReadMetadata(imagePath);
         if (isempty(imData))
             return
         end
