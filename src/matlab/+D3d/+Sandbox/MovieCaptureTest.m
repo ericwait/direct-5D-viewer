@@ -1,5 +1,6 @@
 %% set the directory for the movie and image to go to
 outputRoot = 'D:\Users\eric\Desktop';
+smallThreshold = 25;
 
 %% open original image
 [im,imD] = D3d.Open();
@@ -14,6 +15,54 @@ end
 
 %% load the processed image into the second buffer
 D3d.LoadImage(imS,imD,[],2);
+
+%% create segmenation results for each channel
+[~,~,maxVal] = Utils.GetClassBits(im);
+polygons = cell(imD.NumberOfChannels,1);
+for t=1:imD.NumberOfFrames
+    parfor c=1:imD.NumberOfChannels
+        curIm = imS(:,:,:,c,t);
+        level = graythresh(curIm(curIm>0.1*maxVal));
+        imBW = curIm > level * maxVal;
+        imBW = Cuda.Mex('MaxFilterEllipsoid',im2uint8(imBW),[5,5,2]);
+        imBW = Cuda.Mex('MinFilterEllipsoid',imBW,[5,5,2]);
+        imBW = imBW>0;
+        rp = regionprops(imBW,'Area','PixelList');
+        for i=1:length(rp)
+            if (rp(i).Area>smallThreshold)
+                curPoly = D3d.Polygon.Make(rp(i).PixelList,1,'1',t);
+                if (~isempty(curPoly))
+                    polygons{c} = [polygons{c},curPoly];
+                end
+            end
+        end
+    end
+end
+
+%% clean up the polygons
+parfor c=1:imD.NumberOfChannels
+    curPolys = polygons{c};
+    if (isfield(imD,'ChannelColors'))
+        curColor = 1 - imD.ChannelColors(c,:);
+    else
+        %do something for each channel or each object here
+    end
+    for i=1:length(curPolys)
+        curPolys(i).color = curColor;
+        curPolys(i).index = i + c*1000;
+        curPolys(i).label = num2str(curPolys(i).index);
+    end
+    polygons{c} = curPolys;
+end
+
+%% Load the segmenation and show individual channels
+for c=1:imD.NumberOfChannels
+    D3d.Viewer('loadPolygons',polygons{c});
+end
+
+% View just a channel's polygons
+%D3d.Viewer('displayPolygons',1001:2000);%shows the first channel polygons
+%D3d.Viewer('displayPolygons',2001:5000);%shows the 2nd through 5th channel polygons
 
 %% capture frames for animation
 % ******************************************
