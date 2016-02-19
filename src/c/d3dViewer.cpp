@@ -13,14 +13,14 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Vec.h"
+#include "Global\Vec.h"
 #include "mex.h"
-#include "MessageQueue.h"
+#include "Messages\MessageQueue.h"
 #include "windows.h"
-#include "Globals.h"
-#include "MexFunctions.h"
+#include "Global\Globals.h"
+#include "Mex\MexFunctions.h"
 #include <set>
-#include "MexErrorMsg.h"
+#include "Messages\MexErrorMsg.h"
 
 HANDLE gTermEvent = NULL;
 volatile bool gRendererInit = false;

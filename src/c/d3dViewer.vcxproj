@@ -1,17 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -23,23 +15,10 @@
     <RootNamespace>d3dViewer</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -52,13 +31,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
@@ -73,16 +46,6 @@
     <OutDir>$(SolutionDir)Output\$(ProjectName)\$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)_$(PlatformName)\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-    </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -105,20 +68,6 @@
       <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"
 copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Command>
     </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-    </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -148,55 +97,55 @@ copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Co
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Commands.cpp" />
-    <ClCompile Include="DataQueue.cpp" />
-    <ClCompile Include="DirectXCommands.cpp" />
-    <ClCompile Include="GraphicObject.cpp" />
-    <ClCompile Include="Image.cpp" />
-    <ClCompile Include="Initialization.cpp" />
-    <ClCompile Include="d3dViewer.cpp" />
-    <ClCompile Include="LoadData.cpp" />
-    <ClCompile Include="MainMex.cpp" />
-    <ClCompile Include="Material.cpp" />
-    <ClCompile Include="MeshPrimitive.cpp" />
-    <ClCompile Include="MessageProcessor.cpp" />
-    <ClCompile Include="MessageQueue.cpp" />
-    <ClCompile Include="QueuePolygon.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="SceneNode.cpp" />
-    <ClCompile Include="TextureLightingObj.cpp" />
-    <ClCompile Include="Threads.cpp" />
-    <ClCompile Include="TransferObj.cpp" />
-    <ClCompile Include="Update.cpp" />
-    <ClCompile Include="Widget.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="d3dViewer.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="DataQueue.h" />
-    <ClInclude Include="Defines.h" />
-    <ClInclude Include="DirectXCommands.h" />
-    <ClInclude Include="Globals.h" />
-    <ClInclude Include="GraphicObject.h" />
-    <ClInclude Include="Image.h" />
-    <ClInclude Include="Initialization.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="MeshPrimitive.h" />
-    <ClInclude Include="MessageProcessor.h" />
-    <ClInclude Include="MessageQueue.h" />
-    <ClInclude Include="MexErrorMsg.h" />
-    <ClInclude Include="MexFunctions.h" />
-    <ClInclude Include="QueuePolygon.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="RendererPackage.h" />
-    <ClInclude Include="SceneNode.h" />
-    <ClInclude Include="TextureLightingObj.h" />
-    <ClInclude Include="TransferObj.h" />
-    <ClInclude Include="Vec.h" />
-    <ClInclude Include="VecFuncs.h" />
+    <ClCompile Include="d3dViewer.cpp" />
+    <ClCompile Include="D3d\Camera.cpp" />
+    <ClCompile Include="D3d\GraphicObject.cpp" />
+    <ClCompile Include="D3d\Initialization.cpp" />
+    <ClCompile Include="D3d\Material.cpp" />
+    <ClCompile Include="D3d\MeshPrimitive.cpp" />
+    <ClCompile Include="D3d\MessageProcessor.cpp" />
+    <ClCompile Include="D3d\Renderer.cpp" />
+    <ClCompile Include="D3d\SceneNode.cpp" />
+    <ClCompile Include="D3d\TextureLightingObj.cpp" />
+    <ClCompile Include="Messages\DataQueue.cpp" />
+    <ClCompile Include="Messages\DirectXCommands.cpp" />
+    <ClCompile Include="Messages\Image.cpp" />
+    <ClCompile Include="Messages\MessageQueue.cpp" />
+    <ClCompile Include="Messages\QueuePolygon.cpp" />
+    <ClCompile Include="Messages\Threads.cpp" />
+    <ClCompile Include="Messages\TransferObj.cpp" />
+    <ClCompile Include="Mex\Commands.cpp" />
+    <ClCompile Include="Mex\LoadData.cpp" />
+    <ClCompile Include="Mex\MainMex.cpp" />
+    <ClCompile Include="Mex\Update.cpp" />
+    <ClCompile Include="Mex\Widget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D3d\Camera.h" />
+    <ClInclude Include="D3d\GraphicObject.h" />
+    <ClInclude Include="D3d\Initialization.h" />
+    <ClInclude Include="D3d\Material.h" />
+    <ClInclude Include="D3d\MeshPrimitive.h" />
+    <ClInclude Include="D3d\MessageProcessor.h" />
+    <ClInclude Include="D3d\Renderer.h" />
+    <ClInclude Include="D3d\RendererPackage.h" />
+    <ClInclude Include="D3d\SceneNode.h" />
+    <ClInclude Include="D3d\TextureLightingObj.h" />
+    <ClInclude Include="Global\Defines.h" />
+    <ClInclude Include="Global\Globals.h" />
+    <ClInclude Include="Global\Vec.h" />
+    <ClInclude Include="Global\VecFuncs.h" />
+    <ClInclude Include="Messages\DataQueue.h" />
+    <ClInclude Include="Messages\DirectXCommands.h" />
+    <ClInclude Include="Messages\Image.h" />
+    <ClInclude Include="Messages\MessageQueue.h" />
+    <ClInclude Include="Messages\MexErrorMsg.h" />
+    <ClInclude Include="Messages\QueuePolygon.h" />
+    <ClInclude Include="Messages\TransferObj.h" />
+    <ClInclude Include="Mex\MexFunctions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
