@@ -6,7 +6,7 @@ if (~isempty(D3dUICtrlHandles))
     [imageData, colors, channelData] = D3d.UI.Ctrl.GetUserData();
     
     cla(D3dUICtrlHandles.handles.funcPlot);
-    hold on
+    hold(D3dUICtrlHandles.handles.funcPlot,'on');
     
     for i=1:length(channelData)
         [minRange, maxRange] = D3d.UI.Ctrl.CalcMidRange(channelData(i).minVal,channelData(i).maxVal);
