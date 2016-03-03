@@ -153,7 +153,9 @@ void XaddPolygonsCommand(Message m){
 		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, (*polygon)->getIndex());
 		if (oldNode)
 		{
-			sendErrMessage("You can't add a hull that already exists!");
+			char buff[128];
+			sprintf(buff,"You can't add a hull that already exists! %d", (*polygon)->getIndex());
+			sendErrMessage(buff);
 			return;
 		}
 
