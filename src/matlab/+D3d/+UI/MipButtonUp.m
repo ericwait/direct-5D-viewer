@@ -59,7 +59,7 @@ if (~isempty(answer))
         
         %fprintf('(%.0f, %.0f, %.0f, %.0f)\n',startPnt(1),startPnt(2),startPnt(1)+rad,startPnt(2)+rad);
         if (isempty(MipFullIm))
-            [MipROIim,MipROIimData] = MicroscopeData.ReaderParZ(ud.ImData.imageDir,[],[],[],[],[],true,[],startPnt_xy(1:2),[2*rad_xy(1)-1,rad_xy(2)-1]);
+            [MipROIim,MipROIimData] = MicroscopeData.ReaderParZ(ud.ImData.imageDir,[],[],[],[],[],true,[],startPnt_xy(1:2),[2*rad_xy(1)-1,2*rad_xy(2)-1]);
         else
             MipROIim = MipFullIm(startPnt_xy(2):startPnt_xy(2)+2*rad_xy(2)-1,startPnt_xy(1):startPnt_xy(1)+2*rad_xy(1)-1,:,:,:);
             MipROIimData = ud.ImData;
