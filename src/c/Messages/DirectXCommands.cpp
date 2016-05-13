@@ -118,7 +118,7 @@ void XaddPolygonCommand(Message m){
 	}
 
 	PolygonObject* curPolygonObj = createPolygonObject(polygon->getfaceData(), polygon->getNumFaces(), polygon->getvertData(), polygon->getNumVerts(), polygon->getnormData(), polygon->getNumNormals(), gCameraDefaultMesh);
-	curPolygonObj->setColor(Vec<float>((float)polygon->getcolorData()[0], (float)polygon->getcolorData()[1], (float)polygon->getcolorData()[2]), 1.0f);
+	curPolygonObj->setColor(Vec<float>((float)(polygon->getcolorData())[0], (float)(polygon->getcolorData())[1], (float)(polygon->getcolorData())[2]), 1.0f);
 	curPolygonObj->setIndex(polygon->getIndex());
 	curPolygonObj->setLabel(polygon->getLabel());
 	GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);
@@ -136,7 +136,17 @@ void XaddPolygonsCommand(Message m){
 	for (vector<QueuePolygon*>::iterator polygon = polygons->begin(); polygon != polygons->end(); ++polygon) {
 		if (gRenderer == NULL) return;
 
-		int frame = (*polygon)->getFrame();
+		QueuePolygon* curPoly = *polygon;
+
+		int frame = curPoly->getFrame();
+
+		if(frame<0)
+		{
+			char buff[128];
+			sprintf(buff, "You can't add a hull to a negative frame! Hull:%d, Frame:%d", curPoly->getIndex(),frame);
+			sendErrMessage(buff);
+			return;
+		}
 
 		if (hullRootNodes.empty()){
 			hullRootNodes.resize(gRenderer->getNumberOfFrames());
@@ -149,22 +159,22 @@ void XaddPolygonsCommand(Message m){
 			gRenderer->attachToRootScene(hullRootNodes[frame], Renderer::Section::Main, frame);
 		}
 
-		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, (*polygon)->getIndex());
+		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, curPoly->getIndex());
 		if (oldNode)
 		{
 			char buff[128];
-			sprintf(buff,"You can't add a hull that already exists! %d", (*polygon)->getIndex());
+			sprintf(buff,"You can't add a hull that already exists! %d", curPoly->getIndex());
 			sendErrMessage(buff);
 			return;
 		}
 
-		PolygonObject* curPolygonObj = createPolygonObject((*polygon)->getfaceData(), (*polygon)->getNumFaces(), (*polygon)->getvertData(), (*polygon)->getNumVerts(), (*polygon)->getnormData(), (*polygon)->getNumNormals(), gCameraDefaultMesh);
-		curPolygonObj->setColor(Vec<float>((float)(*polygon)->getcolorData()[0], (float)(*polygon)->getcolorData()[1], (float)(*polygon)->getcolorData()[2]), 1.0f);
-		curPolygonObj->setIndex((*polygon)->getIndex());
-		curPolygonObj->setLabel((*polygon)->getLabel());
+		PolygonObject* curPolygonObj = createPolygonObject(curPoly->getfaceData(), curPoly->getNumFaces(), curPoly->getvertData(), curPoly->getNumVerts(), curPoly->getnormData(), curPoly->getNumNormals(), gCameraDefaultMesh);
+		curPolygonObj->setColor(Vec<float>((float)(curPoly->getcolorData())[0], (float)(curPoly->getcolorData())[1], (float)(curPoly->getcolorData())[2]), (float)(curPoly->getcolorData())[3]);
+		curPolygonObj->setIndex(curPoly->getIndex());
+		curPolygonObj->setLabel(curPoly->getLabel());
 		GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);
 		curPolygonNode->setWireframe(true);
-		curPolygonNode->attachToParentNode(hullRootNodes[(*polygon)->getFrame()]);
+		curPolygonNode->attachToParentNode(hullRootNodes[curPoly->getFrame()]);
 
 		insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, curPolygonNode);
 

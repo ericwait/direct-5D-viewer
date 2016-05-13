@@ -40,7 +40,7 @@ void QueuePolygon::setnormData(double* normData)
 void QueuePolygon::setcolorData(double* colorData)
 {
 	// Possibly going out of memory space here
-	memcpy(this->colorData, colorData, 3 * sizeof(double));
+	memcpy(this->colorData, colorData, 4 * sizeof(double));
 }
 
 double* QueuePolygon::getfaceData()

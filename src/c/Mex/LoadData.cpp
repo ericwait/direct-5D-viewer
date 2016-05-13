@@ -77,6 +77,7 @@ HRESULT loadPolygons(const mxArray* polygonsIn)
 		size_t numFaces = mxGetM(mxFaces);
 		size_t numVerts = mxGetM(mxVerts);
 		size_t numNormals = mxGetM(mxNorms);
+		size_t colorDim = mxGetNumberOfElements(mxColor);
 
 		if (mxFaces == NULL)
 			mexErrMsgTxt("No faces field!");
@@ -102,13 +103,27 @@ HRESULT loadPolygons(const mxArray* polygonsIn)
 		if (numNormals < 1)
 			mexErrMsgTxt("No norms!");
 
+		if(colorDim<3)
+			mexErrMsgTxt("Color is malformed!");
+
 		if (numNormals != numVerts)
 			mexErrMsgTxt("Number of verts does not match the number of normals!");
 
 		double* faceData = (double*)mxGetData(mxFaces);
 		double* vertData = (double*)mxGetData(mxVerts);
 		double* normData = (double*)mxGetData(mxNorms);
-		double* colorData = (double*)mxGetData(mxColor);
+		double* colorDataInit = (double*)mxGetData(mxColor);
+		double colorData[4];
+		if(colorDim<4)
+		{
+			memcpy(colorData, colorDataInit, sizeof(double)*3);
+			colorData[3] = 1.0;
+		}
+		else
+		{
+			memcpy(colorData, colorDataInit, sizeof(double)*4);
+		}
+
 		size_t numColor = mxGetNumberOfElements(mxColor);
 		int frame = int(mxGetScalar(mxFrame)) - 1;
 
