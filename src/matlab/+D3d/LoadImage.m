@@ -86,7 +86,7 @@ if (~isempty(im) && ~isempty(imData))
         end
     end
     
-    if (~strcmpi('unit8',class(im)))
+    if (~strcmpi('uint8',class(im)))
         im8 = ImUtils.ConvertType(im,'uint8',true);
     else
         im8 = im;
