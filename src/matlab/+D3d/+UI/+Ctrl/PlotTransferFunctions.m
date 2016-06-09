@@ -25,7 +25,7 @@ if (~isempty(D3dUICtrlHandles))
     xlim(D3dUICtrlHandles.handles.funcPlot,[0 1]);
     ylim(D3dUICtrlHandles.handles.funcPlot,[0 1]);
     
-    hold off
+    hold(D3dUICtrlHandles.handles.funcPlot,'off')
 
     if (1==get(D3dUICtrlHandles.handles.rb_Processed,'Value'))
         D3d.Viewer('transferUpdate',channelData,'processed');
