@@ -492,6 +492,24 @@ void deleteAllPolygonsCommand(){
 	dataQueue->writeMessage("deleteAllPolygons", (void*)NULL);
 }
 
+
+void setBackColor(int nrhs, const mxArray** prhs)
+{
+	if(nrhs!=2)
+		mexErrMsgTxt("There must be one input consisting of three doubles between [0,1]!");
+	if (mxGetNumberOfElements(prhs[1])!=3)
+		mexErrMsgTxt("There must be one input consisting of three doubles between [0,1]!");
+	
+	double* bc = (double*)mxGetData(prhs[1]);
+	Vec<float>* background = new Vec<float>;
+	background->x = (float)(bc[0]);
+	background->y = (float)(bc[1]);
+	background->z = (float)(bc[2]);
+
+	dataQueue->writeMessage("setBackgroundColor", (void*)background);
+}
+
+
 extern "C" void exitFunc()
 {
 	closeCommand();

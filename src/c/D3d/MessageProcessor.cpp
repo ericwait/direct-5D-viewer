@@ -735,6 +735,11 @@ HRESULT checkMessage()
 		gRendererOn = true;
 		gRenderer->renderAll();
 	}
+	else if(m.command=="setBackgroundColor")
+	{
+		XsetBackgroundColor(m);
+		gRenderer->renderAll();
+	}
 	else
 	{
 		// Print an error message

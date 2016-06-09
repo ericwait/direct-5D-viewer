@@ -346,3 +346,10 @@ void XcaptureWindow()
 
 	gRenderer->captureWindow(NULL);
 }
+
+void XsetBackgroundColor(Message m)
+{
+	Vec<float>* bc = (Vec<float>*)m.data;
+	gRenderer->setBackgroundColor(*bc);
+	delete bc;
+}

@@ -175,6 +175,10 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 
 				dataQueue->writeMessage(command,rotations);
 			}
+			else if(_strcmpi("setBackgroundColor", command)==0)
+			{
+				setBackColor(nrhs, prhs);
+			}
 			else
 			{
 				char buff[255];

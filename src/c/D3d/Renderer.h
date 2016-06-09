@@ -104,6 +104,8 @@ public:
 	void setCaptureFilePath(std::string fp){ captureFilePath = fp; }
 	void setCaptureFileName(std::string fn){ captureFileName = fn; }
 
+	void setBackgroundColor(Vec<float> background) { backgroundColor = background; }
+
 //Getters
 	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
 	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);

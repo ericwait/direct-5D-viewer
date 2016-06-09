@@ -40,6 +40,7 @@ void releaseControlCommand();
 void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs);
 void removePolygonCommand(int nrhs, const mxArray** prhs);
 void deleteAllPolygonsCommand();
+void setBackColor(int nrhs, const mxArray** prhs);
 extern "C" void exitFunc();
 
 

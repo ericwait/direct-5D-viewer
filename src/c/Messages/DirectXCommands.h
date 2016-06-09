@@ -26,3 +26,4 @@ void XsegmentationLighting(Message m);
 void XdisplayPolygonsCommand(Message m);
 void XdeleteAllPolygonsCommand(Message m);
 void XcaptureWindow();
+void XsetBackgroundColor(Message m);
