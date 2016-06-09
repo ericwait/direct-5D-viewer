@@ -28,6 +28,17 @@ float gFramesPerSec = 5;
 float numAngles = 720;
 const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(-1/(numAngles)*DirectX::XM_2PI);
 
+void ClientResize(HWND hWnd, int nWidth, int nHeight)
+{
+	RECT rcClient, rcWind;
+	POINT ptDiff;
+	GetClientRect(hWnd, &rcClient);
+	GetWindowRect(hWnd, &rcWind);
+	ptDiff.x = (rcWind.right-rcWind.left)-rcClient.right;
+	ptDiff.y = (rcWind.bottom-rcWind.top)-rcClient.bottom;
+	MoveWindow(hWnd, rcWind.left, rcWind.top, nWidth+ptDiff.x, nHeight+ptDiff.y, TRUE);
+}
+
 LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 {
 	if(message==WM_DESTROY)
@@ -249,12 +260,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a 1080p movie
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 + 16,1080 + 39,SWP_NOMOVE);
+				ClientResize(gWindowHandle, 1920, 1080);
 			}
 			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a 4k movie (UHD = 3840 x 2160)
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 + 16,2160 + 39,0);
+				ClientResize(gWindowHandle, 3840, 2160);
 			}
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",1.0);
@@ -265,12 +276,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a two panel 1080p movie
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 / 2 + 16,1080 + 39,SWP_NOMOVE);
+				ClientResize(gWindowHandle, 1920/2, 1080);
 			}
 			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a two panel 4k movie (UHD = 3840 x 2160)
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 / 2 + 16,2160 + 39,0);
+				ClientResize(gWindowHandle, 3840/2, 2160);
 			}
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",2.0);
@@ -281,12 +292,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a three panel 1080p movie
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 / 3 + 16,1080 + 39,SWP_NOMOVE);
+				ClientResize(gWindowHandle, 1920/3, 1080);
 			}
 			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a three panel 4k movie (UHD = 3840 x 2160)
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 / 3 + 16,2160 + 39,0);
+				ClientResize(gWindowHandle, 3840/3, 2160);
 			}
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",3.0);
@@ -297,12 +308,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			if(shiftDown && ctrlDown && !altDown)
 			{
 				// make window size appropriate for a four panel 1080p movie
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,1920 / 2 + 16,1080 / 2 + 39,SWP_NOMOVE);
+				ClientResize(gWindowHandle, 1920/2, 1080/2);
 			}
 			else if(ctrlDown && altDown && !shiftDown)
 			{
 				// make window size appropriate for a four panel 4k movie (UHD = 3840 x 2160)
-				SetWindowPos(gWindowHandle,HWND_NOTOPMOST,0,0,3840 / 2 + 16,2160 / 2 + 39,0);
+				ClientResize(gWindowHandle, 3840/2, 2160/2);
 			}
 			{
 				gMexMessageQueueOut.addMessage("keyDown","number",4.0);
