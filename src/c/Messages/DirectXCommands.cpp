@@ -311,7 +311,7 @@ void XsetFrameCommand(Message m){
 void XsetViewOriginCommand(Message m){
 	double* doublePtr = (double*)m.data;
 
-	gRenderer->convertToScreenSpace(doublePtr,1);
+	gRenderer->convertToWorldSpace(doublePtr,1);
 
 	gRenderer->setWorldOrigin(Vec<float>((float)(doublePtr[0]), (float)(doublePtr[1]), (float)(doublePtr[2])));
 

@@ -528,7 +528,7 @@ MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces,
 	return newMesh;
 }
 
-void Renderer::convertToScreenSpace(double* verts, size_t numVerts)
+void Renderer::convertToWorldSpace(double* verts, size_t numVerts)
 {
 	GraphicObjectNode* volumePtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].at(0);
 	VolumeTextureObject* volumeObject = (VolumeTextureObject*)volumePtr->getGraphicObjectPtr();
