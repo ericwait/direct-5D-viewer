@@ -315,7 +315,8 @@ VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsI
 	renderer = rendererIn;
 	dims = dimsIn;
 	numChannels = numChannelsIn;
-	scaleFactor = scaleFactorIn;
+	physVolSize = scaleFactorIn;
+	scaleFactor = scaleFactorIn / scaleFactorIn.maxValue();
 
 	initalizeRendererResources(camera,image, constMemIn);
 }

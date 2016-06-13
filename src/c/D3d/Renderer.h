@@ -174,6 +174,7 @@ private:
 
 	void renderPackage(const RendererPackage* package, float frontClip=-10, float backClip=10);
 	void renderLabel(const RendererPackage* package, HDC hdc);
+	void renderScaleValue(const RendererPackage* package, HDC hdc);
 
 	//Member variables 
 	Vec<float> backgroundColor;

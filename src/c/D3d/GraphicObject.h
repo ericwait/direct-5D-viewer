@@ -104,6 +104,7 @@ public:
 	int getNumberOfChannels(){return numChannels;}
 	Vec<size_t> getDims() { return dims; }
 	Vec<float> getScales() { return scaleFactor; }
+	Vec<float> getPhysVolSize() { return physVolSize; }
 
 private:
 	VolumeTextureObject();
@@ -113,6 +114,7 @@ private:
 
 	Vec<size_t> dims;
 	Vec<float> scaleFactor;
+	Vec<float> physVolSize;
 	int numChannels;
 	MeshPrimitive* meshPrimitive;
 	StaticVolumeTextureMaterial* material;

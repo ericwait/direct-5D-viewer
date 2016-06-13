@@ -21,7 +21,7 @@ void XloadTextureCommand(Message m){
 	Vec<float> physDims = returnedImg->getPhysicalDims();
 
 	Vec<float> scale(Vec<float>(dims) * physDims);
-	scale = scale / scale.maxValue();
+	scale = scale;
 
 	GraphicObjectTypes textureType = returnedImg->getTextureType();
 
@@ -30,7 +30,7 @@ void XloadTextureCommand(Message m){
 
 	if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
 	{
-		HRESULT hr = createBorder(scale);
+		HRESULT hr = createBorder(scale/scale.maxValue());
 		if (FAILED(hr))
 			mexErrMsgTxt("Could not create border!");
 	}

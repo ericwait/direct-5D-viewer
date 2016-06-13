@@ -162,6 +162,38 @@ void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& 
 	directionOut = Vec<float>(DirectX::XMVectorGetX(vPickRayDir),DirectX::XMVectorGetY(vPickRayDir),DirectX::XMVectorGetZ(vPickRayDir));
 }
 
+float Camera::getVolUnitsPerPix() const
+{
+	
+	DirectX::XMFLOAT3 distOrig_f(0, 0, 0);
+	DirectX::XMVECTOR distOrig_v = DirectX::XMLoadFloat3(&distOrig_f);
+	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, viewTransform);
+	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, projectionTransform);
+	float z = DirectX::XMVectorGetZ(distOrig_v);
+
+	DirectX::XMFLOAT3 unitOutPt_f(2.0f/gWindowWidth, 0, z);
+	DirectX::XMFLOAT3 unitOrigPt_f(0, 0, z);
+	DirectX::XMVECTOR unitOutPt_v = DirectX::XMLoadFloat3(&unitOutPt_f);
+	DirectX::XMVECTOR unitOrigPt_v = DirectX::XMLoadFloat3(&unitOrigPt_f);
+
+	DirectX::XMVECTOR det;
+	DirectX::XMMATRIX invProjection = DirectX::XMMatrixInverse(&det, projectionTransform);
+	
+	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(&det, viewTransform);
+
+	DirectX::XMVECTOR wOutVec = DirectX::XMVector3TransformCoord(unitOutPt_v,invProjection);
+	DirectX::XMVECTOR wOrigVec = DirectX::XMVector3TransformCoord(unitOrigPt_v, invProjection);
+	DirectX::XMVECTOR spltW = DirectX::XMVectorSplatW(wOutVec);
+	DirectX::XMVECTOR normOut = DirectX::XMVectorDivide(wOutVec, spltW);
+	DirectX::XMVECTOR normOrig = DirectX::XMVectorDivide(wOrigVec, spltW);
+
+	DirectX::XMVECTOR subVec = DirectX::XMVectorSubtract(normOut,normOrig);
+
+	DirectX::XMVECTOR pixSizeVec = DirectX::XMVector3TransformNormal(subVec, invView);
+	float vecLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(pixSizeVec));
+
+	return vecLength;
+}
 
 void Camera::updateViewTransform()
 {

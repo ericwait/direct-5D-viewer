@@ -21,6 +21,7 @@
 #include "Camera.h"
 #include "RendererPackage.h"
 #include "..\Messages\MexErrorMsg.h"
+#include <string>
 
 Renderer::Renderer()
 {
@@ -766,6 +767,8 @@ void Renderer::gdiRenderLoop()
 	for (int i=0; i<renderMainList.size(); ++i)
 		renderLabel(renderMainList[i]->getRenderPackage(),hdc);
 
+	renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
+
 	IDXGIBackBuffer->ReleaseDC(NULL);
 	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 }
@@ -850,6 +853,35 @@ void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
 	SetTextColor(hdc,hexColor);
 	SetBkMode(hdc,TRANSPARENT);
 	TextOutA(hdc,x,y,package->getLabel().c_str(),(int)package->getLabel().length());
+}
+
+void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
+{
+	float sz = package->getCamera()->getVolUnitsPerPix();
+
+	GraphicObjectNode* volumePtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].at(0);
+	VolumeTextureObject* volumeObject = (VolumeTextureObject*)volumePtr->getGraphicObjectPtr();
+	Vec<size_t> dims = volumeObject->getDims();
+
+	//sz *= dims.maxValue()/2.0;
+	Vec<float> volSize = volumeObject->getPhysVolSize();
+	sz *= volSize.maxValue()/2.0f;
+
+	DirectX::XMFLOAT4 color(1, 1, 1, 1);
+
+	COLORREF hexColor = (unsigned int)(255*color.z);
+	hexColor = hexColor<<8;
+	hexColor |= (unsigned int)(255*color.y);
+	hexColor = hexColor<<8;
+	hexColor |= (unsigned int)(255*color.x);
+
+	SelectObject(hdc, gFont);
+	SetTextColor(hdc, hexColor);
+	SetBkMode(hdc, TRANSPARENT);
+	char buff[36];
+	sprintf(buff, "%01.3f%cm", sz,0xb5);
+	std::string length(buff);
+	TextOutA(hdc, (float)gWindowWidth-100, (float)gWindowHeight-25, length.c_str(), (int)length.length());
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)
