@@ -23,6 +23,8 @@
 #include "..\Messages\MexErrorMsg.h"
 #include <string>
 
+#include <Windows.h>
+
 Renderer::Renderer()
 {
 	//mutexDevice = CreateMutex(NULL,FALSE,NULL);
@@ -867,6 +869,42 @@ void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
 	Vec<float> volSize = volumeObject->getPhysVolSize();
 	sz *= volSize.maxValue()/2.0f;
 
+	float numUnits = 100.0f;
+	float barSize = numUnits/sz; // how many pixels to show 100 units
+	
+	float delta = 10.0f;
+	while(barSize>120.0f)
+	{
+		numUnits -= delta;
+		if(numUnits<=0.5f)
+			delta = 0.1f;
+		else if(numUnits<=1.0f)
+			delta = 0.5f;
+		else if(numUnits<=5.0f)
+			delta = 1.0f;
+		else if(numUnits<=10.0f)
+			delta = 5.0f;
+
+		barSize = numUnits/sz;
+	}
+
+	while(barSize<40.0f)
+	{
+		numUnits += delta;
+		if(numUnits>=100)
+			delta = 100.0f;
+		else if(numUnits>=10)
+			delta = 10.0f;
+		else if(numUnits>=5)
+			delta = 5.0f;
+		else if(numUnits>=1.0f)
+			delta = 1.0f;
+		else if(numUnits>=0.5f)
+			delta = 0.5f;
+
+		barSize = numUnits/sz;
+	}
+
 	DirectX::XMFLOAT4 color(1, 1, 1, 1);
 
 	COLORREF hexColor = (unsigned int)(255*color.z);
@@ -879,9 +917,24 @@ void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
 	SetTextColor(hdc, hexColor);
 	SetBkMode(hdc, TRANSPARENT);
 	char buff[36];
-	sprintf(buff, "%01.3f%cm", sz,0xb5);
+	if (numUnits>=1.0f)
+		sprintf(buff, "%.0f%cm", numUnits, 0xb5);
+	else if(numUnits>=0.1f)
+		sprintf(buff, "%.1f%cm", numUnits, 0xb5);
+	else
+		sprintf(buff, "%.2f%cm", numUnits, 0xb5);
+
 	std::string length(buff);
 	TextOutA(hdc, (float)gWindowWidth-100, (float)gWindowHeight-25, length.c_str(), (int)length.length());
+
+	// Define the rectangle.
+	int x = gWindowWidth-85-barSize/2;
+	int y = gWindowHeight-35;
+	int width = round(barSize);
+	int height = 10;
+
+	// Fill the rectangle.
+	Rectangle(hdc, x, y, x+width, y+height);
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)
