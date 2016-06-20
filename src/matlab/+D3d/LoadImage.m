@@ -10,11 +10,6 @@ function [im,imData] = LoadImage( im, imData, imagePath, bufferNum )
 
 global D3dIsOpen
 
-if (~D3dIsOpen)
-    [im,imData] = D3d.Open(im, imData, imagePath);
-    return
-end
-
 %% check the optional arguments and set the non-existant ones to empty
 if (~exist('im','var'))
     im = [];
@@ -31,6 +26,11 @@ else
     if (~bufferNum==1 && ~bufferNum==2)
         error('bufferType can only be 1 or 2!');
     end
+end
+
+if (isempty(D3dIsOpen) || ~D3dIsOpen)
+    [im,imData] = D3d.Open(im, imData, imagePath);
+    return
 end
 
 bufferType = 'original';
