@@ -769,7 +769,8 @@ void Renderer::gdiRenderLoop()
 	for (int i=0; i<renderMainList.size(); ++i)
 		renderLabel(renderMainList[i]->getRenderPackage(),hdc);
 
-	renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
+	if (!renderMainList.empty())
+		renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
 
 	IDXGIBackBuffer->ReleaseDC(NULL);
 	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
