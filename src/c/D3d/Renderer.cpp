@@ -885,6 +885,14 @@ void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
 			delta = 1.0f;
 		else if(numUnits<=10.0f)
 			delta = 5.0f;
+		else if(numUnits<=100.0f)
+			delta = 10.0f;
+		else if (numUnits<=500.0f)
+			delta = 50.0f;
+		else if(numUnits<=1000.0f)
+			delta = 100.0f;
+		else
+			delta = 1000.0f;
 
 		barSize = numUnits/sz;
 	}
@@ -892,16 +900,22 @@ void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
 	while(barSize<40.0f)
 	{
 		numUnits += delta;
-		if(numUnits>=100)
+		if(numUnits>=1000.0f)
+			delta = 1000.0f;
+		else if(numUnits>=500.0f)
 			delta = 100.0f;
-		else if(numUnits>=10)
+		else if(numUnits>=100.0f)
+			delta = 50.0f;
+		else if(numUnits>=10.0f)
 			delta = 10.0f;
-		else if(numUnits>=5)
+		else if(numUnits>=5.0f)
 			delta = 5.0f;
 		else if(numUnits>=1.0f)
 			delta = 1.0f;
 		else if(numUnits>=0.5f)
 			delta = 0.5f;
+		else
+			delta = 0.1f;
 
 		barSize = numUnits/sz;
 	}
