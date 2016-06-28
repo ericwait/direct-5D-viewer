@@ -9,7 +9,7 @@ smallThreshold = 25;
 imS = im;
 for t=1:imD.NumberOfFrames
     for c=1:imD.NumberOfChannels
-        imS(:,:,:,c,t) = Cuda.Mex('ContrastEnhancement',im(:,:,:,c,t),[75,75,25],[3,3,3]);
+        imS(:,:,:,c,t) = Cuda.ContrastEnhancement(im(:,:,:,c,t),[75,75,25],[3,3,3],1);
     end
 end
 
@@ -20,12 +20,12 @@ D3d.LoadImage(imS,imD,[],2);
 [~,~,maxVal] = Utils.GetClassBits(im);
 polygons = cell(imD.NumberOfChannels,1);
 for t=1:imD.NumberOfFrames
-    parfor c=1:imD.NumberOfChannels
+    for c=1:imD.NumberOfChannels
         curIm = imS(:,:,:,c,t);
-        level = graythresh(curIm(curIm>0.1*maxVal));
-        imBW = curIm > level * maxVal;
-        imBW = Cuda.Mex('MaxFilterEllipsoid',im2uint8(imBW),[5,5,2]);
-        imBW = Cuda.Mex('MinFilterEllipsoid',imBW,[5,5,2]);
+        level = graythresh(curIm(curIm>0));
+        imBW = curIm > level * 0.8 * maxVal;
+        imBW = Cuda.MaxFilterEllipsoid(im2uint8(imBW),[3,3,2],1);
+        imBW = Cuda.MinFilterEllipsoid(imBW,[3,3,2],1);
         imBW = imBW>0;
         rp = regionprops(imBW,'Area','PixelList');
         for i=1:length(rp)
