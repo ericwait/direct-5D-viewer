@@ -40,16 +40,17 @@ for t=1:imD.NumberOfFrames
 end
 
 %% clean up the polygons
-parfor c=1:imD.NumberOfChannels
+for c=1:imD.NumberOfChannels
     curPolys = polygons{c};
-    if (isfield(imD,'ChannelColors'))
+    if (isfield(imD,'ChannelColors') && ~isempty(imD.ChannelColors))
         curColor = 1 - imD.ChannelColors(c,:);
     else
         %do something for each channel or each object here
+        curColor = [.25,.25,1];
     end
     for i=1:length(curPolys)
         curPolys(i).color = curColor;
-        curPolys(i).index = i + c*1000;
+        curPolys(i).index = i + c*10000;
         curPolys(i).label = num2str(curPolys(i).index);
     end
     polygons{c} = curPolys;
