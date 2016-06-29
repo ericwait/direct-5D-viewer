@@ -58,15 +58,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>d3dViewer.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"
-copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Command>
+      <Command>echo copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"
+copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -85,20 +86,18 @@ copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Co
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;libmx.lib;libmex.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>d3dViewer.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>echo copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"
-copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Command>
+      <Command>echo copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"
+copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="d3dViewer.def" />
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dViewer.cpp" />
     <ClCompile Include="D3d\Camera.cpp" />
@@ -120,7 +119,10 @@ copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Co
     <ClCompile Include="Mex\Commands.cpp" />
     <ClCompile Include="Mex\LoadData.cpp" />
     <ClCompile Include="Mex\MainMex.cpp" />
+    <ClCompile Include="Mex\MexCommand.cpp" />
+    <ClCompile Include="Mex\MexInit.cpp" />
     <ClCompile Include="Mex\Update.cpp" />
+    <ClCompile Include="Mex\Viewer.cpp" />
     <ClCompile Include="Mex\Widget.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +147,8 @@ copy $(OutDir)$(ProjectName).dll "$(ProjectDir)..\matlab\+D3d\Viewer.mexw64"</Co
     <ClInclude Include="Messages\MexErrorMsg.h" />
     <ClInclude Include="Messages\QueuePolygon.h" />
     <ClInclude Include="Messages\TransferObj.h" />
+    <ClInclude Include="Mex\CommandList.h" />
+    <ClInclude Include="Mex\MexCommand.h" />
     <ClInclude Include="Mex\MexFunctions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,7 +11,7 @@ eg: [x,y] = level_3d('init', arrowFaces, arrowVerts, arrowNorms, sphereFaces, sp
 This has nlhs = 2, plhs points to null for them
 This has nrhs = 7, prhs points to the arguments
 */
-void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
+void mexFunction1(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 {
 	// If we get no arguments, or not a string array, we error
 	if(nrhs<1 || !mxIsChar(prhs[0])) mexErrMsgTxt("Usage:\n");
@@ -42,7 +42,7 @@ void mexFunction(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 		// init command
 		if(_strcmpi("init",command) == 0)
 		{
-			initCommand(nrhs,prhs);
+			//initCommand(nrhs,prhs);
 		}
 		// close command
 		else if(_strcmpi("close",command) == 0)

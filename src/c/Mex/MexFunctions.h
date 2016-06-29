@@ -2,6 +2,7 @@
 #include <concrt.h>
 #include <vector>
 #include <set>
+#include "..\D3d\GraphicObject.h"
 
 extern HANDLE mexMessageMutex;
 extern HANDLE messageLoopHandle;
@@ -12,7 +13,7 @@ extern DWORD threadID;
 
 
 void pollCommand(int nlhs, mxArray** plhs);
-void initCommand(int nrhs, const mxArray** prhs);
+//void initCommand(int nrhs, const mxArray** prhs);
 void closeCommand();
 void loadTextureCommand(const mxArray** prhs, int nrhs);
 void peelUpdateCommand(int nrhs, const mxArray** prhs);
@@ -41,11 +42,10 @@ void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plh
 void removePolygonCommand(int nrhs, const mxArray** prhs);
 void deleteAllPolygonsCommand();
 void setBackColor(int nrhs, const mxArray** prhs);
-extern "C" void exitFunc();
+extern "C" __declspec(dllexport) void exitFunc();
 
 
-void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]);
-extern "C" void exitFunc();
+void mexFunction1(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]);
 
 void setCurrentTexture(GraphicObjectTypes textureType);
 void toggleSegmentationResults(bool on);

@@ -42,7 +42,7 @@ if (~D3dIsOpen)
     
     %% start the viewer dll
     [pathstr,~,~] = fileparts(which('D3d.Viewer'));
-    D3d.Viewer('init',arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
+    D3d.Viewer.Init(arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
     D3dIsOpen = true;
 end
 

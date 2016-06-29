@@ -56,29 +56,29 @@ void pollCommand(int nlhs, mxArray** plhs)
 	}
 }
 
-void initCommand(int nrhs, const mxArray** prhs)
-{
-	// Not enough args
-	if (nrhs < 8)
-		mexErrMsgTxt("Not enough input arguments to initialize Lever 3-d.  Did you forget the widget?");
-
-	if (!messageLoopHandle)
-	{
-		char buff[512];
-		mxGetString(prhs[7],buff,512);
-		std::string rootDir = buff;
-		startThread(rootDir);
-
-		if (registerExitFunction)
-		{
-			mexAtExit(exitFunc);
-			registerExitFunction = FALSE;
-		}
-
-		loadWidget(prhs + 1);
-		gRendererOn = true;
-	}
-}
+//void initCommand(int nrhs, const mxArray** prhs)
+//{
+//	// Not enough args
+//	if (nrhs < 8)
+//		mexErrMsgTxt("Not enough input arguments to initialize Lever 3-d.  Did you forget the widget?");
+//
+//	if (!messageLoopHandle)
+//	{
+//		char buff[512];
+//		mxGetString(prhs[7],buff,512);
+//		std::string rootDir = buff;
+//		startThread(rootDir);
+//
+//		if (registerExitFunction)
+//		{
+//			mexAtExit(exitFunc);
+//			registerExitFunction = FALSE;
+//		}
+//
+//		loadWidget(prhs + 1);
+//		gRendererOn = true;
+//	}
+//}
 
 void closeCommand()
 {

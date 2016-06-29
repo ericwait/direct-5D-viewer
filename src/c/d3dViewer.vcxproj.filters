@@ -43,11 +43,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="d3dViewer.def">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Mex\Commands.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -111,7 +106,18 @@
     <ClCompile Include="D3d\TextureLightingObj.cpp">
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="d3dViewer.cpp" />
+    <ClCompile Include="Mex\MexCommand.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexInit.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dViewer.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\Viewer.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">
@@ -179,6 +185,12 @@
     </ClInclude>
     <ClInclude Include="Global\VecFuncs.h">
       <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Mex\MexCommand.h">
+      <Filter>Mex\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mex\CommandList.h">
+      <Filter>Mex\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
