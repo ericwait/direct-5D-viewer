@@ -1,0 +1,31 @@
+#include "MexCommand.h"
+#include "MexFunctions.h"
+#include "..\Global\Globals.h"
+
+void MexPeelUpdate::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+{
+	float* x = new float;
+	*x = (float)mxGetScalar(prhs[0]);
+
+	dataQueue->writeMessage("peelUpdate", (void*)x);
+}
+
+std::string MexPeelUpdate::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+{
+	if (nrhs != 1)
+		return "Not the right arguments for peelUpdate!"
+
+	return "";
+}
+
+void MexPeelUpdate::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
+{
+	inArgs.push_back("PeelSize");
+}
+
+void MexPeelUpdate::help(std::vector<std::string>& helpLines) const
+{
+	helpLines.push_back("Executes on slider movement.");
+
+	helpLines.push_back("\tPeelSize -- .");
+}

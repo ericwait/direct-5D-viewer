@@ -80,434 +80,434 @@ DataQueue* dataQueue = new DataQueue();
 //	}
 //}
 
-void closeCommand()
-{
-	dataQueue->writeMessage("close", NULL);
-	cleanUp();
-	gMexMessageQueueOut.clear();
-	dataQueue->clear();
-}
-
-void loadTextureCommand(const mxArray** prhs, int nrhs)
-{
-	if(!mxIsClass(prhs[1],"uint8"))
-		mexErrMsgTxt("Image must be of uint8 class!");
-
-	size_t numDims = mxGetNumberOfDimensions(prhs[1]);
-	if (numDims<3)
-		mexErrMsgTxt("Image must have at least three dimensions!");
-
-	const mwSize* DIMS = mxGetDimensions(prhs[1]);
-
-	// Dimensions 1-5
-	Vec<size_t> dims = Vec<size_t>(DIMS[0], DIMS[1], DIMS[2]);
-	int numChannels = 1;
-	int numFrames = 1;
-
-
-	if (numDims>3)
-		numChannels = int(DIMS[3]);
-
-	if (numDims > 4)
-		numFrames = int(DIMS[4]);
-
-	// ptr to image data
-	unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
-
-	Image* img = new Image(numChannels,numFrames,dims);
-	img->setPixels(image);
-
-	if (nrhs > 2)
-	{
-		// Physical dimensions
-		double* physDims = (double*)mxGetData(prhs[2]);
-		img->setPhysicalDim(Vec<float>(float(physDims[1]),float(physDims[0]),float(physDims[2])));
-	}
-
-	if (nrhs > 3)
-	{
-		char buff[96];
-		mxGetString(prhs[3], buff, 96);
-
-		if (_strcmpi("original", buff) == 0)
-			img->setTextureType(GraphicObjectTypes::OriginalVolume);
-		else if (_strcmpi("processed", buff) == 0)
-			img->setTextureType(GraphicObjectTypes::ProcessedVolume);
-	}
-	else
-	{
-		img->setTextureType(GraphicObjectTypes::OriginalVolume);
-	}
-
-	std::string s = "loadTexture";
-	dataQueue->writeMessage(s,(void*)img);
-	int x = 0;
-	x = x + 30;
-}
-
-void peelUpdateCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("not the right arguments for peelUpdate!");
-
-	float* x = new float;
-	*x = (float)mxGetScalar(prhs[1]);
-
-	dataQueue->writeMessage("peelUpdate", (void*)x);
-}
-
-void textureLightingUpdateCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
-
-	if (mxGetScalar(prhs[1]) > 0.0)
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				dataQueue->writeMessage("textureLightingUpdate", (void*)textureLightObj);
-				//firstVolumeTextures[i]->setLightOn(true);
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				dataQueue->writeMessage("textureLightingUpdate", (void*)textureLightObj);
-				//firstVolumeTextures[i]->setLightOn(false);
-			}
-		}
-	}
-}
-
-void textureAttenUpdateCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("not the right arguments for attenuationUpdate!");
-
-	if (mxGetScalar(prhs[1]) > 0.0)
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				//firstVolumeTextures[i]->setAttenuationOn(true);
-				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				//firstVolumeTextures[i]->setAttenuationOn(false);
-				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
-			}
-		}
-	}
-}
-
-void segmentationLightingCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
-
-	double onD = mxGetScalar(prhs[1]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	dataQueue->writeMessage("showLabels", (void*)onD2);
-}
-
-void playCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for play!");
-
-	double onD = mxGetScalar(prhs[1]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	dataQueue->writeMessage("play", (void*)onD2);
-}
-
-void rotateCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for rotate!");
-
-	double onD = mxGetScalar(prhs[1]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	dataQueue->writeMessage("rotate", (void*)onD2);
-}
-
-void showLabelsCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for showLabels!");
-
-	double onD = mxGetScalar(prhs[1]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	dataQueue->writeMessage("showLabels", (void*)onD2);
-}
-
-void resetViewCommand()
-{
-	std::string s = "resetView";
-	dataQueue->writeMessage(s, NULL);
-}
-
-void captureSpinMovieCommand()
-{
-	dataQueue->writeMessage("captureSpinMovie", (void*)NULL);
-}
-
-void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
-{
-	if (2 > nrhs || 3<nrhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
-
-	char buff[96];
-	if (nrhs > 2)
-	{
-		mxGetString(prhs[2], buff, 96);
-	}
-
-	size_t numElem = mxGetNumberOfElements(prhs[1]);
-
-	for (int chan = 0; chan < numElem; ++chan)
-	{
-		// TODO Pull these out.. eventually 
-		Vec<float> transferFunction(0.0f, 0.0f, 0.0f);
-		Vec<float> ranges;
-		Vec<float> color;
-		float alphaMod;
-
-		mxArray* mxColorPt = mxGetField(prhs[1], chan, "color");
-		double* mxColor = (double*)mxGetData(mxColorPt);
-		color = Vec<float>((float)(mxColor[0]), (float)(mxColor[1]), (float)(mxColor[2]));
-
-		mxArray* mxAPt = mxGetField(prhs[1], chan, "a");
-		mxArray* mxBPt = mxGetField(prhs[1], chan, "b");
-		mxArray* mxCPt = mxGetField(prhs[1], chan, "c");
-		double a = mxGetScalar(mxAPt);
-		double b = mxGetScalar(mxBPt);
-		double c = mxGetScalar(mxCPt);
-		transferFunction = Vec<float>((float)a, (float)b, (float)c);
-
-		mxArray* mxMin = mxGetField(prhs[1], chan, "minVal");
-		mxArray* mxMax = mxGetField(prhs[1], chan, "maxVal");
-		ranges = Vec<float>((float)mxGetScalar(mxMin), (float)mxGetScalar(mxMax), 1.0f);
-
-		mxArray* mxAlphaPt = mxGetField(prhs[1], chan, "alphaMod");
-		mxArray* mxOnPt = mxGetField(prhs[1], chan, "visible");
-		if (mxGetScalar(mxOnPt) != 0)
-			alphaMod = (float)mxGetScalar(mxAlphaPt);
-		else
-			alphaMod = 0.0f;
-
-		TransferObj* transferObj = new TransferObj(transferFunction, ranges, color, alphaMod, chan, buff, numElem);
-		dataQueue->writeMessage("transferUpdate", (void*)transferObj);
-	}
-}
-
-void viewTextureCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for viewTexture!");
-
-	char buff[96];
-	mxGetString(prhs[1], buff, 96);
-
-	GraphicObjectTypes* textureType = new GraphicObjectTypes;// GraphicObjectTypes::OriginalVolume;
-
-	if (_strcmpi("original", buff) == 0)
-		*textureType = GraphicObjectTypes::OriginalVolume;
-	else if (_strcmpi("processed", buff) == 0)
-		*textureType = GraphicObjectTypes::ProcessedVolume;
-
-	dataQueue->writeMessage("viewTexture",(void*)textureType);
-}
-
-void viewSegmentationCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for viewSegmentation!");
-
-	double onD = mxGetScalar(prhs[1]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	dataQueue->writeMessage("viewSegmentation", (void*)onD2);
-}
-
-void wireframeSegmentationCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for wireframeSegmentation!");
-
-	double onD = mxGetScalar(prhs[1]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	dataQueue->writeMessage("wireframeSegmentation", (void*)onD2);
-}
-
-void loadPolygonsCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
-
-	const mxArray* polygons = prhs[1];
-	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
-
-	HRESULT hr = loadPolygons(polygons);
-	if (FAILED(hr))
-		mexErrMsgTxt("Could not load polygons!");
-}
-
-void removePolygonCommand(int nrhs, const mxArray** prhs){
-	double d = mxGetScalar(prhs[1]);
-	int* label = new int;
-	*label = (int)d;
-	dataQueue->writeMessage("removePolygon", (void*)label);
-}
-
-void displayPolygonsCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for displayPolygons!");
-
-	double* hullList = (double*)mxGetData(prhs[1]);
-	size_t numPolygons = mxGetNumberOfElements(prhs[1]);
-
-	std::set<int>* polygonset = new std::set<int>;
-	for (size_t i = 0; i < numPolygons; ++i)
-		polygonset->insert((int)(hullList[i]));
-
-	dataQueue->writeMessage("displayPolygons", (void*)polygonset);
-}
-
-void setFrameCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for setFrame!");
-
-	int curFrame = (int)mxGetScalar(prhs[1]);
-	int* onD2 = new int;
-	*onD2 = curFrame-1;
-	dataQueue->writeMessage("setFrame", (void*)onD2);
-}
-
-void setViewOriginCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");
-
-	double* origin = (double*)mxGetData(prhs[1]);
-	size_t numDims = mxGetNumberOfElements(prhs[1]);
-
-	if (numDims != 3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
-
-	double* originMsg = new double[3];
-	originMsg[0] = origin[0];
-	originMsg[1] = origin[1];
-	originMsg[2] = origin[2];
-
-	dataQueue->writeMessage("setViewOrigin", (void*)originMsg);
-}
-
-void updatePolygonsCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
-
-	const mxArray* polygons = prhs[1];
-	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
-
-	HRESULT hr = updatePolygons(polygons);
-	if (FAILED(hr))
-		mexErrMsgTxt("Could not update polygons!");
-}
-
-void addPolygonsCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
-
-	const mxArray* polygons = prhs[1];
-	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
-
-	HRESULT hr = addPolygons(polygons);
-	if (FAILED(hr))
-		mexErrMsgTxt("Could not add polygons!");
-}
-
-void setCapturePathCommand(int nrhs, const mxArray** prhs)
-{
-	if (nrhs != 3) mexErrMsgTxt("Not the right arguments for setCapturePath!");
-
-	char filePath[512];
-	char fileName[255];
-	mxGetString(prhs[1], filePath, 512);
-	mxGetString(prhs[2], fileName, 255);
-
-	gRenderer->setCaptureFilePath(filePath);
-	gRenderer->setCaptureFileName(fileName);
-}
-
-void takeControlCommand()
-{
-	dataQueue->writeMessage("takeControl",NULL);
-}
-
-void releaseControlCommand()
-{
-	dataQueue->writeMessage("releaseControl", NULL);
-}
-
-void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs)
-{
-	//if (gRendererOn == true) mexErrMsgTxt("MATLAB does not have exclusive control over the renderer! Call takeControl before using this command");
-
-	//if (nrhs != 3) mexErrMsgTxt("Usage is lever_3d('captureImage',folderPath,fileNamePrefix); ");
-	if (nlhs != 1) mexErrMsgTxt("There must be one output argument to hold the file path/name that was captured!");
-
-	std::string fileNameOut;
-	HRESULT hr;
-
-	if (nrhs > 2)
-	{
-		char dirBuff[512];
-		char filePreBuff[256];
-
-		mxGetString(prhs[1], dirBuff, 512);
-		mxGetString(prhs[2], dirBuff, 256);
-
-		hr = gRenderer->captureWindow(dirBuff, filePreBuff, fileNameOut);
-	}
-	else
-	{
-		hr = gRenderer->captureWindow(&fileNameOut);
-	}
-
-	if (FAILED(hr)) mexErrMsgTxt("Unable to capture the screen!");
-
-	plhs[0] = mxCreateString(fileNameOut.c_str());
-}
-
-void deleteAllPolygonsCommand(){
-	dataQueue->writeMessage("deleteAllPolygons", (void*)NULL);
-}
-
-
-void setBackColor(int nrhs, const mxArray** prhs)
-{
-	if(nrhs!=2)
-		mexErrMsgTxt("There must be one input consisting of three doubles between [0,1]!");
-	if (mxGetNumberOfElements(prhs[1])!=3)
-		mexErrMsgTxt("There must be one input consisting of three doubles between [0,1]!");
-	
-	double* bc = (double*)mxGetData(prhs[1]);
-	Vec<float>* background = new Vec<float>;
-	background->x = (float)(bc[0]);
-	background->y = (float)(bc[1]);
-	background->z = (float)(bc[2]);
-
-	dataQueue->writeMessage("setBackgroundColor", (void*)background);
-}
+//void closeCommand()
+//{
+//	dataQueue->writeMessage("close", NULL);
+//	cleanUp();
+//	gMexMessageQueueOut.clear();
+//	dataQueue->clear();
+//}
+
+//void loadTextureCommand(const mxArray** prhs, int nrhs)
+//{
+//	if(!mxIsClass(prhs[1],"uint8"))
+//		mexErrMsgTxt("Image must be of uint8 class!");
+//
+//	size_t numDims = mxGetNumberOfDimensions(prhs[1]);
+//	if (numDims<3)
+//		mexErrMsgTxt("Image must have at least three dimensions!");
+//
+//	const mwSize* DIMS = mxGetDimensions(prhs[1]);
+//
+//	// Dimensions 1-5
+//	Vec<size_t> dims = Vec<size_t>(DIMS[0], DIMS[1], DIMS[2]);
+//	int numChannels = 1;
+//	int numFrames = 1;
+//
+//
+//	if (numDims>3)
+//		numChannels = int(DIMS[3]);
+//
+//	if (numDims > 4)
+//		numFrames = int(DIMS[4]);
+//
+//	// ptr to image data
+//	unsigned char* image = (unsigned char*)mxGetData(prhs[1]);
+//
+//	Image* img = new Image(numChannels,numFrames,dims);
+//	img->setPixels(image);
+//
+//	if (nrhs > 2)
+//	{
+//		// Physical dimensions
+//		double* physDims = (double*)mxGetData(prhs[2]);
+//		img->setPhysicalDim(Vec<float>(float(physDims[1]),float(physDims[0]),float(physDims[2])));
+//	}
+//
+//	if (nrhs > 3)
+//	{
+//		char buff[96];
+//		mxGetString(prhs[3], buff, 96);
+//
+//		if (_strcmpi("original", buff) == 0)
+//			img->setTextureType(GraphicObjectTypes::OriginalVolume);
+//		else if (_strcmpi("processed", buff) == 0)
+//			img->setTextureType(GraphicObjectTypes::ProcessedVolume);
+//	}
+//	else
+//	{
+//		img->setTextureType(GraphicObjectTypes::OriginalVolume);
+//	}
+//
+//	std::string s = "loadTexture";
+//	dataQueue->writeMessage(s,(void*)img);
+//	int x = 0;
+//	x = x + 30;
+//}
+
+//void peelUpdateCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("not the right arguments for peelUpdate!");
+//
+//	float* x = new float;
+//	*x = (float)mxGetScalar(prhs[1]);
+//
+//	dataQueue->writeMessage("peelUpdate", (void*)x);
+//}
+
+//void textureLightingUpdateCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("not the right arguments for lightingUpdate!");
+//
+//	if (mxGetScalar(prhs[1]) > 0.0)
+//	{
+//		for (int i = 0; i < firstVolumeTextures.size(); ++i)
+//		{
+//			if (NULL != firstVolumeTextures[i])
+//			{
+//				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
+//				dataQueue->writeMessage("textureLightingUpdate", (void*)textureLightObj);
+//				//firstVolumeTextures[i]->setLightOn(true);
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i = 0; i < firstVolumeTextures.size(); ++i)
+//		{
+//			if (NULL != firstVolumeTextures[i])
+//			{
+//				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
+//				dataQueue->writeMessage("textureLightingUpdate", (void*)textureLightObj);
+//				//firstVolumeTextures[i]->setLightOn(false);
+//			}
+//		}
+//	}
+//}
+
+//void textureAttenUpdateCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("not the right arguments for attenuationUpdate!");
+//
+//	if (mxGetScalar(prhs[1]) > 0.0)
+//	{
+//		for (int i = 0; i < firstVolumeTextures.size(); ++i)
+//		{
+//			if (NULL != firstVolumeTextures[i])
+//			{
+//				//firstVolumeTextures[i]->setAttenuationOn(true);
+//				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
+//				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i = 0; i < firstVolumeTextures.size(); ++i)
+//		{
+//			if (NULL != firstVolumeTextures[i])
+//			{
+//				//firstVolumeTextures[i]->setAttenuationOn(false);
+//				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
+//				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
+//			}
+//		}
+//	}
+//}
+
+//void segmentationLightingCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for segmentationLighting!");
+//
+//	double onD = mxGetScalar(prhs[1]);
+//	double* onD2 = new double;
+//	*onD2 = onD;
+//	dataQueue->writeMessage("showLabels", (void*)onD2);
+//}
+
+//void playCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for play!");
+//
+//	double onD = mxGetScalar(prhs[1]);
+//	double* onD2 = new double;
+//	*onD2 = onD;
+//	dataQueue->writeMessage("play", (void*)onD2);
+//}
+
+//void rotateCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for rotate!");
+//
+//	double onD = mxGetScalar(prhs[1]);
+//	double* onD2 = new double;
+//	*onD2 = onD;
+//	dataQueue->writeMessage("rotate", (void*)onD2);
+//}
+
+//void showLabelsCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for showLabels!");
+//
+//	double onD = mxGetScalar(prhs[1]);
+//	double* onD2 = new double;
+//	*onD2 = onD;
+//	dataQueue->writeMessage("showLabels", (void*)onD2);
+//}
+
+//void resetViewCommand()
+//{
+//	std::string s = "resetView";
+//	dataQueue->writeMessage(s, NULL);
+//}
+
+//void captureSpinMovieCommand()
+//{
+//	dataQueue->writeMessage("captureSpinMovie", (void*)NULL);
+//}
+
+//void transferUpdateCommand(int nrhs, int nlhs, const mxArray** prhs)
+//{
+//	if (2 > nrhs || 3<nrhs) mexErrMsgTxt("This is not the right number of input arguments for transferUpdate!");
+//
+//	char buff[96];
+//	if (nrhs > 2)
+//	{
+//		mxGetString(prhs[2], buff, 96);
+//	}
+//
+//	size_t numElem = mxGetNumberOfElements(prhs[1]);
+//
+//	for (int chan = 0; chan < numElem; ++chan)
+//	{
+//		// TODO Pull these out.. eventually 
+//		Vec<float> transferFunction(0.0f, 0.0f, 0.0f);
+//		Vec<float> ranges;
+//		Vec<float> color;
+//		float alphaMod;
+//
+//		mxArray* mxColorPt = mxGetField(prhs[1], chan, "color");
+//		double* mxColor = (double*)mxGetData(mxColorPt);
+//		color = Vec<float>((float)(mxColor[0]), (float)(mxColor[1]), (float)(mxColor[2]));
+//
+//		mxArray* mxAPt = mxGetField(prhs[1], chan, "a");
+//		mxArray* mxBPt = mxGetField(prhs[1], chan, "b");
+//		mxArray* mxCPt = mxGetField(prhs[1], chan, "c");
+//		double a = mxGetScalar(mxAPt);
+//		double b = mxGetScalar(mxBPt);
+//		double c = mxGetScalar(mxCPt);
+//		transferFunction = Vec<float>((float)a, (float)b, (float)c);
+//
+//		mxArray* mxMin = mxGetField(prhs[1], chan, "minVal");
+//		mxArray* mxMax = mxGetField(prhs[1], chan, "maxVal");
+//		ranges = Vec<float>((float)mxGetScalar(mxMin), (float)mxGetScalar(mxMax), 1.0f);
+//
+//		mxArray* mxAlphaPt = mxGetField(prhs[1], chan, "alphaMod");
+//		mxArray* mxOnPt = mxGetField(prhs[1], chan, "visible");
+//		if (mxGetScalar(mxOnPt) != 0)
+//			alphaMod = (float)mxGetScalar(mxAlphaPt);
+//		else
+//			alphaMod = 0.0f;
+//
+//		TransferObj* transferObj = new TransferObj(transferFunction, ranges, color, alphaMod, chan, buff, numElem);
+//		dataQueue->writeMessage("transferUpdate", (void*)transferObj);
+//	}
+//}
+
+//void viewTextureCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for viewTexture!");
+//
+//	char buff[96];
+//	mxGetString(prhs[1], buff, 96);
+//
+//	GraphicObjectTypes* textureType = new GraphicObjectTypes;// GraphicObjectTypes::OriginalVolume;
+//
+//	if (_strcmpi("original", buff) == 0)
+//		*textureType = GraphicObjectTypes::OriginalVolume;
+//	else if (_strcmpi("processed", buff) == 0)
+//		*textureType = GraphicObjectTypes::ProcessedVolume;
+//
+//	dataQueue->writeMessage("viewTexture",(void*)textureType);
+//}
+
+//void viewSegmentationCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for viewSegmentation!");
+//
+//	double onD = mxGetScalar(prhs[1]);
+//	double* onD2 = new double;
+//	*onD2 = onD;
+//	dataQueue->writeMessage("viewSegmentation", (void*)onD2);
+//}
+
+//void wireframeSegmentationCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for wireframeSegmentation!");
+//
+//	double onD = mxGetScalar(prhs[1]);
+//	double* onD2 = new double;
+//	*onD2 = onD;
+//	dataQueue->writeMessage("wireframeSegmentation", (void*)onD2);
+//}
+
+//void loadPolygonsCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
+//
+//	const mxArray* polygons = prhs[1];
+//	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
+//
+//	HRESULT hr = loadPolygons(polygons);
+//	if (FAILED(hr))
+//		mexErrMsgTxt("Could not load polygons!");
+//}
+
+//void removePolygonCommand(int nrhs, const mxArray** prhs){
+//	double d = mxGetScalar(prhs[1]);
+//	int* label = new int;
+//	*label = (int)d;
+//	dataQueue->writeMessage("removePolygon", (void*)label);
+//}
+
+//void displayPolygonsCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for displayPolygons!");
+//
+//	double* hullList = (double*)mxGetData(prhs[1]);
+//	size_t numPolygons = mxGetNumberOfElements(prhs[1]);
+//
+//	std::set<int>* polygonset = new std::set<int>;
+//	for (size_t i = 0; i < numPolygons; ++i)
+//		polygonset->insert((int)(hullList[i]));
+//
+//	dataQueue->writeMessage("displayPolygons", (void*)polygonset);
+//}
+
+//void setFrameCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for setFrame!");
+//
+//	int curFrame = (int)mxGetScalar(prhs[1]);
+//	int* onD2 = new int;
+//	*onD2 = curFrame-1;
+//	dataQueue->writeMessage("setFrame", (void*)onD2);
+//}
+
+//void setViewOriginCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for setViewOrigin!");
+//
+//	double* origin = (double*)mxGetData(prhs[1]);
+//	size_t numDims = mxGetNumberOfElements(prhs[1]);
+//
+//	if (numDims != 3) mexErrMsgTxt("There needs to be three doubles for the view origin!");
+//
+//	double* originMsg = new double[3];
+//	originMsg[0] = origin[0];
+//	originMsg[1] = origin[1];
+//	originMsg[2] = origin[2];
+//
+//	dataQueue->writeMessage("setViewOrigin", (void*)originMsg);
+//}
+
+//void updatePolygonsCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
+//
+//	const mxArray* polygons = prhs[1];
+//	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
+//
+//	HRESULT hr = updatePolygons(polygons);
+//	if (FAILED(hr))
+//		mexErrMsgTxt("Could not update polygons!");
+//}
+
+//void addPolygonsCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 2) mexErrMsgTxt("Not the right arguments for loadPolygons!");
+//
+//	const mxArray* polygons = prhs[1];
+//	if (polygons == NULL) mexErrMsgTxt("No polygons passed as the second argument!\n");
+//
+//	HRESULT hr = addPolygons(polygons);
+//	if (FAILED(hr))
+//		mexErrMsgTxt("Could not add polygons!");
+//}
+
+//void setCapturePathCommand(int nrhs, const mxArray** prhs)
+//{
+//	if (nrhs != 3) mexErrMsgTxt("Not the right arguments for setCapturePath!");
+//
+//	char filePath[512];
+//	char fileName[255];
+//	mxGetString(prhs[1], filePath, 512);
+//	mxGetString(prhs[2], fileName, 255);
+//
+//	gRenderer->setCaptureFilePath(filePath);
+//	gRenderer->setCaptureFileName(fileName);
+//}
+
+//void takeControlCommand()
+//{
+//	dataQueue->writeMessage("takeControl",NULL);
+//}
+
+//void releaseControlCommand()
+//{
+//	dataQueue->writeMessage("releaseControl", NULL);
+//}
+
+//void captureImageCommand(int nlhs, int nrhs, const mxArray** prhs, mxArray** plhs)
+//{
+//	//if (gRendererOn == true) mexErrMsgTxt("MATLAB does not have exclusive control over the renderer! Call takeControl before using this command");
+//
+//	//if (nrhs != 3) mexErrMsgTxt("Usage is lever_3d('captureImage',folderPath,fileNamePrefix); ");
+//	if (nlhs != 1) mexErrMsgTxt("There must be one output argument to hold the file path/name that was captured!");
+//
+//	std::string fileNameOut;
+//	HRESULT hr;
+//
+//	if (nrhs > 2)
+//	{
+//		char dirBuff[512];
+//		char filePreBuff[256];
+//
+//		mxGetString(prhs[1], dirBuff, 512);
+//		mxGetString(prhs[2], dirBuff, 256);
+//
+//		hr = gRenderer->captureWindow(dirBuff, filePreBuff, fileNameOut);
+//	}
+//	else
+//	{
+//		hr = gRenderer->captureWindow(&fileNameOut);
+//	}
+//
+//	if (FAILED(hr)) mexErrMsgTxt("Unable to capture the screen!");
+//
+//	plhs[0] = mxCreateString(fileNameOut.c_str());
+//}
+
+//void deleteAllPolygonsCommand(){
+//	dataQueue->writeMessage("deleteAllPolygons", (void*)NULL);
+//}
+
+
+//void setBackColor(int nrhs, const mxArray** prhs)
+//{
+//	if(nrhs!=2)
+//		mexErrMsgTxt("There must be one input consisting of three doubles between [0,1]!");
+//	if (mxGetNumberOfElements(prhs[1])!=3)
+//		mexErrMsgTxt("There must be one input consisting of three doubles between [0,1]!");
+//	
+//	double* bc = (double*)mxGetData(prhs[1]);
+//	Vec<float>* background = new Vec<float>;
+//	background->x = (float)(bc[0]);
+//	background->y = (float)(bc[1]);
+//	background->z = (float)(bc[2]);
+//
+//	dataQueue->writeMessage("setBackgroundColor", (void*)background);
+//}
 
 
 extern "C" void exitFunc()
