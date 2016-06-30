@@ -16,7 +16,7 @@
 function Check(src, evnt)
 global D3dUICtrlHandles EXT_MESAGE_FUNC
 
-msgs = D3d.Viewer('poll');
+msgs = D3d.Viewer.Poll();
 
 if (strcmp(msgs(1).command,'null'))
     return

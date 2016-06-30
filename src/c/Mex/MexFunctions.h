@@ -12,7 +12,7 @@ extern std::vector<SceneNode*> hullRootNodes;
 extern DWORD threadID;
 
 
-void pollCommand(int nlhs, mxArray** plhs);
+//void pollCommand(int nlhs, mxArray** plhs);
 //void initCommand(int nrhs, const mxArray** prhs);
 void closeCommand();
 void loadTextureCommand(const mxArray** prhs, int nrhs);

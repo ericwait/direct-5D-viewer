@@ -52,7 +52,7 @@ void mexFunction1(int nlhs,mxArray* plhs[],int nrhs,const mxArray* prhs[])
 		// poll command
 		else if(_strcmpi("poll",command) == 0)
 		{
-			pollCommand(nlhs,plhs);
+			//pollCommand(nlhs,plhs);
 		}
 		else if(messageLoopHandle != NULL)
 		{

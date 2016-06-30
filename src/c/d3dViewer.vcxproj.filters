@@ -118,6 +118,9 @@
     <ClCompile Include="Mex\Viewer.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexPoll.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">

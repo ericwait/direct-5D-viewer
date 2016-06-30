@@ -39,4 +39,5 @@ DEF_MEX_COMMAND(Info)
 DEF_MEX_COMMAND(Help)
 // Additional specific mex commands should be added here.
 DEF_MEX_COMMAND(Init)
+DEF_MEX_COMMAND(Poll)
 END_MEX_COMMANDS
