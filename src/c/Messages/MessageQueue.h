@@ -51,12 +51,19 @@ public:
 	void addMessage(std::string command,std::string message,double val1,double val2,unsigned char* aray);
 	void addErrorMessage(HRESULT hr);
 	void addErrorMessage(std::string message);
+	size_t size() { return messages.size(); }
+	bool isempty() { return messages.empty(); }
+	bool hasError() { return errorExist; }
+	bool doneLoading() { return loadDone; }
+	void clearLoadFlag() { loadDone = false; }
 	void clear();
 	std::vector<RtnMessage> flushQueue();
 
 private:
 	void addMessage(RtnMessage message);
 	bool validQueue;
+	bool errorExist;
+	bool loadDone;
 	HANDLE queueMutex;
 	std::queue<RtnMessage> messages;
 };

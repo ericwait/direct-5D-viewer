@@ -19,7 +19,7 @@
 MessageQueue::MessageQueue()
 {
 	queueMutex = CreateMutex(NULL,FALSE,NULL);
-	validQueue = true;
+	errorExist = false;
 }
 
 MessageQueue::~MessageQueue()
@@ -59,8 +59,13 @@ RtnMessage MessageQueue::getNextMessage()
 
 	ReleaseMutex(queueMutex);
 
+	if(errorExist && strcmp(msgOut.command.c_str(), "error")&&messages.empty())
+		errorExist = false;
+
+
 	return msgOut;
 }
+
 
 void MessageQueue::addMessage(std::string command, double val)
 {
@@ -94,7 +99,11 @@ void MessageQueue::addMessage(std::string command, std::string message, double v
 
 void MessageQueue::addMessage(RtnMessage message)
 {
-	if (!validQueue) return;
+	if(strcmp(message.command.c_str(), "loadDone")==0)
+	{
+		loadDone = true;
+		return;
+	}
 
 	DWORD waitTime = INFINITE;
 
@@ -136,6 +145,8 @@ void MessageQueue::addErrorMessage(HRESULT hr)
 	msgIn.val1 = hr;
 
 	addMessage(msgIn);
+
+	errorExist = true;
 }
 
 void MessageQueue::addErrorMessage(std::string message)
@@ -146,6 +157,8 @@ void MessageQueue::addErrorMessage(std::string message)
 	msgIn.val1 = -1.0;
 
 	addMessage(msgIn);
+
+	errorExist = true;
 }
 
 void MessageQueue::clear()
@@ -167,9 +180,9 @@ void MessageQueue::clear()
 		messages.pop();
 	}
 
-	validQueue = false;
-
 	ReleaseMutex(queueMutex);
+
+	errorExist = true;
 }
 
 std::vector<RtnMessage> MessageQueue::flushQueue()
@@ -207,6 +220,8 @@ std::vector<RtnMessage> MessageQueue::flushQueue()
 	}
 
 	ReleaseMutex(queueMutex);
+
+	errorExist = false;
 
 	return queueOut;
 }

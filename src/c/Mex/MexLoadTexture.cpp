@@ -2,8 +2,14 @@
 #include "..\Global\Globals.h"
 #include "..\Messages\Image.h"
 
+#pragma optimize("",off)
 void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
+	// check the message queue for an error message before continuing
+
+	if(gMexMessageQueueOut.hasError())
+		return;
+
 	const mwSize* DIMS = mxGetDimensions(prhs[0]);
 
 	// Dimensions 1-5
@@ -48,9 +54,17 @@ void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 
 	std::string s = "loadTexture";
 	gDataQueue->writeMessage(s, (void*)img);
-	int x = 0;
-	x = x + 30;
+
+	unsigned int i = 0;
+	while(!gMexMessageQueueOut.hasError() && !gMexMessageQueueOut.doneLoading())
+	{
+		++i;
+	}
+
+	if(gMexMessageQueueOut.doneLoading())
+		gMexMessageQueueOut.clearLoadFlag();
 }
+#pragma optimize("",on)
 
 std::string MexLoadTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

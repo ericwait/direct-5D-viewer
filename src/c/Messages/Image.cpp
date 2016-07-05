@@ -11,9 +11,6 @@ Image::Image(int numChannels,int numFrames,Vec<size_t> dimensions)
 	this->dimensions = dimensions;
 	this->numChannels = numChannels;
 	this->numFrames = numFrames;
-
-	size_t pixelsCount = dimensions.product() * numFrames * numChannels;
-	pixels = new unsigned char[pixelsCount];
 }
 
 void Image::setDefauts()
@@ -23,12 +20,12 @@ void Image::setDefauts()
 	numChannels = 0;
 	numFrames = 0;
 	physicalDims = Vec<float>(0.0f,0.0f,0.0f);
+	pixels = NULL;
 }
 
 Image::~Image()
 {
 	setDefauts();
-	delete[] pixels;
 }
 
 GraphicObjectTypes Image::getTextureType()
@@ -44,9 +41,9 @@ unsigned char* Image::getPixels()
 {
 	return pixels;
 }
-void Image::setPixels(unsigned char* pixels)
+void Image::setPixels(unsigned char* pixelsIn)
 {
-	memcpy(this->pixels,pixels,dimensions.product()* numChannels * numFrames * sizeof(unsigned char));
+	this->pixels = pixelsIn;
 }
 
 int Image::getNumChannels()
