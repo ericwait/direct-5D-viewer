@@ -474,7 +474,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 				// Inside here check for a message from queue
 				// checkQueue();
-				if(dataQueue->getNumMessages() > 0)
+				if(gDataQueue->getNumMessages() > 0)
 				{
 					hr = checkMessage();
 					if(hr==S_FALSE)
@@ -573,7 +573,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 HRESULT checkMessage()
 {
 	HRESULT hr = S_OK;
-	Message m = dataQueue->getNextMessage();
+	Message m = gDataQueue->getNextMessage();
 
 	if(m.command == "loadTexture")
 	{

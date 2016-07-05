@@ -11,12 +11,12 @@ void MexDisplayPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	for (size_t i = 0; i < numPolygons; ++i)
 		polygonset->insert((int)(hullList[i]));
 
-	dataQueue->writeMessage("displayPolygons", (void*)polygonset);
+	gDataQueue->writeMessage("displayPolygons", (void*)polygonset);
 }
 
 std::string MexDisplayPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	(nrhs != 2)
+	if (nrhs != 2)
 		return "Not the right arguments for displayPolygons!";
 
 	return "";

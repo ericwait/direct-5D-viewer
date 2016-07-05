@@ -298,17 +298,17 @@ end
 % --- Executes on slider movement.
 function s_peelSize_Callback(hObject, eventdata, handles)
 val = get(handles.s_peelSize,'Value');
-D3d.Viewer('peelUpdate',val);
+D3d.Viewer.PeelUpdate(val);
 end
 
 % --- Executes on button press in cb_textureLighting.
 function cb_textureLighting_Callback(hObject, eventdata, handles)
-D3d.Viewer('textureLightingUpdate',get(handles.cb_textureLighting,'Value'));
+D3d.Viewer.TextureLighting(get(handles.cb_textureLighting,'Value'));
 end
 
 % --- Executes on button press in cb_atten.
 function cb_atten_Callback(hObject, eventdata, handles)
-D3d.Viewer('textureAttenUpdate',get(handles.cb_atten,'Value'));
+D3d.Viewer.TextureAttenuation(get(handles.cb_atten,'Value'));
 end
 
 % --- Executes on button press in rb_orgImage.
@@ -324,7 +324,7 @@ end
 % --- Executes on button press in cb_Wireframe.
 function cb_Wireframe_Callback(hObject, eventdata, handles)
 on = get(handles.cb_Wireframe,'Value');
-D3d.Viewer('wireframeSegmentation',on);
+D3d.Viewer.ToggleWireframe(on);
 end
 
 % --- Executes on button press in cb_segLighting.
@@ -335,30 +335,30 @@ end
 % --- Executes on button press in cb_Play.
 function cb_Play_Callback(hObject, eventdata, handles)
 on = get(handles.cb_Play,'Value');
-D3d.Viewer('play',on);
+D3d.Viewer.Play(on);
 end
 
 % --- Executes on button press in cb_Rotate.
 function cb_Rotate_Callback(hObject, eventdata, handles)
 on = get(handles.cb_Rotate,'Value');
-D3d.Viewer('rotate',on);
+D3d.Viewer.Rotate(on);
 end
 
 % --- Executes on button press in pb_ResetView.
 function pb_ResetView_Callback(hObject, eventdata, handles)
-D3d.Viewer('resetView');
+D3d.Viewer.ResetView();
 end
 
 % --- Executes on button press in cb_SegmentationResults.
 function cb_SegmentationResults_Callback(hObject, eventdata, handles)
 on = get(handles.cb_SegmentationResults,'Value');
-D3d.Viewer('viewSegmentation',on);
+D3d.Viewer.DisplayPolygons(on);
 end
 
 % --- Executes on button press in cb_ShowLabels.
 function cb_ShowLabels_Callback(hObject, eventdata, handles)
 on = get(handles.cb_ShowLabels,'Value');
-D3d.Viewer('showLabels',on);
+D3d.Viewer.ShowLabels(on);
 end
 
 %% Create Functions

@@ -1,3 +1,4 @@
+#include "Threads.h"
 #include "..\Global\Globals.h"
 #include "mex.h"
 #include "..\D3d\MessageProcessor.h"

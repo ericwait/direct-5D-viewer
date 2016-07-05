@@ -137,7 +137,7 @@ HRESULT loadPolygons(const mxArray* polygonsIn)
 		polygons->at(i)->setcolorData(colorData);
 	}
 
-	dataQueue->writeMessage("loadPolygons", (void*)polygons);
+	gDataQueue->writeMessage("loadPolygons", (void*)polygons);
 
 	return S_OK;
 }

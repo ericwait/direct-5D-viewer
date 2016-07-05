@@ -14,7 +14,7 @@ void MexSetViewOrigin::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArra
 	originMsg[1] = origin[1];
 	originMsg[2] = origin[2];
 
-	dataQueue->writeMessage("setViewOrigin", (void*)originMsg);
+	gDataQueue->writeMessage("setViewOrigin", (void*)originMsg);
 }
 
 std::string MexSetViewOrigin::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

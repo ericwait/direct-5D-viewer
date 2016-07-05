@@ -27,8 +27,8 @@ for i=1:length(rp)
         hulls = [hulls,polygon];
     end
 end
-D3d.Viewer('deleteAllPolygons');
-D3d.Viewer('loadPolygons',hulls);
+D3d.Viewer.DeleteAllPolygons();
+D3d.Viewer.LoadPolygons(hulls);
 D3d.UI.Ctrl.UpdateTime(t);
 
 testHull = 5;
@@ -68,7 +68,7 @@ polygon.color = [0,.5,1];
 hulls = [hulls,polygon];
 kList = [kList,length(hulls)];
 
-D3d.Viewer('deleteAllPolygons');
-D3d.Viewer('loadPolygons',hulls);
+D3d.Viewer.DeleteAllPolygons();
+D3d.Viewer.LoadPolygons(hulls);
 
-D3d.Viewer('displayPolygons',gmmList);
+D3d.Viewer.DisplayPolygons(gmmList);

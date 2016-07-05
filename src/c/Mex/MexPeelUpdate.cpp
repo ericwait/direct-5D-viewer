@@ -7,13 +7,13 @@ void MexPeelUpdate::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 	float* x = new float;
 	*x = (float)mxGetScalar(prhs[0]);
 
-	dataQueue->writeMessage("peelUpdate", (void*)x);
+	gDataQueue->writeMessage("peelUpdate", (void*)x);
 }
 
 std::string MexPeelUpdate::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	if (nrhs != 1)
-		return "Not the right arguments for peelUpdate!"
+	if(nrhs!=1)
+		return "Not the right arguments for peelUpdate!";
 
 	return "";
 }

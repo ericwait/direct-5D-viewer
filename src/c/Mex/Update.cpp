@@ -146,8 +146,8 @@ HRESULT updatePolygons(const mxArray* hulls)
 		polygon->setcolorData(colorData);
 		int* intptr = new int;
 		*intptr = polygon->getIndex();
-		dataQueue->writeMessage("removePolygon", (void*)intptr);
-		dataQueue->writeMessage("loadPolygon", (void*)polygon);
+		gDataQueue->writeMessage("removePolygon", (void*)intptr);
+		gDataQueue->writeMessage("loadPolygon", (void*)polygon);
 	}
 
 	return S_OK;
@@ -203,7 +203,7 @@ HRESULT addPolygons(const mxArray* polygonsIn)
 		polygons->at(i)->setcolorData(colorData);
 	}
 
-	dataQueue->writeMessage("loadPolygons", (void*)polygons);
+	gDataQueue->writeMessage("loadPolygons", (void*)polygons);
 
 	return S_OK;
 }

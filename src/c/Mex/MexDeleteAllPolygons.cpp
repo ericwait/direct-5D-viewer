@@ -4,7 +4,7 @@
 
 void MexDeleteAllPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	dataQueue->writeMessage("deleteAllPolygons", (void*)NULL);
+	gDataQueue->writeMessage("deleteAllPolygons", (void*)NULL);
 }
 
 std::string MexDeleteAllPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

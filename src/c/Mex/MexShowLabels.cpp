@@ -7,7 +7,7 @@ void MexShowLabels::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 	double onD = mxGetScalar(prhs[0]);
 	double* onD2 = new double;
 	*onD2 = onD;
-	dataQueue->writeMessage("showLabels", (void*)onD2);
+	gDataQueue->writeMessage("showLabels", (void*)onD2);
 }
 
 std::string MexShowLabels::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

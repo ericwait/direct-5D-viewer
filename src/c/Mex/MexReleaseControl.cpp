@@ -4,7 +4,7 @@
 
 void MexReleaseControl::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	dataQueue->writeMessage("releaseControl", NULL);
+	gDataQueue->writeMessage("releaseControl", NULL);
 }
 
 std::string MexReleaseControl::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

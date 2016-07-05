@@ -4,7 +4,7 @@
 
 void MexCaptureSpinMovie::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	dataQueue->writeMessage("captureSpinMovie", (void*)NULL);
+	gDataQueue->writeMessage("captureSpinMovie", (void*)NULL);
 }
 
 std::string MexCaptureSpinMovie::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

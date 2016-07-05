@@ -8,16 +8,5 @@
 %    	ShereNorms -- This is the normal directions that correspond to the faces for an object that represents the axis origin.
 %    	PathStr -- This is the path where the render will find the shader files and is typically in the same directory as the mex dll
 function Init(arrowFaces,arrowVerts,arrowNorms,sphereFaces,sphereVerts,shereNorms,pathStr)
-    curPath = which('Cuda');
-    curPath = fileparts(curPath);
-    mutexfile = fullfile(curPath,sprintf('device%02d.txt',device));
-    while(exist(mutexfile,'file'))
-        pause(1);
-    end
-    f = fopen(mutexfile,'wt');
-    fclose(f);
-
-    Viewer.Mex('Init',arrowFaces,arrowVerts,arrowNorms,sphereFaces,sphereVerts,shereNorms,pathStr);
-
-    delete(mutexfile);
+    D3d.Viewer.Mex('Init',arrowFaces,arrowVerts,arrowNorms,sphereFaces,sphereVerts,shereNorms,pathStr);
 end

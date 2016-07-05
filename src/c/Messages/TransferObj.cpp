@@ -10,6 +10,7 @@ TransferObj::TransferObj(Vec<float> transferFunction, Vec<float> ranges, Vec<flo
 	this->ranges = ranges;
 	this->color = color;
 	this->alphaMod = alphaMod;
+	char buff[255];
 	strncpy_s(buff, b, strlen(b));
 	this->numElem = numElem;
 }

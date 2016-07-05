@@ -1,8 +1,9 @@
 #include "MexCommand.h"
 #include "MexFunctions.h"
 #include "..\Global\Globals.h"
+#include "..\D3d\TextureLightingObj.h"
 
-void MexTextureAttenUpdate::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	if (mxGetScalar(prhs[0]) > 0.0)
 	{
@@ -12,7 +13,7 @@ void MexTextureAttenUpdate::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 			{
 				//firstVolumeTextures[i]->setAttenuationOn(true);
 				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
+				gDataQueue->writeMessage("TextureAttenuation", (void*)textureLightObj);
 			}
 		}
 	}
@@ -24,13 +25,13 @@ void MexTextureAttenUpdate::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 			{
 				//firstVolumeTextures[i]->setAttenuationOn(false);
 				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				dataQueue->writeMessage("textureAttenUpdate", (void*)textureLightObj);
+				gDataQueue->writeMessage("TextureAttenuation", (void*)textureLightObj);
 			}
 		}
 	}
 }
 
-std::string MexTextureAttenUpdate::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+std::string MexTextureAttenuation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	if (nrhs != 1)
 		return "not the right arguments for attenuationUpdate!";
@@ -38,12 +39,12 @@ std::string MexTextureAttenUpdate::check(int nlhs, mxArray* plhs[], int nrhs, co
 	return "";
 }
 
-void MexTextureAttenUpdate::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
+void MexTextureAttenuation::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
 	//inArgs.push_back("arrowFaces");
 }
 
-void MexTextureAttenUpdate::help(std::vector<std::string>& helpLines) const
+void MexTextureAttenuation::help(std::vector<std::string>& helpLines) const
 {
 	//helpLines.push_back("This initializes the D3d viewing window.  It takes a widget to show orientation. The ARROW will be the polygons that point down each axis.  The SPHERE is the center polygon that is centered at the (widget's) axis origin.");
 

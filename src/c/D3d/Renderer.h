@@ -217,8 +217,8 @@ private:
 };
 
 
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"\\DefaultMeshShaders.fx","\\ViewAlignedVertexShader.fx"};
+const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {".//Shaders//DefaultMeshShaders.fx",".//Shaders//ViewAlignedVertexShader.fx"};
 const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshVertexShader","ViewAlignedVertexShader"};
 
-const std::string PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::PixelShadersEnd] ={"\\DefaultMeshShaders.fx","\\StaticVolumePixelShader.fx"};
+const std::string PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::PixelShadersEnd] ={".//Shaders//DefaultMeshShaders.fx",".//Shaders//StaticVolumePixelShader.fx"};
 const std::string PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::PixelShadersEnd] ={"DefaultMeshPixelShader","MultiChanVolumePixelShader"};

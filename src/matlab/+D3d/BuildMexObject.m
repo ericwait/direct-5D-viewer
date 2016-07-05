@@ -76,7 +76,7 @@ function commandString = makeCommandString(objectName, mexName, commandInfo)
          commandString = ['[' makeCommaList(commandInfo.outArgs) '] = '];
     end
 
-    mexCall = [objectName '.' mexName];
+    mexCall = ['D3d.' objectName '.' mexName];
     commandString = [commandString mexCall '(''' commandInfo.command ''''];
     if ( ~isempty(commandInfo.inArgs) )
          commandString = [commandString ',' makeCommaList(commandInfo.inArgs)];

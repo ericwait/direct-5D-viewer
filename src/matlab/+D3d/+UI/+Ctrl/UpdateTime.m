@@ -29,7 +29,7 @@ if (~isempty(D3dUICtrlHandles))
     set(D3dUICtrlHandles.handles.s_curFrame,'Value', time);
     
     if (~exist('fromC','var') || isempty(fromC) || fromC~=1)
-        D3d.Viewer('setFrame',time);
+        D3d.Viewer.SetFrame(time);
     end
 end
 end

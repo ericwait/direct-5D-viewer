@@ -121,6 +121,90 @@
     <ClCompile Include="Mex\MexPoll.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexAddPolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexCaptureImage.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexCaptureSpinMovie.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexClose.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexDeleteAllPolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexDisplayPolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexLoadPolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexLoadTexture.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexPeelUpdate.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexPlay.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexReleaseControl.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexRemovePolygon.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexResetView.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexRotate.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetBackColor.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetCapturePath.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetFrame.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetViewOrigin.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexShowLabels.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexTakeControl.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexUpdatePolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexPolygonLighting.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexTextureAttenuation.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexTextureLighting.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexTransferFunction.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexShowPolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexShowTexture.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexToggleWireframe.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">
@@ -194,6 +278,9 @@
     </ClInclude>
     <ClInclude Include="Mex\CommandList.h">
       <Filter>Mex\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\Threads.h">
+      <Filter>Messaging\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,7 +7,7 @@ if (~isempty(D3dUICtrlHandles))
     end
 end
 
-D3d.Viewer('close');
+D3d.Viewer.Close();
 
 D3d.Messaging.DeleteTimer();
 

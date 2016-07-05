@@ -28,9 +28,9 @@ if (~isempty(D3dUICtrlHandles))
     hold(D3dUICtrlHandles.handles.funcPlot,'off')
 
     if (1==get(D3dUICtrlHandles.handles.rb_Processed,'Value'))
-        D3d.Viewer('transferUpdate',channelData,'processed');
+        D3d.Viewer.TransferFunction(channelData,'processed');
     else
-        D3d.Viewer('transferUpdate',channelData,'original');
+        D3d.Viewer.TransferFunction(channelData,'original');
     end
     
     D3d.UI.Ctrl.SetUserData(imageData,colors,channelData)

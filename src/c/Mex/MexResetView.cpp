@@ -5,7 +5,7 @@
 void MexResetView::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	std::string s = "resetView";
-	dataQueue->writeMessage(s, NULL);
+	gDataQueue->writeMessage(s, NULL);
 }
 
 std::string MexResetView::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

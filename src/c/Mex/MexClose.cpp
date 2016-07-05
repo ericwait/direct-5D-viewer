@@ -1,13 +1,13 @@
 #include "MexCommand.h"
-#include "MexFunctions.h"
 #include "..\Global\Globals.h"
+#include "..\Messages\Threads.h"
 
 void MexClose::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	dataQueue->writeMessage("close", NULL);
+	gDataQueue->writeMessage("close", NULL);
 	cleanUp();
 	gMexMessageQueueOut.clear();
-	dataQueue->clear();
+	gDataQueue->clear();
 }
 
 std::string MexClose::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

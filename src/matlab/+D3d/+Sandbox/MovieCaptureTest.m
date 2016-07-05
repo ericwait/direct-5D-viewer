@@ -71,12 +71,12 @@ end
 
 %% Load the segmenation and show individual channels
 for c=1:imD.NumberOfChannels
-    D3d.Viewer('loadPolygons',polygons{c});
+    D3d.Viewer.LoadPolygons(polygons{c});
 end
 
 % View just a channel's polygons
-%D3d.Viewer('displayPolygons',10001:20000);%shows the first channel polygons
-%D3d.Viewer('displayPolygons',20001:50000);%shows the 2nd through 5th channel polygons
+%D3d.Viewer.DisplayPolygons(10001:20000);%shows the first channel polygons
+%D3d.Viewer.DisplayPolygons(20001:50000);%shows the 2nd through 5th channel polygons
 
 %% capture frames for animation
 % ******************************************
@@ -92,12 +92,12 @@ end
 mkdir(outputPath);
 
 % tell the viewer where to put the screen shots
-D3d.Viewer('setCapturePath',outputPath,imD.DatasetName);
+D3d.Viewer.SetCapturePath(outputPath,imD.DatasetName);
 
 %% run some sort of animation
 for i=1:720
-    D3d.Viewer('setRotation',-0.5,0);
-    D3d.Viewer('captureWindow');
+    D3d.Viewer.Rotate(0.5,0);
+    D3d.Viewer.CaptureImage();
 end
 
 %% get a list of the files captured

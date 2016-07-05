@@ -380,6 +380,8 @@ HRESULT CompileShaderFromFile( LPCWSTR szFileName, LPCSTR szEntryPoint, LPCSTR s
 
 	ID3DBlob* pErrorBlob;
 
+	TCHAR pwd[512];
+	GetCurrentDirectory(MAX_PATH, pwd);
 	hr = D3DCompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 
 	if( FAILED(hr) )

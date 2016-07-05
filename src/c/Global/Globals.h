@@ -48,4 +48,4 @@ extern bool gCapture;
 extern float gFramesPerSec;
 
 // Global Queue
-extern DataQueue* dataQueue;
+extern DataQueue* gDataQueue;

@@ -12,7 +12,7 @@ HANDLE messageLoopHandle = NULL;
 DWORD threadID;
 HANDLE mexMessageMutex = NULL;
 bool registerExitFunction = false;
-DataQueue* dataQueue = new DataQueue();
+DataQueue* gDataQueue = new DataQueue();
 
 //void pollCommand(int nlhs, mxArray** plhs)
 //{
@@ -510,7 +510,3 @@ DataQueue* dataQueue = new DataQueue();
 //}
 
 
-extern "C" void exitFunc()
-{
-	closeCommand();
-}

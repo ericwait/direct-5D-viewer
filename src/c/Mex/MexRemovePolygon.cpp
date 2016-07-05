@@ -7,7 +7,7 @@ void MexRemovePolygon::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArra
 	double d = mxGetScalar(prhs[0]);
 	int* label = new int;
 	*label = (int)d;
-	dataQueue->writeMessage("removePolygon", (void*)label);
+	gDataQueue->writeMessage("removePolygon", (void*)label);
 }
 
 std::string MexRemovePolygon::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
