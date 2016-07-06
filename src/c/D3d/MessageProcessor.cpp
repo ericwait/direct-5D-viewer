@@ -584,7 +584,7 @@ HRESULT checkMessage()
 	{
 		hr = S_FALSE;
 	}
-	else if(m.command == "viewTexture")
+	else if(m.command == "ViewTexture")
 	{
 		GraphicObjectTypes* typ = (GraphicObjectTypes*)m.data;
 		

@@ -14,7 +14,7 @@ void MexShowTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	else if (_strcmpi("processed", buff) == 0)
 		*textureType = GraphicObjectTypes::ProcessedVolume;
 
-	gDataQueue->writeMessage("ShowTexture", (void*)textureType);
+	gDataQueue->writeMessage("ViewTexture", (void*)textureType);
 }
 
 std::string MexShowTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
@@ -27,12 +27,14 @@ std::string MexShowTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxA
 
 void MexShowTexture::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
-	//inArgs.push_back("arrowFaces");
+	inArgs.push_back("bufferType");
 }
 
 void MexShowTexture::help(std::vector<std::string>& helpLines) const
 {
-	//helpLines.push_back("This initializes the D3d viewing window.  It takes a widget to show orientation. The ARROW will be the polygons that point down each axis.  The SPHERE is the center polygon that is centered at the (widget's) axis origin.");
+	helpLines.push_back("This selects which of the two buffers to display.");
 
-	//helpLines.push_back("\tArrowFaces -- This is an ordered list of vertices that make up the facets (triangles) for each axis.");
+	helpLines.push_back("\tBufferType - there are two buffers available to be displayed, 'original' and 'processed'.");
+	helpLines.push_back("\t\tOriginal - corresponds to the first buffer and can be displayed if an image has been loaded.");
+	helpLines.push_back("\t\tProcessed - corresponds to the second buffer and can be displayed if an image has been loaded.");
 }
