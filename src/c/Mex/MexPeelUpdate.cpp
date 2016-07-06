@@ -25,7 +25,7 @@ void MexPeelUpdate::usage(std::vector<std::string>& outArgs, std::vector<std::st
 
 void MexPeelUpdate::help(std::vector<std::string>& helpLines) const
 {
-	helpLines.push_back("Executes on slider movement.");
+	helpLines.push_back("This will set the percent of the volume to render before rendering the polygons in the same area.");
 
-	helpLines.push_back("\tPeelSize -- .");
+	helpLines.push_back("\tPeelSize -- This is the percentage of the volume to render before rendering polygons in the same space.");
 }
