@@ -728,9 +728,9 @@ HRESULT checkMessage()
 	else
 	{
 		// Print an error message
-		/*char buff[255];
-		sprintf_s(buff, "%s is not a valid command!\n", command);
-		mexErrMsgTxt(buff);*/
+		char buff[255];
+		sprintf_s(buff, "%s is not a valid command!\n", m.command);
+		sendErrMessage(buff);
 	}
 	return hr;
 }
