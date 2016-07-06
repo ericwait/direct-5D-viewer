@@ -87,7 +87,7 @@ void XaddPolygonsCommand(Message m){
 		if(frame<0)
 		{
 			char buff[128];
-			sprintf(buff, "You can't add a hull to a negative frame! Hull:%d, Frame:%d", curPoly->getIndex(),frame);
+			sprintf(buff, "You can't add a polygon to a negative frame! Polygon:%d, Frame:%d", curPoly->getIndex(),frame);
 			sendErrMessage(buff);
 			return;
 		}
@@ -107,7 +107,7 @@ void XaddPolygonsCommand(Message m){
 		if (oldNode)
 		{
 			char buff[128];
-			sprintf(buff,"You can't add a hull that already exists! %d", curPoly->getIndex());
+			sprintf(buff,"You can't add a polygon that already exists! Polygon:%d", curPoly->getIndex());
 			sendErrMessage(buff);
 			return;
 		}
