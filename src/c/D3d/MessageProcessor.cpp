@@ -635,7 +635,7 @@ HRESULT checkMessage()
 		XcaptureSpinMovieCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "transferUpdate")
+	else if(m.command == "TransferFunction")
 	{
 		XtransferUpdateCommand(m);
 		gRenderer->renderAll();
