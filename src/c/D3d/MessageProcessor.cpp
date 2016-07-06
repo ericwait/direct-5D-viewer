@@ -650,7 +650,7 @@ HRESULT checkMessage()
 		XremovePolygonCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "displayPolygons")
+	else if(m.command == "ShowPolygons")
 	{
 		XdisplayPolygonsCommand(m);
 		gRenderer->renderAll();
