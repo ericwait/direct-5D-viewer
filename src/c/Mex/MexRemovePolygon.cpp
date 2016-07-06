@@ -17,12 +17,9 @@ std::string MexRemovePolygon::check(int nlhs, mxArray* plhs[], int nrhs, const m
 
 void MexRemovePolygon::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
-	//inArgs.push_back("arrowFaces");
 }
 
 void MexRemovePolygon::help(std::vector<std::string>& helpLines) const
 {
-	//helpLines.push_back("This initializes the D3d viewing window.  It takes a widget to show orientation. The ARROW will be the polygons that point down each axis.  The SPHERE is the center polygon that is centered at the (widget's) axis origin.");
-
-	//helpLines.push_back("\tArrowFaces -- This is an ordered list of vertices that make up the facets (triangles) for each axis.");
+	helpLines.push_back("This removes all polygons from the directX viewer");
 }
