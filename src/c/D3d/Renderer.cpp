@@ -753,7 +753,7 @@ void Renderer::postRenderLoop()
 
 void Renderer::gdiRenderLoop()
 {
-	if (rootScene->getNumRenderableObjects(Main)<1 || !labelsOn)
+	if (rootScene->getNumRenderableObjects(Main)<1)
 		return;
 
 	immediateContext->OMSetRenderTargets(0, 0, 0);
@@ -768,8 +768,11 @@ void Renderer::gdiRenderLoop()
 
 	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
 
-	for (int i=0; i<renderMainList.size(); ++i)
-		renderLabel(renderMainList[i]->getRenderPackage(),hdc);
+	if(labelsOn)
+	{
+		for(int i = 1; i<renderMainList.size(); ++i)
+			renderLabel(renderMainList[i]->getRenderPackage(), hdc);
+	}
 
 	if (!renderMainList.empty())
 		renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
