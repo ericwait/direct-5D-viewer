@@ -640,11 +640,6 @@ HRESULT checkMessage()
 		XtransferUpdateCommand(m);
 		gRenderer->renderAll();
 	}
-// 	else if(m.command == "viewTexture")
-// 	{
-// 		XviewTextureCommand(m);
-// 		gRenderer->renderAll();
-// 	}
 	else if(m.command == "viewSegmentation")
 	{
 		XviewSegmentationCommand(m);
@@ -653,16 +648,6 @@ HRESULT checkMessage()
 	else if(m.command == "wireframeSegmentation")
 	{
 		XwireframeSegmentationCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "loadPolygon")
-	{
-		XaddPolygonCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "loadPolygons")
-	{
-		XaddPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
 	else if(m.command == "removePolygon")

@@ -1210,21 +1210,13 @@ void Renderer::resetRootWorldTransform()
 
 void Renderer::setClipChunkPercent(float ccp)
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
-
 	clipChunkPercent = ccp;
-
-	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::setNumPlanes(int numPlanesIn)
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
-
 	if (numPlanes < numPlanesIn)
 		numPlanes = numPlanesIn;
-
-	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::updateRenderList()

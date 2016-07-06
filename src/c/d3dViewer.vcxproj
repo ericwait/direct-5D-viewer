@@ -118,7 +118,6 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Messages\TransferObj.cpp" />
     <ClCompile Include="Mex\Commands.cpp" />
     <ClCompile Include="Mex\LoadData.cpp" />
-    <ClCompile Include="Mex\MainMex.cpp" />
     <ClCompile Include="Mex\MexAddPolygons.cpp" />
     <ClCompile Include="Mex\MexCaptureImage.cpp" />
     <ClCompile Include="Mex\MexCaptureSpinMovie.cpp" />
@@ -127,7 +126,6 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexDeleteAllPolygons.cpp" />
     <ClCompile Include="Mex\MexDisplayPolygons.cpp" />
     <ClCompile Include="Mex\MexInit.cpp" />
-    <ClCompile Include="Mex\MexLoadPolygons.cpp" />
     <ClCompile Include="Mex\MexLoadTexture.cpp" />
     <ClCompile Include="Mex\MexPeelUpdate.cpp" />
     <ClCompile Include="Mex\MexPlay.cpp" />

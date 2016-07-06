@@ -49,9 +49,6 @@
     <ClCompile Include="Mex\LoadData.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MainMex.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\Update.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -137,9 +134,6 @@
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexDisplayPolygons.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexLoadPolygons.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexLoadTexture.cpp">

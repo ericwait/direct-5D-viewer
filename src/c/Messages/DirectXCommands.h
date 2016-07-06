@@ -7,7 +7,6 @@
 void XloadTextureCommand(Message m);
 void XresetViewCommand(Message m);
 void XtransferUpdateCommand(Message m);
-void XaddPolygonCommand(Message m);
 void XaddPolygonsCommand(Message m);
 void XpeelUpdateCommand(Message m);
 void XremovePolygonCommand(Message m);

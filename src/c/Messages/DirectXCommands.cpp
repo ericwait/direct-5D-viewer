@@ -74,63 +74,6 @@ void XtransferUpdateCommand(Message m){
 	delete sentTranfser;
 }
 
-void XaddPolygonCommand(Message m){
-	if (gRenderer == NULL) return;
-
-	/*if (!gGraphicObjectNodes[GraphicObjectTypes::CellPolygons].empty())
-	{
-		//gRenderer->getMutex();
-		for (int j = 0; j < gGraphicObjectNodes[GraphicObjectTypes::CellPolygons].size(); ++j)
-		{
-			gGraphicObjectNodes[GraphicObjectTypes::CellPolygons][j]->releaseRenderResources();
-			delete gGraphicObjectNodes[GraphicObjectTypes::CellPolygons][j];
-		}
-
-		gGraphicObjectNodes[GraphicObjectTypes::CellPolygons].clear();
-
-		gRenderer->updateRenderList();
-		//gRenderer->releaseMutex();
-	}
-
-	if (hullRootNodes.size() != gRenderer->getNumberOfFrames())
-	{
-		for (int i = 0; i < hullRootNodes.size(); ++i)
-			delete hullRootNodes[i];
-	}
-	*/
-	if (hullRootNodes.empty()){
-		hullRootNodes.resize(gRenderer->getNumberOfFrames());
-		for (unsigned int i = 0; i < gRenderer->getNumberOfFrames(); ++i)
-			hullRootNodes[i] = NULL;
-	}
-
-	QueuePolygon* polygon = (QueuePolygon*)m.data;
-
-	if (hullRootNodes[polygon->getFrame()] == NULL){
-		hullRootNodes[polygon->getFrame()] = new SceneNode();
-		gRenderer->attachToRootScene(hullRootNodes[polygon->getFrame()], Renderer::Section::Main, polygon->getFrame());
-	}
-
-	GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, polygon->getIndex());
-	if (oldNode)
-	{
-		sendErrMessage("You can't add a hull that already exists!");
-		return;
-	}
-
-	PolygonObject* curPolygonObj = createPolygonObject(polygon->getfaceData(), polygon->getNumFaces(), polygon->getvertData(), polygon->getNumVerts(), polygon->getnormData(), polygon->getNumNormals(), gCameraDefaultMesh);
-	curPolygonObj->setColor(Vec<float>((float)(polygon->getcolorData())[0], (float)(polygon->getcolorData())[1], (float)(polygon->getcolorData())[2]), 1.0f);
-	curPolygonObj->setIndex(polygon->getIndex());
-	curPolygonObj->setLabel(polygon->getLabel());
-	GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);
-	curPolygonNode->setWireframe(true);
-	curPolygonNode->attachToParentNode(hullRootNodes[polygon->getFrame()]);
-
-	insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, curPolygonNode);
-
-	delete polygon;
-}
-
 void XaddPolygonsCommand(Message m){
 	vector<QueuePolygon*>* polygons = (vector<QueuePolygon*>*)m.data;
 
