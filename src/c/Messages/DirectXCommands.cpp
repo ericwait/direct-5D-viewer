@@ -224,16 +224,6 @@ void XviewTextureCommand(Message m){
 	delete[] m.data;
 }
 
-void XviewSegmentationCommand(Message m){
-	double* doublePtr = (double*)m.data;
-	double onD = *doublePtr;
-	bool on = onD > 0;
-
-	toggleSegmentationResults(on);
-
-	delete doublePtr;
-}
-
 void XwireframeSegmentationCommand(Message m){
 	double* doublePtr = (double*)m.data;
 	double onD = *doublePtr;

@@ -640,11 +640,6 @@ HRESULT checkMessage()
 		XtransferUpdateCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "viewSegmentation")
-	{
-		XviewSegmentationCommand(m);
-		gRenderer->renderAll();
-	}
 	else if(m.command == "wireframeSegmentation")
 	{
 		XwireframeSegmentationCommand(m);

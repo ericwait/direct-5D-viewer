@@ -15,7 +15,6 @@ void XrotateCommand(Message m);
 void XshowLabelsCommand(Message m);
 void XcaptureSpinMovieCommand(Message m);
 void XviewTextureCommand(Message m);
-void XviewSegmentationCommand(Message m);
 void XwireframeSegmentationCommand(Message m);
 void XsetFrameCommand(Message m);
 void XsetViewOriginCommand(Message m);
