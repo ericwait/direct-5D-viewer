@@ -113,7 +113,8 @@ void XaddPolygonsCommand(Message m){
 		}
 
 		PolygonObject* curPolygonObj = createPolygonObject(curPoly->getfaceData(), curPoly->getNumFaces(), curPoly->getvertData(), curPoly->getNumVerts(), curPoly->getnormData(), curPoly->getNumNormals(), gCameraDefaultMesh);
-		curPolygonObj->setColor(Vec<float>((float)(curPoly->getcolorData())[0], (float)(curPoly->getcolorData())[1], (float)(curPoly->getcolorData())[2]), (float)(curPoly->getcolorData())[3]);
+		double* color = curPoly->getcolorData();
+		curPolygonObj->setColor(Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), (float)(color[3]));
 		curPolygonObj->setIndex(curPoly->getIndex());
 		curPolygonObj->setLabel(curPoly->getLabel());
 		GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);

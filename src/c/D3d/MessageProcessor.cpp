@@ -674,9 +674,10 @@ HRESULT checkMessage()
 	{
 
 	}
-	else if(m.command == "addPolygons")
+	else if(m.command == "AddPolygons")
 	{
-
+		XaddPolygonsCommand(m);
+		gRenderer->renderAll();
 	}
 	else if(m.command == "setCapturePath")
 	{
