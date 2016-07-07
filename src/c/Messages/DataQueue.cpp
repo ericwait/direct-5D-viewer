@@ -20,18 +20,20 @@ DataQueue::~DataQueue()
 Message DataQueue::getNextMessage()
 {
 	Message message;
-	if (!messages.empty()){
-		DWORD waitTerm = WaitForSingleObject(mutex, INFINITE);
+	DWORD waitTerm = WaitForSingleObject(mutex, INFINITE);
 
+	if (!messages.empty())
+	{
 		message = messages.front();
 		messages.pop();
 
-		ReleaseMutex(mutex);
 	}
 	else
 	{
 		mexErrMsgTxt("No messages available in queue!");
 	}
+
+	ReleaseMutex(mutex);
 
 	return message;
 }
@@ -64,8 +66,11 @@ void DataQueue::writeMessage(std::string cmd, void* data)
 
 void DataQueue::clear()
 {
+	DWORD waitTerm = WaitForSingleObject(mutex, INFINITE);
 	while(!messages.empty())
 	{
 		messages.pop();
 	}
+
+	ReleaseMutex(mutex);
 }
