@@ -329,7 +329,8 @@ end
 
 % --- Executes on button press in cb_segLighting.
 function cb_segLighting_Callback(hObject, eventdata, handles)
-%TODO put seg lighting in the shader to be turned on and off
+on = get(handles.cb_segLighting,'Value');
+D3d.Viewer.PolygonLighting(on);
 end
 
 % --- Executes on button press in cb_Play.

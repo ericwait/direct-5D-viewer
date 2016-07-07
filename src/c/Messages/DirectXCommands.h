@@ -20,7 +20,7 @@ void XsetFrameCommand(Message m);
 void XsetViewOriginCommand(Message m);
 void XtextureLightingUpdateCommand(Message m);
 void XtextureAttenUpdateCommand(Message m);
-void XsegmentationLighting(Message m);
+void XpolygonLighting(Message m);
 void XdisplayPolygonsCommand(Message m);
 void XdeleteAllPolygonsCommand(Message m);
 void XcaptureWindow();

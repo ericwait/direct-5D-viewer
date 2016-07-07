@@ -199,12 +199,12 @@ void XtextureAttenUpdateCommand(Message m){
 	delete localLightObj;
 }
 
-void XsegmentationLighting(Message m){
+void XpolygonLighting(Message m){
 	double* doublePtr = (double*)m.data;
 	double onD = *doublePtr;
 	bool on = onD > 0;
 
-	toggleSegmentaionLighting(on);
+	togglePolygonLighting(on);
 	delete doublePtr;
 }
 

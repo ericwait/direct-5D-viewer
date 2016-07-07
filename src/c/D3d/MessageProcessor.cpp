@@ -609,9 +609,9 @@ HRESULT checkMessage()
 		XtextureAttenUpdateCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "segmentationLighting")
+	else if(m.command == "PolygonLighting")
 	{
-		XsegmentationLighting(m);
+		XpolygonLighting(m);
 		gRenderer->renderAll();
 	}
 	else if(m.command == "play")

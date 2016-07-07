@@ -60,6 +60,7 @@ public:
 	DirectX::XMFLOAT4 getColor(){return colorBuffer.color;}
 
 	void updateParams();
+	void setLightOn(bool on);
 
 private:
 	SingleColoredMaterial(){}
@@ -68,6 +69,7 @@ private:
 	{
 		DirectX::XMFLOAT4 color;
 		DirectX::XMFLOAT4 colorModifier;
+		DirectX::XMFLOAT4 lightOn;
 	} colorBuffer;
 
 	ID3D11Buffer* constBuffer;

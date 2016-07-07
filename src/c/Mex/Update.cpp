@@ -64,18 +64,13 @@ void togglePolygonWireframe(bool wireframe)
 	//gRenderer->releaseMutex();
 }
 
-void toggleSegmentaionLighting(bool lighting)
+void togglePolygonLighting(bool lighting)
 {
 	if (gRenderer == NULL) return;
 
-	//gRenderer->getMutex();
-
 	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
-	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
-	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
-		objectIter->second->setLightOn(lighting);
-
-	//gRenderer->releaseMutex();
+	for(auto itr:gGraphicObjectNodes[cellType])
+		itr.second->setLightOn(lighting);
 }
 
 void toggleSelectedCell(std::set<int> labels)

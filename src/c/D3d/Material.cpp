@@ -61,6 +61,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn) : Material(re
 {
 	colorBuffer.color = DirectX::XMFLOAT4(1,1,1,1);
 	colorBuffer.colorModifier = DirectX::XMFLOAT4(1,1,1,1);
+	colorBuffer.lightOn = DirectX::XMFLOAT4(1, 1, 1, 1);
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
@@ -73,6 +74,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 {
 	colorBuffer.color = DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,1);
 	colorBuffer.colorModifier = DirectX::XMFLOAT4(1,1,1,1);
+	colorBuffer.lightOn = DirectX::XMFLOAT4(1, 1, 1, 1);
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
@@ -85,6 +87,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 {
 	colorBuffer.color = DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,alpha);
 	colorBuffer.colorModifier = DirectX::XMFLOAT4(1,1,1,1);
+	colorBuffer.lightOn = DirectX::XMFLOAT4(1, 1, 1, 1);
 
 	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
 
@@ -120,6 +123,10 @@ void SingleColoredMaterial::updateParams()
 	renderer->updateShaderParams(&colorBuffer,constBuffer);
 }
 
+void SingleColoredMaterial::setLightOn(bool on)
+{
+	colorBuffer.lightOn = DirectX::XMFLOAT4(on, on, on, on);
+}
 
 
 StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image,

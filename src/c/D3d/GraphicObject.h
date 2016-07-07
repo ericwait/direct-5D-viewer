@@ -56,7 +56,7 @@ public:
 		std::vector<Vec<float>>& normals, Camera* camera);
 	~PolygonObject();
 
-	void setLightOn(bool on){}
+	void setLightOn(bool on) { material->setLightOn(on); }
 	void setColor(Vec<float> color, float alpha);
 	void setColorMod(Vec<float> colorMod, float alpha);
 	void setWireframe(bool wireframe);

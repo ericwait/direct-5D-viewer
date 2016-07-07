@@ -10,6 +10,7 @@ cbuffer PSConstantBuffer : register( b1 )
 {
 	float4 color;
 	float4 colorModifier;
+	float4 lightOn;
 };
 
 struct VS_OUTPUT
@@ -30,7 +31,7 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
-	output.TextureUV = TextureUV; 
+	output.TextureUV = TextureUV;
 
 	output.Pos = mul( Pos, World );
 
@@ -46,14 +47,17 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 }
 
 PS_OUTPUT DefaultMeshPixelShader( VS_OUTPUT input )
-{ 
+{
 	PS_OUTPUT output;
 	float4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);
-	float lightInt = 0.7*dot(-input.Normal,mainLightDir);
+	float3 cval = color;
 
-	lightInt = saturate(lightInt) + 0.3;
-
-	float3 cval = color*lightInt;
+	if(lightOn.x>0)
+	{
+		float lightInt = 0.7*dot(-input.Normal,mainLightDir);
+		lightInt = saturate(lightInt) + 0.3;
+		cval *= lightInt;
+	}
 
 	output.color = float4(cval.x, cval.y, cval.z, color.w) * colorModifier;
 	output.depth = input.Pos.z;
