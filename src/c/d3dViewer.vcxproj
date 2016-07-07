@@ -139,6 +139,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexSetCapturePath.cpp" />
     <ClCompile Include="Mex\MexSetFrame.cpp" />
     <ClCompile Include="Mex\MexSetViewOrigin.cpp" />
+    <ClCompile Include="Mex\MexSetWindowSize.cpp" />
     <ClCompile Include="Mex\MexShowLabels.cpp" />
     <ClCompile Include="Mex\MexTakeControl.cpp" />
     <ClCompile Include="Mex\MexTextureAttenuation.cpp" />

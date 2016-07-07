@@ -199,6 +199,9 @@
     <ClCompile Include="Mex\MexToggleWireframe.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexSetWindowSize.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">

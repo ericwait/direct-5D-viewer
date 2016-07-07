@@ -19,3 +19,4 @@
 DWORD WINAPI messageLoop(LPVOID lpParam);
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 HRESULT checkMessage();
+void ClientResize(HWND hWnd, int nWidth, int nHeight);

@@ -25,3 +25,4 @@ void XdisplayPolygonsCommand(Message m);
 void XdeleteAllPolygonsCommand(Message m);
 void XcaptureWindow();
 void XsetBackgroundColor(Message m);
+void XsetWindowSize(Message m);

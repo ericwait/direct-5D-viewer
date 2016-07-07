@@ -722,6 +722,11 @@ HRESULT checkMessage()
 		XsetBackgroundColor(m);
 		gRenderer->renderAll();
 	}
+	else if(m.command=="windowSize")
+	{
+		XsetWindowSize(m);
+		gRenderer->renderAll();
+	}
 	else
 	{
 		// Print an error message

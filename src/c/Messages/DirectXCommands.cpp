@@ -8,6 +8,7 @@
 #include "..\D3d\TextureLightingObj.h"
 #include <vector>
 #include "MexErrorMsg.h"
+#include "..\D3d\MessageProcessor.h"
 
 using std::vector;
 
@@ -287,4 +288,13 @@ void XsetBackgroundColor(Message m)
 	Vec<float>* bc = (Vec<float>*)m.data;
 	gRenderer->setBackgroundColor(*bc);
 	delete bc;
+}
+
+void XsetWindowSize(Message m)
+{
+	double* dims = (double*)m.data;
+	int width = round(dims[0]);
+	int height = round(dims[1]);
+
+	ClientResize(gWindowHandle, width, height);
 }
