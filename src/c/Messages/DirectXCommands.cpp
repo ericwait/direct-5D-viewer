@@ -257,7 +257,7 @@ void XsetViewOriginCommand(Message m){
 void XdisplayPolygonsCommand(Message m){
 	std::set<int>* hullset = (std::set<int>*)m.data;
 
-	toggleSelectedCell(*hullset);
+	toggleSelectedPolygon(*hullset);
 	delete hullset;
 }
 

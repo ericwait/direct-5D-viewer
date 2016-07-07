@@ -654,6 +654,14 @@ HRESULT checkMessage()
 	}
 	else if(m.command == "ShowPolygons")
 	{
+		double* on = (double*)m.data;
+		togglePolygons((*on)>0);
+		delete on;
+
+		gRenderer->renderAll();
+	}
+	else if(m.command == "DisplayPolygons")
+	{
 		XdisplayPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
@@ -709,21 +717,21 @@ HRESULT checkMessage()
 
 		delete[] rotations;
 	}
-	else if(m.command=="takeControl")
+	else if(m.command == "takeControl")
 	{
 		gRendererOn = false;
 	} 
-	else if(m.command=="releaseControl")
+	else if(m.command == "releaseControl")
 	{
 		gRendererOn = true;
 		gRenderer->renderAll();
 	}
-	else if(m.command=="setBackgroundColor")
+	else if(m.command == "setBackgroundColor")
 	{
 		XsetBackgroundColor(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command=="windowSize")
+	else if(m.command == "windowSize")
 	{
 		XsetWindowSize(m);
 		gRenderer->renderAll();

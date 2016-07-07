@@ -14,7 +14,7 @@ extern DWORD threadID;
 extern "C" __declspec(dllexport) void exitFunc();
 
 void setCurrentTexture(GraphicObjectTypes textureType);
-void toggleSegmentationResults(bool on);
+void togglePolygons(bool on);
 void togglePolygonWireframe(bool wireframe);
 void toggleSelectedCell(std::set<int> labels);
 void togglePolygonLighting(bool lighting);

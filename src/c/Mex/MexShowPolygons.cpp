@@ -4,14 +4,11 @@
 
 void MexShowPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double* polyList = (double*)mxGetData(prhs[0]);
-	size_t numPolygons = mxGetNumberOfElements(prhs[0]);
+	double mexOn = mxGetScalar(prhs[0]);
+	double* on = new double;
+	*on = mexOn;
 
-	std::set<int>* polygonSet = new std::set<int>;
-	for(size_t i = 0; i<numPolygons; ++i)
-		polygonSet->insert((int)(polyList[i]));
-
-	gMsgQueueToDirectX.writeMessage("ShowPolygons", (void*)polygonSet);
+	gMsgQueueToDirectX.writeMessage("ShowPolygons", (void*)on);
 }
 
 std::string MexShowPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
@@ -24,13 +21,13 @@ std::string MexShowPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mx
 
 void MexShowPolygons::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
-	inArgs.push_back("polygonIdxList");
+	inArgs.push_back("on");
 }
 
 void MexShowPolygons::help(std::vector<std::string>& helpLines) const
 {
-	helpLines.push_back("This will show only the listed polygons.");
+	helpLines.push_back("This will toggle the polygons on and off.");
 
-	helpLines.push_back("\tPolygonIdxList - This is a list of polygon indices that correspond to the index field passed to the AddPolygon command.");
-	helpLines.push_back("\t\tOnly the polygons in this list will be displayed.");
+	helpLines.push_back("\tOn - If this is set to one, then all of the polygons will be on. If this is 0, all of the polygons will be off.");
+	helpLines.push_back("\t\tIf only a subset of the polygons should be displayed, use 'DisplayPolygons'.");
 }
