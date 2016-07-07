@@ -50,6 +50,9 @@ Renderer::Renderer()
 	clipChunkPercent = 1.0f;
 	numPlanes = 0;
 	labelsOn = true;
+	frameNumOn = true;
+	scaleTextOn = true;
+	scaleBarOn = true;
 	captureFilePath = "./";
 	captureFileName = "";
 	dllRoot = "";
@@ -680,7 +683,6 @@ void Renderer::renderAll()
 	if (gRendererOn)
 	{
 		rootScene->updateRenderableList();
-		//WaitForSingleObject(mutexDevice,INFINITE);
 		startRender();
 		preRenderLoop();
 		mainRenderLoop();
@@ -688,8 +690,6 @@ void Renderer::renderAll()
 		gdiRenderLoop();
 		endRender();
 	}
-
-	//ReleaseMutex(mutexDevice);
 }
 
 void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
@@ -775,8 +775,13 @@ void Renderer::gdiRenderLoop()
 			renderLabel(renderMainList[i]->getRenderPackage(), hdc);
 	}
 
-	if (!renderMainList.empty())
-		renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
+	if(!renderMainList.empty())
+	{
+		if (scaleBarOn)
+			renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
+		if (frameNumOn)
+			renderFrameNum(hdc);
+	}
 
 	IDXGIBackBuffer->ReleaseDC(NULL);
 	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
@@ -926,6 +931,43 @@ void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
 		barSize = numUnits/sz;
 	}
 
+	if(scaleTextOn)
+	{
+		DirectX::XMFLOAT4 color(1, 1, 1, 1);
+
+		COLORREF hexColor = (unsigned int)(255*color.z);
+		hexColor = hexColor<<8;
+		hexColor |= (unsigned int)(255*color.y);
+		hexColor = hexColor<<8;
+		hexColor |= (unsigned int)(255*color.x);
+
+		SelectObject(hdc, gFont);
+		SetTextColor(hdc, hexColor);
+		SetBkMode(hdc, TRANSPARENT);
+		char buff[36];
+		if(numUnits>=1.0f)
+			sprintf(buff, "%.0f%cm", numUnits, 0xb5);
+		else if(numUnits>=0.1f)
+			sprintf(buff, "%.1f%cm", numUnits, 0xb5);
+		else
+			sprintf(buff, "%.2f%cm", numUnits, 0xb5);
+
+		std::string length(buff);
+		TextOutA(hdc, (float)gWindowWidth-100, (float)gWindowHeight-25, length.c_str(), (int)length.length());
+	}
+
+	// Define the rectangle.
+	int x = gWindowWidth-85-barSize/2;
+	int y = gWindowHeight-35;
+	int width = round(barSize);
+	int height = 10;
+
+	// Fill the rectangle.
+	Rectangle(hdc, x, y, x+width, y+height);
+}
+
+void Renderer::renderFrameNum(HDC hdc)
+{
 	DirectX::XMFLOAT4 color(1, 1, 1, 1);
 
 	COLORREF hexColor = (unsigned int)(255*color.z);
@@ -938,24 +980,10 @@ void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
 	SetTextColor(hdc, hexColor);
 	SetBkMode(hdc, TRANSPARENT);
 	char buff[36];
-	if (numUnits>=1.0f)
-		sprintf(buff, "%.0f%cm", numUnits, 0xb5);
-	else if(numUnits>=0.1f)
-		sprintf(buff, "%.1f%cm", numUnits, 0xb5);
-	else
-		sprintf(buff, "%.2f%cm", numUnits, 0xb5);
+	sprintf(buff, "Frame:%d", currentFrame+1);
 
 	std::string length(buff);
-	TextOutA(hdc, (float)gWindowWidth-100, (float)gWindowHeight-25, length.c_str(), (int)length.length());
-
-	// Define the rectangle.
-	int x = gWindowWidth-85-barSize/2;
-	int y = gWindowHeight-35;
-	int width = round(barSize);
-	int height = 10;
-
-	// Fill the rectangle.
-	Rectangle(hdc, x, y, x+width, y+height);
+	TextOutA(hdc, (float)gWindowWidth-120, 10, length.c_str(), (int)length.length());
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)

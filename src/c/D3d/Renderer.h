@@ -101,6 +101,12 @@ public:
 	void updateRenderList();
 	void setLabels(bool on){labelsOn=on;}
 	void toggleLabels(){labelsOn = !labelsOn;}
+	void setFrameNumOn(bool on) { frameNumOn = on; }
+	void toggleFrameNum() { frameNumOn = !frameNumOn; }
+	void setscaleTextOn(bool on) { scaleTextOn = on; }
+	void togglescaleText() { scaleTextOn = !scaleTextOn; }
+	void setscaleBarOn(bool on) { scaleBarOn = on; }
+	void togglescaleBar() { scaleBarOn = !scaleBarOn; }
 	void setCaptureFilePath(std::string fp){ captureFilePath = fp; }
 	void setCaptureFileName(std::string fn){ captureFileName = fn; }
 
@@ -175,6 +181,7 @@ private:
 	void renderPackage(const RendererPackage* package, float frontClip=-10, float backClip=10);
 	void renderLabel(const RendererPackage* package, HDC hdc);
 	void renderScaleValue(const RendererPackage* package, HDC hdc);
+	void renderFrameNum(HDC hdc);
 
 	//Member variables 
 	Vec<float> backgroundColor;
@@ -211,6 +218,9 @@ private:
 	float clipChunkPercent;
 	int numPlanes;
 	bool labelsOn;
+	bool frameNumOn;
+	bool scaleTextOn;
+	bool scaleBarOn;
 	std::string captureFilePath;
 	std::string captureFileName;
 	std::string dllRoot;

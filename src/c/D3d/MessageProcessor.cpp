@@ -207,9 +207,23 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			altDown = true;
 			gMsgQueueToMex.addMessage("keyDown","alt");
 		}
+		else if ('B' == wParam)
+		{
+			if(ctrlDown)
+				gRenderer->togglescaleText();
+			else
+				gRenderer->togglescaleBar();
+
+			gRenderer->renderAll();
+		}
 		else if('C' == wParam)
 		{
 			gCameraDefaultMesh->resetCamera();
+			gRenderer->renderAll();
+		}
+		else if('F'==wParam)
+		{
+			gRenderer->toggleFrameNum();
 			gRenderer->renderAll();
 		}
 		else if('H' == wParam)
