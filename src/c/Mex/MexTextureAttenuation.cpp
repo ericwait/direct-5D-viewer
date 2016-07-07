@@ -5,30 +5,9 @@
 
 void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	if (mxGetScalar(prhs[0]) > 0.0)
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				//firstVolumeTextures[i]->setAttenuationOn(true);
-				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				gMsgQueueToDirectX.writeMessage("TextureAttenuation", (void*)textureLightObj);
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				//firstVolumeTextures[i]->setAttenuationOn(false);
-				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				gMsgQueueToDirectX.writeMessage("TextureAttenuation", (void*)textureLightObj);
-			}
-		}
-	}
+	bool* on = new bool;
+	*on = mxGetScalar(prhs[0])>0.0;
+	gMsgQueueToDirectX.writeMessage("textureAttenUpdate", (void*)on);
 }
 
 std::string MexTextureAttenuation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
@@ -41,12 +20,12 @@ std::string MexTextureAttenuation::check(int nlhs, mxArray* plhs[], int nrhs, co
 
 void MexTextureAttenuation::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
-	//inArgs.push_back("arrowFaces");
+	inArgs.push_back("on");
 }
 
 void MexTextureAttenuation::help(std::vector<std::string>& helpLines) const
 {
-	//helpLines.push_back("This initializes the D3d viewing window.  It takes a widget to show orientation. The ARROW will be the polygons that point down each axis.  The SPHERE is the center polygon that is centered at the (widget's) axis origin.");
+	helpLines.push_back("This allows for the toggling the attenuation of intensities on the texture.");
 
-	//helpLines.push_back("\tArrowFaces -- This is an ordered list of vertices that make up the facets (triangles) for each axis.");
+	helpLines.push_back("\tOn - This is a double, [0,1] where a zero means no attenuation and a one means there is a attenuation applied to the texture.");
 }

@@ -5,11 +5,8 @@
 
 void MexTransferFunction::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	char bufferType[96];
-	if (nrhs > 2)
-	{
-		mxGetString(prhs[1], bufferType, 96);
-	}
+	char bufferType[256];
+	mxGetString(prhs[1], bufferType, 256);
 
 	size_t numElem = mxGetNumberOfElements(prhs[0]);
 
@@ -51,7 +48,7 @@ void MexTransferFunction::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 
 std::string MexTransferFunction::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	if (1 > nrhs || 2 < nrhs)
+	if (2 != nrhs)
 		return "This is not the right number of input arguments for TransferFunction!";
 
 	return "";

@@ -8,11 +8,12 @@ smallThreshold = 25;
 %% do some sort of processing here
 imS = im;
 refIms = im(:,:,:,:,1);
-parfor t=1:imD.NumberOfFrames
+%parfor t=1:imD.NumberOfFrames
+for t=1:imD.NumberOfFrames
     chanIms = im(:,:,:,:,t);
     imSmooth = chanIms;
-    for c=1:imD.NumberOfChannels
-        imSmooth(:,:,:,c) = imhistmatch(chanIms(:,:,:,c),refIms(:,:,:,c),2^16);
+    for c=1%:imD.NumberOfChannels
+        %imSmooth(:,:,:,c) = imhistmatch(chanIms(:,:,:,c),refIms(:,:,:,c),2^16);
         imSmooth(:,:,:,c) = Cuda.ContrastEnhancement(imSmooth(:,:,:,c),[75,75,25],[3,3,3],1);
         
     end
@@ -29,12 +30,13 @@ polygons = cell(imD.NumberOfChannels,1);
 
 prgs = Utils.CmdlnProgress(imD.NumberOfChannels*imD.NumberOfFrames,true,'Making Polygons');
 for t=1:imD.NumberOfFrames
-    for c=1:imD.NumberOfChannels
+    for c=1%:imD.NumberOfChannels
         curIm = imS(:,:,:,c,t);
         level = graythresh(curIm(curIm>0));
-        imBW = curIm > level * 0.8 * maxVal;
-        imBW = Cuda.MaxFilterEllipsoid(im2uint8(imBW),[3,3,2],1);
-        imBW = Cuda.MinFilterEllipsoid(imBW,[3,3,2],1);
+        imBW = curIm > level;% * 0.8 * maxVal;
+        imBW = im2uint8(imBW);
+        imBW = Cuda.MinFilterEllipsoid(imBW,[1,1,0],1);
+        imBW = Cuda.MaxFilterEllipsoid(imBW,[1,1,0],1);
         imBW = imBW>0;
         rp = regionprops(imBW,'Area','PixelList');
         plygns = D3d.Polygon.MakeEmptyStruct();
@@ -53,13 +55,13 @@ end
 prgs.ClearProgress(true);
 
 %% clean up the polygons
-for c=1:imD.NumberOfChannels
+for c=1%:imD.NumberOfChannels
     curPolys = polygons{c};
     if (isfield(imD,'ChannelColors') && ~isempty(imD.ChannelColors))
-        curColor = 1 - imD.ChannelColors(c,:);
+        curColor = [1 - imD.ChannelColors(c,:),1];
     else
         %do something for each channel or each object here
-        curColor = [.25,.25,1];
+        curColor = [.25,.25,1,1];
     end
     for i=1:length(curPolys)
         curPolys(i).color = curColor;
@@ -71,7 +73,7 @@ end
 
 %% Load the segmenation and show individual channels
 for c=1:imD.NumberOfChannels
-    D3d.Viewer.LoadPolygons(polygons{c});
+    D3d.Viewer.AddPolygons(polygons{c});
 end
 
 % View just a channel's polygons

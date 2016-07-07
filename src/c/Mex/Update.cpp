@@ -19,8 +19,6 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 
 	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
 
-	//gRenderer->getMutex();
-
 	for (int i = 0; i < firstVolumeTextures.size(); ++i)
 	{
 		int idx = GraphicObjectTypes::OriginalVolume + i;
@@ -28,40 +26,28 @@ void setCurrentTexture(GraphicObjectTypes textureType)
 			break;
 
 		bool render = (i == fvtIdx);
-		std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[idx].begin();
-		for ( ; objectIter != gGraphicObjectNodes[idx].end(); ++objectIter )
-			objectIter->second->setRenderable(render);
+		for (auto itr :gGraphicObjectNodes[idx])
+			itr.second->setRenderable(render);
 	}
-
-	//gRenderer->releaseMutex();
 }
 
-void toggleSegmentationResults(bool on)
+void togglePolygons(bool on)
 {
 	if (gRenderer == NULL) return;
 
-	//gRenderer->getMutex();
-
 	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
-	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
-	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
-		objectIter->second->setRenderable(on);
-
-	//gRenderer->releaseMutex();
+	for (auto itr : gGraphicObjectNodes[cellType])
+		itr.second->setRenderable(on);
 }
 
 void togglePolygonWireframe(bool wireframe)
 {
 	if (gRenderer == NULL) return;
 
-	//gRenderer->getMutex();
-
 	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
 	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
 	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
 		objectIter->second->setWireframe(wireframe);
-
-	//gRenderer->releaseMutex();
 }
 
 void togglePolygonLighting(bool lighting)
@@ -73,24 +59,19 @@ void togglePolygonLighting(bool lighting)
 		itr.second->setLightOn(lighting);
 }
 
-void toggleSelectedCell(std::set<int> labels)
+void toggleSelectedPolygon(std::set<int> labels)
 {
 	if (gRenderer == NULL) return;
 
-	//gRenderer->getMutex();
-
 	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
-	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[cellType].begin();
-	for ( ; objectIter != gGraphicObjectNodes[cellType].end(); ++objectIter )
+	for(auto itr:gGraphicObjectNodes[cellType])
 	{
-		GraphicObjectNode* node = objectIter->second;
+		GraphicObjectNode* node = itr.second;
 		if ( labels.count(node->getPolygonLabel()) > 0 )
 			node->setRenderable(true);
 		else
 			node->setRenderable(false);
 	}
-
-	//gRenderer->releaseMutex();
 }
 
 HRESULT updatePolygons(const mxArray* hulls)

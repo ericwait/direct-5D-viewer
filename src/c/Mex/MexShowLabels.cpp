@@ -20,12 +20,12 @@ std::string MexShowLabels::check(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 
 void MexShowLabels::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
-	//inArgs.push_back("arrowFaces");
+	inArgs.push_back("on");
 }
 
 void MexShowLabels::help(std::vector<std::string>& helpLines) const
 {
-	//helpLines.push_back("This initializes the D3d viewing window.  It takes a widget to show orientation. The ARROW will be the polygons that point down each axis.  The SPHERE is the center polygon that is centered at the (widget's) axis origin.");
+	helpLines.push_back("This will toggle the polygon labels on and off.");
 
-	//helpLines.push_back("\tArrowFaces -- This is an ordered list of vertices that make up the facets (triangles) for each axis.");
+	helpLines.push_back("\tOn - If this is set to one, then all of the polygon labels will be on. If this is 0, all of the polygon labels will be off.");
 }

@@ -55,7 +55,7 @@ void XtransferUpdateCommand(Message m){
 	TransferObj* sentTranfser = (TransferObj*)m.data;
 
 	GraphicObjectTypes textureType = GraphicObjectTypes::OriginalVolume;
-	char buff[96];
+	char buff[256];
 
 	strncpy_s(buff, sentTranfser->buff, strlen(sentTranfser->buff));
 
@@ -192,11 +192,19 @@ void XtextureLightingUpdateCommand(Message m){
 	delete localLightObj;
 }
 
-void XtextureAttenUpdateCommand(Message m){
-	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
-	firstVolumeTextures[localLightObj->index]->setAttenuationOn(localLightObj->value);
+void XtextureAttenUpdateCommand(Message m)
+{
+	bool* on = (bool*)m.data;
 
-	delete localLightObj;
+	for(int i = 0; i<firstVolumeTextures.size(); ++i)
+	{
+		if(NULL!=firstVolumeTextures[i])
+		{
+			firstVolumeTextures[i]->setAttenuationOn(*on);
+		}
+	}
+
+	delete on;
 }
 
 void XpolygonLighting(Message m){
