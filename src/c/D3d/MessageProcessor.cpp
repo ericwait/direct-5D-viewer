@@ -519,6 +519,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 					{
 						GraphicObjectNode* node = objectIter->second;
 						node->releaseRenderResources();
+						delete node;
 					}
 				}
 
