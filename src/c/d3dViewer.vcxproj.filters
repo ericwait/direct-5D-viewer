@@ -121,9 +121,6 @@
     <ClCompile Include="Mex\MexAddPolygons.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MexCaptureImage.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\MexCaptureSpinMovie.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -173,9 +170,6 @@
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexTakeControl.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexUpdatePolygons.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexPolygonLighting.cpp">

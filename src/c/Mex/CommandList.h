@@ -39,7 +39,6 @@ DEF_MEX_COMMAND(Info)
 DEF_MEX_COMMAND(Help)
 // Additional specific mex commands should be added here.
 DEF_MEX_COMMAND(AddPolygons)
-DEF_MEX_COMMAND(CaptureImage)
 DEF_MEX_COMMAND(CaptureSpinMovie)
 DEF_MEX_COMMAND(Close)
 DEF_MEX_COMMAND(DeleteAllPolygons)
