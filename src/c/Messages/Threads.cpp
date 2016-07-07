@@ -65,7 +65,7 @@ void termThread()
 		ResumeThread(messageLoopHandle);
 
 		// Wait for thread termination/force termination if it times out
-		DWORD waitTerm = WaitForSingleObject(messageLoopHandle, 30000);
+		DWORD waitTerm = WaitForSingleObject(messageLoopHandle, 300000);
 		if (waitTerm == WAIT_TIMEOUT)
 			TerminateThread(messageLoopHandle, -1000);
 
