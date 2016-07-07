@@ -4,7 +4,7 @@
 
 void MexPoll::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	std::vector<RtnMessage> curMsgs = gMexMessageQueueOut.flushQueue();
+	std::vector<RtnMessage> curMsgs = gMsgQueueToMex.flushQueue();
 
 	const char* fields[] = {"command", "message", "val", "array"};
 	plhs[0] = mxCreateStructMatrix(curMsgs.size(), 1, 4, fields);

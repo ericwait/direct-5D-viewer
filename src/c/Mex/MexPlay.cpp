@@ -7,7 +7,7 @@ void MexPlay::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]
 	double onD = mxGetScalar(prhs[0]);
 	double* onD2 = new double;
 	*onD2 = onD;
-	gDataQueue->writeMessage("play", (void*)onD2);
+	gMsgQueueToDirectX.writeMessage("play", (void*)onD2);
 }
 
 std::string MexPlay::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

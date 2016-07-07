@@ -12,8 +12,8 @@ MEXFUNCTION_LINKAGE void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const 
 
 extern "C" void exitFunc()
 {
-	gDataQueue->writeMessage("close", NULL);
+	gMsgQueueToDirectX.writeMessage("close", NULL);
 	cleanUp();
-	gMexMessageQueueOut.clear();
-	gDataQueue->clear();
+	gMsgQueueToMex.clear();
+	gMsgQueueToDirectX.clear();
 }

@@ -58,7 +58,7 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 		{
 			DWORD errCode = GetLastError();
 
-			gMexMessageQueueOut.addMessage("error","Unable to register window class!",errCode);
+			gMsgQueueToMex.addMessage("error","Unable to register window class!",errCode);
 
 			return E_FAIL;
 		}
@@ -74,7 +74,7 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	{
 		DWORD errCode = GetLastError();
 		
-		gMexMessageQueueOut.addMessage("error","Unable to register window class!",errCode);
+		gMsgQueueToMex.addMessage("error","Unable to register window class!",errCode);
 
 		return E_FAIL;
 	}

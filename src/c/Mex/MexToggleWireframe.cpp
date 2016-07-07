@@ -7,7 +7,7 @@ void MexToggleWireframe::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	double onD = mxGetScalar(prhs[0]);
 	double* onD2 = new double;
 	*onD2 = onD;
-	gDataQueue->writeMessage("ToggleWireframe", (void*)onD2);
+	gMsgQueueToDirectX.writeMessage("ToggleWireframe", (void*)onD2);
 }
 
 std::string MexToggleWireframe::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

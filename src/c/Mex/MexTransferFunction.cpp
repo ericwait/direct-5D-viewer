@@ -45,7 +45,7 @@ void MexTransferFunction::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 			alphaMod = 0.0f;
 
 		TransferObj* transferObj = new TransferObj(transferFunction, ranges, color, alphaMod, chan, bufferType, numElem);
-		gDataQueue->writeMessage("TransferFunction", (void*)transferObj);
+		gMsgQueueToDirectX.writeMessage("TransferFunction", (void*)transferObj);
 	}
 }
 

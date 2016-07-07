@@ -27,7 +27,7 @@ volatile bool gRendererInit = false;
 
 HINSTANCE gDllInstance = NULL;
 
-MessageQueue gMexMessageQueueOut;
+MessageQueue gMsgQueueToMex;
 
 std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 PolygonObject* gBorderObj = NULL;

@@ -10,7 +10,7 @@ void MexSetBackgroundColor::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 	background->y = (float)(bc[1]);
 	background->z = (float)(bc[2]);
 
-	gDataQueue->writeMessage("setBackgroundColor", (void*)background);
+	gMsgQueueToDirectX.writeMessage("setBackgroundColor", (void*)background);
 }
 
 std::string MexSetBackgroundColor::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

@@ -137,7 +137,7 @@ HRESULT loadPolygons(const mxArray* polygonsIn)
 		polygons->at(i)->setcolorData(colorData);
 	}
 
-	gDataQueue->writeMessage("loadPolygons", (void*)polygons);
+	gMsgQueueToDirectX.writeMessage("loadPolygons", (void*)polygons);
 
 	return S_OK;
 }

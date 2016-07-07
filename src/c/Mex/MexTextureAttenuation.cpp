@@ -13,7 +13,7 @@ void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 			{
 				//firstVolumeTextures[i]->setAttenuationOn(true);
 				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				gDataQueue->writeMessage("TextureAttenuation", (void*)textureLightObj);
+				gMsgQueueToDirectX.writeMessage("TextureAttenuation", (void*)textureLightObj);
 			}
 		}
 	}
@@ -25,7 +25,7 @@ void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 			{
 				//firstVolumeTextures[i]->setAttenuationOn(false);
 				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				gDataQueue->writeMessage("TextureAttenuation", (void*)textureLightObj);
+				gMsgQueueToDirectX.writeMessage("TextureAttenuation", (void*)textureLightObj);
 			}
 		}
 	}

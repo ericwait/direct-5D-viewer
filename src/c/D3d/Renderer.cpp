@@ -1191,7 +1191,7 @@ void Renderer::incrementFrame()
 		}
 	}
 
-	gMexMessageQueueOut.addMessage("timeChange",currentFrame+1);
+	gMsgQueueToMex.addMessage("timeChange",currentFrame+1);
 }
 
 void Renderer::decrementFrame()
@@ -1199,7 +1199,7 @@ void Renderer::decrementFrame()
 	if (currentFrame!=0)
 		--currentFrame;
 
-	gMexMessageQueueOut.addMessage("timeChange",currentFrame+1);
+	gMsgQueueToMex.addMessage("timeChange",currentFrame+1);
 }
 
 unsigned int Renderer::getNumberOfFrames()

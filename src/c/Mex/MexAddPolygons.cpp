@@ -67,7 +67,7 @@ void MexAddPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 		polygons->at(i)->setcolorData(colorData);
 	}
 
-	gDataQueue->writeMessage("AddPolygons", (void*)polygons);
+	gMsgQueueToDirectX.writeMessage("AddPolygons", (void*)polygons);
 }
 
 std::string MexAddPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

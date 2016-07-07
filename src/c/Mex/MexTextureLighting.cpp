@@ -12,7 +12,7 @@ void MexTextureLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 			if (NULL != firstVolumeTextures[i])
 			{
 				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				gDataQueue->writeMessage("TextureLighting", (void*)textureLightObj);
+				gMsgQueueToDirectX.writeMessage("TextureLighting", (void*)textureLightObj);
 			}
 		}
 	}
@@ -23,7 +23,7 @@ void MexTextureLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 			if (NULL != firstVolumeTextures[i])
 			{
 				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				gDataQueue->writeMessage("TextureLighting", (void*)textureLightObj);
+				gMsgQueueToDirectX.writeMessage("TextureLighting", (void*)textureLightObj);
 			}
 		}
 	}

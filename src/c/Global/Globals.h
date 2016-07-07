@@ -31,7 +31,7 @@ extern HFONT gFont;
 extern volatile bool gRendererInit;
 extern PolygonObject* gBorderObj;
 extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
-extern MessageQueue gMexMessageQueueOut;
+extern MessageQueue gMsgQueueToMex;
 
 //Implemented in Initialization.cpp
 extern unsigned int gWindowWidth;
@@ -48,4 +48,4 @@ extern bool gCapture;
 extern float gFramesPerSec;
 
 // Global Queue
-extern DataQueue* gDataQueue;
+extern DataQueue gMsgQueueToDirectX;

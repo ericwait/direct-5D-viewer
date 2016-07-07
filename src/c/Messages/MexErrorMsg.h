@@ -15,7 +15,7 @@ inline void errMessage(std::string message, char *file, int line)
 	msg += " line ";
 	msg += ln;
 
-	gMexMessageQueueOut.addErrorMessage(msg);
+	gMsgQueueToMex.addErrorMessage(msg);
 }
 #define sendErrMessage(ans) { errMessage((ans), __FILE__, __LINE__); }
 
@@ -37,6 +37,6 @@ inline void hrErrMessage(HRESULT hr, char *file, int line)
 	msg += " line ";
 	msg += buff;
 
-	gMexMessageQueueOut.addErrorMessage(msg);
+	gMsgQueueToMex.addErrorMessage(msg);
 }
 #define sendHrErrMessage(ans) { hrErrMessage((ans), __FILE__, __LINE__); }

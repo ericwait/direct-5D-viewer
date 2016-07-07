@@ -42,7 +42,7 @@ void XloadTextureCommand(Message m){
 	setCurrentTexture(textureType);
 
 	delete returnedImg;
-	gMexMessageQueueOut.addMessage("loadDone", 0);
+	gMsgQueueToMex.addMessage("loadDone", 0);
 }
 
 void XresetViewCommand(Message m){

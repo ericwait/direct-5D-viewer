@@ -7,7 +7,7 @@ void MexPolygonLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	double onD = mxGetScalar(prhs[0]);
 	double* onD2 = new double;
 	*onD2 = onD;
-	gDataQueue->writeMessage("showLabels", (void*)onD2);
+	gMsgQueueToDirectX.writeMessage("showLabels", (void*)onD2);
 }
 
 std::string MexPolygonLighting::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

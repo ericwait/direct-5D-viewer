@@ -11,7 +11,7 @@ void MexDisplayPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	for (size_t i = 0; i < numPolygons; ++i)
 		polygonset->insert((int)(hullList[i]));
 
-	gDataQueue->writeMessage("displayPolygons", (void*)polygonset);
+	gMsgQueueToDirectX.writeMessage("displayPolygons", (void*)polygonset);
 }
 
 std::string MexDisplayPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

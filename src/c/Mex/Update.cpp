@@ -146,8 +146,8 @@ HRESULT updatePolygons(const mxArray* hulls)
 		polygon->setcolorData(colorData);
 		int* intptr = new int;
 		*intptr = polygon->getIndex();
-		gDataQueue->writeMessage("removePolygon", (void*)intptr);
-		gDataQueue->writeMessage("loadPolygon", (void*)polygon);
+		gMsgQueueToDirectX.writeMessage("removePolygon", (void*)intptr);
+		gMsgQueueToDirectX.writeMessage("loadPolygon", (void*)polygon);
 	}
 
 	return S_OK;

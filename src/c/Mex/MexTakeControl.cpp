@@ -4,7 +4,7 @@
 
 void MexTakeControl::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gDataQueue->writeMessage("takeControl", NULL);
+	gMsgQueueToDirectX.writeMessage("takeControl", NULL);
 }
 
 std::string MexTakeControl::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

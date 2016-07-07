@@ -7,7 +7,7 @@ void MexPeelUpdate::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 	float* x = new float;
 	*x = (float)mxGetScalar(prhs[0]);
 
-	gDataQueue->writeMessage("peelUpdate", (void*)x);
+	gMsgQueueToDirectX.writeMessage("peelUpdate", (void*)x);
 }
 
 std::string MexPeelUpdate::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

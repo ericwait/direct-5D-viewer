@@ -4,10 +4,10 @@
 
 void MexClose::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gDataQueue->writeMessage("close", NULL);
+	gMsgQueueToDirectX.writeMessage("close", NULL);
 	cleanUp();
-	gMexMessageQueueOut.clear();
-	gDataQueue->clear();
+	gMsgQueueToMex.clear();
+	gMsgQueueToDirectX.clear();
 }
 
 std::string MexClose::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

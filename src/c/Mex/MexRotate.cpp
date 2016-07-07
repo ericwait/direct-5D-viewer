@@ -7,7 +7,7 @@ void MexRotate::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 	double onD = mxGetScalar(prhs[0]);
 	double* onD2 = new double;
 	*onD2 = onD;
-	gDataQueue->writeMessage("rotate", (void*)onD2);
+	gMsgQueueToDirectX.writeMessage("rotate", (void*)onD2);
 }
 
 std::string MexRotate::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

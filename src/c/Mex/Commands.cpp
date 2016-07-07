@@ -12,7 +12,7 @@ HANDLE messageLoopHandle = NULL;
 DWORD threadID;
 HANDLE mexMessageMutex = NULL;
 bool registerExitFunction = false;
-DataQueue* gDataQueue = new DataQueue();
+DataQueue gMsgQueueToDirectX;
 
 //void pollCommand(int nlhs, mxArray** plhs)
 //{

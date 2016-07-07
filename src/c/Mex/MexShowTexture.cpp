@@ -14,7 +14,7 @@ void MexShowTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	else if (_strcmpi("processed", buff) == 0)
 		*textureType = GraphicObjectTypes::ProcessedVolume;
 
-	gDataQueue->writeMessage("ViewTexture", (void*)textureType);
+	gMsgQueueToDirectX.writeMessage("ViewTexture", (void*)textureType);
 }
 
 std::string MexShowTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

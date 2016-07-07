@@ -132,11 +132,11 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		index = gRenderer->getPolygon(pnt,direction);
 		if(ctrlDown)
 		{
-			gMexMessageQueueOut.addMessage("cellSelected",index);
+			gMsgQueueToMex.addMessage("cellSelected",index);
 		}
 		else
 		{
-			gMexMessageQueueOut.addMessage("rightClick",index);
+			gMsgQueueToMex.addMessage("rightClick",index);
 		}
 		ctrlDown = false;
 		gRenderer->renderAll();
@@ -190,22 +190,22 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		else if(VK_SPACE==wParam)
 		{
 			gPlay = !gPlay;
-			gMexMessageQueueOut.addMessage("play",gPlay);
+			gMsgQueueToMex.addMessage("play",gPlay);
 		}
 		else if(VK_SHIFT==wParam)
 		{
 			shiftDown = true;
-			gMexMessageQueueOut.addMessage("keyDown","shift");
+			gMsgQueueToMex.addMessage("keyDown","shift");
 		}
 		else if(VK_CONTROL==wParam)
 		{
 			ctrlDown = true;
-			gMexMessageQueueOut.addMessage("keyDown","ctrl");
+			gMsgQueueToMex.addMessage("keyDown","ctrl");
 		}
 		else if(VK_MENU == wParam)
 		{
 			altDown = true;
-			gMexMessageQueueOut.addMessage("keyDown","alt");
+			gMsgQueueToMex.addMessage("keyDown","alt");
 		}
 		else if('C' == wParam)
 		{
@@ -215,7 +215,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		else if('H' == wParam)
 		{
 			hullsOn = !hullsOn;
-			gMexMessageQueueOut.addMessage("togglePolygons",double(hullsOn));
+			gMsgQueueToMex.addMessage("togglePolygons",double(hullsOn));
 
 			for(std::map<int,GraphicObjectNode*>::iterator it=gGraphicObjectNodes[GraphicObjectTypes::Polygons].begin();
 				it!=gGraphicObjectNodes[GraphicObjectTypes::Polygons].end(); ++it)
@@ -229,7 +229,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		else if('L'==wParam)
 		{
 			gRenderer->toggleLabels();
-			gMexMessageQueueOut.addMessage("toggleLabels",0.0);
+			gMsgQueueToMex.addMessage("toggleLabels",0.0);
 			gRenderer->renderAll();
 		}
 		else if('P' == wParam)
@@ -248,11 +248,11 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		else if('S' == wParam)
 		{
 			gRotate = !gRotate;
-			gMexMessageQueueOut.addMessage("rotate",gRotate);
+			gMsgQueueToMex.addMessage("rotate",gRotate);
 		}
 		else if('X'==wParam)
 		{
-			gMexMessageQueueOut.addMessage("centerSelectedPolygon",1.0);
+			gMsgQueueToMex.addMessage("centerSelectedPolygon",1.0);
 			gRenderer->renderAll();
 		}
 		else if('1' == wParam || VK_NUMPAD1 == wParam)
@@ -268,7 +268,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 				ClientResize(gWindowHandle, 3840, 2160);
 			}
 			{
-				gMexMessageQueueOut.addMessage("keyDown","number",1.0);
+				gMsgQueueToMex.addMessage("keyDown","number",1.0);
 			}
 		}
 		else if('2' == wParam || VK_NUMPAD2 == wParam)
@@ -284,7 +284,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 				ClientResize(gWindowHandle, 3840/2, 2160);
 			}
 			{
-				gMexMessageQueueOut.addMessage("keyDown","number",2.0);
+				gMsgQueueToMex.addMessage("keyDown","number",2.0);
 			}
 		}
 		else if('3' == wParam || VK_NUMPAD3 == wParam)
@@ -300,7 +300,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 				ClientResize(gWindowHandle, 3840/3, 2160);
 			}
 			{
-				gMexMessageQueueOut.addMessage("keyDown","number",3.0);
+				gMsgQueueToMex.addMessage("keyDown","number",3.0);
 			}
 		}
 		else if('4' == wParam || VK_NUMPAD4 == wParam)
@@ -316,49 +316,49 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 				ClientResize(gWindowHandle, 3840/2, 2160/2);
 			}
 			{
-				gMexMessageQueueOut.addMessage("keyDown","number",4.0);
+				gMsgQueueToMex.addMessage("keyDown","number",4.0);
 			}
 		}
 		else if('5' == wParam || VK_NUMPAD5 == wParam)
 		{
-			gMexMessageQueueOut.addMessage("keyDown","number",5.0);
+			gMsgQueueToMex.addMessage("keyDown","number",5.0);
 		}
 		else if('6' == wParam || VK_NUMPAD6 == wParam)
 		{
-			gMexMessageQueueOut.addMessage("keyDown","number",6.0);
+			gMsgQueueToMex.addMessage("keyDown","number",6.0);
 		}
 		else if('7' == wParam || VK_NUMPAD7 == wParam)
 		{
-			gMexMessageQueueOut.addMessage("keyDown","number",7.0);
+			gMsgQueueToMex.addMessage("keyDown","number",7.0);
 		}
 		else if('8' == wParam || VK_NUMPAD8 == wParam)
 		{
-			gMexMessageQueueOut.addMessage("keyDown","number",8.0);
+			gMsgQueueToMex.addMessage("keyDown","number",8.0);
 		}
 		else if('9' == wParam || VK_NUMPAD9 == wParam)
 		{
-			gMexMessageQueueOut.addMessage("keyDown","number",9.0);
+			gMsgQueueToMex.addMessage("keyDown","number",9.0);
 		}
 		else if('0' == wParam || VK_NUMPAD0 == wParam)
 		{
-			gMexMessageQueueOut.addMessage("keyDown","number",0.0);
+			gMsgQueueToMex.addMessage("keyDown","number",0.0);
 		}
 		break;
 	case WM_KEYUP:
 		if(VK_SHIFT==wParam)
 		{
 			shiftDown = false;
-			gMexMessageQueueOut.addMessage("keyUp","shift");
+			gMsgQueueToMex.addMessage("keyUp","shift");
 		}
 		else if(VK_CONTROL==wParam)
 		{
 			ctrlDown = false;
-			gMexMessageQueueOut.addMessage("keyUp","ctrl");
+			gMsgQueueToMex.addMessage("keyUp","ctrl");
 		}
 		else if(VK_MENU)
 		{
 			altDown = false;
-			gMexMessageQueueOut.addMessage("keyUp","alt");
+			gMsgQueueToMex.addMessage("keyUp","alt");
 		}
 		break;
 	}
@@ -474,7 +474,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 				// Inside here check for a message from queue
 				// checkQueue();
-				if(gDataQueue->getNumMessages() > 0)
+				if(gMsgQueueToDirectX.getNumMessages() > 0)
 				{
 					hr = checkMessage();
 					if(hr==S_FALSE)
@@ -574,7 +574,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 HRESULT checkMessage()
 {
 	HRESULT hr = S_OK;
-	Message m = gDataQueue->getNextMessage();
+	Message m = gMsgQueueToDirectX.getNextMessage();
 
 	if(m.command == "loadTexture")
 	{

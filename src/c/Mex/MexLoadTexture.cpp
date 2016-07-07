@@ -7,7 +7,7 @@ void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 {
 	// check the message queue for an error message before continuing
 
-	if(gMexMessageQueueOut.hasError())
+	if(gMsgQueueToMex.hasError())
 		return;
 
 	const mwSize* DIMS = mxGetDimensions(prhs[0]);
@@ -53,16 +53,16 @@ void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	}
 
 	std::string s = "loadTexture";
-	gDataQueue->writeMessage(s, (void*)img);
+	gMsgQueueToDirectX.writeMessage(s, (void*)img);
 
 	unsigned int i = 0;
-	while(!gMexMessageQueueOut.hasError() && !gMexMessageQueueOut.doneLoading())
+	while(!gMsgQueueToMex.hasError() && !gMsgQueueToMex.doneLoading())
 	{
 		++i;
 	}
 
-	if(gMexMessageQueueOut.doneLoading())
-		gMexMessageQueueOut.clearLoadFlag();
+	if(gMsgQueueToMex.doneLoading())
+		gMsgQueueToMex.clearLoadFlag();
 }
 #pragma optimize("",on)
 

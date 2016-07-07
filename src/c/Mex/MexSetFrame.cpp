@@ -7,7 +7,7 @@ void MexSetFrame::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* pr
 	int curFrame = (int)mxGetScalar(prhs[0]);
 	int* onD2 = new int;
 	*onD2 = curFrame - 1;
-	gDataQueue->writeMessage("setFrame", (void*)onD2);
+	gMsgQueueToDirectX.writeMessage("setFrame", (void*)onD2);
 }
 
 std::string MexSetFrame::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
