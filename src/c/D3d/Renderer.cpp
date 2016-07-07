@@ -193,6 +193,7 @@ HRESULT Renderer::initSwapChain()
 
 void Renderer::releaseSwapChain()
 {
+	immediateContext->ClearState();
 	SAFE_RELEASE(swapChain);
 	SAFE_RELEASE(d3dDevice);
 	SAFE_RELEASE(immediateContext);
