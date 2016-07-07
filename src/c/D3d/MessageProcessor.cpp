@@ -518,7 +518,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 					for(; objectIter != gGraphicObjectNodes[i].end(); ++objectIter)
 					{
 						GraphicObjectNode* node = objectIter->second;
-						node->releaseRenderResources();
+						node->detatchFromParentNode();
 						delete node;
 					}
 				}
@@ -553,7 +553,8 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 		gRendererInit = false;
 
-		gMexMessageQueueOut.addMessage("close",1.0);
+		gMsgQueueToMex.addMessage("loadDone", 0);
+		gMsgQueueToMex.addMessage("close",1.0);
 	}
 	catch(const std::exception& e)
 	{
@@ -692,7 +693,7 @@ HRESULT checkMessage()
 		XdeleteAllPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
-	else if (m.command == "setRotation")
+	else if(m.command == "setRotation")
 	{
 		double* rotations = (double*)m.data;
 		rotations[0] = rotations[0]/180.0 * DirectX::XM_PI;
@@ -711,7 +712,7 @@ HRESULT checkMessage()
 	else if(m.command=="takeControl")
 	{
 		gRendererOn = false;
-	}
+	} 
 	else if(m.command=="releaseControl")
 	{
 		gRendererOn = true;

@@ -14,6 +14,10 @@ extern "C" void exitFunc()
 {
 	gMsgQueueToDirectX.writeMessage("close", NULL);
 	cleanUp();
+	while(!gMsgQueueToMex.doneLoading())
+	{
+		;
+	}
 	gMsgQueueToMex.clear();
 	gMsgQueueToDirectX.clear();
 }
