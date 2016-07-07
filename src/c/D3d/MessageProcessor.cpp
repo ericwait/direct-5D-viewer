@@ -725,7 +725,7 @@ HRESULT checkMessage()
 	{
 		// Print an error message
 		char buff[255];
-		sprintf_s(buff, "%s is not a valid command!\n", m.command);
+		sprintf(buff, "%s is not a valid command!\n", m.command.c_str());
 		sendErrMessage(buff);
 	}
 	return hr;
