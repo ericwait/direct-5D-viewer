@@ -20,12 +20,12 @@ std::string MexPlay::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 
 void MexPlay::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
-	//inArgs.push_back("arrowFaces");
+	inArgs.push_back("playOn");
 }
 
 void MexPlay::help(std::vector<std::string>& helpLines) const
 {
-	/*helpLines.push_back("This initializes the D3d viewing window.  It takes a widget to show orientation. The ARROW will be the polygons that point down each axis.  The SPHERE is the center polygon that is centered at the (widget's) axis origin.");
+	helpLines.push_back("This will toggle the automatic playing of the movie.");
 
-	helpLines.push_back("\tArrowFaces -- This is an ordered list of vertices that make up the facets (triangles) for each axis.");*/
+	helpLines.push_back("\tPlayOn - This is a double that is either a zero or a one, where a zero indicates not playing and a one indicates playing.");
 }

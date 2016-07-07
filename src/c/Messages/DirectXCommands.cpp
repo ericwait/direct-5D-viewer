@@ -224,12 +224,12 @@ void XviewTextureCommand(Message m){
 	delete[] m.data;
 }
 
-void XwireframeSegmentationCommand(Message m){
+void XtoggleWireframe(Message m){
 	double* doublePtr = (double*)m.data;
 	double onD = *doublePtr;
 	bool on = onD > 0;
 
-	toggleSegmentaionWireframe(on);
+	togglePolygonWireframe(on);
 
 	delete doublePtr;
 }

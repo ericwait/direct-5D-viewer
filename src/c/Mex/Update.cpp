@@ -50,7 +50,7 @@ void toggleSegmentationResults(bool on)
 	//gRenderer->releaseMutex();
 }
 
-void toggleSegmentaionWireframe(bool wireframe)
+void togglePolygonWireframe(bool wireframe)
 {
 	if (gRenderer == NULL) return;
 

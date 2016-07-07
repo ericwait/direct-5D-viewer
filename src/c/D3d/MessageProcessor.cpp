@@ -597,7 +597,7 @@ HRESULT checkMessage()
 		XpeelUpdateCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "textureLightingUpdate")
+	else if(m.command == "TextureLighting")
 	{
 		XtextureLightingUpdateCommand(m);
 		gRenderer->renderAll();
@@ -640,9 +640,9 @@ HRESULT checkMessage()
 		XtransferUpdateCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "wireframeSegmentation")
+	else if(m.command == "ToggleWireframe")
 	{
-		XwireframeSegmentationCommand(m);
+		XtoggleWireframe(m);
 		gRenderer->renderAll();
 	}
 	else if(m.command == "removePolygon")

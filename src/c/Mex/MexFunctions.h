@@ -15,7 +15,7 @@ extern "C" __declspec(dllexport) void exitFunc();
 
 void setCurrentTexture(GraphicObjectTypes textureType);
 void toggleSegmentationResults(bool on);
-void toggleSegmentaionWireframe(bool wireframe);
+void togglePolygonWireframe(bool wireframe);
 void toggleSegmentaionLighting(bool lighting);
 void toggleSelectedCell(std::set<int> labels);
 HRESULT updatePolygons(const mxArray* hulls);
