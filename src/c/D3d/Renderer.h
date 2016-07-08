@@ -107,6 +107,8 @@ public:
 	void togglescaleText() { scaleTextOn = !scaleTextOn; }
 	void setscaleBarOn(bool on) { scaleBarOn = on; }
 	void togglescaleBar() { scaleBarOn = !scaleBarOn; }
+	void setfpsOn(bool on) { fpsOn = on; }
+	void togglefps() { fpsOn = !fpsOn; }
 	void setCaptureFilePath(std::string fp){ captureFilePath = fp; }
 	void setCaptureFileName(std::string fn){ captureFileName = fn; }
 
@@ -182,6 +184,7 @@ private:
 	void renderLabel(const RendererPackage* package, HDC hdc);
 	void renderScaleValue(const RendererPackage* package, HDC hdc);
 	void renderFrameNum(HDC hdc);
+	void renderFPS(HDC hdc);
 
 	//Member variables 
 	Vec<float> backgroundColor;
@@ -221,9 +224,13 @@ private:
 	bool frameNumOn;
 	bool scaleTextOn;
 	bool scaleBarOn;
+	bool fpsOn;
 	std::string captureFilePath;
 	std::string captureFileName;
 	std::string dllRoot;
+	const int NUM_TIMES = 20;
+	UINT64 frameTimes[20];
+	int curTimeIdx;
 };
 
 

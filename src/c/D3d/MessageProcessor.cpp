@@ -223,7 +223,11 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if('F'==wParam)
 		{
-			gRenderer->toggleFrameNum();
+			if(ctrlDown)
+				gRenderer->togglefps();
+			else
+				gRenderer->toggleFrameNum();
+
 			gRenderer->renderAll();
 		}
 		else if('H' == wParam)

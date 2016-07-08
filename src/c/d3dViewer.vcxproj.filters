@@ -273,5 +273,8 @@
     <ClInclude Include="Messages\Threads.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3d\Timer.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

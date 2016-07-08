@@ -162,6 +162,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClInclude Include="D3d\RendererPackage.h" />
     <ClInclude Include="D3d\SceneNode.h" />
     <ClInclude Include="D3d\TextureLightingObj.h" />
+    <ClInclude Include="D3d\Timer.h" />
     <ClInclude Include="Global\Defines.h" />
     <ClInclude Include="Global\Globals.h" />
     <ClInclude Include="Global\Vec.h" />

@@ -21,6 +21,7 @@
 #include "Camera.h"
 #include "RendererPackage.h"
 #include "..\Messages\MexErrorMsg.h"
+#include "Timer.h"
 #include <string>
 
 #include <Windows.h>
@@ -53,9 +54,15 @@ Renderer::Renderer()
 	frameNumOn = true;
 	scaleTextOn = true;
 	scaleBarOn = true;
+	fpsOn = false;
 	captureFilePath = "./";
 	captureFileName = "";
 	dllRoot = "";
+
+	for(int i = 0; i<NUM_TIMES; ++i)
+		frameTimes[0] = 0;
+
+	curTimeIdx = 0;
 }
 
 Renderer::~Renderer()
@@ -682,11 +689,17 @@ void Renderer::renderAll()
 {
 	if (gRendererOn)
 	{
+		UINT64 startTime = GetTimeMs64();
 		rootScene->updateRenderableList();
 		startRender();
 		preRenderLoop();
 		mainRenderLoop();
 		postRenderLoop();
+		frameTimes[curTimeIdx] = GetTimeMs64()-startTime;
+		++curTimeIdx;
+		if(curTimeIdx>=NUM_TIMES)
+			curTimeIdx = 0;
+
 		gdiRenderLoop();
 		endRender();
 	}
@@ -781,6 +794,8 @@ void Renderer::gdiRenderLoop()
 			renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
 		if (frameNumOn)
 			renderFrameNum(hdc);
+		if(fpsOn)
+			renderFPS(hdc);
 	}
 
 	IDXGIBackBuffer->ReleaseDC(NULL);
@@ -984,6 +999,32 @@ void Renderer::renderFrameNum(HDC hdc)
 
 	std::string length(buff);
 	TextOutA(hdc, (float)gWindowWidth-120, 10, length.c_str(), (int)length.length());
+}
+
+void Renderer::renderFPS(HDC hdc)
+{
+	UINT64 totalTimes = 0;
+	for(int i = 0; i<NUM_TIMES; ++i)
+		totalTimes += frameTimes[i];
+
+	double avgFrame = double(totalTimes)/NUM_TIMES;
+
+	DirectX::XMFLOAT4 color(1, 1, 1, 1);
+
+	COLORREF hexColor = (unsigned int)(255*color.z);
+	hexColor = hexColor<<8;
+	hexColor |= (unsigned int)(255*color.y);
+	hexColor = hexColor<<8;
+	hexColor |= (unsigned int)(255*color.x);
+
+	SelectObject(hdc, gFont);
+	SetTextColor(hdc, hexColor);
+	SetBkMode(hdc, TRANSPARENT);
+	char buff[36];
+	sprintf(buff, "FPS:%.1f", 1000.0/avgFrame);
+
+	std::string length(buff);
+	TextOutA(hdc, 20, 10, length.c_str(), (int)length.length());
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)
