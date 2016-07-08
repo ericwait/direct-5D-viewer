@@ -695,13 +695,12 @@ void Renderer::renderAll()
 		preRenderLoop();
 		mainRenderLoop();
 		postRenderLoop();
+		gdiRenderLoop();
+		endRender();
 		frameTimes[curTimeIdx] = GetTimeMs64()-startTime;
 		++curTimeIdx;
 		if(curTimeIdx>=NUM_TIMES)
 			curTimeIdx = 0;
-
-		gdiRenderLoop();
-		endRender();
 	}
 }
 
