@@ -109,6 +109,7 @@ public:
 	void togglescaleBar() { scaleBarOn = !scaleBarOn; }
 	void setfpsOn(bool on) { fpsOn = on; }
 	void togglefps() { fpsOn = !fpsOn; }
+	void togglestats();
 	void setCaptureFilePath(std::string fp){ captureFilePath = fp; }
 	void setCaptureFileName(std::string fn){ captureFileName = fn; }
 
@@ -225,11 +226,18 @@ private:
 	bool scaleTextOn;
 	bool scaleBarOn;
 	bool fpsOn;
+	bool statsOn;
 	std::string captureFilePath;
 	std::string captureFileName;
 	std::string dllRoot;
 	const int NUM_TIMES = 20;
 	UINT64 frameTimes[20];
+	UINT64 startTimes[20];
+	UINT64 preTimes[20];
+	UINT64 mainTimes[20];
+	UINT64 postTimes[20];
+	UINT64 gdiTimes[20];
+	UINT64 endTimes[20];
 	int curTimeIdx;
 };
 

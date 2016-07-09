@@ -223,8 +223,10 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if('F'==wParam)
 		{
-			if(ctrlDown)
+			if(ctrlDown && !altDown)
 				gRenderer->togglefps();
+			else if(ctrlDown && altDown)
+				gRenderer->togglestats();
 			else
 				gRenderer->toggleFrameNum();
 

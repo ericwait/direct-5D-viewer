@@ -55,12 +55,21 @@ Renderer::Renderer()
 	scaleTextOn = true;
 	scaleBarOn = true;
 	fpsOn = false;
+	statsOn = false;
 	captureFilePath = "./";
 	captureFileName = "";
 	dllRoot = "";
 
 	for(int i = 0; i<NUM_TIMES; ++i)
-		frameTimes[0] = 0;
+	{
+		frameTimes[i] = 0;
+		startTimes[i] = 0;
+		preTimes  [i] = 0;
+		mainTimes [i] = 0;
+		postTimes [i] = 0;
+		gdiTimes  [i] = 0;
+		endTimes  [i] = 0;
+	}
 
 	curTimeIdx = 0;
 }
@@ -589,6 +598,13 @@ void Renderer::updateShaderParams(const void* params, ID3D11Buffer* buffer)
 	//ReleaseMutex(mutexDevice);
 }
 
+void Renderer::togglestats()
+{
+	statsOn = !statsOn;
+	if(!fpsOn)
+		fpsOn = true;
+}
+
 int Renderer::getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
@@ -689,15 +705,34 @@ void Renderer::renderAll()
 {
 	if (gRendererOn)
 	{
-		UINT64 startTime = GetTimeMs64();
+		UINT64 frameTime = GetTimeMs64();
 		rootScene->updateRenderableList();
+
+		UINT64 startTime = GetTimeMs64();
 		startRender();
+		startTimes[curTimeIdx] = GetTimeMs64()-startTime;
+
+		UINT64 preTime = GetTimeMs64();
 		preRenderLoop();
+		preTimes[curTimeIdx] = GetTimeMs64()-preTime;
+
+		UINT64 mainTime = GetTimeMs64();
 		mainRenderLoop();
+		mainTimes[curTimeIdx] = GetTimeMs64()-mainTime;
+
+		UINT64 postTime = GetTimeMs64();
 		postRenderLoop();
+		postTimes[curTimeIdx] = GetTimeMs64()-postTime;
+
+		UINT64 gdiTime = GetTimeMs64();
 		gdiRenderLoop();
+		gdiTimes[curTimeIdx] = GetTimeMs64()-gdiTime;
+
+		UINT64 endTime = GetTimeMs64();
 		endRender();
-		frameTimes[curTimeIdx] = GetTimeMs64()-startTime;
+		endTimes[curTimeIdx] = GetTimeMs64()-endTime;
+
+		frameTimes[curTimeIdx] = GetTimeMs64()-frameTime;
 		++curTimeIdx;
 		if(curTimeIdx>=NUM_TIMES)
 			curTimeIdx = 0;
@@ -1003,10 +1038,45 @@ void Renderer::renderFrameNum(HDC hdc)
 void Renderer::renderFPS(HDC hdc)
 {
 	UINT64 totalTimes = 0;
+	UINT64 startTime  = 0;
+	UINT64 preTime	  = 0;
+	UINT64 mainTime   = 0;
+	UINT64 postTime  = 0;
+	UINT64 gdiTime   = 0;
+	UINT64 endTime   = 0;
+
+	double avgFrame = 0;
+	double avgStart = 0;
+	double avgPre = 0;
+	double avgMain = 0;
+	double avgPost = 0;
+	double avgGdi = 0;
+	double avgEnd = 0;
+
 	for(int i = 0; i<NUM_TIMES; ++i)
 		totalTimes += frameTimes[i];
 
-	double avgFrame = double(totalTimes)/NUM_TIMES;
+	avgFrame = double(totalTimes)/NUM_TIMES;
+
+	if(statsOn)
+	{
+		for(int i = 0; i<NUM_TIMES; ++i)
+		{
+			startTime += startTimes[i];
+			preTime += preTimes[i];
+			mainTime += mainTimes[i];
+			postTime += postTimes[i];
+			gdiTime += gdiTimes[i];
+			endTime += endTimes[i];
+		}
+
+		avgStart = double(startTime)/NUM_TIMES;
+		avgPre = double(preTime)/NUM_TIMES;
+		avgMain = double(mainTime)/NUM_TIMES;
+		avgPost = double(postTime)/NUM_TIMES;
+		avgGdi = double(gdiTime)/NUM_TIMES;
+		avgEnd = double(endTime)/NUM_TIMES;
+	}
 
 	DirectX::XMFLOAT4 color(1, 1, 1, 1);
 
@@ -1020,10 +1090,49 @@ void Renderer::renderFPS(HDC hdc)
 	SetTextColor(hdc, hexColor);
 	SetBkMode(hdc, TRANSPARENT);
 	char buff[36];
-	sprintf(buff, "FPS:%.1f", 1000.0/avgFrame);
+	double fps = 1000.0/avgFrame;
+	if (0.01<fps)
+		sprintf(buff, "FPS:%0.3f", fps);
+	else if(0.1<fps)
+		sprintf(buff, "FPS:%0.2f", fps);
+	else if(10.0<fps)
+		sprintf(buff, "FPS:%0.1f", fps);
+	else
+		sprintf(buff, "FPS:%.0f", fps);
 
-	std::string length(buff);
-	TextOutA(hdc, 20, 10, length.c_str(), (int)length.length());
+	std::string buff_str(buff);
+	TextOutA(hdc, 20, 10, buff_str.c_str(), (int)buff_str.length());
+
+	if(statsOn)
+	{
+		sprintf(buff, "Start:  %.3fms", avgStart);
+		buff_str = buff;
+		TextOutA(hdc, 20, 40, buff_str.c_str(), (int)buff_str.length());
+
+		sprintf(buff, "Pre:    %.3fms", avgPre);
+		buff_str = buff;
+		TextOutA(hdc, 20, 60, buff_str.c_str(), (int)buff_str.length());
+
+		sprintf(buff, "Main:  %.3fms", avgMain);
+		buff_str = buff;
+		TextOutA(hdc, 20, 80, buff_str.c_str(), (int)buff_str.length());
+
+		sprintf(buff, "Post:   %.3fms", avgPost);
+		buff_str = buff;
+		TextOutA(hdc, 20, 100, buff_str.c_str(), (int)buff_str.length());
+
+		sprintf(buff, "GDI:    %.3fms", avgGdi);
+		buff_str = buff;
+		TextOutA(hdc, 20, 120, buff_str.c_str(), (int)buff_str.length());
+
+		sprintf(buff, "Full:   %.3fms", avgFrame);
+		buff_str = buff;
+		TextOutA(hdc, 20, 140, buff_str.c_str(), (int)buff_str.length());
+
+		sprintf(buff, "Present:%.3fms", avgEnd);
+		buff_str = buff;
+		TextOutA(hdc, 20, 165, buff_str.c_str(), (int)buff_str.length());
+	}
 }
 
 void Renderer::setVertexShader(int vertexShaderListIdx)
