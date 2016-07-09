@@ -721,18 +721,20 @@ HRESULT checkMessage()
 		XdeleteAllPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "setRotation")
+	else if(m.command == "SetRotation")
 	{
-		double* rotations = (double*)m.data;
-		rotations[0] = rotations[0]/180.0 * DirectX::XM_PI;
-		rotations[1] = rotations[1]/180.0 * DirectX::XM_PI;
+		Vec<double>* rotations = (Vec<double>*)m.data;
+		rotations->x = rotations->x/180.0 * DirectX::XM_PI;
+		rotations->y = rotations->y/180.0 * DirectX::XM_PI;
+		rotations->z = rotations->z/180.0 * DirectX::XM_PI;
 
-		DirectX::XMMATRIX rotX,rotY;
-		rotX = DirectX::XMMatrixRotationY(float(rotations[0]));
-		rotY = DirectX::XMMatrixRotationX(float(rotations[1]));
+		DirectX::XMMATRIX rotX, rotY, rotZ;
+		rotX = DirectX::XMMatrixRotationX(float(rotations->x));
+		rotY = DirectX::XMMatrixRotationY(float(rotations->y));
+		rotZ = DirectX::XMMatrixRotationZ(float(rotations->z));
 
 		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
-		gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
+		gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY*rotZ);
 		gRenderer->renderAll();
 
 		delete[] rotations;
