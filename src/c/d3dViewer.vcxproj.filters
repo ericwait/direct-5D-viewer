@@ -199,6 +199,9 @@
     <ClCompile Include="Mex\MexSetRotation.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexCaptureWindow.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">

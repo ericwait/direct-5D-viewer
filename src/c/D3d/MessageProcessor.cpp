@@ -708,7 +708,7 @@ HRESULT checkMessage()
 	{
 
 	}
-	else if(m.command == "captureWindow")
+	else if(m.command == "CaptureWindow")
 	{
 		XcaptureWindow();
 	}
