@@ -2,7 +2,7 @@
 #include "MexFunctions.h"
 #include "..\Global\Globals.h"
 
-void MexDisplayPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+void MexShowPolygonList::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	double* polyList = (double*)mxGetData(prhs[0]);
 	size_t numPolygons = mxGetNumberOfElements(prhs[0]);
@@ -11,23 +11,23 @@ void MexDisplayPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	for(size_t i = 0; i<numPolygons; ++i)
 		polygonSet->insert((int)(polyList[i]));
 
-	gMsgQueueToDirectX.writeMessage("displayPolygons", (void*)polygonSet);
+	gMsgQueueToDirectX.writeMessage("DisplayPolygons", (void*)polygonSet);
 }
 
-std::string MexDisplayPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+std::string MexShowPolygonList::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	if (nrhs != 1)
-		return "Not the right arguments for displayPolygons!";
+		return "Not the right arguments for ShowPolygonList!";
 
 	return "";
 }
 
-void MexDisplayPolygons::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
+void MexShowPolygonList::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
 	inArgs.push_back("polygonIndices");
 }
 
-void MexDisplayPolygons::help(std::vector<std::string>& helpLines) const
+void MexShowPolygonList::help(std::vector<std::string>& helpLines) const
 {
 	helpLines.push_back("This will show only the listed polygons.");
 

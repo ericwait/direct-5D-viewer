@@ -130,9 +130,6 @@
     <ClCompile Include="Mex\MexDeleteAllPolygons.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MexDisplayPolygons.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\MexLoadTexture.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -184,9 +181,6 @@
     <ClCompile Include="Mex\MexTransferFunction.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MexShowPolygons.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\MexShowTexture.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -197,6 +191,12 @@
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexSetRotation.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexShowAllPolygons.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexShowPolygonList.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexCaptureWindow.cpp">

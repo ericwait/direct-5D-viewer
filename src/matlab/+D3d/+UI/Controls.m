@@ -353,7 +353,7 @@ end
 % --- Executes on button press in cb_SegmentationResults.
 function cb_SegmentationResults_Callback(hObject, eventdata, handles)
 on = get(handles.cb_SegmentationResults,'Value');
-D3d.Viewer.ShowPolygons(on);
+D3d.Viewer.ShowAllPolygons(on);
 end
 
 % --- Executes on button press in cb_ShowLabels.
