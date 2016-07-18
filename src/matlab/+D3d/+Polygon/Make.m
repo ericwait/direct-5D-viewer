@@ -1,7 +1,7 @@
 function [ polygon ] = Make( pixelList_xy, polyIdx, label, frame, color, reductions, quiet )
 %[ polygon ] = D3d.Polygon.Make( pixelList_xy, polyIdx, label, frame, color, reductions, quiet )
 if (~exist('color','var') || isempty(color))
-    color = [1,1,1];
+    color = [1,1,1,1];
 end
 
 if (~exist('label','var') || isempty(label))
