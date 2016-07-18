@@ -1,0 +1,145 @@
+cmap = hsv(K+1);
+cmap = cmap(2:end,:);
+
+[bwSmall,shiftCoords_rcz] = ImUtils.ROI.MakeSubImBW(size(bw),find(bw),2);
+ptsShift_rc = cellfun(@(x)(x-repmat(shiftCoords_rcz,size(x,1),1)),pts_rc,'uniformOutput',false);
+indShift = find(bwSmall);
+
+imD = MicroscopeData.GetEmptyMetadata();
+imD.Dimensions = SwapXY_RC(size(bwSmall));
+imD.NumberOfChannels = K*2;
+imD.NumberOfFrames = 1;
+imD.PixelPhysicalSize = ones(1,3);
+imD.ChannelColors = vertcat(cmap,repmat([1,0,0],K,1));
+
+rpCluster = [];
+rpTrue = [];
+for i=1:K
+    colr = cmap(i,:);
+    
+    figure
+    curInd = indShift(idx==i);
+    curIm = zeros(size(bwSmall),'uint8');
+    curIm(curInd) = 255;
+    h = subplot(1,2,1);
+    ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
+    rpC = regionprops(curIm>0,'Centroid','PixelIdxList');
+    rpCluster = [rpCluster,rpC];
+    
+    curInd = Utils.CoordToInd(size(bwSmall),ptsShift_rc{i});
+    curIm = false(size(bwSmall));
+    curIm(curInd) = true;
+    h = subplot(1,2,2);
+    ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
+    rpT = regionprops(curIm,'Centroid','PixelIdxList');
+    rpTrue = [rpTrue,rpT];
+end
+clear curIm
+
+dst = ones(K)*inf;
+for i=1:K
+    dst(i,:) = sqrt(sum((repmat(rpTrue(i).Centroid,K,1) - vertcat(rpCluster.Centroid)).^2,2))';
+end
+
+[vals,I] = min(dst,[],2);
+if (numel(unique(I))==K)
+    mapping = I;
+else
+    newDst = dst;
+    mapping = zeros(K,1);
+    for i=1:K
+        if (I(i)~=0)
+            sameIdx = I==I(i);
+            % is there more than one good canidate
+            if (nnz(sameIdx)==1)
+                j = find(sameIdx);
+                mapping(j) = I(i);
+                newDst(i,:) = inf;
+                newDst(:,j) = inf;
+            else
+                minVal = min(vals(sameIdx));
+                j = find(vals==minVal);
+                mapping(j) = I(i);
+                newDst(i,:) = inf;
+                newDst(:,j) = inf;
+                sameIdx(j) = 0;
+                [vals,I] = min(newDst,[],2);
+            end
+        end
+        I(mapping~=0) = 0;
+    end
+end
+
+polygons = [];
+imC = zeros([size(bwSmall),K*2],'uint8');
+for i=1:K
+    j = mapping(i);
+    polygons = [polygons,D3d.Polygon.Make(ptsShift_rc{j},j,num2str(j),1,[cmap(j,:),1])];
+    
+    curInd = intersect(rpCluster(i).PixelIdxList,rpTrue(i).PixelIdxList);
+    curIm = zeros(size(bwSmall),'uint8');
+    curIm(curInd) = 255;
+    imC(:,:,:,i) = curIm;
+    
+    curInd = setdiff(rpCluster(i).PixelIdxList,rpTrue(i).PixelIdxList);
+    curIm = zeros(size(bwSmall),'uint8');
+    curIm(curInd) = 255;
+    imC(:,:,:,i+K) = curIm;
+end
+
+D3d.LoadImage(imC,imD);
+D3d.Viewer.DeleteAllPolygons();
+D3d.Viewer.AddPolygons(polygons);
+
+%% Capture
+
+D3d.Viewer.SetCapturePath('.','Texture');
+delete(fullfile('.','Texture'));
+mkdir(fullfile('.','Texture'));
+for t=1:720
+    D3d.Viewer.CaptureWindow();
+    D3d.Viewer.SetRotation(0,0.5,0);
+end
+
+D3d.Viewer.SetCapturePath('.','Poly');
+delete(fullfile('.','Poly'));
+mkdir(fullfile('.','Poly'));
+for t=1:720
+    D3d.Viewer.CaptureWindow();
+    D3d.Viewer.SetRotation(0,0.5,0);
+end
+
+folderOut = fullfile('.','Texture');
+dList = dir(fullfile(folderOut,'*.bmp'));
+fNamesRH = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+
+folderOut = fullfile('.','Poly');
+dList = dir(fullfile(folderOut,'*.bmp'));
+fNamesLH = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+
+movieOut = fullfile('.','CombFrames');
+if (exist(movieOut,'dir'))
+    rmdir(movieOut,'s');
+end
+mkdir(movieOut);
+
+for t=1:min(length(fNamesRH),length(fNamesLH))
+    imRH = imread(fNamesRH{t});
+    imLH = imread(fNamesLH{t});
+    
+    im = cat(2,imRH,imLH);
+    cent = round(size(im,2)/2);
+    im(:,cent-2:cent+2,:) = 255;
+    im = imresize(im,[1080,1920]);
+    imwrite(im,fullfile(movieOut,sprintf('t%04d.tif',t)),'compression','lzw');
+end
+
+range = [1,min(length(fNamesRH),length(fNamesLH))];
+
+ffmpegimages2video(fullfile(movieOut,'t%04d.tif'),...
+    fullfile(movieOut,'compare.mp4'),...
+    'InputFrameRate',60,...
+    'InputStartNumber',range,...
+    'x264Preset','veryslow',...
+    'x264Tune','stillimage',...
+    'OutputFrameRate',60);
