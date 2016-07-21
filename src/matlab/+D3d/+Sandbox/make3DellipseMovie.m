@@ -6,7 +6,7 @@ ptsShift_rc = cellfun(@(x)(x-repmat(shiftCoords_rcz,size(x,1),1)+1),pts_rc,'unif
 indShift = find(bwSmall);
 
 imD = MicroscopeData.GetEmptyMetadata();
-imD.Dimensions = SwapXY_RC(size(bwSmall));
+imD.Dimensions = Utils.SwapXY_RC(size(bwSmall));
 imD.NumberOfChannels = K*2;
 imD.NumberOfFrames = 1;
 imD.PixelPhysicalSize = ones(1,3);
@@ -29,7 +29,7 @@ for i=1:K
     h = subplot(2,K,i);
     ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
     rpC = regionprops(curIm>0,'Centroid','PixelIdxList');
-    rpCluster = [rpCluster,rpC];
+    rpCluster = [rpCluster,rpC(1)];
     
     curInd = Utils.CoordToInd(size(bwSmall),ptsShift_rc{i});
     curIm = false(size(bwSmall));
@@ -60,13 +60,13 @@ else
                 j = find(sameIdx);
                 mapping(j) = I(i);
                 newDst(i,:) = inf;
-                newDst(:,j) = inf;
+                newDst(:,mapping(i)) = inf;
             else
                 minVal = min(vals(sameIdx));
                 j = find(vals==minVal);
-                mapping(j) = I(i);
+                mapping(i) = I(j);
                 newDst(i,:) = inf;
-                newDst(:,j) = inf;
+                newDst(:,mapping(i)) = inf;
                 sameIdx(j) = 0;
                 [vals,I] = min(newDst,[],2);
             end
@@ -78,7 +78,7 @@ end
 %% 
 figure
 polygons = [];
-imC = zeros([size(bwSmall),K*2],'uint8');
+imTex = zeros([size(bwSmall),K*2],'uint8');
 for i=1:K
     j = mapping(i);
     polygons = [polygons,D3d.Polygon.Make(Utils.SwapXY_RC(ptsShift_rc{i}),i,num2str(i),1,[cmap(i,:),1])];
@@ -88,14 +88,14 @@ for i=1:K
     curIm(curInd) = 255;
     h = subplot(3,K,i);
     ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
-    imC(:,:,:,i) = curIm;
+    imTex(:,:,:,i) = curIm;
     
     curInd = setdiff(rpCluster(j).PixelIdxList,rpTrue(i).PixelIdxList);
     curIm = zeros(size(bwSmall),'uint8');
     curIm(curInd) = 255;
     h = subplot(3,K,i+K);
     ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
-    imC(:,:,:,i+K) = curIm;
+    imTex(:,:,:,i+K) = curIm;
     
     curInd = Utils.CoordToInd(size(bwSmall),ptsShift_rc{i});
     curIm = false(size(bwSmall));
@@ -104,10 +104,10 @@ for i=1:K
     ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
 end
 
-D3d.LoadImage(imC,imD);
+D3d.LoadImage(imTex,imD);
 D3d.Viewer.DeleteAllPolygons();
 D3d.Viewer.AddPolygons(polygons);
-D3d.Viewer.SetWindowSize(640,1080);
+D3d.Viewer.SetWindowSize(640,1080/2);
 
 %% Capture all texture
 D3d.Viewer.SetBackgroundColor([0,0,0]);
@@ -138,8 +138,8 @@ end
 i = 1;
 %for i=1:K
 
-ccWidth = 640/2;
-ccHeight = 1080/2;
+ccWidth = 640;
+ccHeight = 1080/3;
 D3d.Viewer.SetWindowSize(ccWidth,ccHeight);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 D3d.Viewer.SetViewOrigin(polygons(i).CenterOfMass);
@@ -161,27 +161,31 @@ end
 %%
 folderOut = fullfile('.','Texture');
 dList = dir(fullfile(folderOut,'*.bmp'));
-fNamesC = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+fNamesTex = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
 
 folderOut = fullfile('.','Poly');
 dList = dir(fullfile(folderOut,'*.bmp'));
-fNamesLH = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+fNamesPol = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
 
 folderOut = fullfile('.','cc1');
 dList = dir(fullfile(folderOut,'*.bmp'));
-fNamesRHT = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+fNamesCC1 = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
 
 folderOut = fullfile('.','cc2');
 dList = dir(fullfile(folderOut,'*.bmp'));
-fNamesRHC = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+fNamesCC2 = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
 
 folderOut = fullfile('.','cc3');
 dList = dir(fullfile(folderOut,'*.bmp'));
-fNamesRHB = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+fNamesCC3 = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
 
 folderOut = fullfile('.','cc4');
 dList = dir(fullfile(folderOut,'*.bmp'));
-fNamesRHB1 = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+fNamesCC4 = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
+
+folderOut = fullfile('.','cc5');
+dList = dir(fullfile(folderOut,'*.bmp'));
+fNamesCC5 = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
 
 movieOut = fullfile('.','CombFrames');
 if (exist(movieOut,'dir'))
@@ -189,40 +193,44 @@ if (exist(movieOut,'dir'))
 end
 mkdir(movieOut);
 
-for t=1:min([length(fNamesC),length(fNamesLH),length(fNamesRHT),length(fNamesRHC),length(fNamesRHB)])
-    imC = imread(fNamesC{t});
-    imLH = imread(fNamesLH{t});
+for t=1:min([length(fNamesTex),length(fNamesPol)])
+    imTex = imread(fNamesTex{t});
+    imPol = imread(fNamesPol{t});
     
-    im = cat(2,imLH,imC);
+    im = cat(2,imPol,imTex);
     cent = round(size(im,2)/2);
     im(:,cent-2:cent+2,:) = 255;
     
-    imRT = imread(fNamesRHT{t});
-    imRC = imread(fNamesRHC{t});
-    imRB = imread(fNamesRHB{t});
-    imRB1 = imread(fNamesRHB1{t});
+    imCC1 = imread(fNamesCC1{t});
+    imCC2 = imread(fNamesCC2{t});
+    imCC3 = imread(fNamesCC3{t});
+    imCC4 = imread(fNamesCC4{t});
+    imCC5 = imread(fNamesCC5{t});
     
-    imR = cat(1,imRT,imRC);
-    cent2 = round(size(imR,1)/2);
-    imR(cent2-2:cent2+2,:,:) = 255;
+    imB = cat(2,imCC4,imCC5);
+    cent = round(size(imB,2)/2);
+    imB(:,cent-2:cent+2,:) = 255;
     
-    imR2 = cat(1,imRB,imRB1);
-    cent2 = round(size(imR2,1)/2);
-    imR2(cent2-2:cent2+2,:,:) = 255;
+    im = cat(1,im,imB);
+    cent = round(size(im,1)/2);
+    im(cent-2:cent+2,:,:) = 255;
     
-    imR = cat(2,imR,imR2);
-    cent2 = round(size(imR,2)/2);
-    imR(:,cent2-2:cent2+2,:) = 255;
-%     imR = cat(1,imR,imRB);
-%     imR(end-cent2-2:end-cent2+2,:,:) = 255;
+    imR = cat(1,imCC1,imCC2);
+    cent = round(size(imR,1)/2);
+    imR(cent-2:cent+2,:,:) = 255;
+    
+    imR = cat(1,imR,imCC3);
+    imR(end-cent-2:end-cent+2,:,:) = 255;
     
     im = cat(2,im,imR);
+    cent = size(imR,2);
     im(:,end-cent-2:end-cent+2,:) = 255;
+    
     im = imresize(im,[1080,1920]);
     imwrite(im,fullfile(movieOut,sprintf('t%04d.tif',t)),'compression','lzw');
 end
 
-range = [1,min([length(fNamesC),length(fNamesLH),length(fNamesRHT),length(fNamesRHC),length(fNamesRHB)])];
+range = [1,min([length(fNamesTex),length(fNamesPol),length(fNamesCC1),length(fNamesCC2),length(fNamesCC3)])];
 
 ffmpegimages2video(fullfile(movieOut,'t%04d.tif'),...
     fullfile(movieOut,'compare.mp4'),...
