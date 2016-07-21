@@ -1,6 +1,8 @@
 cmap = hsv(K+1);
 cmap = cmap(2:end,:);
 
+[idx,bestScore] = ReassignClusterIdx(bw,pts_rc,idx);
+
 [bwSmall,shiftCoords_rcz] = ImUtils.ROI.MakeSubImBW(size(bw),find(bw),2);
 ptsShift_rc = cellfun(@(x)(x-repmat(shiftCoords_rcz,size(x,1),1)+1),pts_rc,'uniformOutput',false);
 indShift = find(bwSmall);
