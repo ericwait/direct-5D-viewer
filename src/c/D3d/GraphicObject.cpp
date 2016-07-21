@@ -395,7 +395,7 @@ void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned ch
 void VolumeTextureObject::createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces,
 	std::vector<Vec<float>> &normals, std::vector<Vec<float>> &textureUVs)
 {
-	int numPlanes = int(dims.maxValue() * 1.5f * 1.5f);//second 1.5 is to reduce moire
+	int numPlanes = int(dims.maxValue() * 1.5f * 3.0f);//3.0 is to reduce moire
 	renderer->setNumPlanes((int)(ceil(numPlanes/1.5)));
 
 	vertices.resize(4*numPlanes);
