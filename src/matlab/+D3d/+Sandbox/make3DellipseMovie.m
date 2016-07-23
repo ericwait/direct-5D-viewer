@@ -41,56 +41,21 @@ for i=1:K
 end
 clear curIm
 
-dst = ones(K)*inf;
-for i=1:K
-    dst(i,:) = sqrt(sum((repmat(rpTrue(i).Centroid,K,1) - vertcat(rpCluster.Centroid)).^2,2))';
-end
-
-[vals,I] = min(dst,[],2);
-if (numel(unique(I))==K)
-    mapping = I;
-else
-    newDst = dst;
-    mapping = zeros(K,1);
-    for i=1:K
-        if (I(i)~=0)
-            sameIdx = I==I(i);
-            % is there more than one good canidate
-            if (nnz(sameIdx)==1)
-                j = find(sameIdx);
-                mapping(j) = I(i);
-                newDst(i,:) = inf;
-                newDst(:,mapping(i)) = inf;
-            else
-                minVal = min(vals(sameIdx));
-                j = find(vals==minVal);
-                mapping(i) = I(j);
-                newDst(i,:) = inf;
-                newDst(:,mapping(i)) = inf;
-                sameIdx(j) = 0;
-                [vals,I] = min(newDst,[],2);
-            end
-        end
-        I(mapping~=0) = 0;
-    end
-end
-
 %% 
 figure
 polygons = [];
 imTex = zeros([size(bwSmall),K*2],'uint8');
 for i=1:K
-    j = mapping(i);
     polygons = [polygons,D3d.Polygon.Make(Utils.SwapXY_RC(ptsShift_rc{i}),i,num2str(i),1,[cmap(i,:),1])];
     
-    curInd = intersect(rpCluster(j).PixelIdxList,rpTrue(i).PixelIdxList);
+    curInd = intersect(rpCluster(i).PixelIdxList,rpTrue(i).PixelIdxList);
     curIm = zeros(size(bwSmall),'uint8');
     curIm(curInd) = 255;
     h = subplot(3,K,i);
     ImUtils.ThreeD.ShowMaxImage(curIm,false,[],h);
     imTex(:,:,:,i) = curIm;
     
-    curInd = setdiff(rpCluster(j).PixelIdxList,rpTrue(i).PixelIdxList);
+    curInd = setdiff(rpCluster(i).PixelIdxList,rpTrue(i).PixelIdxList);
     curIm = zeros(size(bwSmall),'uint8');
     curIm(curInd) = 255;
     h = subplot(3,K,i+K);
