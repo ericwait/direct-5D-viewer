@@ -157,7 +157,7 @@ end
 
 % get viewer set for the individual components
 ccWidth = 1920/3;
-if (K==2 || K==4)
+if (K==2 || K>=4)
     ccHeight = 1080/2;
 elseif (K==3)
     ccHeight = 1080/3;
