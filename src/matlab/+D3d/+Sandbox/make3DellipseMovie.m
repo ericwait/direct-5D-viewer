@@ -204,7 +204,7 @@ end
 %% Make composite frames for a 1080p movie
 % Ensure that the viewer is done rendering
 % Set the dir that this movie and frames are saved to
-outDir = 'CompFrames';%default
+%outDir = 'CompFrames';%default
 %outDir = 'TopLeft';% Top Left pannel for 4k
 %outDir = 'TopRight';% Top Right pannel for 4k
 %outDir = 'BottomLeft';% Bottom Left pannel for 4k
@@ -278,6 +278,8 @@ for t=1:min([length(fNamesTex),length(fNamesTR)])
         imB(:,cent-2:cent+2,:) = 255;
     elseif (K==4)
         imB = cat(2,imCC4,imCC3);
+        cent = round(size(imB,2)/2);
+        imB(:,cent-2:cent+2,:) = 255;
     end
     
     if (K>3)
