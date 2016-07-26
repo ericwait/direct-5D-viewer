@@ -1489,6 +1489,8 @@ HRESULT Renderer::captureWindow(std::string* filenameOut)
 	//Close the handle for the file that was created
 	CloseHandle(hFile);
 
+	delete[] lpbitmap;
+
 	return hr;
 }
 
