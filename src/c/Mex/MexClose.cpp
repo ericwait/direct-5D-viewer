@@ -6,7 +6,7 @@ void MexClose::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[
 {
 	gMsgQueueToDirectX.writeMessage("close", NULL);
 	cleanUp();
-	while(!gMsgQueueToMex.doneLoading())
+	while(!gMsgQueueToMex.doneLoading() && !gMsgQueueToMex.isempty())
 	{
 		;
 	}
