@@ -1,7 +1,19 @@
+function make3DellipseMovie(bw,pts_rc,idx,K,movieOutDir,makeMP4)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make the data fit a bit tighter so
 % the viewer doesn't have to work as hard
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+roiTime = tic;
+fprintf('Making ROI...')
+
+if (~exist('movieOutDir','var') || isempty(movieOutDir))
+    movieOutDir = 'CompFrames';
+end
+if (~exist('makeMP4','var') || isempty(makeMP4))
+    makeMP4 = false;
+end
+
+fullTime = tic;
 
 cmap = hsv(K+1);
 cmap = cmap(2:end,:);
@@ -111,12 +123,17 @@ for c=1:K
 end
 D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
 D3d.UI.Ctrl.UpdateCurrentState();
+fprintf('%s\n',Utils.PrintTime(toc(roiTime)))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Capture all clustering
 % Set Zoom before running
+h = warndlg({'Set the zoom before closing this dialog.';'Closing this window will start capturing'},'Set Zoom');
+uiwait(h);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+texTime = tic;
+fprintf('Capturing All Clusters...')
 % Texture capture
 D3d.Viewer.SetBackgroundColor([0,0,0]);
 D3d.Viewer.SetCapturePath(fullfile('.','Texture'),'Texture');
@@ -128,11 +145,19 @@ for t=1:720
     D3d.Viewer.CaptureWindow();
     D3d.Viewer.SetRotation(0,0.5,0);
 end
+dList = dir(fullfile('.','Texture','*.bmp'));
+while (length(dList)<720)
+    pause(10);
+    dList = dir(fullfile('.','Texture','*.bmp'));
+end
+fprintf('%s\n',Utils.PrintTime(toc(texTime)))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Capture Ground Truth
 % Gound Truth is in the polygons
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+polyTime = tic;
+fprintf('Capturing Ground Truth...')
 for c=1:K
     channelData(c).visible = 0;
     channelData(c+K).visible = 0;
@@ -154,8 +179,16 @@ for t=1:720
     D3d.Viewer.CaptureWindow();
     D3d.Viewer.SetRotation(0,0.5,0);
 end
+dList = dir(fullfile('.','Poly','*.bmp'));
+while (length(dList)<720)
+    pause(10);
+    dList = dir(fullfile('.','Poly','*.bmp'));
+end
+fprintf('%s\n',Utils.PrintTime(toc(polyTime)))
 
 % get viewer set for the individual components
+ccTime = tic;
+fprintf('Capturing Each CC...')
 ccWidth = 1920/3;
 if (K==2 || K>=4)
     ccHeight = 1080/2;
@@ -168,49 +201,55 @@ D3d.Viewer.ShowAllPolygons(false);
 D3d.Viewer.TextureAttenuation(true);
 D3d.Viewer.TextureLighting(true);
 
-i = 0;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Set view for each CC
-% run this and next section for each cc
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for c=1:K
-    channelData(c).visible = 0;
-    channelData(c+K).visible = 0;
+for i = 1:K
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% Set view for each CC
+    % run this and next section for each cc
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    for c=1:K
+        channelData(c).visible = 0;
+        channelData(c+K).visible = 0;
+    end
+    
+    channelData(i).visible = 1;
+    channelData(i+K).visible = 1;
+    D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
+    D3d.UI.Ctrl.UpdateCurrentState();
+    D3d.Viewer.ResetView();
+    D3d.Viewer.SetViewOrigin(polygons(i).CenterOfMass);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Capture current CC
+    %  Adjust zoom before running
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ccFolder = sprintf('cc%d',i);
+    D3d.Viewer.SetCapturePath(fullfile('.',ccFolder),ccFolder);
+    if (exist(fullfile('.',ccFolder),'dir'))
+        rmdir(fullfile('.',ccFolder),'s');
+    end
+    mkdir(fullfile('.',ccFolder));
+    for t=1:720
+        D3d.Viewer.CaptureWindow();
+        D3d.Viewer.SetRotation(0,0.5,0);
+    end
+    dList = dir(fullfile('.',ccFolder,'*.bmp'));
+    while (length(dList)<720)
+        pause(10);
+        dList = dir(fullfile('.',ccFolder,'*.bmp'));
+    end
 end
-i = i+1;
-channelData(i).visible = 1;
-channelData(i+K).visible = 1;
-D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
-D3d.UI.Ctrl.UpdateCurrentState();
-D3d.Viewer.ResetView();
-D3d.Viewer.SetViewOrigin(polygons(i).CenterOfMass);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Capture current CC
-%  Adjust zoom before running
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ccFolder = sprintf('cc%d',i);
-D3d.Viewer.SetCapturePath(fullfile('.',ccFolder),ccFolder);
-if (exist(fullfile('.',ccFolder),'dir'))
-    rmdir(fullfile('.',ccFolder),'s');
-end
-mkdir(fullfile('.',ccFolder));
-for t=1:720
-    D3d.Viewer.CaptureWindow();
-    D3d.Viewer.SetRotation(0,0.5,0);
-end
-
+fprintf('%s\n',Utils.PrintTime(toc(ccTime)))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make composite frames for a 1080p movie
 % Ensure that the viewer is done rendering
 % Set the dir that this movie and frames are saved to
-%outDir = 'CompFrames';%default
-%outDir = 'TopLeft';% Top Left pannel for 4k
-%outDir = 'TopRight';% Top Right pannel for 4k
-%outDir = 'BottomLeft';% Bottom Left pannel for 4k
-%outDir = 'BottomRight';% Bottom Right pannel for 4k
+%movieOutDir = 'CompFrames';%default
+%movieOutDir = 'TopLeft';% Top Left pannel for 4k
+%movieOutDir = 'TopRight';% Top Right pannel for 4k
+%movieOutDir = 'BottomLeft';% Bottom Left pannel for 4k
+%movieOutDir = 'BottomRight';% Bottom Right pannel for 4k
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-movieOut = fullfile('.',outDir);
+movieOut = fullfile('.',movieOutDir);
 if (exist(movieOut,'dir'))
     rmdir(movieOut,'s');
 end
@@ -311,82 +350,20 @@ prgs.ClearProgress(true);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Create a mp4
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-range = [1,min([length(fNamesTex),length(fNamesTR)])];
-
-fprintf('Making movie...');
-tic
-ffmpegimages2video(fullfile(movieOut,'t%04d.tif'),...
-    fullfile(movieOut,'compare.mp4'),...
-    'InputFrameRate',60,...
-    'InputStartNumber',range,...
-    'x264Preset','veryslow',...
-    'x264Tune','stillimage',...
-    'OutputFrameRate',60);
-fprintf('%s\n',Utils.PrintTime(toc))
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Composite previous runs into 4k
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-movieOut = fullfile('.','4kCompFrames');
-if (exist(movieOut,'dir'))
-    rmdir(movieOut,'s');
+if (makeMP4)
+    range = [1,min([length(fNamesTex),length(fNamesTR)])];
+    
+    fprintf('Making movie...');
+    mvTime = tic;
+    ffmpegimages2video(fullfile(movieOut,'t%04d.tif'),...
+        fullfile(movieOut,'compare.mp4'),...
+        'InputFrameRate',60,...
+        'InputStartNumber',range,...
+        'x264Preset','veryslow',...
+        'x264Tune','stillimage',...
+        'OutputFrameRate',60);
+    fprintf('%s\n',Utils.PrintTime(toc(mvTime)))
 end
-mkdir(movieOut);
-
-folderOut = fullfile('.','TopLeft');
-dList = dir(fullfile(folderOut,'*.tif'));
-fNamesTL = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
-
-folderOut = fullfile('.','TopRight');
-dList = dir(fullfile(folderOut,'*.tif'));
-fNamesTR = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
-
-folderOut = fullfile('.','BottomLeft');
-dList = dir(fullfile(folderOut,'*.tif'));
-fNamesBL = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
-
-folderOut = fullfile('.','BottomRight');
-dList = dir(fullfile(folderOut,'*.tif'));
-fNamesBR = cellfun(@(x)(fullfile(folderOut,x)),{dList.name},'uniformOutput',false);
-
-prgs = Utils.CmdlnProgress(min([length(fNamesTex),length(fNamesTR)]),true,'Making Frames');
-for t=2:2:min([length(fNamesTL),length(fNamesTR),length(fNamesBL),length(fNamesBR)])
-    imTL = imread(fNamesTL{t});
-    imTR = imread(fNamesTR{t});
-    imBL = imread(fNamesBL{t});
-    imBR = imread(fNamesBR{t});
-    
-    imT = cat(2,imTL,imTR);
-    cent = round(size(imT,2)/2);
-    imT(:,cent-4:cent+4,:) = 255;
-    
-    imB = cat(2,imBL,imBR);
-    cent = round(size(imB,2)/2);
-    imB(:,cent-4:cent+4,:) = 255;
-    
-    im = cat(1,imT,imB);
-    cent = round(size(im,1)/2);
-    im(cent-4:cent+4,:,:) = 255;
-
-    im = imresize(im,[2160,3840]);
-    imwrite(im,fullfile(movieOut,sprintf('t%04d.tif',t/2)),'compression','lzw');
-    
-    prgs.PrintProgress(t);
+fprintf('Full Capture took: %s\n',Utils.PrintTime(toc(fullTime)))
 end
-prgs.ClearProgress(true);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Create 4k mp4
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-range = [1,length(fNamesTL)];
-
-fprintf('Making movie...');
-tic
-ffmpegimages2video(fullfile(movieOut,'t%04d.tif'),...
-    fullfile(movieOut,'compare4k.mp4'),...
-    'InputFrameRate',30,...
-    'InputStartNumber',range,...
-    'x264Preset','veryslow',...
-    'x264Tune','stillimage',...
-    'OutputFrameRate',30);
-fprintf('%s\n',Utils.PrintTime(toc))
