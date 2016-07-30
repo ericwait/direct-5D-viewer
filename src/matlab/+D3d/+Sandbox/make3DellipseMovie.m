@@ -189,17 +189,11 @@ fprintf('%s\n',Utils.PrintTime(toc(polyTime)))
 % get viewer set for the individual components
 ccTime = tic;
 fprintf('Capturing Each CC...')
-ccWidth = 1920/3;
-if (K==2 || K>=4)
-    ccHeight = 1080/2;
-elseif (K==3)
-    ccHeight = 1080/3;
-end
-D3d.Viewer.SetWindowSize(ccWidth,ccHeight);
 D3d.Viewer.ShowLabels(false);
 D3d.Viewer.ShowAllPolygons(false);
 D3d.Viewer.TextureAttenuation(true);
 D3d.Viewer.TextureLighting(true);
+ccWidth = 1920/3;
 
 for i = 1:K
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -210,6 +204,19 @@ for i = 1:K
         channelData(c).visible = 0;
         channelData(c+K).visible = 0;
     end
+    
+    if (K==2 || K==4)
+        ccHeight = 1080/2;
+    elseif (K==3)
+        ccHeight = 1080/3;
+    elseif (K==5)
+        if (i>3)
+            ccHeight = 1080/2;
+        else
+            ccHeight = 1080/3;
+        end
+    end
+    D3d.Viewer.SetWindowSize(ccWidth,ccHeight);
     
     channelData(i).visible = 1;
     channelData(i+K).visible = 1;
@@ -238,6 +245,8 @@ for i = 1:K
         dList = dir(fullfile('.',ccFolder,'*.bmp'));
     end
 end
+D3d.Close();
+
 fprintf('%s\n',Utils.PrintTime(toc(ccTime)))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make composite frames for a 1080p movie
@@ -331,7 +340,7 @@ for t=1:min([length(fNamesTex),length(fNamesTR)])
     cent = round(size(imR,1)/2);
     imR(cent-2:cent+2,:,:) = 255;
     
-    if (K==3)
+    if (K==3 || K==5)
         imR = cat(1,imR,imCC3);
         imR(end-cent-2:end-cent+2,:,:) = 255;
     end
