@@ -39,3 +39,4 @@ src/c/d3dViewer.VC.opendb
 *.db
 *.h5
 *.json
+*.bmp
