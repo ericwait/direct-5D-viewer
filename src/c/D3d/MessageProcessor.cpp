@@ -59,6 +59,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	static float previousPeel;
 	static bool minimized = false;
 	static bool hullsOn = true;
+	static bool widgetOn = true;
 
 	int index;
 	Vec<float> pnt;
@@ -269,6 +270,14 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		{
 			gRotate = !gRotate;
 			gMsgQueueToMex.addMessage("rotate",gRotate);
+		}
+		else if('W' == wParam)
+		{
+			widgetOn = !widgetOn;
+			toggleWidget(widgetOn);
+
+			gRenderer->updateRenderList();
+			gRenderer->renderAll();
 		}
 		else if('X'==wParam)
 		{

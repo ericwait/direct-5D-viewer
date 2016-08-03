@@ -40,6 +40,15 @@ void togglePolygons(bool on)
 		itr.second->setRenderable(on);
 }
 
+void toggleWidget(bool on)
+{
+	if(gRenderer==NULL) return;
+
+	const GraphicObjectTypes widgetType = GraphicObjectTypes::Widget;
+	for(auto itr:gGraphicObjectNodes[widgetType])
+		itr.second->setRenderable(on);
+}
+
 void togglePolygonWireframe(bool wireframe)
 {
 	if (gRenderer == NULL) return;

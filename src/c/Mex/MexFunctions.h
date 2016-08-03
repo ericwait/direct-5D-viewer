@@ -15,6 +15,7 @@ extern "C" __declspec(dllexport) void exitFunc();
 
 void setCurrentTexture(GraphicObjectTypes textureType);
 void togglePolygons(bool on);
+void toggleWidget(bool on);
 void togglePolygonWireframe(bool wireframe);
 void togglePolygonLighting(bool lighting);
 void toggleSelectedPolygon(std::set<int> labels);
