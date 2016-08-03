@@ -346,7 +346,8 @@ void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)
 	shaderText += "\t\t\tgrad.z = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[2]) - \n";
 	shaderText += "\t\t\t\tg_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[2]);\n";
 	shaderText += "\t\t\tgrad = normalize(grad);\n";
-	shaderText += "\t\t\tlightMod = saturate(dot(grad,mainLightDir)*2.0)*0.65 + 0.35;\n";
+    shaderText += "\t\t\tfloat ambientLight = 0.45f;\n";
+	shaderText += "\t\t\tlightMod = saturate(dot(grad,mainLightDir)*2.0*(1-ambientLight) + ambientLight);\n";
 	shaderText += "\t\t}\n";
 	shaderText += "\n";
 	shaderText += "\t\toutput.color.rgb += (lightMod*intensity*channelColor[i].rgb);\n";
