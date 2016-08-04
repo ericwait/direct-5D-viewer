@@ -65,9 +65,9 @@ end
 
 %% open the missing image if it is small enough
 if (all(imData.Dimensions<=2048) && isempty(im))
-    [im,imData] = MicroscopeData.ReaderH5(imagePath,'verbose',true,'normalize',true);
+    [im,imData] = MicroscopeData.Reader(imagePath,'verbose',true,'normalize',true);
         if (isempty(im))
-            [im,imData] = MicroscopeData.Reader(imData,[],[],[],'uint8',true,false,true);
+            [im,imData] = MicroscopeData.Reader('imageData',imData,'verbose',true,'normalize',true);
             if (isempty(im))
                 return
             end
