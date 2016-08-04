@@ -278,6 +278,7 @@ function pb_colorChooser_Callback(hObject, eventdata, handles)
 
 chan = get(handles.m_channelPicker,'Value');
 channelData(chan).color = uisetcolor(channelData(chan).color);
+colors(chan,:) = channelData(chan).color;
 
 D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
 D3d.UI.Ctrl.UpdateCurrentState();
