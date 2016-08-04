@@ -783,6 +783,14 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
+	else if(m.command=="showWidget")
+	{
+		double* onD = (double*)m.data;
+		bool on = (*onD)>0;
+		toggleWidget(on);
+		gRenderer->renderAll();
+		delete m.data;
+	}
     else if(m.command=="setBoarderColor")
     {
         Vec<float>* color = (Vec<float>*)m.data;
