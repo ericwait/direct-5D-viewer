@@ -221,6 +221,7 @@ HRESULT createBorder(Vec<float> &scale)
 
 	GraphicObjectNode* borderNode = new GraphicObjectNode(gBorderObj);
 	gBorderObj->setColor(Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);
+	gBorderObj->setLightOn(false);
 	gRenderer->attachToRootScene(borderNode, Renderer::Pre, 0);
 
 	insertGlobalGraphicsObject(GraphicObjectTypes::Border, borderNode);
