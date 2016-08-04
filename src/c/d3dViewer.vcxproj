@@ -125,6 +125,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexCommand.cpp" />
     <ClCompile Include="Mex\MexDeleteAllPolygons.cpp" />
     <ClCompile Include="Mex\MexSetBoarderColor.cpp" />
+    <ClCompile Include="Mex\MexShowFrameNumber.cpp" />
     <ClCompile Include="Mex\MexShowPolygonList.cpp" />
     <ClCompile Include="Mex\MexInit.cpp" />
     <ClCompile Include="Mex\MexLoadTexture.cpp" />

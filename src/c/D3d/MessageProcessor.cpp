@@ -767,6 +767,14 @@ HRESULT checkMessage()
 		XsetWindowSize(m);
 		gRenderer->renderAll();
 	}
+	else if(m.command=="showFrameNumber")
+	{
+		double* onD = (double*)m.data;
+		bool on = (*onD)>0;
+		gRenderer->setFrameNumOn(on);
+		gRenderer->renderAll();
+		delete m.data;
+	}
 	else if(m.command=="showScaleBar")
 	{
 		double* onD = (double*)m.data;

@@ -208,6 +208,9 @@
     <ClCompile Include="Mex\MexShowScaleBar.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexShowFrameNumber.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Mex\MexSetBoarderColor.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
