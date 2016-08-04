@@ -799,6 +799,7 @@ HRESULT checkMessage()
         for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
             ((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
             
+        gRenderer->renderAll();
         delete m.data;
     }
 	else
