@@ -7,6 +7,9 @@ if (~isempty(D3dUICtrlHandles))
     imageData = data.imageData;
     colors = data.colors;
     channelData = data.channelData;
+    for c=1:length(channelData)
+        channelData(c).color = colors(c,:);
+    end
 else
     error('There is no UserData stored in the control window!');
 end

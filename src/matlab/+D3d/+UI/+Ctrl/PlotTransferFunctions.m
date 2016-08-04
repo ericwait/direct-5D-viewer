@@ -17,9 +17,9 @@ if (~isempty(D3dUICtrlHandles))
             channelData(i).maxVal);
         
         if (channelData(i).visible>0)
-            plot(D3dUICtrlHandles.handles.funcPlot,x,y,'-','Color',channelData(i).color,'LineWidth',2.0);
+            plot(D3dUICtrlHandles.handles.funcPlot,x,y,'-','Color',colors(i,:),'LineWidth',2.0);
         else
-            plot(D3dUICtrlHandles.handles.funcPlot,x,y,':','Color',channelData(i).color,'LineWidth',2.0);
+            plot(D3dUICtrlHandles.handles.funcPlot,x,y,':','Color',colors(i,:),'LineWidth',2.0);
         end
     end
     xlim(D3dUICtrlHandles.handles.funcPlot,[0 1]);
