@@ -1611,9 +1611,20 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 	GlobalUnlock(hDIB);
 	GlobalFree(hDIB);
 
-	DeleteObject(hdcMemDC);
-	IDXGIBackBuffer->ReleaseDC(NULL);
-	immediateContext->OMSetRenderTargets(1,&renderTargetView,depthStencilView);
+	bool bSuccess = DeleteDC(hdcMemDC);
+	if(!bSuccess)
+	{
+		MessageBox(gWindowHandle, "Delete DC Failed", "Failed", MB_OK);
+		hr = E_FAIL;
+	}
+
+	hr = IDXGIBackBuffer->ReleaseDC(NULL);
+
+	if(FAILED(hr))
+	{
+		MessageBox(gWindowHandle, "Release DC has failed", "Failed", MB_OK);
+	}
+   immediateContext->OMSetRenderTargets(1,&renderTargetView,depthStencilView);
 
 	return imOut;
 }

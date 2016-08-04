@@ -79,20 +79,20 @@ std::string MexAddPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxA
 		return "Not the right arguments for loadPolygons!";
 
 	const mxArray* polys = prhs[0];
-	if(mxGetField(polys, 1, "faces")==NULL)
-		return "Polygon struct is malformed!";
-	if(mxGetField(polys, 1, "verts")==NULL)
-		return "Polygon struct is malformed!";
-	if(mxGetField(polys, 1, "norms")==NULL)
-		return "Polygon struct is malformed!";
-	if(mxGetField(polys, 1, "color")==NULL)
-		return "Polygon struct is malformed!";
-	if(mxGetField(polys, 1, "frame")==NULL)
-		return "Polygon struct is malformed!";
-	if(mxGetField(polys, 1, "index")==NULL)
-		return "Polygon struct is malformed!";
-	if(mxGetField(polys, 1, "label")==NULL)
-		return "Polygon struct is malformed!";
+	if(mxGetField(polys, 0, "faces")==NULL)
+		return "Polygon struct is malformed, no faces!";
+	if(mxGetField(polys, 0, "verts")==NULL)
+		return "Polygon struct is malformed, no verts!";
+	if(mxGetField(polys, 0, "norms")==NULL)
+		return "Polygon struct is malformed, no norms!";
+	if(mxGetField(polys, 0, "color")==NULL)
+		return "Polygon struct is malformed, no color!";
+	if(mxGetField(polys, 0, "frame")==NULL)
+		return "Polygon struct is malformed, no frame!";
+	if(mxGetField(polys, 0, "index")==NULL)
+		return "Polygon struct is malformed, no index!";
+	if(mxGetField(polys, 0, "label")==NULL)
+		return "Polygon struct is malformed, no label!";
 
 	return "";
 }
