@@ -775,6 +775,16 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
+    else if(m.command=="setBoarderColor")
+    {
+        Vec<float>* color = (Vec<float>*)m.data;
+
+        const GraphicObjectTypes boarderType = GraphicObjectTypes::Border;
+        for(auto objectIter = gGraphicObjectNodes[boarderType].begin(); objectIter!=gGraphicObjectNodes[boarderType].end(); ++objectIter)
+            ((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
+            
+        delete m.data;
+    }
 	else
 	{
 		// Print an error message
