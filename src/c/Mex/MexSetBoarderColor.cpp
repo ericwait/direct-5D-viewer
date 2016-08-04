@@ -2,7 +2,7 @@
 #include "MexFunctions.h"
 #include "..\Global\Globals.h"
 
-void MexSetBoarderColor::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+void MexSetBorderColor::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
     double* bc = (double*)mxGetData(prhs[0]);
     Vec<float>* background = new Vec<float>;
@@ -10,10 +10,10 @@ void MexSetBoarderColor::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
     background->y = (float)(bc[1]);
     background->z = (float)(bc[2]);
 
-    gMsgQueueToDirectX.writeMessage("setBoarderColor", (void*)background);
+    gMsgQueueToDirectX.writeMessage("setBorderColor", (void*)background);
 }
 
-std::string MexSetBoarderColor::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
+std::string MexSetBorderColor::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
     if(nrhs!=1)
         return "There must be one input consisting of three doubles between [0,1]!";
@@ -21,14 +21,14 @@ std::string MexSetBoarderColor::check(int nlhs, mxArray* plhs[], int nrhs, const
     return "";
 }
 
-void MexSetBoarderColor::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
+void MexSetBorderColor::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
     inArgs.push_back("color");
 }
 
-void MexSetBoarderColor::help(std::vector<std::string>& helpLines) const
+void MexSetBorderColor::help(std::vector<std::string>& helpLines) const
 {
-    helpLines.push_back("This will set the color of the boarder box.");
+    helpLines.push_back("This will set the color of the border box.");
 
     helpLines.push_back("\tColor - This should be three doubles between [0,1] that represent (r,g,b) of the desired background color.");
 }

@@ -791,12 +791,12 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
-    else if(m.command=="setBoarderColor")
+    else if(m.command=="setBorderColor")
     {
         Vec<float>* color = (Vec<float>*)m.data;
 
-        const GraphicObjectTypes boarderType = GraphicObjectTypes::Border;
-        for(auto objectIter = gGraphicObjectNodes[boarderType].begin(); objectIter!=gGraphicObjectNodes[boarderType].end(); ++objectIter)
+        const GraphicObjectTypes borderType = GraphicObjectTypes::Border;
+        for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
             ((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
             
         delete m.data;
