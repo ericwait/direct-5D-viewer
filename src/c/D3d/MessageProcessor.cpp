@@ -767,7 +767,7 @@ HRESULT checkMessage()
 		XsetWindowSize(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command=="showFrameNumber")
+	else if(m.command == "showFrameNumber")
 	{
 		double* onD = (double*)m.data;
 		bool on = (*onD)>0;
@@ -775,7 +775,7 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
-	else if(m.command=="showScaleBar")
+	else if(m.command == "showScaleBar")
 	{
 		double* onD = (double*)m.data;
 		bool on = (*onD)>0;
@@ -783,7 +783,7 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
-	else if(m.command=="showWidget")
+	else if(m.command == "showWidget")
 	{
 		double* onD = (double*)m.data;
 		bool on = (*onD)>0;
@@ -791,17 +791,17 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
-    else if(m.command=="setBorderColor")
-    {
-        Vec<float>* color = (Vec<float>*)m.data;
+	else if(m.command == "setBorderColor")
+	{
+		Vec<float>* color = (Vec<float>*)m.data;
 
-        const GraphicObjectTypes borderType = GraphicObjectTypes::Border;
-        for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
-            ((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
-            
-        gRenderer->renderAll();
-        delete m.data;
-    }
+		const GraphicObjectTypes borderType = GraphicObjectTypes::Border;
+		for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
+			((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
+			
+		gRenderer->renderAll();
+		delete m.data;
+	}
 	else
 	{
 		// Print an error message
