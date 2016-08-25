@@ -122,16 +122,23 @@ localStruct = struct(...
 if (~isfield(savedData,'channelData') || isempty(savedData.channelData))
     channelData = localStruct;
     for i=1:imageData.NumberOfChannels
-        localStruct.color = colors(i,:);
+        if (imageData.NumberOfChannels==1)
+            localStruct.color = [1,1,1];
+            colors(1,:) = [1,1,1];
+        else
+            localStruct.color = colors(i,:);
+        end
         channelData(i) = localStruct;
     end
 else
     channelData = savedData.channelData;
+    colors = savedData.colors;
 end
 
-D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
-
 if (imageData.NumberOfChannels>0)
+    if (isfield(imageData,'ChannelColor') && ~isempty(imageData.ChannelColor))
+        channelData.color = imageData.ChannelColor;
+    end
     if (isfield(imageData,'ChannelNames') && ~isempty(imageData.ChannelNames))
         strng = imageData.ChannelNames;
     else
@@ -144,6 +151,8 @@ if (imageData.NumberOfChannels>0)
         end
     end
 end
+
+D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
 
 set(handles.m_channelPicker,'string',strng);
 if (imageData.NumberOfFrames > 1)
