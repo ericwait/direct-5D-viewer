@@ -18,7 +18,11 @@ if (~exist('imData','var'))
     imData = [];
 end
 if (~exist('imagePath','var'))
-    imagePath = [];
+    if (isempty(imData))
+        imagePath = [];
+    else
+        imagePath = imData.imageDir;
+    end
 end
 if (~exist('bufferNum','var') || isempty(bufferNum))
     bufferNum = 1;
@@ -65,12 +69,9 @@ end
 
 %% open the missing image if it is small enough
 if (all(imData.Dimensions<=2048) && isempty(im))
-    [im,imData] = MicroscopeData.Reader(imagePath,'verbose',true,'normalize',true);
+    [im,imData] = MicroscopeData.Reader('imageData',imData,'verbose',true);
         if (isempty(im))
-            [im,imData] = MicroscopeData.Reader('imageData',imData,'verbose',true,'normalize',true);
-            if (isempty(im))
                 return
-            end
         end        
 elseif (isempty(im) || any(imData.Dimensions>2048))
     D3d.UI.InitializeMipFigure(im,imData,imData.imageDir,true);
