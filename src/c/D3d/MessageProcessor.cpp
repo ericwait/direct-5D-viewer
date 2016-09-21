@@ -719,7 +719,7 @@ HRESULT checkMessage()
 	}
 	else if(m.command == "CaptureWindow")
 	{
-		XcaptureWindow();
+		XcaptureWindow(m.data);
 	}
 	else if(m.command == "centerSelectedCell")
 	{

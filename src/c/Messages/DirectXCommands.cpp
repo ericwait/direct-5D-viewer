@@ -284,11 +284,23 @@ void XdeleteAllPolygonsCommand(Message m){
 	gRenderer->updateRenderList();
 }
 
-void XcaptureWindow()
+void XcaptureWindow(void* imageOut/*=NULL*/)
 {
 	gRenderer->renderAll();
 
-	gRenderer->captureWindow(NULL);
+	if(imageOut!=NULL)
+	{
+		DWORD dwBmpSize = 0;
+		BITMAPINFOHEADER bi;
+		unsigned char* lpbitmap = gRenderer->captureWindow(dwBmpSize, bi);
+		Image* im = (Image*)imageOut;
+		im->setPixels(lpbitmap);
+		im->setDimensions(Vec<size_t>(bi.biWidth, bi.biHeight, 3));
+
+		gMsgQueueToMex.addMessage("loadDone",0);
+	}
+	else
+		gRenderer->captureWindow(NULL);
 }
 
 void XsetBackgroundColor(Message m)

@@ -23,6 +23,6 @@ void XtextureAttenUpdateCommand(Message m);
 void XpolygonLighting(Message m);
 void XdisplayPolygonsCommand(Message m);
 void XdeleteAllPolygonsCommand(Message m);
-void XcaptureWindow();
+void XcaptureWindow(void* image=NULL);
 void XsetBackgroundColor(Message m);
 void XsetWindowSize(Message m);
