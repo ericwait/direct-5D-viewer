@@ -18,7 +18,7 @@ if (~exist('imData','var'))
     imData = [];
 end
 if (~exist('imagePath','var'))
-    if (isempty(imData))
+    if (isempty(imData) || ~isfield(imData,'imageDir') )
         imagePath = [];
     else
         imagePath = imData.imageDir;
