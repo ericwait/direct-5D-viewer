@@ -22,13 +22,14 @@ class Camera
 {
 public:
 	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
+    virtual ~Camera() {}
 
 	void moveLeft();
 	void moveRight();
 	void moveUp();
 	void moveDown();
-	void zoomIncrement();
-	void zoomDecrement();
+	virtual void zoomIncrement();
+	virtual void zoomDecrement();
 	void resetCamera();
 	void setCameraPosition(Vec<float> cameraPositionIn);
 	void setLookPosition(Vec<float> lookPositionIn);
@@ -63,6 +64,8 @@ public:
 	OrthoCamera(Vec<float> cameraPostionIn, Vec<float> lookPostionIn, Vec<float> upDirectionIn);
 
 	void updateProjectionTransform();
+    virtual void zoomIncrement() {}
+    virtual void zoomDecrement() {}
 
 private:
 	OrthoCamera();
