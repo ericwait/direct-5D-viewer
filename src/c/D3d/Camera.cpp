@@ -30,29 +30,29 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 
 void Camera::moveLeft()
 {
-	cameraPosition.x += 0.03f;
-	lookPosition.x	 += 0.03f;
-	updateViewTransform();
-}
-
-void Camera::moveRight()
-{
 	cameraPosition.x -= 0.03f;
 	lookPosition.x	 -= 0.03f;
 	updateViewTransform();
 }
 
+void Camera::moveRight()
+{
+	cameraPosition.x += 0.03f;
+	lookPosition.x	 += 0.03f;
+	updateViewTransform();
+}
+
 void Camera::moveUp()
 {
-	cameraPosition.y += 0.03f;
-	lookPosition.y	 += 0.03f;
+	cameraPosition.y -= 0.03f;
+	lookPosition.y	 -= 0.03f;
 	updateViewTransform();
 }
 
 void Camera::moveDown()
 {
-	cameraPosition.y -= 0.03f;
-	lookPosition.y	 -= 0.03f;
+	cameraPosition.y += 0.03f;
+	lookPosition.y	 += 0.03f;
 	updateViewTransform();
 }
 
