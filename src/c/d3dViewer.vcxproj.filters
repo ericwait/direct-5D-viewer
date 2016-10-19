@@ -214,6 +214,24 @@
     <ClCompile Include="Mex\MexSetBoarderColor.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexMoveLeft.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexMoveRight.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexMoveUp.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexMoveDown.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexZoomDecrement.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexZoomIncrement.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">

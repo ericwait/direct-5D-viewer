@@ -802,6 +802,35 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
+    else if(m.command == "moveLeft")
+    {
+        gCameraDefaultMesh->moveLeft();
+        gRenderer->renderAll();
+    }
+    else if(m.command == "moveRight")
+    {
+        gCameraDefaultMesh->moveRight();
+        gRenderer->renderAll();
+    } 
+    else if(m.command == "moveUp")
+    {
+        gCameraDefaultMesh->moveUp();
+        gRenderer->renderAll();
+    }
+    else if(m.command == "moveDown")
+    {
+        gCameraDefaultMesh->moveDown();
+        gRenderer->renderAll();
+    }
+    else if(m.command == "zoomDecrement")
+    {
+        gCameraDefaultMesh->zoomDecrement();
+        gRenderer->renderAll();
+    } else if(m.command == "zoomIncrement")
+    {
+        gCameraDefaultMesh->zoomIncrement();
+        gRenderer->renderAll();
+    }
 	else
 	{
 		// Print an error message

@@ -67,14 +67,3 @@ GraphicObjectNode* getGlobalGraphicsObject(GraphicObjectTypes objType, unsigned 
 	return gGraphicObjectNodes[objType][uniqueID];
 }
 
-
-//BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpReserved)
-//{
-//	if ( fdwReason == DLL_PROCESS_ATTACH )
-//	{
-//		gDllInstance = hInstDLL;
-//		registerExitFunction = TRUE;
-//	}
-//
-//	return TRUE;
-//}
