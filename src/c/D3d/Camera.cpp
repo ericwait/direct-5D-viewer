@@ -28,40 +28,41 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 	updateProjectionTransform();
 }
 
-void Camera::moveLeft()
+void Camera::moveLeft(double speedFactor/*=1.0f*/)
 {
-	cameraPosition.x -= 0.03f;
-	lookPosition.x	 -= 0.03f;
+	cameraPosition.x -= 0.03*speedFactor;
+	lookPosition.x	 -= 0.03*speedFactor;
 	updateViewTransform();
 }
 
-void Camera::moveRight()
+void Camera::moveRight(double speedFactor/*=1.0f*/)
 {
-	cameraPosition.x += 0.03f;
-	lookPosition.x	 += 0.03f;
+	cameraPosition.x += 0.03*speedFactor;
+	lookPosition.x	 += 0.03*speedFactor;
 	updateViewTransform();
 }
 
-void Camera::moveUp()
+void Camera::moveUp(double speedFactor/*=1.0f*/)
 {
-	cameraPosition.y -= 0.03f;
-	lookPosition.y	 -= 0.03f;
+	cameraPosition.y -= 0.03*speedFactor;
+	lookPosition.y	 -= 0.03*speedFactor;
 	updateViewTransform();
 }
 
-void Camera::moveDown()
+void Camera::moveDown(double speedFactor/*=1.0f*/)
 {
-	cameraPosition.y += 0.03f;
-	lookPosition.y	 += 0.03f;
+	cameraPosition.y += 0.03*speedFactor;
+	lookPosition.y	 += 0.03*speedFactor;
 	updateViewTransform();
 }
 
-void Camera::zoomIncrement()
+void Camera::zoomIncrement(double speedFactor/*=1.0f*/)
 {
-	float curDelta = lookPosition.z-cameraPosition.z;
+    double curDelta = lookPosition.z-cameraPosition.z;
 	if (curDelta>0.02f)
 	{
-		float newDelta = curDelta - SQR(curDelta)/zoomFactor;
+        double lclZoomFactor = zoomFactor/speedFactor;
+        double newDelta = curDelta - SQR(curDelta)/lclZoomFactor;
 
 		if (newDelta>0.02f)
 			cameraPosition.z = lookPosition.z - newDelta;
@@ -72,12 +73,13 @@ void Camera::zoomIncrement()
 	}
 }
 
-void Camera::zoomDecrement()
+void Camera::zoomDecrement(double speedFactor/*=1.0f*/)
 {
-	float curDelta = lookPosition.z-cameraPosition.z;
+    double curDelta = lookPosition.z-cameraPosition.z;
 	if (curDelta<10.0f)
 	{
-		float newDelta = zoomFactor/2.0f - sqrt(abs(SQR(zoomFactor) - 4.0f*zoomFactor*(curDelta))) /2.0f;
+        double lclZoomFactor = zoomFactor/speedFactor;
+        double newDelta = lclZoomFactor/2.0f - sqrt(abs(SQR(lclZoomFactor) - 4.0f*lclZoomFactor*(curDelta))) /2.0f;
 
 		if (newDelta<10.0f)
 			cameraPosition.z = lookPosition.z - newDelta;

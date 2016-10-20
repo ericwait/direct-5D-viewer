@@ -24,12 +24,12 @@ public:
 	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
     virtual ~Camera() {}
 
-	void moveLeft();
-	void moveRight();
-	void moveUp();
-	void moveDown();
-	virtual void zoomIncrement();
-	virtual void zoomDecrement();
+	void moveLeft(double speedFactor=1.0);
+	void moveRight(double speedFactor=1.0);
+	void moveUp(double speedFactor=1.0);
+	void moveDown(double speedFactor=1.0);
+	virtual void zoomIncrement(double speedFactor=1.0);
+	virtual void zoomDecrement(double speedFactor=1.0);
 	void resetCamera();
 	void setCameraPosition(Vec<float> cameraPositionIn);
 	void setLookPosition(Vec<float> lookPositionIn);

@@ -798,38 +798,57 @@ HRESULT checkMessage()
 		const GraphicObjectTypes borderType = GraphicObjectTypes::Border;
 		for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
 			((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
-			
+
 		gRenderer->renderAll();
 		delete m.data;
 	}
     else if(m.command == "moveLeft")
     {
-        gCameraDefaultMesh->moveLeft();
+        double* speed = (double*)m.data;
+        gCameraDefaultMesh->moveLeft(*speed);
         gRenderer->renderAll();
+
+        delete speed;
     }
     else if(m.command == "moveRight")
     {
-        gCameraDefaultMesh->moveRight();
+        double* speed = (double*)m.data;
+        gCameraDefaultMesh->moveRight(*speed);
         gRenderer->renderAll();
-    } 
+
+        delete speed;
+    }
     else if(m.command == "moveUp")
     {
-        gCameraDefaultMesh->moveUp();
+        double* speed = (double*)m.data;
+        gCameraDefaultMesh->moveUp(*speed);
         gRenderer->renderAll();
+
+        delete speed;
     }
     else if(m.command == "moveDown")
     {
-        gCameraDefaultMesh->moveDown();
+        double* speed = (double*)m.data;
+        gCameraDefaultMesh->moveDown(*speed);
         gRenderer->renderAll();
+
+        delete speed;
     }
     else if(m.command == "zoomDecrement")
     {
-        gCameraDefaultMesh->zoomDecrement();
+        double* speed = (double*)m.data;
+        gCameraDefaultMesh->zoomDecrement(*speed);
         gRenderer->renderAll();
-    } else if(m.command == "zoomIncrement")
+
+        delete speed;
+    }
+    else if(m.command == "zoomIncrement")
     {
-        gCameraDefaultMesh->zoomIncrement();
+        double* speed = (double*)m.data;
+        gCameraDefaultMesh->zoomIncrement(*speed);
         gRenderer->renderAll();
+
+        delete speed;
     }
 	else
 	{
