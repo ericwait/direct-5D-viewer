@@ -618,7 +618,7 @@ HRESULT checkMessage()
 	else if(m.command == "ViewTexture")
 	{
 		GraphicObjectTypes* typ = (GraphicObjectTypes*)m.data;
-		
+
 		setCurrentTexture(*typ);
 		gRenderer->renderAll();
 		delete typ;
@@ -730,28 +730,44 @@ HRESULT checkMessage()
 		XdeleteAllPolygonsCommand(m);
 		gRenderer->renderAll();
 	}
-	else if(m.command == "SetRotation")
+	else if(m.command == "SetViewRotation")
 	{
-		Vec<double>* rotations = (Vec<double>*)m.data;
-		rotations->x = rotations->x/180.0 * DirectX::XM_PI;
-		rotations->y = rotations->y/180.0 * DirectX::XM_PI;
-		rotations->z = rotations->z/180.0 * DirectX::XM_PI;
+		double* rotationAxis = (double*)m.data;
+		double angle = rotationAxis[3];
+		angle = angle/180.0 *DirectX::XM_PI;
 
-		DirectX::XMMATRIX rotX, rotY, rotZ;
-		rotX = DirectX::XMMatrixRotationX(float(rotations->x));
-		rotY = DirectX::XMMatrixRotationY(float(rotations->y));
-		rotZ = DirectX::XMMatrixRotationZ(float(rotations->z));
+        DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
+        DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
+
+        DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
 
 		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
-		gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY*rotZ);
+		gRenderer->setWorldRotation(previousWorldRotation*rotMat);
 		gRenderer->renderAll();
 
-		delete[] rotations;
+		delete[] rotationAxis;
 	}
+    else if(m.command=="SetWorldRotation")
+    {
+        double* rotationAxis = (double*)m.data;
+        double angle = rotationAxis[3];
+        angle = angle/180.0 *DirectX::XM_PI;
+
+        DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
+        DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
+
+        DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
+
+        DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
+        gRenderer->setWorldRotation(rotMat*previousWorldRotation);
+        gRenderer->renderAll();
+
+        delete[] rotationAxis;
+    }
 	else if(m.command == "takeControl")
 	{
 		gRendererOn = false;
-	} 
+	}
 	else if(m.command == "releaseControl")
 	{
 		gRendererOn = true;

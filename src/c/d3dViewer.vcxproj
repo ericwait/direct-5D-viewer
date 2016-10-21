@@ -129,6 +129,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexMoveRight.cpp" />
     <ClCompile Include="Mex\MexMoveUp.cpp" />
     <ClCompile Include="Mex\MexSetBoarderColor.cpp" />
+    <ClCompile Include="Mex\MexSetWorldRotation.cpp" />
     <ClCompile Include="Mex\MexShowFrameNumber.cpp" />
     <ClCompile Include="Mex\MexShowPolygonList.cpp" />
     <ClCompile Include="Mex\MexInit.cpp" />
@@ -156,7 +157,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexShowAllPolygons.cpp" />
     <ClCompile Include="Mex\MexShowTexture.cpp" />
     <ClCompile Include="Mex\MexToggleWireframe.cpp" />
-    <ClCompile Include="Mex\MexSetRotation.cpp" />
+    <ClCompile Include="Mex\MexSetViewRotation.cpp" />
     <ClCompile Include="Mex\MexZoomDecrement.cpp" />
     <ClCompile Include="Mex\MexZoomIncrement.cpp" />
     <ClCompile Include="Mex\Update.cpp" />

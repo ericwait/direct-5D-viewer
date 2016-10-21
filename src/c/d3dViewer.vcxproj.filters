@@ -190,9 +190,6 @@
     <ClCompile Include="Mex\MexSetWindowSize.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MexSetRotation.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\MexShowAllPolygons.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -230,6 +227,12 @@
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexZoomIncrement.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetViewRotation.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetWorldRotation.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
