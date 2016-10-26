@@ -158,6 +158,10 @@ public:
 
 	void convertToWorldSpace(double* verts, size_t numVerts);
 
+    float FrontClipPos() const;
+    void FrontClipPos(float val);
+    float BackClipPos() const;
+    void BackClipPos(float val);
 private:
 	HRESULT initSwapChain();
 	HRESULT initDepthStencils();
@@ -220,6 +224,8 @@ private:
 	RootSceneNode* rootScene;
 	unsigned int currentFrame;
 	float clipChunkPercent;
+    float frontClipPos;
+    float backClipPos;
 	int numPlanes;
 	bool labelsOn;
 	bool frameNumOn;

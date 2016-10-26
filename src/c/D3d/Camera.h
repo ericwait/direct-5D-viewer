@@ -30,6 +30,8 @@ public:
 	void moveDown(double speedFactor=1.0);
 	virtual void zoomIncrement(double speedFactor=1.0);
 	virtual void zoomDecrement(double speedFactor=1.0);
+    float getNearZ() const { return nearZ; }
+    void setNearZ(float val);
 	void resetCamera();
 	void setCameraPosition(Vec<float> cameraPositionIn);
 	void setLookPosition(Vec<float> lookPositionIn);
@@ -52,6 +54,7 @@ protected:
 	Vec<float> defaultCameraPosition;
 	Vec<float> defaultLookPosition;
 	Vec<float> defaultUpDirection;
+    float nearZ;
 	DirectX::XMMATRIX viewTransform;
 	DirectX::XMMATRIX projectionTransform;
 	float zoomFactor;

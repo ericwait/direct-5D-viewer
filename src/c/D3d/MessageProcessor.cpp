@@ -60,13 +60,14 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	static bool minimized = false;
 	static bool hullsOn = true;
 	static bool widgetOn = true;
+    float alpha = (altDown) ? (0.1f) : (1.0f);
 
 	int index;
 	Vec<float> pnt;
 	Vec<float> direction;
 
 	switch(message)
-	{
+    {
 	case WM_NULL:
 		break;
 	case WM_CREATE:
@@ -95,10 +96,51 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_MOUSEWHEEL:
-		if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
-			gCameraDefaultMesh->zoomIncrement();
+        if(shiftDown && ctrlDown)
+        {
+            float nearZ = gCameraDefaultMesh->getNearZ();
+            if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
+            {
+                nearZ += 0.05f*alpha;
+            } else
+            {
+                nearZ -= 0.05f*alpha;
+            }
+            gCameraDefaultMesh->setNearZ(nearZ);
+        }
+		else if (ctrlDown)
+		{ 
+			float frontClipPos = gRenderer->FrontClipPos();
+			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
+			{
+				frontClipPos += 0.01f*alpha;
+			}
+			else
+			{
+				frontClipPos -= 0.01f*alpha;
+			}
+			gRenderer->FrontClipPos(frontClipPos);
+		}
+		else if (shiftDown)
+		{
+			float backClipPos = gRenderer->BackClipPos();
+			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
+			{
+				backClipPos += 0.01f*alpha;
+			} 
+            else
+			{
+				backClipPos -= 0.01f*alpha;
+			}
+			gRenderer->BackClipPos(backClipPos);
+		}
 		else
-			gCameraDefaultMesh->zoomDecrement();
+		{
+			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
+				gCameraDefaultMesh->zoomIncrement(alpha);
+			else
+				gCameraDefaultMesh->zoomDecrement(alpha);
+		}
 		gRenderer->renderAll();
 		break;
 	case WM_MOUSEMOVE:
@@ -108,12 +150,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			if(shiftDown)
 				rotX = DirectX::XMMatrixIdentity();
 			else
-				rotX = DirectX::XMMatrixRotationY(((float)(iMouseX - previousMouseX) / gWindowWidth)*DirectX::XM_2PI);
+				rotX = DirectX::XMMatrixRotationY(((float)(iMouseX - previousMouseX) / gWindowWidth)*DirectX::XM_2PI*alpha);
 
 			if(ctrlDown)
 				rotY = DirectX::XMMatrixIdentity();
 			else
-				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / gWindowHeight)*DirectX::XM_2PI);
+				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / gWindowHeight)*DirectX::XM_2PI*alpha);
 
 			gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
 			gRenderer->renderAll();
@@ -208,7 +250,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			altDown = true;
 			gMsgQueueToMex.addMessage("keyDown","alt");
 		}
-		else if ('B' == wParam)
+		else if('B' == wParam)
 		{
 			if(ctrlDown)
 				gRenderer->togglescaleText();
@@ -219,10 +261,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if('C' == wParam)
 		{
+            gRenderer->FrontClipPos(-1.5f);
+            gRenderer->BackClipPos(1.5f);
 			gCameraDefaultMesh->resetCamera();
 			gRenderer->renderAll();
 		}
-		else if('F'==wParam)
+		else if('F' == wParam)
 		{
 			if(ctrlDown && !altDown)
 				gRenderer->togglefps();
@@ -247,7 +291,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gRenderer->updateRenderList();
 			gRenderer->renderAll();
 		}
-		else if('L'==wParam)
+		else if('L' == wParam)
 		{
 			gRenderer->toggleLabels();
 			gMsgQueueToMex.addMessage("toggleLabels",0.0);
@@ -279,7 +323,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gRenderer->updateRenderList();
 			gRenderer->renderAll();
 		}
-		else if('X'==wParam)
+		else if('X' == wParam)
 		{
 			gMsgQueueToMex.addMessage("centerSelectedPolygon",1.0);
 			gRenderer->renderAll();
@@ -373,6 +417,13 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gMsgQueueToMex.addMessage("keyDown","number",0.0);
 		}
 		break;
+    case WM_SYSKEYDOWN:
+        if(VK_MENU==wParam)
+        {
+            altDown = true;
+            gMsgQueueToMex.addMessage("keyDown", "alt");
+        }
+        break;
 	case WM_KEYUP:
 		if(VK_SHIFT==wParam)
 		{
@@ -384,12 +435,20 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			ctrlDown = false;
 			gMsgQueueToMex.addMessage("keyUp","ctrl");
 		}
-		else if(VK_MENU)
+		else if(VK_MENU==wParam)
 		{
 			altDown = false;
 			gMsgQueueToMex.addMessage("keyUp","alt");
 		}
 		break;
+    case WM_SYSKEYUP:
+        if(VK_MENU==wParam)
+        {
+            altDown = false;
+            gMsgQueueToMex.addMessage("keyDown", "alt");
+        }
+        break;
+
 	}
 
 	return DefWindowProc(hWnd,message,wParam,lParam);
@@ -736,10 +795,10 @@ HRESULT checkMessage()
 		double angle = rotationAxis[3];
 		angle = angle/180.0 *DirectX::XM_PI;
 
-        DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
-        DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
+		DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
+		DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
 
-        DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
+		DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
 
 		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
 		gRenderer->setWorldRotation(previousWorldRotation*rotMat);
@@ -747,23 +806,23 @@ HRESULT checkMessage()
 
 		delete[] rotationAxis;
 	}
-    else if(m.command=="SetWorldRotation")
-    {
-        double* rotationAxis = (double*)m.data;
-        double angle = rotationAxis[3];
-        angle = angle/180.0 *DirectX::XM_PI;
+	else if(m.command=="SetWorldRotation")
+	{
+		double* rotationAxis = (double*)m.data;
+		double angle = rotationAxis[3];
+		angle = angle/180.0 *DirectX::XM_PI;
 
-        DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
-        DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
+		DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
+		DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
 
-        DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
+		DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
 
-        DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
-        gRenderer->setWorldRotation(rotMat*previousWorldRotation);
-        gRenderer->renderAll();
+		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
+		gRenderer->setWorldRotation(rotMat*previousWorldRotation);
+		gRenderer->renderAll();
 
-        delete[] rotationAxis;
-    }
+		delete[] rotationAxis;
+	}
 	else if(m.command == "takeControl")
 	{
 		gRendererOn = false;
@@ -818,54 +877,54 @@ HRESULT checkMessage()
 		gRenderer->renderAll();
 		delete m.data;
 	}
-    else if(m.command == "moveLeft")
-    {
-        double* speed = (double*)m.data;
-        gCameraDefaultMesh->moveLeft(*speed);
-        gRenderer->renderAll();
+	else if(m.command == "moveLeft")
+	{
+		double* speed = (double*)m.data;
+		gCameraDefaultMesh->moveLeft(*speed);
+		gRenderer->renderAll();
 
-        delete speed;
-    }
-    else if(m.command == "moveRight")
-    {
-        double* speed = (double*)m.data;
-        gCameraDefaultMesh->moveRight(*speed);
-        gRenderer->renderAll();
+		delete speed;
+	}
+	else if(m.command == "moveRight")
+	{
+		double* speed = (double*)m.data;
+		gCameraDefaultMesh->moveRight(*speed);
+		gRenderer->renderAll();
 
-        delete speed;
-    }
-    else if(m.command == "moveUp")
-    {
-        double* speed = (double*)m.data;
-        gCameraDefaultMesh->moveUp(*speed);
-        gRenderer->renderAll();
+		delete speed;
+	}
+	else if(m.command == "moveUp")
+	{
+		double* speed = (double*)m.data;
+		gCameraDefaultMesh->moveUp(*speed);
+		gRenderer->renderAll();
 
-        delete speed;
-    }
-    else if(m.command == "moveDown")
-    {
-        double* speed = (double*)m.data;
-        gCameraDefaultMesh->moveDown(*speed);
-        gRenderer->renderAll();
+		delete speed;
+	}
+	else if(m.command == "moveDown")
+	{
+		double* speed = (double*)m.data;
+		gCameraDefaultMesh->moveDown(*speed);
+		gRenderer->renderAll();
 
-        delete speed;
-    }
-    else if(m.command == "zoomDecrement")
-    {
-        double* speed = (double*)m.data;
-        gCameraDefaultMesh->zoomDecrement(*speed);
-        gRenderer->renderAll();
+		delete speed;
+	}
+	else if(m.command == "zoomDecrement")
+	{
+		double* speed = (double*)m.data;
+		gCameraDefaultMesh->zoomDecrement(*speed);
+		gRenderer->renderAll();
 
-        delete speed;
-    }
-    else if(m.command == "zoomIncrement")
-    {
-        double* speed = (double*)m.data;
-        gCameraDefaultMesh->zoomIncrement(*speed);
-        gRenderer->renderAll();
+		delete speed;
+	}
+	else if(m.command == "zoomIncrement")
+	{
+		double* speed = (double*)m.data;
+		gCameraDefaultMesh->zoomIncrement(*speed);
+		gRenderer->renderAll();
 
-        delete speed;
-    }
+		delete speed;
+	}
 	else
 	{
 		// Print an error message

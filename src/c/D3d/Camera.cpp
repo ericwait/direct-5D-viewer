@@ -22,6 +22,8 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 	lookPosition = defaultLookPosition = lookPositionIn;
 	upDirection = defaultUpDirection = upDirectionIn;
 
+    nearZ = 0.1f;
+
 	zoomFactor = 25;
 
 	updateViewTransform();
@@ -91,11 +93,18 @@ void Camera::zoomDecrement(double speedFactor/*=1.0f*/)
 }
 
 
+void Camera::setNearZ(float val)
+{
+    nearZ = MAX(val,0.0f);
+    updateProjectionTransform();
+}
+
 void Camera::resetCamera()
 {
 	cameraPosition = defaultCameraPosition;
 	lookPosition = defaultLookPosition;
 	upDirection = defaultUpDirection;
+    nearZ = 0.1f;
 	updateViewTransform();
 }
 
@@ -119,7 +128,7 @@ void Camera::setUpDirection(Vec<float> upDirectionIn)
 
 void Camera::updateProjectionTransform()
 {
-	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, 0.1f, 25.0f);
+	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, nearZ, 25.0f);
 }
 
 

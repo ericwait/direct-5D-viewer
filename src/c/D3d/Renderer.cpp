@@ -49,6 +49,8 @@ Renderer::Renderer()
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 	currentFrame = 0;
 	clipChunkPercent = 1.0f;
+	FrontClipPos(-1.5f);
+	BackClipPos(1.5f);
 	numPlanes = 0;
 	labelsOn = true;
 	frameNumOn = true;
@@ -573,6 +575,26 @@ void Renderer::convertToWorldSpace(double* verts, size_t numVerts)
 	}
 }
 
+float Renderer::FrontClipPos() const
+{
+    return frontClipPos;
+}
+
+void Renderer::FrontClipPos(float val)
+{
+    frontClipPos = val;
+}
+
+float Renderer::BackClipPos() const
+{
+    return backClipPos;
+}
+
+void Renderer::BackClipPos(float val)
+{
+    backClipPos = val;
+}
+
 HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
@@ -756,7 +778,7 @@ void Renderer::preRenderLoop()
 	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre,currentFrame);
 	for (int i=0; i<renderPreList.size(); ++i)
 	{
-		renderPackage(renderPreList[i]->getRenderPackage());
+		renderPackage(renderPreList[i]->getRenderPackage(),FrontClipPos(),BackClipPos());
 	}
 }
 
@@ -771,11 +793,11 @@ void Renderer::mainRenderLoop()
 
 	float numChunks = numPlanes*clipChunkPercent +1;
 
-	float chunkWidth = 3.0f/numChunks;
+	float chunkWidth = (BackClipPos()-FrontClipPos())/numChunks;
 
 	for (int i=(int)numChunks-1; i>=0; --i)
 	{
-		float frontPlane = i*chunkWidth - 1.5f;
+		float frontPlane = i*chunkWidth + FrontClipPos();
 		float backPlane = frontPlane + chunkWidth;
 
 		for (int i=0; i<renderMainList.size(); ++i)
