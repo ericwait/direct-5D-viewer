@@ -12,7 +12,6 @@ if (~isempty(D3dUICtrlHandles))
     set(D3dUICtrlHandles.handles.pb_colorChooser,'BackgroundColor',colors(chan,:));
     set(D3dUICtrlHandles.handles.cb_visible,'Value',channelData(chan).visible);
 
-    
-    D3d.UI.Ctrl.PlotTransferFunctions()
+    D3d.UI.Ctrl.PlotTransferFunctions();
 end
 end
