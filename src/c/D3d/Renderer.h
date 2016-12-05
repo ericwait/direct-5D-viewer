@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "..\Global\Vec.h"
+#include "Global/Vec.h"
 #include <d3d11.h>
 #include <vector>
 #include <map>

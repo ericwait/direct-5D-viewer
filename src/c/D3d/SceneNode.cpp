@@ -14,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "SceneNode.h"
-#include "..\Global\Globals.h"
-#include "..\Messages\MexErrorMsg.h"
+#include "Global/Globals.h"
+#include "Messages/MexErrorMsg.h"
 
 #undef max
 

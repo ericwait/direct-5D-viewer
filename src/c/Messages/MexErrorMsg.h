@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 #include "MessageQueue.h"
 #include <comdef.h>
 

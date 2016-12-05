@@ -13,7 +13,7 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 #include "Initialization.h"
 #include "MessageProcessor.h"
 #include "Renderer.h"

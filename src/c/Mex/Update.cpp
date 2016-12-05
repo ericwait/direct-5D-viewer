@@ -1,10 +1,10 @@
-#include "..\Global\Vec.h"
+#include "Global/Vec.h"
 #include "mex.h"
-#include "..\Messages\MessageQueue.h"
+#include "Messages/MessageQueue.h"
 #include "windows.h"
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 #include "MexFunctions.h"
-#include "..\Messages\QueuePolygon.h"
+#include "Messages/QueuePolygon.h"
 #include <set>
 #include <vector>
 

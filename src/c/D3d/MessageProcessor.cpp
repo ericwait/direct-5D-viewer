@@ -13,12 +13,12 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 #include "MessageProcessor.h"
 #include "Initialization.h"
 #include <time.h>
-#include "..\Messages\DirectXCommands.h"
-#include "..\Messages\MexErrorMsg.h"
+#include "Messages/DirectXCommands.h"
+#include "Messages/MexErrorMsg.h"
 
 bool gRendererOn = false;
 bool gPlay = false;

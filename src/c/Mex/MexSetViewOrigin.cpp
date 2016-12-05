@@ -1,6 +1,6 @@
 #include "MexCommand.h"
 #include "MexFunctions.h"
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 
 void MexSetViewOrigin::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

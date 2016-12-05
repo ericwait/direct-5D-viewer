@@ -14,14 +14,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "..\D3d\Renderer.h"
-#include "..\D3d\SceneNode.h"
-#include "..\D3d\Camera.h"
+#include "D3d/Renderer.h"
+#include "D3d/SceneNode.h"
+#include "D3d/Camera.h"
 #include "Defines.h"
-#include "..\Messages\MessageQueue.h"
+#include "Messages/MessageQueue.h"
 #include "windows.h"
 #include "DirectXMath.h"
-#include "..\Messages\DataQueue.h"
+#include "Messages/DataQueue.h"
 
 //Implemented in lever-3d_mex.cpp
 extern HANDLE gTermEvent;

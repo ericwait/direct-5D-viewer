@@ -1,14 +1,14 @@
-#include "..\Global\Globals.h"
-#include "..\Global\Vec.h"
+#include "Global/Globals.h"
+#include "Global/Vec.h"
 #include "mex.h"
-#include "..\Mex\MexFunctions.h"
+#include "Mex/MexFunctions.h"
 #include "Image.h"
 #include "TransferObj.h"
 #include "QueuePolygon.h"
-#include "..\D3d\TextureLightingObj.h"
+#include "D3d/TextureLightingObj.h"
 #include <vector>
 #include "MexErrorMsg.h"
-#include "..\D3d\MessageProcessor.h"
+#include "D3d/MessageProcessor.h"
 
 using std::vector;
 

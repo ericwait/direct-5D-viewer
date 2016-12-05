@@ -1,7 +1,7 @@
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 #include "mex.h"
-#include "..\D3d\MessageProcessor.h"
-#include "..\Mex\MexFunctions.h"
+#include "D3d/MessageProcessor.h"
+#include "Mex/MexFunctions.h"
 #include "Image.h"
 
 Image::Image(int numChannels,int numFrames,Vec<size_t> dimensions)

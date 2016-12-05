@@ -14,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "..\Global\Vec.h"
-#include "..\Global\Defines.h"
+#include "Global/Vec.h"
+#include "Global/Defines.h"
 #include "Renderer.h"
 #include <d3d11.h>
 #include <vector>

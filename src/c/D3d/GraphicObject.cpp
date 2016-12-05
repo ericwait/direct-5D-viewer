@@ -14,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "GraphicObject.h"
-#include "..\Global\Globals.h"
-#include "..\Messages\MexErrorMsg.h"
+#include "Global/Globals.h"
+#include "Messages/MexErrorMsg.h"
 #undef min
 #undef max
 

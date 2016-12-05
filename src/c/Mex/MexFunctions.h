@@ -2,7 +2,7 @@
 #include <concrt.h>
 #include <vector>
 #include <set>
-#include "..\D3d\GraphicObject.h"
+#include "D3d/GraphicObject.h"
 
 extern HANDLE mexMessageMutex;
 extern HANDLE messageLoopHandle;

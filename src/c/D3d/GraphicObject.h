@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "..\Global\Vec.h"
+#include "Global/Vec.h"
 #include "MeshPrimitive.h"
 #include "Material.h"
 #include "RendererPackage.h"

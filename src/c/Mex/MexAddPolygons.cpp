@@ -1,7 +1,7 @@
 #include "MexCommand.h"
 #include "MexFunctions.h"
-#include "..\Global\Globals.h"
-#include "..\Messages\QueuePolygon.h"
+#include "Global/Globals.h"
+#include "Messages/QueuePolygon.h"
 
 #include <vector>
 

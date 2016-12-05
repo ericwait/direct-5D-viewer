@@ -14,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MeshPrimitive.h"
-#include "..\Global\Globals.h"
-#include "..\Messages\MexErrorMsg.h"
+#include "Global/Globals.h"
+#include "Messages/MexErrorMsg.h"
 
 MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
 	std::vector<Vec<float>>& normals,std::vector<Vec<float>> textureUV, Renderer::VertexShaders shader)

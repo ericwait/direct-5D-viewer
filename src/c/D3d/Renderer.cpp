@@ -14,13 +14,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Renderer.h"
-#include "..\Global\Defines.h"
-#include "..\Global\Globals.h"
+#include "Global/Defines.h"
+#include "Global/Globals.h"
 #include <d3dcompiler.h>
 #include "MeshPrimitive.h"
 #include "Camera.h"
 #include "RendererPackage.h"
-#include "..\Messages\MexErrorMsg.h"
+#include "Messages/MexErrorMsg.h"
 #include "Timer.h"
 #include <string>
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "..\Global\Vec.h"
+#include "Global/Vec.h"
 
 class TransferObj
 {

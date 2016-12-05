@@ -1,6 +1,6 @@
 #include "MexCommand.h"
-#include "..\Global\Globals.h"
-#include "..\Messages\Image.h"
+#include "Global/Globals.h"
+#include "Messages/Image.h"
 
 #pragma optimize("",off)
 void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

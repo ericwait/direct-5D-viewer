@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Camera.h"
-#include "..\Global\Globals.h"
+#include "Global/Globals.h"
 
 Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
 {
