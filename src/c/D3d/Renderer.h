@@ -236,14 +236,15 @@ private:
 	std::string captureFilePath;
 	std::string captureFileName;
 	std::string dllRoot;
-	const int NUM_TIMES = 20;
-	UINT64 frameTimes[20];
-	UINT64 startTimes[20];
-	UINT64 preTimes[20];
-	UINT64 mainTimes[20];
-	UINT64 postTimes[20];
-	UINT64 gdiTimes[20];
-	UINT64 endTimes[20];
+
+	static const int NUM_TIMES = 20;
+	UINT64 frameTimes[NUM_TIMES];
+	UINT64 startTimes[NUM_TIMES];
+	UINT64 preTimes[NUM_TIMES];
+	UINT64 mainTimes[NUM_TIMES];
+	UINT64 postTimes[NUM_TIMES];
+	UINT64 gdiTimes[NUM_TIMES];
+	UINT64 endTimes[NUM_TIMES];
 	int curTimeIdx;
 };
 

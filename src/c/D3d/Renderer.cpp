@@ -656,7 +656,7 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 	vertexShaderList.push_back(newShader);
 	vertexLayoutList.push_back(newLayout);
 
-	vertexShaderMap.insert(std::pair<std::string,int>(shaderLookupName,vertexShaderList.size()-1));
+	vertexShaderMap.insert(std::pair<std::string,int>(shaderLookupName,(int)vertexShaderList.size()-1));
 
 	int idx = vertexShaderMap[shaderLookupName];
 
@@ -690,7 +690,7 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 
 	pixelShaderList.push_back(newShader);
 
-	pixelShaderMap.insert(std::pair<std::string,int>(shaderLookupName,pixelShaderList.size()-1));
+	pixelShaderMap.insert(std::pair<std::string,int>(shaderLookupName,(int)pixelShaderList.size()-1));
 
 	int idx = pixelShaderMap[shaderLookupName];
 
