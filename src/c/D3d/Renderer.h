@@ -19,10 +19,13 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 #include <DirectXMath.h>
 
 class MeshPrimitive;
 class Material;
+class MaterialParameters;
+class StaticVolumeParams;
 class RendererPackage;
 class SceneNode;
 class RootSceneNode;
@@ -131,6 +134,12 @@ public:
 	unsigned char* captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi);
 
 	std::string getDllDir() { return dllRoot; }
+
+// Static setup getters
+	unsigned char* getRootShaderMem(GraphicObjectTypes type);
+
+	std::shared_ptr<StaticVolumeParams>& getSharedVolumeParams(int volType);
+	std::shared_ptr<StaticVolumeParams>& createSharedVolumeParams(int volType, int numChannels);
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
@@ -246,6 +255,9 @@ private:
 	UINT64 gdiTimes[NUM_TIMES];
 	UINT64 endTimes[NUM_TIMES];
 	int curTimeIdx;
+
+private:
+	static std::shared_ptr<StaticVolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
 };
 
 

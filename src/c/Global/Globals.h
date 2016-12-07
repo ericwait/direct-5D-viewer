@@ -17,6 +17,7 @@
 #include "D3d/Renderer.h"
 #include "D3d/SceneNode.h"
 #include "D3d/Camera.h"
+#include "D3d/Material.h"
 #include "Defines.h"
 #include "Messages/MessageQueue.h"
 #include "windows.h"

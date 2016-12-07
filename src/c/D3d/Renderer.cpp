@@ -18,6 +18,8 @@
 #include "Global/Globals.h"
 #include <d3dcompiler.h>
 #include "MeshPrimitive.h"
+#include "Material.h"
+#include "MaterialParams.h"
 #include "Camera.h"
 #include "RendererPackage.h"
 #include "Messages/MexErrorMsg.h"
@@ -25,6 +27,9 @@
 #include <string>
 
 #include <Windows.h>
+
+// Initialize static root shader memory to null for all object types
+std::shared_ptr<StaticVolumeParams> Renderer::sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume] = {NULL};
 
 Renderer::Renderer()
 {
@@ -1653,3 +1658,16 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 
 	return imOut;
 }
+
+std::shared_ptr<StaticVolumeParams>& Renderer::getSharedVolumeParams(int volType)
+{
+	return sharedVolumeParams[volType];
+}
+
+std::shared_ptr<StaticVolumeParams>& Renderer::createSharedVolumeParams(int volType, int numChannels)
+{
+	sharedVolumeParams[volType] = std::make_shared<StaticVolumeParams>(this, numChannels);
+	return sharedVolumeParams[volType];
+}
+
+
