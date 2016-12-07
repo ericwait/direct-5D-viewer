@@ -15,7 +15,11 @@
 
 #pragma once
 #include "Renderer.h"
+#include "MaterialParams.h"
+#include "Texture.h"
+
 #include <DirectXMath.h>
+#include <memory>
 
 class Material
 {
@@ -23,18 +27,36 @@ public:
 	friend class Renderer;
 	virtual ~Material();
 
+
+	void attachTexture(int slot, std::shared_ptr<Texture>& texture);
+
+
+	// Return generalized material parameter structure
+	MaterialParameters* getParams(){return params.get();}
+
+	// Return requested material parameters type
+	template<class T> T* typedParams(){return dynamic_cast<T>(params.get());}
+
+
 	void setWireframe(bool wireframe);
 	virtual DirectX::XMFLOAT4 getColor(){return DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f);}
 
 protected:
 	Material(){}
 	Material(Renderer* rendererIn);
+	Material(Renderer* rendererIn, std::weak_ptr<MaterialParameters> sharedParams);
 
-	virtual void updateParams() = 0;
 	void setShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
-	virtual void setShaderResources() = 0;
-	
+	void bindConstants();
+	void bindTextures();
+
 	Renderer* renderer;
+
+	// We use a ref count so that parameters can be shared across materials
+	std::shared_ptr<MaterialParameters> params;
+
+	// Shared texture references list
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	bool wireframe;
 	bool cullBackFace;
@@ -49,41 +71,22 @@ class SingleColoredMaterial : public Material
 {
 public:
 	SingleColoredMaterial(Renderer* renderer);
-	SingleColoredMaterial(Renderer* renderer, Vec<float> colorIn);
-	SingleColoredMaterial(Renderer* renderer, Vec<float> colorIn, float alpha);
-	~SingleColoredMaterial();
+	SingleColoredMaterial(Renderer* renderer, Vec<float> colorIn, float alpha = 1.0f);
 
 	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
-	void setShaderResources();
-	
-	DirectX::XMFLOAT4 getColor(){return colorBuffer.color;}
 
-	void updateParams();
 	void setLightOn(bool on);
 
 private:
 	SingleColoredMaterial(){}
-	
-	struct ColorBuffer
-	{
-		DirectX::XMFLOAT4 color;
-		DirectX::XMFLOAT4 colorModifier;
-		DirectX::XMFLOAT4 lightOn;
-	} colorBuffer;
-
-	ID3D11Buffer* constBuffer;
 };
 
 
 class StaticVolumeTextureMaterial : public Material
 {
 public:
-	StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dims, int numChannels, unsigned char* image,
-		unsigned char** shaderConstMemoryIn=NULL);
-	~StaticVolumeTextureMaterial();
-
-	static const Vec<float> colors[6];
+	StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, std::weak_ptr<StaticVolumeParams> paramsIn);
 
 	void setTransferFunction(int channel, Vec<float> transferFunction);
 	void setRange(int channel, Vec<float> ranges);
@@ -91,37 +94,9 @@ public:
 	void setLightOn(bool on);
 	void setAttenuationOn(bool on);
 	void setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir);
-	unsigned char* getShaderConstMemory(){return shaderConstMemory;}
-
-	bool isLightOn(){return lightingOn;}
-
-	void updateParams();
 
 private:
-	StaticVolumeTextureMaterial();
-
-	void setShaderResources();
-
-	struct VolPixShaderConsts
-	{
-		std::vector<DirectX::XMFLOAT4> transferFunctions;
-		std::vector<DirectX::XMFLOAT4> ranges;
-		std::vector<DirectX::XMFLOAT4> channelColors;
-		DirectX::XMFLOAT4 gradientSampleDirection[3];
-		DirectX::XMFLOAT4 lightOn;
-
-		size_t sizeOf()
-		{
-			size_t size = 0;
-			size += transferFunctions.size() * sizeof(DirectX::XMFLOAT4);
-			size += ranges.size() * sizeof(DirectX::XMFLOAT4);
-			size += channelColors.size() * sizeof(DirectX::XMFLOAT4);
-			size += 3 * sizeof(DirectX::XMFLOAT4);
-			size += sizeof(DirectX::XMFLOAT4);
-
-			return size;
-		}
-	}volPixShaderConsts;
+	StaticVolumeTextureMaterial(){};
 	
 	unsigned char* shaderConstMemory;
 	int numChannels;

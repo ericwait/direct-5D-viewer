@@ -15,27 +15,31 @@
 
 #include "Material.h"
 
-const Vec<float> StaticVolumeTextureMaterial::colors[6] = 
-{
-	Vec<float>(1.0f, 0.0f, 0.0f),
-	Vec<float>(0.0f, 1.0f, 0.0f),
-	Vec<float>(0.0f, 0.0f, 1.0f),
-	Vec<float>(1.0f, 1.0f, 0.0f),
-	Vec<float>(0.0f, 1.0f, 1.0f),
-	Vec<float>(1.0f, 0.0f, 1.0f)
-};
-
-
 void createStaticVolumeShaderText(std::string strChans, Renderer* renderer);
 
 
 Material::Material(Renderer* rendererIn)
 {
 	renderer = rendererIn;
+
 	shaderIdx = -1;
 	wireframe = false;
 	cullBackFace = true;
 	testDepth = true;
+
+	params = NULL;
+}
+
+Material::Material(Renderer* rendererIn, std::weak_ptr<MaterialParameters> sharedParams)
+{
+	renderer = rendererIn;
+
+	shaderIdx = -1;
+	wireframe = false;
+	cullBackFace = true;
+	testDepth = true;
+
+	params = sharedParams.lock();
 }
 
 Material::~Material()
@@ -43,6 +47,20 @@ Material::~Material()
 	renderer = NULL;
 	shaderIdx = -1;
 	wireframe = false;
+}
+
+void Material::attachTexture(int slot, std::shared_ptr<Texture>& texture)
+{
+	// TODO: Should we throw this or just resize?
+	if ( slot >= textures.size() )
+	{
+		char errBuf[256];
+		sprintf(errBuf, "Cannot attach to slot %d, only %d slots are declared for this material", slot, textures.size());
+
+		throw std::runtime_error(errBuf);
+	}
+
+	textures[slot] = texture;
 }
 
 void Material::setWireframe(bool wireframe)
@@ -55,28 +73,33 @@ void Material::setShader(const std::string& shaderFilename, const std::string& s
 	shaderIdx = renderer->getPixelShader(shaderFilename,shaderFunction,shaderParams);
 }
 
-
-
-SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn) : Material(rendererIn)
+void Material::bindConstants()
 {
-	colorBuffer.color = DirectX::XMFLOAT4(1,1,1,1);
-	colorBuffer.colorModifier = DirectX::XMFLOAT4(1,1,1,1);
-	colorBuffer.lightOn = DirectX::XMFLOAT4(1, 1, 1, 1);
-
-	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
-
-	std::string root = renderer->getDllDir();
-	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
-		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS],"");
+	if ( params )
+		params->setShaderResources();
 }
 
-SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn) : Material(rendererIn)
+void Material::bindTextures()
 {
-	colorBuffer.color = DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,1);
-	colorBuffer.colorModifier = DirectX::XMFLOAT4(1,1,1,1);
-	colorBuffer.lightOn = DirectX::XMFLOAT4(1, 1, 1, 1);
+	std::vector<ID3D11SamplerState*> samplers;
+	std::vector<ID3D11ShaderResourceView*> resources;
 
-	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
+	for ( int i=0; i < textures.size(); ++i )
+	{
+		samplers.push_back(textures[i]->getSampler());
+		resources.push_back(textures[i]->getResource());
+	}
+
+	renderer->setPixelShaderResourceViews(0, resources.size(), resources.data());
+	renderer->setPixelShaderTextureSamplers(0, samplers.size(), samplers.data());
+}
+
+
+
+SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn)
+	: Material(rendererIn)
+{
+	params = std::make_shared<SingleColorParams>(rendererIn, Vec<float>(1.0f,1.0f,1.0f), 1.0f);
 
 	std::string root = renderer->getDllDir();
 	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
@@ -85,184 +108,78 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 
 SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn, float alpha) : Material(rendererIn)
 {
-	colorBuffer.color = DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,alpha);
-	colorBuffer.colorModifier = DirectX::XMFLOAT4(1,1,1,1);
-	colorBuffer.lightOn = DirectX::XMFLOAT4(1, 1, 1, 1);
-
-	renderer->createConstantBuffer(sizeof(ColorBuffer), &constBuffer);
+	params = std::make_shared<SingleColorParams>(rendererIn, colorIn, alpha);
 
 	std::string root = renderer->getDllDir();
 	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
 		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS],"");
 }
 
-SingleColoredMaterial::~SingleColoredMaterial()
-{
-	SAFE_RELEASE(constBuffer);
-
-	Material::~Material();
-}
-
 void SingleColoredMaterial::setColor(Vec<float> colorIn, float alpha)
 {
-	colorBuffer.color = DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,alpha);
+	static_cast<SingleColorParams*>(params.get())->setColor(colorIn, alpha);
 }
 
 void SingleColoredMaterial::setColorModifier(Vec<float> colorMod, float alphaMod)
 {
-	colorBuffer.colorModifier = DirectX::XMFLOAT4(colorMod.x,colorMod.y,colorMod.z,alphaMod);
-}
-
-void SingleColoredMaterial::setShaderResources()
-{
-	renderer->setPixelShaderConsts(constBuffer);
-}
-
-void SingleColoredMaterial::updateParams()
-{
-	renderer->updateShaderParams(&colorBuffer,constBuffer);
+	static_cast<SingleColorParams*>(params.get())->setColorModifier(colorMod, alphaMod);
 }
 
 void SingleColoredMaterial::setLightOn(bool on)
 {
-	colorBuffer.lightOn = DirectX::XMFLOAT4(on, on, on, on);
+	static_cast<SingleColorParams*>(params.get())->setLightOn(on);
 }
 
 
-StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image,
-	unsigned char** shaderConstMemoryIn/*=NULL*/) : Material(rendererIn)
-{
-	numChannels = numChannelsIn;
-	dims = dimsIn;
-	shaderConstMemory = *shaderConstMemoryIn;
 
+StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, std::weak_ptr<StaticVolumeParams> paramsIn)
+	: Material(rendererIn, paramsIn)
+{
 	cullBackFace = false;
 	testDepth = false;
 	wireframe = false;
-	lightingOn = false;
-	attenuationOn = false;
+
+	numChannels = numChannelsIn;
+	textures.resize(numChannels);
 
 	char cBuffer[3];
 	sprintf_s(cBuffer, "%d", numChannels);
 	std::string strChans = cBuffer;
 	createStaticVolumeShaderText(strChans,renderer);
 
-	volPixShaderConsts.channelColors.resize(numChannels);
-	volPixShaderConsts.ranges.resize(numChannels);
-	volPixShaderConsts.transferFunctions.resize(numChannels);
-
-	if (shaderConstMemory == NULL)
-	{
-		shaderConstMemory = new unsigned char[volPixShaderConsts.sizeOf()];
-		*shaderConstMemoryIn = shaderConstMemory;
-
-		for (int i = 0; i < numChannels; ++i)
-		{
-			setTransferFunction(i, Vec<float>(0.0f, 1.0f, 0.0f));
-			setRange(i, Vec<float>(0.0f, 1.0f, 0.0f));
-			setColor(i, colors[i % 6], 1.0f);
-			setAttenuationOn(false);
-			setLightOn(false);
-		}
-	}
-	renderer->createConstantBuffer(volPixShaderConsts.sizeOf(),&constBuffer);
-
 	std::string root = renderer->getDllDir();
 	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::StaticVolume],
 		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::StaticVolume],strChans);
-
-	samplerState.resize(numChannels);
-	shaderResourceView.resize(numChannels);
-
-	for (int i=0; i<numChannels; ++i)
-	{
-		samplerState[i] = renderer->getSamplerState();
-		shaderResourceView[i] = renderer->createTextureResourceView(dims, image + dims.product()*i);
-	}
-}
-
-StaticVolumeTextureMaterial::~StaticVolumeTextureMaterial()
-{
-	for(int i=0; i<shaderResourceView.size(); ++i)
-	{
-		SAFE_RELEASE(shaderResourceView[i]);
-	}
-
-	SAFE_RELEASE(constBuffer);
-
-	//delete[] shaderConstMemory;  //TODO make a better structure that cleans this up
-
-	Material::~Material();
 }
 
 void StaticVolumeTextureMaterial::setTransferFunction(int channel, Vec<float> transferFunction)
 {
-	//channel number of float4s before it
-	size_t memStart = channel*sizeof(float)*4;
-
-	memcpy((void*)(shaderConstMemory+memStart),&(transferFunction),sizeof(float)*3);
+	static_cast<StaticVolumeParams*>(params.get())->setTransferFunction(channel, transferFunction);
 }
 
 void StaticVolumeTextureMaterial::setRange(int channel, Vec<float> ranges)
 {
-	//channel number of float4 before it along with numChannel float4s behind that
-	size_t memStart = channel*sizeof(float)*4 + sizeof(float)*4*numChannels;
-
-	memcpy((void*)(shaderConstMemory+memStart),&(ranges),sizeof(float)*3);
+	static_cast<StaticVolumeParams*>(params.get())->setRange(channel, ranges);
 }
 
 void StaticVolumeTextureMaterial::setColor(int channel, Vec<float> color, float alphaMod)
 {
-	//channel number of float4 before it along with 2 times numchannel float4s behind that
-	size_t memStart = channel*sizeof(float)*4 + 8*sizeof(float)*numChannels;
+	static_cast<StaticVolumeParams*>(params.get())->setColor(channel, color, alphaMod);
+}
 
-	memcpy((void*)(shaderConstMemory+memStart),&(color.x),sizeof(float)*3);
-	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*3),&(alphaMod),sizeof(float));
+void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir)
+{
+	static_cast<StaticVolumeParams*>(params.get())->setGradientSampleDir(xDir, yDir, zDir);
 }
 
 void StaticVolumeTextureMaterial::setLightOn(bool on)
 {
-	lightingOn = on;
-
-	float isOn = (on==true) ? (1.0f) : (0.0f);
-	//3 float4s along with 3 times numchannel float4s behind
-	size_t memStart = 12*sizeof(float)+12*sizeof(float)*numChannels;
-
-	memcpy((void*)(shaderConstMemory+memStart),&isOn,sizeof(float));
+	static_cast<StaticVolumeParams*>(params.get())->setLightOn(on);
 }
 
 void StaticVolumeTextureMaterial::setAttenuationOn(bool on)
 {
-	attenuationOn = on;
-
-	float isOn = (on == true) ? (1.0f) : (0.0f);
-	//2nd float plus 3 float4s along with 3 times numchannel float4s behind
-	size_t memStart = sizeof(float) + 12 * sizeof(float) + 12 * sizeof(float)*numChannels;
-
-	memcpy((void*)(shaderConstMemory + memStart), &isOn, sizeof(float));
-}
-
-
-void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir)
-{
-	//3 times numchannel float4s behind
-	size_t memStart = 12*sizeof(float)*numChannels;
-
-	memcpy((void*)(shaderConstMemory+memStart),&xDir,sizeof(float)*3);
-	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*4),&yDir,sizeof(float)*3);
-	memcpy((void*)(shaderConstMemory+memStart+sizeof(float)*8),&zDir,sizeof(float)*3);
-}
-
-void StaticVolumeTextureMaterial::updateParams()
-{
-	renderer->updateShaderParams(shaderConstMemory,constBuffer);
-}
-
-void StaticVolumeTextureMaterial::setShaderResources()
-{
-	renderer->setPixelShaderConsts(constBuffer);
-	renderer->setPixelShaderResourceViews(0,(int)shaderResourceView.size(),shaderResourceView.data());
-	renderer->setPixelShaderTextureSamplers(0,(int)samplerState.size(),samplerState.data());
+	static_cast<StaticVolumeParams*>(params.get())->setAttenuationOn(on);
 }
 
 void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)

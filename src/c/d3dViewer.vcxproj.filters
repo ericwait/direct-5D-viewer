@@ -235,6 +235,12 @@
     <ClCompile Include="Mex\MexSetWorldRotation.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D3d\MaterialParams.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\Texture.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexFunctions.h">
@@ -313,6 +319,12 @@
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3d\Timer.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\MaterialParams.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\Texture.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

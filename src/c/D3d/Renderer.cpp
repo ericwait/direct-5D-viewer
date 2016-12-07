@@ -896,9 +896,12 @@ void Renderer::renderPackage(const RendererPackage* package, float frontClip, fl
 	setRasterizerState(package->getMaterial()->wireframe);
 
 	//Pixel Shader setup
-	package->getMaterial()->updateParams();//can be sped up by doing this differently
-	package->getMaterial()->setShaderResources();//TODO this needs tweeking
-	if (previousPixelShaderIdx!=package->getMaterial()->shaderIdx)
+	package->getMaterial()->getParams()->updateParams(); //can be sped up by doing this differently
+
+	package->getMaterial()->bindTextures();
+	package->getMaterial()->bindConstants(); //TODO this needs tweeking
+
+	if (previousPixelShaderIdx != package->getMaterial()->shaderIdx)
 	{
 		setPixelShader(package->getMaterial()->shaderIdx);
 		previousPixelShaderIdx = package->getMaterial()->shaderIdx;
@@ -1235,7 +1238,7 @@ ID3D11SamplerState* Renderer::getSamplerState()
 	return linearTextureSampler;
 }
 
-ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, unsigned char* image)
+ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, const unsigned char* image)
 {
 	HRESULT hr = S_OK;
 	UINT iMipCount = 1;

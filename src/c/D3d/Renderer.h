@@ -149,7 +149,7 @@ public:
 	HRESULT createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut);
 	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
-	ID3D11ShaderResourceView* createTextureResourceView(Vec<size_t> dims, unsigned char* image);
+	ID3D11ShaderResourceView* createTextureResourceView(Vec<size_t> dims, const unsigned char* image);
 
 	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
 		std::vector<Vec<float>> textureUV, VertexShaders shader);
