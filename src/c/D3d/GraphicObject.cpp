@@ -123,8 +123,6 @@ PolygonObject::~PolygonObject()
 	faces.clear();
 	vertices.clear();
 	normals.clear();
-
-	GraphicObject::~GraphicObject();
 }
 
 void PolygonObject::setColor(Vec<float> color, float alpha)
@@ -310,7 +308,7 @@ bool PolygonObject::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntV
 
 
 VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsIn, int numChannelsIn, unsigned char* image, 
-										 Vec<float> scaleFactorIn, Camera* camera, unsigned char** constMemIn/*=NULL*/)
+										 Vec<float> scaleFactorIn, Camera* camera, std::weak_ptr<StaticVolumeParams> sharedParams /* = NULL*/)
 {
 	renderer = rendererIn;
 	dims = dimsIn;
@@ -318,14 +316,12 @@ VolumeTextureObject::VolumeTextureObject(Renderer* rendererIn, Vec<size_t> dimsI
 	physVolSize = scaleFactorIn;
 	scaleFactor = scaleFactorIn / scaleFactorIn.maxValue();
 
-	initalizeRendererResources(camera,image, constMemIn);
+	initalizeRendererResources(camera,image, sharedParams);
 }
 
 VolumeTextureObject::~VolumeTextureObject()
 {
 	SAFE_DELETE(material);
-
-	GraphicObject::~GraphicObject();
 }
 
 void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
@@ -372,7 +368,7 @@ void VolumeTextureObject::setWireframe(bool wireframe)
 	sendErrMessage("You cannot set wire frame on a VolumeTextureObject!");
 }
 
-void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char** shaderMemIn/*=NULL*/)
+void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned char* image, std::weak_ptr<StaticVolumeParams> sharedParams)
 {
 	if (rendererPackage==NULL)
 	{
@@ -384,7 +380,10 @@ void VolumeTextureObject::initalizeRendererResources(Camera* camera, unsigned ch
 		createViewAlignedPlanes(vertices, faces, normals, textureUVs);
 
 		meshPrimitive = renderer->addMeshPrimitive(faces,vertices,normals,textureUVs,Renderer::VertexShaders::ViewAligned);
-		material = new StaticVolumeTextureMaterial(renderer,dims,numChannels,image,shaderMemIn);//delete in destructor
+		material = new StaticVolumeTextureMaterial(renderer,numChannels,sharedParams);//delete in destructor
+		
+		for (int i=0; i < numChannels; ++i)
+			material->attachTexture(i, std::make_shared<Texture>(renderer, dims,image + i*dims.product()));
 
 		rendererPackage = new RendererPackage(camera);//delete in destructor
 		rendererPackage->setMeshPrimitive(meshPrimitive);

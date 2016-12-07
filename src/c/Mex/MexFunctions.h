@@ -7,7 +7,6 @@
 extern HANDLE mexMessageMutex;
 extern HANDLE messageLoopHandle;
 extern bool registerExitFunction;
-extern std::vector<VolumeTextureObject*> firstVolumeTextures;
 extern std::vector<SceneNode*> hullRootNodes;
 extern DWORD threadID;
 

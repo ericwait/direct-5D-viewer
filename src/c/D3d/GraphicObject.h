@@ -89,11 +89,10 @@ public:
 	static const Vec<float> triVertices[4];
 
 	VolumeTextureObject(Renderer* renderer, Vec<size_t> dimsIn, int numChannels, unsigned char* image, Vec<float> scaleFactorIn, Camera* camera,
-		unsigned char** constMemIn=NULL);
+		std::weak_ptr<StaticVolumeParams> sharedParams=std::weak_ptr<StaticVolumeParams>());
 	~VolumeTextureObject();
 
 	void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
-	unsigned char* getShaderConstMemory(){return material->getShaderConstMemory();}
 	void setTransferFunction(int channel, Vec<float> transferFunction){material->setTransferFunction(channel,transferFunction);}
 	void setRange(int channel, Vec<float> ranges){material->setRange(channel,ranges);}
 	void setColor(int channel, Vec<float> color, float alphaMod){material->setColor(channel,color,alphaMod);}
@@ -108,7 +107,7 @@ public:
 
 private:
 	VolumeTextureObject();
-	void initalizeRendererResources(Camera* camera, unsigned char* image, unsigned char** shaderMemIn=NULL);
+	void initalizeRendererResources(Camera* camera, unsigned char* image, std::weak_ptr<StaticVolumeParams> sharedParams);
 
 	void createViewAlignedPlanes(std::vector<Vec<float>> &vertices, std::vector<Vec<unsigned int>> &faces, std::vector<Vec<float>> &normals, std::vector<Vec<float>> &textureUVs);
 

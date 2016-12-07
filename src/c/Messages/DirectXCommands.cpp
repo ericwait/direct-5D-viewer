@@ -22,12 +22,8 @@ void XloadTextureCommand(Message m){
 	Vec<float> physDims = returnedImg->getPhysicalDims();
 
 	Vec<float> scale(Vec<float>(dims) * physDims);
-	scale = scale;
 
 	GraphicObjectTypes textureType = returnedImg->getTextureType();
-
-	if (returnedImg->getTextureType() == 1)
-		textureType = GraphicObjectTypes::ProcessedVolume;
 
 	if (gGraphicObjectNodes[GraphicObjectTypes::Border].empty())
 	{
@@ -68,9 +64,13 @@ void XtransferUpdateCommand(Message m){
 
 	size_t numElem = sentTranfser->numElem;
 
-	firstVolumeTextures[fvtIdx]->setTransferFunction(sentTranfser->chan, sentTranfser->transferFunction);
-	firstVolumeTextures[fvtIdx]->setRange(sentTranfser->chan, sentTranfser->ranges);
-	firstVolumeTextures[fvtIdx]->setColor(sentTranfser->chan, sentTranfser->color, sentTranfser->alphaMod);
+	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(fvtIdx);
+	if ( sharedParams )
+	{
+		sharedParams->setTransferFunction(sentTranfser->chan, sentTranfser->transferFunction);
+		sharedParams->setRange(sentTranfser->chan, sentTranfser->ranges);
+		sharedParams->setColor(sentTranfser->chan, sentTranfser->color, sentTranfser->alphaMod);
+	}
 
 	delete sentTranfser;
 }
@@ -187,7 +187,11 @@ void XshowLabelsCommand(Message m){
 
 void XtextureLightingUpdateCommand(Message m){
 	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
-	firstVolumeTextures[localLightObj->index]->setLightOn(localLightObj->value);
+
+	// TODO: what is the expected behavior of these on the MATLAB side?
+	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(localLightObj->index);
+	if ( sharedParams )
+		sharedParams->setLightOn(localLightObj->value);
 
 	delete localLightObj;
 }
@@ -196,12 +200,11 @@ void XtextureAttenUpdateCommand(Message m)
 {
 	bool* on = (bool*)m.data;
 
-	for(int i = 0; i<firstVolumeTextures.size(); ++i)
+	for(int i = 0; i<2; ++i)
 	{
-		if(NULL!=firstVolumeTextures[i])
-		{
-			firstVolumeTextures[i]->setAttenuationOn(*on);
-		}
+		std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(i);
+		if ( sharedParams )
+			sharedParams->setAttenuationOn(*on);
 	}
 
 	delete on;

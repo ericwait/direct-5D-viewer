@@ -10,23 +10,16 @@
 
 using std::vector;
 
-std::vector<VolumeTextureObject*> firstVolumeTextures;
 std::vector<SceneNode*> hullRootNodes;
 
 void setCurrentTexture(GraphicObjectTypes textureType)
 {
 	if (gRenderer == NULL) return;
 
-	int fvtIdx = textureType - GraphicObjectTypes::OriginalVolume;
-
-	for (int i = 0; i < firstVolumeTextures.size(); ++i)
+	for (int i = GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i)
 	{
-		int idx = GraphicObjectTypes::OriginalVolume + i;
-		if (idx == GraphicObjectTypes::VTend)
-			break;
-
-		bool render = (i == fvtIdx);
-		for (auto itr :gGraphicObjectNodes[idx])
+		bool render = (i == textureType);
+		for (auto itr : gGraphicObjectNodes[i])
 			itr.second->setRenderable(render);
 	}
 }

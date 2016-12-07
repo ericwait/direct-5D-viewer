@@ -5,27 +5,10 @@
 
 void MexTextureLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	if (mxGetScalar(prhs[0]) > 0.0)
+	for (int i = 0; i < 2; ++i)
 	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				TextureLightingObj* textureLightObj = new TextureLightingObj(true, i);
-				gMsgQueueToDirectX.writeMessage("TextureLighting", (void*)textureLightObj);
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < firstVolumeTextures.size(); ++i)
-		{
-			if (NULL != firstVolumeTextures[i])
-			{
-				TextureLightingObj* textureLightObj = new TextureLightingObj(false, i);
-				gMsgQueueToDirectX.writeMessage("TextureLighting", (void*)textureLightObj);
-			}
-		}
+		TextureLightingObj* textureLightObj = new TextureLightingObj((mxGetScalar(prhs[0]) > 0.0), i);
+		gMsgQueueToDirectX.writeMessage("TextureLighting", (void*)textureLightObj);
 	}
 }
 

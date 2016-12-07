@@ -615,7 +615,6 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 			}
 
 			gBorderObj = NULL;
-			firstVolumeTextures.clear();
 		}
 
 		if(mexMessageMutex != NULL)

@@ -1,12 +1,17 @@
-#include "Global/Vec.h"
-#include "mex.h"
-#include "Messages/MessageQueue.h"
-#include "windows.h"
 #include "Global/Globals.h"
-#include "MexFunctions.h"
-#include <set>
+#include "Global/Vec.h"
+
 #include "Messages/QueuePolygon.h"
+#include "Messages/MessageQueue.h"
+
+#include "mex.h"
+#include "windows.h"
+
+#include "MexFunctions.h"
+
+#include <set>
 #include <vector>
+#include <memory>
 
 using std::vector;
 
@@ -237,17 +242,6 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 
 	//gRenderer->getMutex();
 
-	unsigned char* shaderConstMemory = NULL;
-
-	GraphicObjectNode* firstVolTextPtr = NULL;
-	if (!gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].empty())
-		firstVolTextPtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].begin()->second;
-	else if (!gGraphicObjectNodes[GraphicObjectTypes::ProcessedVolume].empty())
-		firstVolTextPtr = gGraphicObjectNodes[GraphicObjectTypes::ProcessedVolume].begin()->second;
-	
-	if (firstVolTextPtr!=NULL)
-		shaderConstMemory = ((VolumeTextureObject*)(firstVolTextPtr->getGraphicObjectPtr()))->getShaderConstMemory();
-
 	if (!gGraphicObjectNodes[typ].empty())
 	{
 		std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[typ].begin();
@@ -261,26 +255,21 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		gGraphicObjectNodes[typ].clear();
 	}
 
-	int fvtIdx = typ-GraphicObjectTypes::OriginalVolume;
+	int volType = typ - GraphicObjectTypes::OriginalVolume;
+	if ( !gRenderer->getSharedVolumeParams(volType) )
+		gRenderer->createSharedVolumeParams(volType, numChannel);
+
+	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(volType);
 
 	for (int i = 0; i < numFrames; ++i)
 	{
 		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer, dims, numChannel, image + i*numChannel*dims.product(), scales,
-			gCameraDefaultMesh, &shaderConstMemory);
-		shaderConstMemory = volumeTexture->getShaderConstMemory();
+			gCameraDefaultMesh, sharedParams);
 
 		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
 		gRenderer->attachToRootScene(volumeTextureNode, Renderer::Section::Main, i);
 
 		insertGlobalGraphicsObject(typ,volumeTextureNode,i);
-
-		if(0==i)
-		{
-			if(fvtIdx+1 > firstVolumeTextures.size())
-				firstVolumeTextures.resize(fvtIdx+1);
-
-			firstVolumeTextures[fvtIdx] = volumeTexture;
-		}
 	}
 
 	//gRenderer->releaseMutex();
