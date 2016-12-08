@@ -8,9 +8,9 @@ cbuffer VSConstantBuffer : register( b0 )
 
 cbuffer PSConstantBuffer : register( b1 )
 {
+	float4 flags;
 	float4 color;
 	float4 colorModifier;
-	float4 lightOn;
 };
 
 struct VS_OUTPUT
@@ -52,7 +52,7 @@ PS_OUTPUT DefaultMeshPixelShader( VS_OUTPUT input )
 	float4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);
 	float3 cval = color;
 
-	if(lightOn.x>0)
+	if(flags.x>0)
 	{
 		float lightInt = 0.7*dot(-input.Normal,mainLightDir);
 		lightInt = saturate(lightInt) + 0.3;

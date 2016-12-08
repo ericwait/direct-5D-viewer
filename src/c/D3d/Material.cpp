@@ -55,7 +55,7 @@ void Material::attachTexture(int slot, std::shared_ptr<Texture>& texture)
 	if ( slot >= textures.size() )
 	{
 		char errBuf[256];
-		sprintf(errBuf, "Cannot attach to slot %d, only %d slots are declared for this material", slot, textures.size());
+		sprintf(errBuf, "Cannot attach to slot %d, only %zu slots are declared for this material", slot, textures.size());
 
 		throw std::runtime_error(errBuf);
 	}
@@ -90,8 +90,8 @@ void Material::bindTextures()
 		resources.push_back(textures[i]->getResource());
 	}
 
-	renderer->setPixelShaderResourceViews(0, resources.size(), resources.data());
-	renderer->setPixelShaderTextureSamplers(0, samplers.size(), samplers.data());
+	renderer->setPixelShaderResourceViews(0, (int)resources.size(), resources.data());
+	renderer->setPixelShaderTextureSamplers(0, (int)samplers.size(), samplers.data());
 }
 
 
@@ -203,11 +203,11 @@ void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)
 	shaderText += "\n";
 	shaderText += "cbuffer ConstantPSBuffer : register( b1 )\n";
 	shaderText += "{\n";
+	shaderText += "	float4 flags;\n";
 	shaderText += "	float4 transferFunctions[" + strChans + "];\n";
 	shaderText += "	float4 ranges[" + strChans + "];\n";
 	shaderText += "	float4 channelColor[" + strChans + "];\n";
 	shaderText += "	float4 gradientSampleDirection[3];\n";
-	shaderText += "	float4 lightOn;\n";
 	shaderText += "};\n";
 	shaderText += "\n";
 	shaderText += "struct PixelOutputType\n";
@@ -254,7 +254,7 @@ void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)
 	shaderText += "\t\tmaxIntensity = max(intensity,maxIntensity);\n";
 	shaderText += "\n";
 	shaderText += "\t\tfloat lightMod = 1.0f;\n";
-	shaderText += "\t\tif(lightOn.x>0)\n";
+	shaderText += "\t\tif(flags.x>0)\n";
 	shaderText += "\t\t{\n";
 	shaderText += "\t\t\tgrad.x = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[0]) - \n";
 	shaderText += "\t\t\t\tg_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[0]);\n";
@@ -287,7 +287,7 @@ void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)
 	shaderText += "\t}\n";
 	shaderText += "\n";
 	shaderText += "\n";
-	shaderText += "\tif(lightOn.y>0)\n";
+	shaderText += "\tif(flags.y>0)\n";
 	shaderText += "\t{\n";
 	shaderText += "\t\tfloat distMult = (input.Dpth.z<=0) ? (1) : (1-input.Dpth.z);\n";
 	shaderText += "\t\toutput.color.r *= distMult;\n";

@@ -2,10 +2,33 @@
 #include "Renderer.h"
 #include <DirectXMath.h>
 
+#include <unordered_map>
+
 class Material;
 
 class MaterialParameters
 {
+	typedef unsigned char byte;
+
+	class Param
+	{
+	public:
+		Param(){};
+		Param(const std::string& type, size_t offset, size_t size, const std::string& desc = "")
+			: type(type), byteOffset(offset), byteSize(size), desc(desc)
+		{}
+
+		size_t size(){return byteSize;}
+		template<typename T> T* getPtr(void* base){return ((T*) (((byte*) base) + byteOffset));}
+
+	private:
+		size_t byteSize;
+		size_t byteOffset;
+
+		std::string type;
+		std::string desc;
+	};
+
 public:
 	friend class Renderer;
 	friend class Material;
@@ -13,6 +36,13 @@ public:
 
 	virtual DirectX::XMFLOAT4 getColor(){return DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f);}
 
+	void setLightOn(bool on);
+	void setAttenuationOn(bool on);
+
+	// Get a pointer for arrays
+	template<typename T> T* ptr(const std::string& name){return getPtr<T>(name);}
+	// Get a reference for single types
+	template<typename T> T& ref(const std::string& name){return getRef<T>(name);}
 
 private:
 	// Disable creation of this without a renderer (force children to initialize properly)
@@ -21,16 +51,55 @@ private:
 protected:
 	MaterialParameters(Renderer* rendererIn);
 
-	void createResources(size_t size){renderer->createConstantBuffer(size, &constBuffer);}
+	// Handling parameters creation/destruction dynamic access
+	template<typename T> T* getPtr(const std::string& name){return (paramHash[name].getPtr<T>(constMemory.data()));}
+	template<typename T> T& getRef(const std::string& name){return *(paramHash[name].getPtr<T>(constMemory.data()));}
+
+	template<typename T>
+	void addParam(const std::string& name, const T& defaultValue = T(), const std::string& desc = "")
+	{
+		if ( paramHash.count(name) > 0 )
+			return;
+
+		size_t offset = constMemory.size();
+		size_t size = sizeof(T);
+
+		constMemory.resize(offset + size);
+		paramHash.emplace(name, Param(typeid(T).name(),offset,size,desc));
+
+		getRef<T>(name) = defaultValue;
+	}
+
+	template<typename T>
+	void addParamArray(const std::string& name, size_t number, const std::string& desc = "")
+	{
+		if ( paramHash.count(name) > 0 )
+			return;
+
+		size_t offset = constMemory.size();
+		size_t size = number * sizeof(T);
+
+		char type[256];
+		sprintf(type, "%s[%zu]", typeid(T).name(), number);
+
+		constMemory.resize(offset + size);
+		paramHash.emplace(name, Param(type,offset,size,desc));
+	}
+
+	void clearParams();
+
+	// Render resources
+	void createResources(){renderer->createConstantBuffer(constMemory.size(), &constBuffer);}
 	void releaseResources(){SAFE_RELEASE(constBuffer);}
 
 	void setShaderResources(){renderer->setPixelShaderConsts(constBuffer);}
-	void updateParams(){renderer->updateShaderParams(constMemory,constBuffer);}
+	void updateParams(){renderer->updateShaderParams(constMemory.data(),constBuffer);}
 
 	Renderer* renderer;
 	ID3D11Buffer* constBuffer;
 
-	void* constMemory;
+	std::unordered_map<std::string,Param> paramHash;
+	std::vector<byte> constMemory;
 };
 
 class SingleColorParams: public MaterialParameters
@@ -42,17 +111,8 @@ public:
 	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
 
-	void setLightOn(bool on);
-
 private:
 	SingleColorParams() : MaterialParameters(NULL){};
-
-	struct ColorBuffer
-	{
-		DirectX::XMFLOAT4 color;
-		DirectX::XMFLOAT4 colorModifier;
-		DirectX::XMFLOAT4 lightOn;
-	} colorBuffer;
 };
 
 class StaticVolumeParams : public MaterialParameters
@@ -60,8 +120,6 @@ class StaticVolumeParams : public MaterialParameters
 public:
 	StaticVolumeParams(Renderer* rendererIn);
 	StaticVolumeParams(Renderer* rendererIn, int numChannelsIn);
-
-	~StaticVolumeParams();
 
 	//NOTE: This will reset all param data
 	void resetChannels(int numChannelsIn);
@@ -71,8 +129,6 @@ public:
 
 	void setColor(int channel, Vec<float> color, float alphaMod);
 
-	void setLightOn(bool on);
-	void setAttenuationOn(bool on);
 	void setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir);
 
 private:
@@ -80,31 +136,7 @@ private:
 
 	StaticVolumeParams() : MaterialParameters(NULL){};
 
-	void allocMemory();
-	void clearMemory();
 	void setDefaultParams();
-
-	struct StaticVolLayout
-	{
-		std::vector<DirectX::XMFLOAT4> transferFunctions;
-		std::vector<DirectX::XMFLOAT4> ranges;
-		std::vector<DirectX::XMFLOAT4> channelColors;
-		DirectX::XMFLOAT4 gradientSampleDirection[3];
-		DirectX::XMFLOAT4 lightOn;
-
-		static size_t sizeOf(int numChannels)
-		{
-			size_t size = 0;
-
-			size += numChannels * sizeof(DirectX::XMFLOAT4);
-			size += numChannels * sizeof(DirectX::XMFLOAT4);
-			size += numChannels * sizeof(DirectX::XMFLOAT4);
-			size += 3 * sizeof(DirectX::XMFLOAT4);
-			size += sizeof(DirectX::XMFLOAT4);
-
-			return size;
-		}
-	};
 
 	int numChannels;
 };
