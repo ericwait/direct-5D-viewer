@@ -1,8 +1,12 @@
 #pragma once
+#include "D3d/SceneNode.h"
+
+#include "mex.h"
+
 #include <concrt.h>
 #include <vector>
 #include <set>
-#include "D3d/GraphicObject.h"
+#include <memory>
 
 extern HANDLE mexMessageMutex;
 extern HANDLE messageLoopHandle;
@@ -20,10 +24,9 @@ void togglePolygonLighting(bool lighting);
 void toggleSelectedPolygon(std::set<int> labels);
 HRESULT updatePolygons(const mxArray* hulls);
 
-
-PolygonObject* createPolygonObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
-	Camera* camera);
 HRESULT loadPolygons(const mxArray* hulls);
+std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals);
+
 HRESULT createBorder(Vec<float> &scale);
 HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ);
 

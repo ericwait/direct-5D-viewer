@@ -20,12 +20,16 @@
 #undef max
 
 // Class method implementations
-SceneNode::SceneNode()
+SceneNode::SceneNode(int index, GraphicObjectTypes type)
+	: parentNode(NULL), index(index), type(type)
 {
 	localToParentTransform = DirectX::XMMatrixIdentity();
 	parentToWorld = DirectX::XMMatrixIdentity();
-	parentNode=NULL;
 }
+
+SceneNode::SceneNode(GraphicObjectTypes type)
+	: SceneNode(-1, type)
+{}
 
 SceneNode::~SceneNode()
 {
@@ -51,7 +55,8 @@ void SceneNode::attachToParentNode(SceneNode* parent)
 	if ( !parent->addChildNode(this) )
 		return;
 
-	parentNode = parent;
+	setParentNode(parent);
+
 	updateTransforms(parent->getLocalToWorldTransform());
 	requestUpdate();
 }
@@ -59,7 +64,7 @@ void SceneNode::attachToParentNode(SceneNode* parent)
 void SceneNode::detatchFromParentNode()
 {
 	parentNode->detatchChildNode(this);
-	parentNode = NULL;
+	setParentNode(NULL);
 }
 
 
@@ -69,30 +74,34 @@ void SceneNode::setLocalToParent(DirectX::XMMATRIX transform)
 	updateTransforms(parentToWorld);
 }
 
-DirectX::XMMATRIX SceneNode::getLocalToWorldTransform()
+DirectX::XMMATRIX SceneNode::getLocalToWorldTransform() const
 {
 	return localToParentTransform*parentToWorld;
 }
 
 
-int SceneNode::getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut)
+SceneNode* SceneNode::pickNode(Vec<float> pnt, Vec<float> direction, GraphicObjectTypes filter, float& depthOut)
 {
+	SceneNode* nodeOut = NULL;
 	depthOut = std::numeric_limits<float>::max();
-	int labelOut = -1;
 
 	for (int i=0; i<childrenNodes.size(); ++i)
 	{
 		float curDepth;
-		int index = childrenNodes[i]->getPolygon(pnt,direction,curDepth);
+
+		SceneNode* node = childrenNodes[i]->pickNode(pnt,direction,filter, curDepth);
+
+		if ( !node )
+			continue;
 
 		if (curDepth < depthOut)
 		{
-			labelOut = index;
+			nodeOut = node;
 			depthOut = curDepth;
 		}
 	}
 
-	return labelOut;
+	return nodeOut;
 }
 
 
@@ -143,9 +152,9 @@ void SceneNode::detatchChildNode(SceneNode* child)
 }
 
 
-GraphicObjectNode::GraphicObjectNode(GraphicObject* graphicObjectIn)
+GraphicObjectNode::GraphicObjectNode(int index, GraphicObjectTypes type, std::shared_ptr<MeshPrimitive> mesh, std::shared_ptr<Material> material)
+	: SceneNode(index, type), mesh(mesh), material(material)
 {
-	graphicObject = graphicObjectIn;
 	renderable = true;
 }
 
@@ -153,8 +162,6 @@ void GraphicObjectNode::releaseRenderResources()
 {
 	if (parentNode!=NULL)
 		detatchFromParentNode();
-
-	SAFE_DELETE(graphicObject);
 	
 	renderable = false;
 }
@@ -167,18 +174,15 @@ void GraphicObjectNode::setRenderable(bool render)
 
 void GraphicObjectNode::setWireframe(bool wireframe)
 {
-	graphicObject->setWireframe(wireframe);
+	material->setWireframe(wireframe);
 }
 
 
-const RendererPackage* GraphicObjectNode::getRenderPackage()
+SceneNode* GraphicObjectNode::pickNode(Vec<float> pnt, Vec<float> direction, GraphicObjectTypes filter, float& depthOut)
 {
-	return graphicObject->getRenderPackage();
-}
+	if ( type != filter )
+		return NULL;
 
-
-int GraphicObjectNode::getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut)
-{
 	DirectX::XMVECTOR det;
 	DirectX::XMMATRIX locl = DirectX::XMMatrixInverse(&det,getLocalToWorldTransform());
 
@@ -193,14 +197,17 @@ int GraphicObjectNode::getPolygon(Vec<float> pnt, Vec<float> direction,float& de
 	Vec<float> lclPntVec(DirectX::XMVectorGetX(lclPnt),DirectX::XMVectorGetY(lclPnt),DirectX::XMVectorGetZ(lclPnt));
 	Vec<float> lclDirVec(DirectX::XMVectorGetX(lclDir),DirectX::XMVectorGetY(lclDir),DirectX::XMVectorGetZ(lclDir));
 
-	return graphicObject->getPolygon(lclPntVec,lclDirVec,depthOut);
+	if ( mesh->checkIntersect(lclPntVec,lclDirVec,depthOut) )
+		return this;
+
+	return NULL;
 }
 
 
 void GraphicObjectNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 {
 	parentToWorld = parentToWorldIn;
-	graphicObject->makeLocalToWorld(localToParentTransform*parentToWorld);
+	localToWorld = mesh->computeLocalToWorld(localToParentTransform * parentToWorld);
 }
 
 GraphicObjectNode::~GraphicObjectNode()
@@ -209,11 +216,12 @@ GraphicObjectNode::~GraphicObjectNode()
 }
 
 
-RootSceneNode::RootSceneNode() : SceneNode()
+RootSceneNode::RootSceneNode()
+	: SceneNode(GraphicObjectTypes::Group)
 {
 	for (int i=0; i<Renderer::Section::SectionEnd; ++i)
 	{
-		rootChildrenNodes[i].push_back(new SceneNode);
+		rootChildrenNodes[i].push_back(new SceneNode(GraphicObjectTypes::Group));
 		rootChildrenNodes[i][0]->setParentNode(this);
 	}
 
@@ -224,7 +232,7 @@ RootSceneNode::RootSceneNode() : SceneNode()
 void RootSceneNode::resetWorldTransform()
 {
 	origin = Vec<float>(0.0f,0.0f,0.0f);
-	curRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(0.0f,0.0f,DirectX::XM_PI);
+	rootRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(0.0f,0.0f,DirectX::XM_PI);
 	updateTransforms(parentToWorld);
 }
 
@@ -246,8 +254,8 @@ SceneNode* RootSceneNode::getRenderSectionNode(Renderer::Section section, int fr
 		rootChildrenNodes[section].resize(frame+1);
 		for (int i=oldSize; i<=frame; ++i)
 		{
-			rootChildrenNodes[section][i] = new SceneNode;
-			rootChildrenNodes[section][i]->parentNode = this; //TODO rethink this
+			rootChildrenNodes[section][i] = new SceneNode(GraphicObjectTypes::Group);
+			rootChildrenNodes[section][i]->setParentNode(this); //TODO rethink this
 		}
 	}
 
@@ -272,19 +280,19 @@ void RootSceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 	for(int i=0; i<rootChildrenNodes[Renderer::Section::Pre].size(); ++i)
 	{
 		SceneNode* node = rootChildrenNodes[Renderer::Section::Pre][i];
-		node->updateTransforms(transMatrix * curRotationMatrix * parentToWorld);
+		node->updateTransforms(transMatrix * rootRotationMatrix * parentToWorld);
 	}
 
 	for(int i=0; i<rootChildrenNodes[Renderer::Section::Main].size(); ++i)
 	{
 		SceneNode* node = rootChildrenNodes[Renderer::Section::Main][i];
-		node->updateTransforms(transMatrix * curRotationMatrix * parentToWorld);
+		node->updateTransforms(transMatrix * rootRotationMatrix * parentToWorld);
 	}
 
 	for(int i=0; i<rootChildrenNodes[Renderer::Section::Post].size(); ++i)
 	{
 		SceneNode* node = rootChildrenNodes[Renderer::Section::Post][i];
-		node->updateTransforms(curRotationMatrix * parentToWorld);
+		node->updateTransforms(rootRotationMatrix * parentToWorld);
 	}
 }
 
@@ -300,31 +308,34 @@ int RootSceneNode::getNumFrames()
 }
 
 
-int RootSceneNode::getPolygon(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, float& depthOut)
+SceneNode* RootSceneNode::pickNode(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, GraphicObjectTypes filter, float& depthOut)
 {
 	std::vector<SceneNode*> children = rootChildrenNodes[Renderer::Section::Main][currentFrame]->getChildren();
 
+	SceneNode* nodeOut = NULL;
 	depthOut = std::numeric_limits<float>::max();
-	int indexOut = -1;
 
 	for (int i=0; i<children.size(); ++i)
 	{
 		float curDepth;
-		int index = children[i]->getPolygon(pnt,direction,curDepth);
+		SceneNode* node = children[i]->pickNode(pnt,direction,filter, curDepth);
+
+		if ( !node )
+			continue;
 
 		if (curDepth < depthOut)
 		{
-			indexOut = index;
+			nodeOut = node;
 			depthOut = curDepth;
 		}
 	}
 
-	return indexOut;
+	return nodeOut;
 }
 
 DirectX::XMMATRIX RootSceneNode::getWorldRotation()
 {
-	return curRotationMatrix;
+	return rootRotationMatrix;
 }
 
 bool RootSceneNode::addChildNode(SceneNode* child)
@@ -355,7 +366,7 @@ void RootSceneNode::updateTranslation(Vec<float> origin)
 
 void RootSceneNode::updateRotation(DirectX::XMMATRIX& rotation)
 {
-	curRotationMatrix = rotation;
+	rootRotationMatrix = rotation;
 	updateTransforms(parentToWorld);
 }
 

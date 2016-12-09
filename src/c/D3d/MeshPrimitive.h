@@ -15,8 +15,8 @@
 
 #pragma once
 #include "Global/Vec.h"
-#include "Global/Defines.h"
 #include "Renderer.h"
+
 #include <d3d11.h>
 #include <vector>
 
@@ -24,24 +24,73 @@ class MeshPrimitive
 {
 public:
 	friend class Renderer;
+	friend class GraphicObjectNode;
+
+	MeshPrimitive(Renderer* rendererIn, Renderer::VertexShaders shader, const std::vector<Vec<unsigned int>>& faces,const std::vector<Vec<float>>& vertices,
+		const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV = std::vector<Vec<float>>());
+
+	bool checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
+
 	~MeshPrimitive();
+protected:
+	MeshPrimitive(Renderer* rendererIn, Renderer::VertexShaders shader);
+
+	void setupMesh(const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+		const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV = std::vector<Vec<float>>());
+
+	void cleanupMesh();
+
+	void loadShader(Renderer::VertexShaders shader);
+	void initializeResources(const std::vector<Vec<float>>& textureUV);
+	void updateCenterOfMass();
 
 	Vec<float> getCenterOfMass() const {return centerOfMass;}
+	bool intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord);
 
-protected:
-	MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
-		std::vector<Vec<float>>& normals, std::vector<Vec<float>> textureUV, Renderer::VertexShaders shader);
-	MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
-		std::vector<Vec<float>>& normals, Renderer::VertexShaders shader);
+	// TODO: This really should probably be part of the material system
+	// Overloaded to change the way transforms get passed to the vertex shader
+	virtual DirectX::XMMATRIX computeLocalToWorld(DirectX::XMMATRIX parentToWorld){return parentToWorld;}
 
 private:
 	MeshPrimitive(){}
 
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
-	
+protected:
 	Renderer* renderer;
-	int shaderIdx;
+
 	size_t numFaces;
 	Vec<float> centerOfMass;
+
+	// Triangle resources
+	std::vector<Vec<unsigned int>> faces;
+	std::vector<Vec<float>> vertices;
+	std::vector<Vec<float>> normals;
+
+	// Render resources
+	int vertShaderIdx;
+
+	ID3D11Buffer* vertexBuffer;
+	ID3D11Buffer* indexBuffer;
+};
+
+
+class ViewAlignedPlanes : public MeshPrimitive
+{
+public:
+	// Static indices/verts for planes
+	static const Vec<unsigned int> planeIndices[2];
+	static const Vec<float> planeVertices[4];
+
+	ViewAlignedPlanes(Renderer* renderer, Vec<size_t> volDims, Vec<float> scaleDims);
+
+protected:
+	virtual DirectX::XMMATRIX computeLocalToWorld(DirectX::XMMATRIX parentToWorld);
+
+private:
+	void buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
+		std::vector<Vec<float>>& vertices,std::vector<Vec<float>>& normals, std::vector<Vec<float>>& textureUV);
+
+	// Need to keep these around for transforms
+	// TODO: Put all shader refs together into the material?
+	Vec<size_t> dims;
+	Vec<float> scaleFactor;
 };

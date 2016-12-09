@@ -1,5 +1,6 @@
 #pragma once
 #include "Renderer.h"
+
 #include <DirectXMath.h>
 
 #include <unordered_map>

@@ -14,7 +14,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "Global/Vec.h"
 #include "Renderer.h"
+
 #include "MaterialParams.h"
 #include "Texture.h"
 
@@ -28,7 +30,7 @@ public:
 	virtual ~Material();
 
 
-	void attachTexture(int slot, std::shared_ptr<Texture>& texture);
+	void attachTexture(int slot, std::shared_ptr<Texture> texture);
 
 
 	// Return generalized material parameter structure
@@ -41,10 +43,13 @@ public:
 	void setWireframe(bool wireframe);
 	virtual DirectX::XMFLOAT4 getColor(){return DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f);}
 
+	// Overloaded to potentially pass transform related variables to the pixel shader
+	virtual void updateTransformParams(DirectX::XMMATRIX localToWorld, DirectX::XMMATRIX view, DirectX::XMMATRIX projection){}
+
 protected:
 	Material(){}
 	Material(Renderer* rendererIn);
-	Material(Renderer* rendererIn, std::weak_ptr<MaterialParameters> sharedParams);
+	Material(Renderer* rendererIn, std::shared_ptr<MaterialParameters> sharedParams);
 
 	void setShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
 	void bindConstants();
@@ -86,9 +91,14 @@ private:
 class StaticVolumeTextureMaterial : public Material
 {
 public:
-	StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, std::weak_ptr<StaticVolumeParams> paramsIn);
+	StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn);
+
+	// Overloaded to potentially pass transform related variables to the pixel shader
+	virtual void updateTransformParams(DirectX::XMMATRIX localToWorld, DirectX::XMMATRIX view, DirectX::XMMATRIX projection);
 
 private:
 	StaticVolumeTextureMaterial(){};
+
 	int numChannels;
+	Vec<size_t> dims;
 };

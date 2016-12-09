@@ -15,8 +15,7 @@
 
 using std::vector;
 
-PolygonObject* createPolygonObject(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals,
-	Camera* camera)
+std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals)
 {
 	std::vector<Vec<unsigned int>> faces;
 	std::vector<Vec<float>> verts;
@@ -53,9 +52,7 @@ PolygonObject* createPolygonObject(double* faceData, size_t numFaces, double* ve
 		normals[i] = curNormal;
 	}
 
-	PolygonObject* cho = new PolygonObject(gRenderer, faces, verts, normals, camera);
-
-	return cho;
+	return std::make_shared<MeshPrimitive>(gRenderer,Renderer::VertexShaders::DefaultVS, faces, verts, normals);
 }
 
 
@@ -163,8 +160,8 @@ HRESULT createBorder(Vec<float> &scale)
 
 	for (int i = 0; i < 6; ++i)
 	{
-		faces[2 * i] = VolumeTextureObject::triIndices[0] + 4 * i;
-		faces[2 * i + 1] = VolumeTextureObject::triIndices[1] + 4 * i;
+		faces[2 * i] = ViewAlignedPlanes::planeIndices[0] + 4 * i;
+		faces[2 * i + 1] = ViewAlignedPlanes::planeIndices[1] + 4 * i;
 	}
 
 	DirectX::XMMATRIX scl = DirectX::XMMatrixScaling(scale.y, scale.x, scale.z);
@@ -173,8 +170,8 @@ HRESULT createBorder(Vec<float> &scale)
 
 	for (int i = 0; i < 16; ++i)
 	{
-		DirectX::XMFLOAT4 curF4(VolumeTextureObject::triVertices[i % 4].x, VolumeTextureObject::triVertices[i % 4].y,
-			VolumeTextureObject::triVertices[i % 4].z, 1.0f);
+		DirectX::XMFLOAT4 curF4(ViewAlignedPlanes::planeVertices[i % 4].x, ViewAlignedPlanes::planeVertices[i % 4].y,
+			ViewAlignedPlanes::planeVertices[i % 4].z, 1.0f);
 
 		DirectX::XMVECTOR curVec = DirectX::XMLoadFloat4(&curF4);
 		DirectX::XMVECTOR rotVec = DirectX::XMVector3TransformCoord(DirectX::XMVector3TransformCoord(curVec, start), scl);
@@ -188,8 +185,8 @@ HRESULT createBorder(Vec<float> &scale)
 
 	for (int i = 16; i < 20; ++i)
 	{
-		DirectX::XMFLOAT4 curF4(VolumeTextureObject::triVertices[i % 4].x, VolumeTextureObject::triVertices[i % 4].y,
-			VolumeTextureObject::triVertices[i % 4].z, 1.0f);
+		DirectX::XMFLOAT4 curF4(ViewAlignedPlanes::planeVertices[i % 4].x, ViewAlignedPlanes::planeVertices[i % 4].y,
+			ViewAlignedPlanes::planeVertices[i % 4].z, 1.0f);
 
 		DirectX::XMVECTOR curVec = DirectX::XMLoadFloat4(&curF4);
 		DirectX::XMVECTOR rotVec = DirectX::XMVector3TransformCoord(DirectX::XMVector3TransformCoord(curVec, yRot1), scl);
@@ -198,8 +195,8 @@ HRESULT createBorder(Vec<float> &scale)
 
 	for (int i = 20; i < 24; ++i)
 	{
-		DirectX::XMFLOAT4 curF4(VolumeTextureObject::triVertices[i % 4].x, VolumeTextureObject::triVertices[i % 4].y,
-			VolumeTextureObject::triVertices[i % 4].z, 1.0f);
+		DirectX::XMFLOAT4 curF4(ViewAlignedPlanes::planeVertices[i % 4].x, ViewAlignedPlanes::planeVertices[i % 4].y,
+			ViewAlignedPlanes::planeVertices[i % 4].z, 1.0f);
 
 		DirectX::XMVECTOR curVec = DirectX::XMLoadFloat4(&curF4);
 		DirectX::XMVECTOR rotVec = DirectX::XMVector3TransformCoord(DirectX::XMVector3TransformCoord(curVec, yRot2), scl);
@@ -222,13 +219,12 @@ HRESULT createBorder(Vec<float> &scale)
 			normals[faces[2 * i].x + j] = norm;
 	}
 
-	gBorderObj = new PolygonObject(gRenderer, faces, vertices, normals, gCameraDefaultMesh);
-
-	GraphicObjectNode* borderNode = new GraphicObjectNode(gBorderObj);
-	gBorderObj->setColor(Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);
-	gBorderObj->setLightOn(false);
+	std::shared_ptr<MeshPrimitive> borderMesh = std::make_shared<MeshPrimitive>(gRenderer, Renderer::VertexShaders::DefaultVS, faces, vertices, normals);
+	std::shared_ptr<SingleColoredMaterial> borderMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);
+	GraphicObjectNode* borderNode = new GraphicObjectNode(0, GraphicObjectTypes::Border, borderMesh, borderMat);
+	
+	borderNode->setLightOn(false);
 	gRenderer->attachToRootScene(borderNode, Renderer::Pre, 0);
-
 	insertGlobalGraphicsObject(GraphicObjectTypes::Border, borderNode);
 
 	//gRenderer->releaseMutex();
@@ -260,16 +256,21 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		gRenderer->createSharedVolumeParams(volType, numChannel);
 
 	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(volType);
+	std::shared_ptr<ViewAlignedPlanes> planeMesh = std::make_shared<ViewAlignedPlanes>(gRenderer, dims, scales);
 
 	for (int i = 0; i < numFrames; ++i)
 	{
-		VolumeTextureObject* volumeTexture = new VolumeTextureObject(gRenderer, dims, numChannel, image + i*numChannel*dims.product(), scales,
-			gCameraDefaultMesh, sharedParams);
+		std::shared_ptr<StaticVolumeTextureMaterial> planeMat = std::make_shared<StaticVolumeTextureMaterial>(gRenderer, numChannel, dims, sharedParams);
 
-		GraphicObjectNode* volumeTextureNode = new GraphicObjectNode(volumeTexture);
-		gRenderer->attachToRootScene(volumeTextureNode, Renderer::Section::Main, i);
+		GraphicObjectNode* volumeNode = new GraphicObjectNode(i, typ, planeMesh, planeMat);
+		for ( int j=0; j < numChannel; ++j )
+		{
+			const unsigned char* imFrame = image + i*numChannel*dims.product() + j*dims.product();
+			volumeNode->getMaterial()->attachTexture(0, std::make_shared<Texture>(gRenderer, dims, imFrame));
+		}
 
-		insertGlobalGraphicsObject(typ,volumeTextureNode,i);
+		gRenderer->attachToRootScene(volumeNode, Renderer::Section::Main, i);
+		insertGlobalGraphicsObject(typ,volumeNode,i);
 	}
 
 	//gRenderer->releaseMutex();

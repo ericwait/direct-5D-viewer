@@ -14,19 +14,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Renderer.h"
-#include "Global/Defines.h"
-#include "Global/Globals.h"
-#include <d3dcompiler.h>
 #include "MeshPrimitive.h"
 #include "Material.h"
 #include "MaterialParams.h"
 #include "Camera.h"
-#include "RendererPackage.h"
-#include "Messages/MexErrorMsg.h"
 #include "Timer.h"
-#include <string>
 
+#include "Global/Defines.h"
+#include "Global/Globals.h"
+
+#include "Messages/MexErrorMsg.h"
+
+#include <d3dcompiler.h>
 #include <Windows.h>
+
+#include <string>
 
 // Initialize static root shader memory to null for all object types
 std::shared_ptr<StaticVolumeParams> Renderer::sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume] = {NULL};
@@ -77,6 +79,9 @@ Renderer::Renderer()
 		gdiTimes  [i] = 0;
 		endTimes  [i] = 0;
 	}
+
+	volDims = Vec<size_t>(1,1,1);
+	volPhysSize = Vec<float>(1.0f,1.0f,1.0f);
 
 	curTimeIdx = 0;
 }
@@ -539,32 +544,10 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 	return result;
 }
 
-MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
-	std::vector<Vec<float>> textureUV, VertexShaders shader)
-{
-	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, textureUV, shader);
-
-	return newMesh;
-}
-
-MeshPrimitive* Renderer::addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
-	VertexShaders shader)
-{
-	//WaitForSingleObject(mutexDevice,INFINITE);
-	MeshPrimitive* newMesh = new MeshPrimitive(this, faces, vertices, normals, shader);
-
-	//meshPrimitives.push_back(newMesh);
-	//ReleaseMutex(mutexDevice);
-
-	return newMesh;
-}
-
 void Renderer::convertToWorldSpace(double* verts, size_t numVerts)
 {
-	GraphicObjectNode* volumePtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].at(0);
-	VolumeTextureObject* volumeObject = (VolumeTextureObject*)volumePtr->getGraphicObjectPtr();
-	Vec<size_t> dims = volumeObject->getDims();
-	Vec<double> scales = Vec<double>(volumeObject->getScales());
+	Vec<size_t> dims = getDims();
+	Vec<double> scales = getScales();
 	scales = Vec<double>(scales.y, scales.x, scales.z);
 
 	Vec<double> dimsNeg1to1 = Vec<double>(dims.y,dims.x,dims.z) / 2.0;
@@ -783,7 +766,7 @@ void Renderer::preRenderLoop()
 	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre,currentFrame);
 	for (int i=0; i<renderPreList.size(); ++i)
 	{
-		renderPackage(renderPreList[i]->getRenderPackage(),FrontClipPos(),BackClipPos());
+		renderNode(gCameraDefaultMesh, renderPreList[i], FrontClipPos(),BackClipPos());
 	}
 }
 
@@ -807,7 +790,7 @@ void Renderer::mainRenderLoop()
 
 		for (int i=0; i<renderMainList.size(); ++i)
 		{
-			renderPackage(renderMainList[i]->getRenderPackage(),frontPlane,backPlane);
+			renderNode(gCameraDefaultMesh, renderMainList[i], frontPlane, backPlane);
 		}
 	}
 }
@@ -822,7 +805,7 @@ void Renderer::postRenderLoop()
 	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post,currentFrame);
 	for (int i=0; i<renderPostList.size(); ++i)
 	{
-		renderPackage(renderPostList[i]->getRenderPackage());
+		renderNode(gCameraWidget, renderPostList[i]);
 	}
 }
 
@@ -846,13 +829,13 @@ void Renderer::gdiRenderLoop()
 	if(labelsOn)
 	{
 		for(int i = 1; i<renderMainList.size(); ++i)
-			renderLabel(renderMainList[i]->getRenderPackage(), hdc);
+			renderLabel(gCameraDefaultMesh, renderMainList[i], hdc);
 	}
 
 	if(!renderMainList.empty())
 	{
 		if (scaleBarOn)
-			renderScaleValue(renderMainList[0]->getRenderPackage(), hdc);
+			renderScaleValue(gCameraDefaultMesh, hdc);
 		if (frameNumOn)
 			renderFrameNum(hdc);
 		if(fpsOn)
@@ -876,55 +859,60 @@ void Renderer::endRender()
 	swapChain->Present( 0, 0 );
 }
 
-void Renderer::renderPackage(const RendererPackage* package, float frontClip, float backClip)
+void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip, float backClip)
 {
 	static int previousVertexShaderIdx = -1;
 	static int previousPixelShaderIdx = -1;
+
 	//Vertex Shader setup
 	VertexShaderConstBuffer vcb;
-	const Camera* camera = package->getCamera();
+
 	vcb.projectionTransform = DirectX::XMMatrixTranspose(camera->getProjectionTransform());
 	vcb.viewTransform = DirectX::XMMatrixTranspose(camera->getViewTransform());
-	vcb.worldTransform = DirectX::XMMatrixTranspose(package->getLocalToWorld());
+	vcb.worldTransform = DirectX::XMMatrixTranspose(node->getLocalToWorld());
 	vcb.depthPeelPlanes.x = frontClip;
 	vcb.depthPeelPlanes.y = backClip;
 	updateShaderParams(&vcb,vertexShaderConstBuffer);
-	if (previousVertexShaderIdx!=package->getMeshPrimitive()->shaderIdx)
+
+	if ( previousVertexShaderIdx != node->mesh->vertShaderIdx )
 	{
-		setVertexShader(package->getMeshPrimitive()->shaderIdx);
-		previousVertexShaderIdx = package->getMeshPrimitive()->shaderIdx;
+		setVertexShader(node->mesh->vertShaderIdx);
+		previousVertexShaderIdx = node->mesh->vertShaderIdx;
 	}
 
-	setGeometry(package->getMeshPrimitive()->vertexBuffer,package->getMeshPrimitive()->indexBuffer);
+	setGeometry(node->mesh->vertexBuffer, node->mesh->indexBuffer);
 
-	//Rasterizer setup
-	setRasterizerState(package->getMaterial()->wireframe);
 
-	//Pixel Shader setup
-	package->getMaterial()->getParams()->updateParams(); //can be sped up by doing this differently
-
-	package->getMaterial()->bindTextures();
-	package->getMaterial()->bindConstants(); //TODO this needs tweeking
-
-	if (previousPixelShaderIdx != package->getMaterial()->shaderIdx)
-	{
-		setPixelShader(package->getMaterial()->shaderIdx);
-		previousPixelShaderIdx = package->getMaterial()->shaderIdx;
-	}
+	// Material and pixel shader setup
+	setRasterizerState(node->material->wireframe);
 	
-	setDepthStencilState(package->getMaterial()->testDepth);
-
-	drawTriangles(package->getMeshPrimitive()->numFaces);
+	//Pixel Shader setup
+	node->material->updateTransformParams(node->getLocalToWorldTransform(), camera->getViewTransform(), camera->getProjectionTransform());
+	node->material->getParams()->updateParams(); //can be sped up by doing this differently
+	
+	node->material->bindTextures();
+	node->material->bindConstants(); //TODO this needs tweeking
+	
+	if (previousPixelShaderIdx != node->material->shaderIdx)
+	{
+		setPixelShader(node->material->shaderIdx);
+		previousPixelShaderIdx = node->material->shaderIdx;
+	}
+		
+	setDepthStencilState(node->material->testDepth);
+	
+	drawTriangles(node->mesh->numFaces);
 }
 
-void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
+
+void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node, HDC hdc)
 {
-	if (package->getLabel().length()==0) return;
+	if ( node->getLabel().length() == 0 ) return;
 
 	DirectX::XMVECTOR v2D={0.,0.,0.,0.};
 	int x,y;
 
-	DirectX::XMFLOAT4 color = package->getMaterial()->getColor();
+	DirectX::XMFLOAT4 color = node->material->getColor();
 
 	COLORREF hexColor = (unsigned int) (255*color.z);
 	hexColor = hexColor << 8;
@@ -932,12 +920,12 @@ void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
 	hexColor = hexColor << 8;
 	hexColor |=  (unsigned int) (255*color.x);
 
-	Vec<float> centerOfmassVec = package->getMeshPrimitive()->getCenterOfMass();
+	Vec<float> centerOfmassVec = node->mesh->getCenterOfMass();
 	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
 	DirectX::XMVECTOR com = DirectX::XMLoadFloat3(&centerOfmass);
-	const Camera* camera = package->getCamera();
-	v2D= DirectX::XMVector3Project(com,0.0f,0.0f,(float)gWindowWidth,(float)gWindowHeight,0.0f,1.0f,
-		camera->getProjectionTransform(),camera->getViewTransform(),package->getLocalToWorld());
+
+	v2D = DirectX::XMVector3Project(com,0.0f,0.0f,(float)gWindowWidth,(float)gWindowHeight,0.0f,1.0f,
+		camera->getProjectionTransform(),camera->getViewTransform(),node->getLocalToWorld());
 
 	x=(int)DirectX::XMVectorGetX(v2D);
 	y=(int)DirectX::XMVectorGetY(v2D);
@@ -945,19 +933,18 @@ void Renderer::renderLabel(const RendererPackage* package, HDC hdc)
 	SelectObject(hdc, gFont);
 	SetTextColor(hdc,hexColor);
 	SetBkMode(hdc,TRANSPARENT);
-	TextOutA(hdc,x,y,package->getLabel().c_str(),(int)package->getLabel().length());
+
+	TextOutA(hdc,x,y,node->getLabel().c_str(),(int)node->getLabel().length());
 }
 
-void Renderer::renderScaleValue(const RendererPackage* package, HDC hdc)
+void Renderer::renderScaleValue(const Camera* camera, HDC hdc)
 {
-	float sz = package->getCamera()->getVolUnitsPerPix();
+	float sz = camera->getVolUnitsPerPix();
 
-	GraphicObjectNode* volumePtr = gGraphicObjectNodes[GraphicObjectTypes::OriginalVolume].at(0);
-	VolumeTextureObject* volumeObject = (VolumeTextureObject*)volumePtr->getGraphicObjectPtr();
-	Vec<size_t> dims = volumeObject->getDims();
+	Vec<size_t> dims = getDims();
 
 	//sz *= dims.maxValue()/2.0;
-	Vec<float> volSize = volumeObject->getPhysVolSize();
+	Vec<float> volSize = getPhysSize();
 	sz *= volSize.maxValue()/2.0f;
 
 	float numUnits = 100.0f;
@@ -1327,10 +1314,13 @@ int Renderer::getPolygon(Vec<float> pnt, Vec<float> direction)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 	float depth;
-	int index = rootScene->getPolygon(pnt,direction,currentFrame,depth);
+	SceneNode* node = rootScene->pickNode(pnt, direction, currentFrame, GraphicObjectTypes::Polygons, depth);
 	//ReleaseMutex(mutexDevice);
 
-	return index;
+	if ( !node )
+		return -1;
+
+	return node->getIndex();
 }
 
 void Renderer::resizeViewPort()

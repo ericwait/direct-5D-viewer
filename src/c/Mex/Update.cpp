@@ -69,7 +69,7 @@ void toggleSelectedPolygon(std::set<int> labels)
 	for(auto itr:gGraphicObjectNodes[cellType])
 	{
 		GraphicObjectNode* node = itr.second;
-		if ( labels.count(node->getPolygonLabel()) > 0 )
+		if ( labels.count(node->getIndex()) > 0 )
 			node->setRenderable(true);
 		else
 			node->setRenderable(false);

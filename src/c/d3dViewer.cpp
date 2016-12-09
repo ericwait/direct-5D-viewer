@@ -30,16 +30,13 @@ HINSTANCE gDllInstance = NULL;
 MessageQueue gMsgQueueToMex;
 
 std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
-PolygonObject* gBorderObj = NULL;
-
-extern std::vector<DirectX::XMVECTOR> volumeBoundingVerts;
 
 // A few of global helper functions for managing the graphic object node list
 void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* node, int forceLabel /* = -1*/)
 {
 	int uniqueID = forceLabel;
 	if ( forceLabel < 0 )
-		uniqueID = node->getPolygonLabel();
+		uniqueID = node->getIndex();
 
 	if (gGraphicObjectNodes[objType].count(uniqueID) > 0)
 	{

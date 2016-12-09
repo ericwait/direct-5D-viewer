@@ -14,9 +14,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "GraphicObject.h"
+#include "Global/Vec.h"
+#include "Renderer.h"
+
+#include "MeshPrimitive.h"
+#include "Material.h"
+
 #include <DirectXMath.h>
 #include <vector>
+
+class GraphicObjectNode;
 
 // A few of global helper functions for managing the graphic object node list
 void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* node, int forceLabel = -1);
@@ -27,53 +34,78 @@ class SceneNode
 {
 public:
 	friend class RootSceneNode;
-	SceneNode();
+
+	SceneNode(GraphicObjectTypes type);
+
 	virtual ~SceneNode();
 
 	void update();
 
 	virtual void attachToParentNode(SceneNode* parent);
 	void detatchFromParentNode();
-	void setLocalToParent(DirectX::XMMATRIX transform);
-	virtual bool isRenderable(){return false;}
-	DirectX::XMMATRIX getLocalToWorldTransform();
 
-	virtual int getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut);
-	virtual int getPolygonLabel(){return -1;}
+	void setLocalToParent(DirectX::XMMATRIX transform);
+	DirectX::XMMATRIX getLocalToWorldTransform() const;
+
+	virtual bool isRenderable(){return false;}
+	virtual SceneNode* pickNode(Vec<float> pnt, Vec<float> direction, GraphicObjectTypes filter, float& depthOut);
+
+	int getIndex() const {return index;}
+	const std::string& getLabel() const {return label;}
+	void setLabel(const std::string& labelIn){label = labelIn;}
 
 	SceneNode* getParentNode(){return parentNode;}
 
 protected:
+	SceneNode(int index, GraphicObjectTypes type);
+
 	void setParentNode(SceneNode* parent);
+
+	virtual bool addChildNode(SceneNode* child);
+	virtual void detatchChildNode(SceneNode* child);
+
 	virtual const std::vector<SceneNode*>& getChildren();
 	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
-	virtual bool addChildNode(SceneNode* child);
 	virtual void requestUpdate();
-	virtual void detatchChildNode(SceneNode* child);
 
 	DirectX::XMMATRIX localToParentTransform;
 	DirectX::XMMATRIX parentToWorld;
-	std::vector<SceneNode*> childrenNodes;
+
+	// Scene graph
 	SceneNode* parentNode;
+	std::vector<SceneNode*> childrenNodes;
+	
+	// Object properites
+	int index;
+	std::string label;
+
+	GraphicObjectTypes type;
+
+	Vec<float> BoundingBox[2];
 };
 
 
 class GraphicObjectNode : public SceneNode
 {
 public:
-	GraphicObjectNode(GraphicObject* graphicObjectIn);
+	friend class Renderer;
+
+	GraphicObjectNode(int index, GraphicObjectTypes type, std::shared_ptr<MeshPrimitive> mesh, std::shared_ptr<Material> material);
 	~GraphicObjectNode();
 
 	void releaseRenderResources();
-	void setLightOn(bool on){graphicObject->setLightOn(on);}
+	void setLightOn(bool on){material->getParams()->setLightOn(on);}
+
 	void setRenderable(bool render);
 	void setWireframe(bool wireframe);
 
 	virtual bool isRenderable(){return renderable;}
-	const RendererPackage* getRenderPackage();
-	virtual int getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut);
-	virtual int getPolygonLabel(){return graphicObject->getIndex();}
-	GraphicObject* getGraphicObjectPtr() { return graphicObject; }
+	virtual SceneNode* pickNode(Vec<float> pnt, Vec<float> direction, GraphicObjectTypes filter, float& depthOut);
+
+	DirectX::XMMATRIX getLocalToWorld() const {return localToWorld;};
+
+	std::shared_ptr<MeshPrimitive>& getMesh(){return mesh;}
+	std::shared_ptr<Material>& getMaterial(){return material;}
 
 protected:
 	virtual bool addChildNode(SceneNode* child) { return false; }; //TODO: should probably be an error
@@ -81,8 +113,15 @@ protected:
 
 private:
 	GraphicObjectNode();
-	GraphicObject* graphicObject;
+
+	// TODO: Should this be in the material?
+	DirectX::XMMATRIX localToWorld;
+
 	bool renderable;
+
+	// Render properties
+	std::shared_ptr<MeshPrimitive> mesh;
+	std::shared_ptr<Material> material;
 };
 
 
@@ -93,19 +132,26 @@ public:
 	~RootSceneNode();
 
 	virtual void attachToParentNode(SceneNode* parent){}
+
 	SceneNode* getRenderSectionNode(Renderer::Section section, int frame);
 	size_t getNumRenderableObjects(Renderer::Section section){return renderList[section].size();}
 	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section, unsigned int frame);
+
 	int getNumFrames();
-	int getPolygon(Vec<float> pnt, Vec<float> direction,float& depthOut){return -1;}
-	int getPolygon(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame,float& depthOut);
+
+	SceneNode* pickNode(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, GraphicObjectTypes filter,float& depthOut);
+	virtual SceneNode* pickNode(Vec<float> pnt, Vec<float> direction, GraphicObjectTypes filter, float& depthOut){return NULL;}
+
+	// Transform updates
 	DirectX::XMMATRIX getWorldRotation();
 
 	void resetWorldTransform();
-	virtual void requestUpdate();
-	void updateRenderableList();
 	void updateTranslation(Vec<float> origin);
 	void updateRotation(DirectX::XMMATRIX& rotation);
+
+	// Propagate rendering info
+	virtual void requestUpdate();
+	void updateRenderableList();
 
 protected:
 	virtual bool addChildNode(SceneNode* child);
@@ -115,8 +161,9 @@ private:
 	void makeRenderableList();
 
 	bool bRenderListDirty;
+
 	Vec<float> origin;
-	DirectX::XMMATRIX curRotationMatrix;
+	DirectX::XMMATRIX rootRotationMatrix;
 
 	std::vector<SceneNode*> rootChildrenNodes[Renderer::Section::SectionEnd];
 	std::vector<std::vector<GraphicObjectNode*>> renderList[Renderer::Section::SectionEnd];

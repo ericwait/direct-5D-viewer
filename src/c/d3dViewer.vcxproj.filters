@@ -79,9 +79,6 @@
     <ClCompile Include="D3d\Camera.cpp">
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D3d\GraphicObject.cpp">
-      <Filter>D3d\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="D3d\Initialization.cpp">
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
@@ -270,9 +267,6 @@
     <ClInclude Include="D3d\Camera.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D3d\GraphicObject.h">
-      <Filter>D3d\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="D3d\Initialization.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
@@ -286,9 +280,6 @@
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3d\Renderer.h">
-      <Filter>D3d\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="D3d\RendererPackage.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3d\SceneNode.h">

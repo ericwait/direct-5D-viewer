@@ -17,80 +17,255 @@
 #include "Global/Globals.h"
 #include "Messages/MexErrorMsg.h"
 
-MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
-	std::vector<Vec<float>>& normals,std::vector<Vec<float>> textureUV, Renderer::VertexShaders shader)
+#include <limits>
+
+MeshPrimitive::MeshPrimitive(Renderer* rendererIn, Renderer::VertexShaders shader)
+	: renderer(rendererIn), vertShaderIdx(-1), vertexBuffer(NULL), indexBuffer(NULL)
 {
-	renderer = rendererIn;
-
-	std::vector<Vertex> vert;
-
-	vert.resize(vertices.size());
-
-	for (int i=0; i<vertices.size(); ++i)
-	{
-		vert[i].pos = vertices[i];
-		vert[i].normal = normals[i];
-		vert[i].texUV = textureUV[i];
-	}
-
-	shaderIdx = -1;
-
-	HRESULT hr = renderer->createVertexBuffer(vert,&vertexBuffer);
-	if (FAILED(hr))
-		sendHrErrMessage(hr);
-
-	hr = renderer->createIndexBuffer(faces,&indexBuffer);
-	if (FAILED(hr))
-		sendHrErrMessage(hr);
-
-	numFaces = faces.size();
-
-	std::string root = renderer->getDllDir();
-	shaderIdx = renderer->getVertexShader(root+VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
+	loadShader(shader);
 }
 
-MeshPrimitive::MeshPrimitive(Renderer* rendererIn, std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices,
-	std::vector<Vec<float>>& normals, Renderer::VertexShaders shader)
+void MeshPrimitive::setupMesh(const std::vector<Vec<unsigned int>>& facesIn, const std::vector<Vec<float>>& verticesIn,
+	const std::vector<Vec<float>>& normalsIn, const std::vector<Vec<float>>& textureUVIn)
 {
-	renderer = rendererIn;
+	faces = facesIn;
+	vertices = verticesIn;
+	normals = normalsIn;
 
-	std::vector<Vertex> vert;
-		Vec<double> vertAcum(0,0,0);
+	initializeResources(textureUVIn);
+}
 
-	vert.resize(vertices.size());
+void MeshPrimitive::cleanupMesh()
+{
+	numFaces = 0;
 
-	for (int i=0; i<vertices.size(); ++i)
-	{		
-		vertAcum += vertices[i];
-		vert[i].pos = vertices[i];
-		vert[i].normal = normals[i];
-	}
+	SAFE_RELEASE(vertexBuffer);
+	SAFE_RELEASE(indexBuffer);
+}
 
-	centerOfMass = vertAcum/vertices.size();
-	shaderIdx = -1;
+void MeshPrimitive::loadShader(Renderer::VertexShaders shader)
+{
+	std::string root = renderer->getDllDir();
+	vertShaderIdx = renderer->getVertexShader(root+VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
 
-	HRESULT hr = renderer->createVertexBuffer(vert,&vertexBuffer);
-	if (FAILED(hr))
-		sendHrErrMessage(hr);
+	if (vertShaderIdx == -1)
+		throw std::runtime_error("Cannot get vertex shader!");
+}
 
-	hr = renderer->createIndexBuffer(faces,&indexBuffer);
-	if (FAILED(hr))
-		sendHrErrMessage(hr);
+void MeshPrimitive::initializeResources(const std::vector<Vec<float>>& textureUV)
+{
+	cleanupMesh();
 
 	numFaces = faces.size();
+	std::vector<Vertex> vertBuffer;
 
-	std::string root = renderer->getDllDir();
-	shaderIdx = renderer->getVertexShader(root+VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
+	vertBuffer.resize(vertices.size());
+	for (int i=0; i<vertices.size(); ++i)
+	{
+		vertBuffer[i].pos = vertices[i];
+		vertBuffer[i].normal = normals[i];
+	}
 
-	if (shaderIdx == -1)
-		throw std::runtime_error("Cannot get vertex shader!");
+	for ( int i=0; i < textureUV.size(); ++i )
+		vertBuffer[i].texUV = textureUV[i];
+
+	HRESULT hr = renderer->createVertexBuffer(vertBuffer, &vertexBuffer);
+	if (FAILED(hr))
+		sendHrErrMessage(hr);
+
+	hr = renderer->createIndexBuffer(faces, &indexBuffer);
+	if (FAILED(hr))
+		sendHrErrMessage(hr);
+}
+
+void MeshPrimitive::updateCenterOfMass()
+{
+	centerOfMass = Vec<float>(0.0f, 0.0f, 0.0f);
+
+	for ( int i=0; i < vertices.size(); ++i )
+		centerOfMass += vertices[i];
+
+	centerOfMass = centerOfMass / vertices.size();
+}
+
+bool MeshPrimitive::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord)
+{
+	// Find vectors for two edges sharing vert0
+	Vec<float> edge1(vertices[face.y]-vertices[face.x]);
+	Vec<float> edge2(vertices[face.z]-vertices[face.x]);
+
+	Vec<float> crossVec = lclDirVec.cross(edge2);
+
+	// If determinant is near zero, ray lies in plane of triangle
+	float det = edge1.dot(crossVec);
+
+	if( abs(det) < 1e-5f )
+		return false;
+
+	Vec<float> tvec;
+	if( det > 0 )
+	{
+		tvec = lclPntVec - vertices[face.x];
+	}
+	else
+	{
+		tvec = lclPntVec + vertices[face.x];
+		det = -det;
+	}
+
+	// Calculate U parameter and test bounds
+	triCoord.x = tvec.dot(crossVec);
+	if( triCoord.x < 0.0f || triCoord.x > det )
+		return false;
+
+	// Prepare to test V parameter
+	Vec<float> qvec = tvec.cross(edge1);
+
+	// Calculate V parameter and test bounds
+	triCoord.y = lclDirVec.dot(qvec);
+	if( triCoord.y < 0.0f || triCoord.x + triCoord.y > det )
+		return false;
+
+	// Calculate t, scale parameters, ray intersects triangle
+	triCoord.z = edge2.dot(qvec);
+
+	triCoord = triCoord / det;
+
+	return true;
+}
+
+MeshPrimitive::MeshPrimitive(Renderer * rendererIn, Renderer::VertexShaders shader, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV)
+	: MeshPrimitive(rendererIn, shader)
+{
+	setupMesh(faces, vertices, normals, textureUV);
+}
+
+bool MeshPrimitive::checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, float & depthOut)
+{
+	bool found = false;
+	depthOut = std::numeric_limits<float>::max();
+
+	for (unsigned int i=0; i < faces.size(); ++i){
+		Vec<float> triCoord;
+
+		if ( intersectTriangle(faces[i],lclPntVec,lclDirVec,triCoord) )
+		{
+			if ( triCoord.z < depthOut && triCoord.z > 0)
+			{
+				depthOut = triCoord.z;
+				found = true;
+			}
+		}
+	}
+
+	return found;
 }
 
 MeshPrimitive::~MeshPrimitive()
 {
-	SAFE_RELEASE(vertexBuffer);
-	SAFE_RELEASE(indexBuffer);
+	cleanupMesh();
 
 	renderer = NULL;
-	shaderIdx = -1;
+	vertShaderIdx = -1;
+}
+
+
+const Vec<unsigned int> ViewAlignedPlanes::planeIndices[2] = 
+{
+	Vec<unsigned int>(0,2,1),
+	Vec<unsigned int>(1,2,3)
+};
+const Vec<float> ViewAlignedPlanes::planeVertices[4] = 
+{
+	Vec<float>( -1.0f, -1.0f, 1.0f ), 
+	Vec<float>( -1.0f, 1.0f, 1.0f), 
+	Vec<float>( 1.0f, -1.0f, 1.0f), 
+	Vec<float>( 1.0f, 1.0f, 1.0f)
+};
+
+ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, Vec<float> scaleDims)
+	: dims(volDims), scaleFactor(scaleDims / scaleDims.maxValue()), MeshPrimitive(renderer, Renderer::VertexShaders::ViewAligned)
+{
+	std::vector<Vec<float>> texUVs;
+	buildViewAlignedPlanes(dims, faces, vertices, normals, texUVs);
+
+	renderer->setDims(volDims);
+	renderer->setPhysSize(scaleDims);
+
+	initializeResources(texUVs);
+}
+
+DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX parentToWorld)
+{
+	DirectX::XMVECTOR det;
+	DirectX::XMMATRIX invParentWorld = DirectX::XMMatrixInverse(&det,parentToWorld);
+
+	DirectX::XMMATRIX handedCorrection(0.0f,1.0f,0.0f,0.0f,
+									1.0f,0.0f,0.0f,0.0f,
+									0.0f,0.0f,1.0f,0.0f,
+									0.0f,0.0f,0.0f,1.0f);
+
+	DirectX::XMMATRIX localToWorld = DirectX::XMMatrixTranslation(-0.5f, -0.5f, -0.5f) //centering texture coord at vol origin
+						* DirectX::XMMatrixScaling(2.0f, 2.0f, 2.0f) // upscale centered texCoord [-0.5,0.5] --> [-1,1]
+						* invParentWorld   // Apply this inverted volume to world transform
+						* handedCorrection // Invert handedness (This is a MATLAB column-major thing!)
+						* DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f) // downscale back to texCoord [-1,1] --> [-0.5,0.5]
+						* DirectX::XMMatrixScaling(1.0f/scaleFactor.x, 1.0f/scaleFactor.y, 1.0f/scaleFactor.z) // Scale from physical coordinates to normalized coordinates
+						* DirectX::XMMatrixTranslation(0.5f, 0.5f, 0.5f); // Put the origin back to upper left in texture coordinates
+
+	return localToWorld;
+}
+
+void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
+	std::vector<Vec<float>>& vertices,std::vector<Vec<float>>& normals, std::vector<Vec<float>>& textureUV)
+{
+	faces.clear();
+	vertices.clear();
+	normals.clear();
+	textureUV.clear();
+
+	int numPlanes = int(volDims.maxValue() * 1.5f * 3.0f);//3.0 is to reduce moire
+	renderer->setNumPlanes((int)(ceil(numPlanes/1.5)));
+
+	vertices.resize(4*numPlanes);
+	faces.resize(2*numPlanes);
+	normals.resize(4*numPlanes);
+	textureUV.resize(4*numPlanes);
+
+	int planesFirstVert = 0;
+	for (int planeIdx=0; planeIdx<numPlanes; ++planeIdx)
+	{
+		float zPosition = (2.0f*planeIdx) / numPlanes -1.0f;
+
+		//i is making each plane
+		for (int i=0; i<4; i++)
+		{
+			vertices[planesFirstVert+i] = planeVertices[i]*3.0f;
+			vertices[planesFirstVert+i].z = zPosition*1.5f;
+
+			//Vec<float> temp(vertices[planesFirstVert+i].y,vertices[planesFirstVert+i].x,vertices[planesFirstVert+i].z);
+			//textureUVs[planesFirstVert+i] = temp * 0.5f + 0.5f;
+
+			textureUV[planesFirstVert+i] = vertices[planesFirstVert+i] * 0.5f + 0.5f;
+		}
+
+		for (int i=0; i<2; ++i)
+			faces[2*(numPlanes-planeIdx-1) + i] = planeIndices[i] + planesFirstVert;
+
+		Vec<float> edge1, edge2;
+		Vec<double> norm;
+
+		edge1 = vertices[faces[2*planeIdx].y] - vertices[faces[2*planeIdx].x];
+		edge2 = vertices[faces[2*planeIdx].z] - vertices[faces[2*planeIdx].x];
+
+		Vec<float> triDir = edge1.cross(edge2);
+
+		norm = triDir.norm();
+
+		for (int i=0; i<4 ; ++i)
+			normals[planesFirstVert+i] = norm;
+
+		planesFirstVert += 4;
+	}
 }

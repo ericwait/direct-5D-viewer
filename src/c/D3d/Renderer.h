@@ -15,26 +15,40 @@
 
 #pragma once
 #include "Global/Vec.h"
+
 #include <d3d11.h>
+#include <DirectXMath.h>
+
 #include <vector>
 #include <map>
 #include <string>
 #include <memory>
-#include <DirectXMath.h>
 
+class Camera;
 class MeshPrimitive;
 class Material;
 class MaterialParameters;
 class StaticVolumeParams;
-class RendererPackage;
 class SceneNode;
 class RootSceneNode;
+class GraphicObjectNode;
 
 struct Vertex
 {
 	Vec<float> pos;
 	Vec<float> texUV;
 	Vec<float> normal;
+};
+
+enum GraphicObjectTypes
+{
+	Group,
+	Widget,
+	Polygons,
+	Border,
+	OriginalVolume,
+	ProcessedVolume,
+	VTend
 };
 
 class Renderer
@@ -135,6 +149,14 @@ public:
 
 	std::string getDllDir() { return dllRoot; }
 
+	// Keep around dims/scale from volume for converting vertices
+	Vec<float> getScales(){return volPhysSize / volPhysSize.maxValue();}
+	Vec<float> getPhysSize(){return volPhysSize;}
+	Vec<size_t> getDims(){return volDims;}
+
+	void setPhysSize(Vec<float> physSizeIn){volPhysSize = physSizeIn;}
+	void setDims(Vec<size_t> dimsIn){volDims = dimsIn;}
+
 // Static setup getters
 	unsigned char* getRootShaderMem(GraphicObjectTypes type);
 
@@ -160,11 +182,6 @@ public:
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
 	ID3D11ShaderResourceView* createTextureResourceView(Vec<size_t> dims, const unsigned char* image);
 
-	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
-		std::vector<Vec<float>> textureUV, VertexShaders shader);
-	MeshPrimitive* addMeshPrimitive(std::vector<Vec<unsigned int>>& faces, std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& normals,
-		VertexShaders shader);
-
 	void convertToWorldSpace(double* verts, size_t numVerts);
 
     float FrontClipPos() const;
@@ -178,7 +195,7 @@ private:
 	HRESULT resetViewPort();
 	HRESULT initRasterizerStates();
 	void createBlendState();
-
+	
 	void releaseDepthStencils();
 	void releaseRenderTarget();
 	void releaseRasterizerStates();
@@ -194,9 +211,10 @@ private:
 	HRESULT compileVertexShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
 	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
 
-	void renderPackage(const RendererPackage* package, float frontClip=-10, float backClip=10);
-	void renderLabel(const RendererPackage* package, HDC hdc);
-	void renderScaleValue(const RendererPackage* package, HDC hdc);
+	void renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip=-10, float backClip=10);
+	void renderLabel(const Camera* camera, const GraphicObjectNode* node, HDC hdc);
+	void renderScaleValue(const Camera* camera, HDC hdc);
+
 	void renderFrameNum(HDC hdc);
 	void renderFPS(HDC hdc);
 
@@ -230,7 +248,10 @@ private:
 
 	ID3D11SamplerState* linearTextureSampler;
 
+	// Scene objects
+	//TODO: Should probably put cameras in the scene
 	RootSceneNode* rootScene;
+
 	unsigned int currentFrame;
 	float clipChunkPercent;
     float frontClipPos;
@@ -255,6 +276,9 @@ private:
 	UINT64 gdiTimes[NUM_TIMES];
 	UINT64 endTimes[NUM_TIMES];
 	int curTimeIdx;
+
+	Vec<size_t> volDims;
+	Vec<float> volPhysSize;
 
 private:
 	static std::shared_ptr<StaticVolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];

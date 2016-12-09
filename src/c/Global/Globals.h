@@ -15,14 +15,18 @@
 
 #pragma once
 #include "D3d/Renderer.h"
-#include "D3d/SceneNode.h"
 #include "D3d/Camera.h"
-#include "D3d/Material.h"
+#include "D3d/SceneNode.h"
+
 #include "Defines.h"
 #include "Messages/MessageQueue.h"
-#include "windows.h"
 #include "DirectXMath.h"
 #include "Messages/DataQueue.h"
+
+#include "windows.h"
+
+#undef max
+#undef min
 
 //Implemented in lever-3d_mex.cpp
 extern HANDLE gTermEvent;
@@ -30,7 +34,6 @@ extern HWND gWindowHandle;
 extern HINSTANCE gDllInstance;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
-extern PolygonObject* gBorderObj;
 extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 extern MessageQueue gMsgQueueToMex;
 

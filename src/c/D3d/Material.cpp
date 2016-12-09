@@ -30,7 +30,7 @@ Material::Material(Renderer* rendererIn)
 	params = NULL;
 }
 
-Material::Material(Renderer* rendererIn, std::weak_ptr<MaterialParameters> sharedParams)
+Material::Material(Renderer* rendererIn, std::shared_ptr<MaterialParameters> sharedParams)
 {
 	renderer = rendererIn;
 
@@ -39,7 +39,7 @@ Material::Material(Renderer* rendererIn, std::weak_ptr<MaterialParameters> share
 	cullBackFace = true;
 	testDepth = true;
 
-	params = sharedParams.lock();
+	params = sharedParams;
 }
 
 Material::~Material()
@@ -49,7 +49,7 @@ Material::~Material()
 	wireframe = false;
 }
 
-void Material::attachTexture(int slot, std::shared_ptr<Texture>& texture)
+void Material::attachTexture(int slot, std::shared_ptr<Texture> texture)
 {
 	// TODO: Should we throw this or just resize?
 	if ( slot >= textures.size() )
@@ -132,14 +132,13 @@ void SingleColoredMaterial::setLightOn(bool on)
 
 
 
-StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, std::weak_ptr<StaticVolumeParams> paramsIn)
-	: Material(rendererIn, paramsIn)
+StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn)
+	: Material(rendererIn, paramsIn), numChannels(numChannelsIn), dims(dims)
 {
 	cullBackFace = false;
 	testDepth = false;
 	wireframe = false;
-
-	numChannels = numChannelsIn;
+	
 	textures.resize(numChannels);
 
 	char cBuffer[3];
@@ -150,6 +149,35 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, i
 	std::string root = renderer->getDllDir();
 	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::StaticVolume],
 		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::StaticVolume],strChans);
+}
+
+void StaticVolumeTextureMaterial::updateTransformParams(DirectX::XMMATRIX localToWorld, DirectX::XMMATRIX view, DirectX::XMMATRIX projection)
+{
+	DirectX::XMVECTOR det;
+	DirectX::XMMATRIX invParentWorld = DirectX::XMMatrixInverse(&det,localToWorld);
+
+	DirectX::XMMATRIX handedCorrection(0.0f,1.0f,0.0f,0.0f,
+		1.0f,0.0f,0.0f,0.0f,
+		0.0f,0.0f,1.0f,0.0f,
+		0.0f,0.0f,0.0f,1.0f);
+
+	DirectX::XMFLOAT3 vec(1.0f,0.0f,0.0f);
+	DirectX::XMVECTOR vecU = DirectX::XMLoadFloat3(&vec);
+	DirectX::XMMATRIX trans = invParentWorld * handedCorrection * DirectX::XMMatrixScaling(1.0f/dims.x,1.0f/dims.y,1.0f/dims.z);
+
+	Vec<float> xDir, yDir, zDir;
+	DirectX::XMVECTOR vecO = DirectX::XMVector3TransformNormal(vecU,trans);
+	xDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
+	vec = DirectX::XMFLOAT3(0.0f,1.0f,0.0f);
+	vecU = DirectX::XMLoadFloat3(&vec);
+	vecO = DirectX::XMVector3TransformNormal(vecU,trans);
+	yDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
+	vec = DirectX::XMFLOAT3(0.0f,0.0f,1.0f);
+	vecU = DirectX::XMLoadFloat3(&vec);
+	vecO = DirectX::XMVector3TransformNormal(vecU,trans);
+	zDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
+
+	typedParams<StaticVolumeParams>()->setGradientSampleDir(xDir, yDir,zDir);
 }
 
 void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)

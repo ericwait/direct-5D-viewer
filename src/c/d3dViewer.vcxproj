@@ -101,7 +101,6 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
   <ItemGroup>
     <ClCompile Include="d3dViewer.cpp" />
     <ClCompile Include="D3d\Camera.cpp" />
-    <ClCompile Include="D3d\GraphicObject.cpp" />
     <ClCompile Include="D3d\Initialization.cpp" />
     <ClCompile Include="D3d\Material.cpp" />
     <ClCompile Include="D3d\MaterialParams.cpp" />
@@ -168,14 +167,12 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3d\Camera.h" />
-    <ClInclude Include="D3d\GraphicObject.h" />
     <ClInclude Include="D3d\Initialization.h" />
     <ClInclude Include="D3d\Material.h" />
     <ClInclude Include="D3d\MaterialParams.h" />
     <ClInclude Include="D3d\MeshPrimitive.h" />
     <ClInclude Include="D3d\MessageProcessor.h" />
     <ClInclude Include="D3d\Renderer.h" />
-    <ClInclude Include="D3d\RendererPackage.h" />
     <ClInclude Include="D3d\SceneNode.h" />
     <ClInclude Include="D3d\Texture.h" />
     <ClInclude Include="D3d\TextureLightingObj.h" />

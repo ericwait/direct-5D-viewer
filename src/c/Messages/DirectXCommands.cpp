@@ -100,7 +100,7 @@ void XaddPolygonsCommand(Message m){
 		}
 
 		if (hullRootNodes[frame] == NULL){
-			hullRootNodes[frame] = new SceneNode();
+			hullRootNodes[frame] = new SceneNode(GraphicObjectTypes::Group);
 			gRenderer->attachToRootScene(hullRootNodes[frame], Renderer::Section::Main, frame);
 		}
 
@@ -113,16 +113,16 @@ void XaddPolygonsCommand(Message m){
 			return;
 		}
 
-		PolygonObject* curPolygonObj = createPolygonObject(curPoly->getfaceData(), curPoly->getNumFaces(), curPoly->getvertData(), curPoly->getNumVerts(), curPoly->getnormData(), curPoly->getNumNormals(), gCameraDefaultMesh);
 		double* color = curPoly->getcolorData();
-		curPolygonObj->setColor(Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), (float)(color[3]));
-		curPolygonObj->setIndex(curPoly->getIndex());
-		curPolygonObj->setLabel(curPoly->getLabel());
-		GraphicObjectNode* curPolygonNode = new GraphicObjectNode(curPolygonObj);
-		curPolygonNode->setWireframe(true);
-		curPolygonNode->attachToParentNode(hullRootNodes[curPoly->getFrame()]);
+		std::shared_ptr<MeshPrimitive> polyMesh = createPolygonMesh(curPoly->getfaceData(), curPoly->getNumFaces(), curPoly->getvertData(), curPoly->getNumVerts(), curPoly->getnormData(), curPoly->getNumNormals());
+		std::shared_ptr<SingleColoredMaterial> polyMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), (float)(color[3]));
 
-		insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, curPolygonNode);
+		GraphicObjectNode* polyNode = new GraphicObjectNode(curPoly->getIndex(), GraphicObjectTypes::Polygons, polyMesh, polyMat);
+		polyNode->setLabel(curPoly->getLabel());
+		polyNode->setWireframe(true);
+
+		polyNode->attachToParentNode(hullRootNodes[curPoly->getFrame()]);
+		insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, polyNode);
 
 		delete *polygon;
 	}

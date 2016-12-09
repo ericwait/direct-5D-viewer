@@ -613,8 +613,6 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 				gGraphicObjectNodes[i].clear();
 			}
-
-			gBorderObj = NULL;
 		}
 
 		if(mexMessageMutex != NULL)
@@ -871,7 +869,7 @@ HRESULT checkMessage()
 
 		const GraphicObjectTypes borderType = GraphicObjectTypes::Border;
 		for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
-			((PolygonObject*)(objectIter->second->getGraphicObjectPtr()))->setColor(*color, 1.0f);
+			objectIter->second->getMaterial()->typedParams<SingleColoredMaterial>()->setColor(*color, 1.0f);
 
 		gRenderer->renderAll();
 		delete m.data;
