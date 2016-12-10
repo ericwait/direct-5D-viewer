@@ -35,7 +35,7 @@ public:
 	MaterialParameters* getParams(){return params.get();}
 
 	// Return requested material parameters type
-	template<class T> T* typedParams(){return dynamic_cast<T>(params.get());}
+	template<class T> T* typedParams(){return dynamic_cast<T*>(params.get());}
 
 
 	void setWireframe(bool wireframe);
@@ -88,22 +88,7 @@ class StaticVolumeTextureMaterial : public Material
 public:
 	StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, std::weak_ptr<StaticVolumeParams> paramsIn);
 
-	void setTransferFunction(int channel, Vec<float> transferFunction);
-	void setRange(int channel, Vec<float> ranges);
-	void setColor(int channel, Vec<float> color, float alphaMod);
-	void setLightOn(bool on);
-	void setAttenuationOn(bool on);
-	void setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir);
-
 private:
 	StaticVolumeTextureMaterial(){};
-	
-	unsigned char* shaderConstMemory;
 	int numChannels;
-	Vec<size_t> dims;
-	bool lightingOn;
-	bool attenuationOn;
-	ID3D11Buffer* constBuffer;
-	std::vector<ID3D11SamplerState*> samplerState;
-	std::vector<ID3D11ShaderResourceView*> shaderResourceView;
 };

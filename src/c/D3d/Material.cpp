@@ -152,36 +152,6 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, i
 		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::StaticVolume],strChans);
 }
 
-void StaticVolumeTextureMaterial::setTransferFunction(int channel, Vec<float> transferFunction)
-{
-	static_cast<StaticVolumeParams*>(params.get())->setTransferFunction(channel, transferFunction);
-}
-
-void StaticVolumeTextureMaterial::setRange(int channel, Vec<float> ranges)
-{
-	static_cast<StaticVolumeParams*>(params.get())->setRange(channel, ranges);
-}
-
-void StaticVolumeTextureMaterial::setColor(int channel, Vec<float> color, float alphaMod)
-{
-	static_cast<StaticVolumeParams*>(params.get())->setColor(channel, color, alphaMod);
-}
-
-void StaticVolumeTextureMaterial::setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir)
-{
-	static_cast<StaticVolumeParams*>(params.get())->setGradientSampleDir(xDir, yDir, zDir);
-}
-
-void StaticVolumeTextureMaterial::setLightOn(bool on)
-{
-	static_cast<StaticVolumeParams*>(params.get())->setLightOn(on);
-}
-
-void StaticVolumeTextureMaterial::setAttenuationOn(bool on)
-{
-	static_cast<StaticVolumeParams*>(params.get())->setAttenuationOn(on);
-}
-
 void createStaticVolumeShaderText(std::string strChans,Renderer* renderer)
 {
 	std::string shaderText = "";

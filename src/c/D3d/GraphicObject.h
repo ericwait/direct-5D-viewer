@@ -44,6 +44,7 @@ protected:
 
 	void setLocalToWorld(DirectX::XMMATRIX localToWorld);
 	virtual void updateBoundingBox(DirectX::XMMATRIX localToWorld){}
+
 	Renderer* renderer;
 	RendererPackage* rendererPackage;
 };
@@ -93,11 +94,6 @@ public:
 	~VolumeTextureObject();
 
 	void makeLocalToWorld(DirectX::XMMATRIX parentToWorld);
-	void setTransferFunction(int channel, Vec<float> transferFunction){material->setTransferFunction(channel,transferFunction);}
-	void setRange(int channel, Vec<float> ranges){material->setRange(channel,ranges);}
-	void setColor(int channel, Vec<float> color, float alphaMod){material->setColor(channel,color,alphaMod);}
-	void setLightOn(bool on){material->setLightOn(on);}
-	void setAttenuationOn(bool on){ material->setAttenuationOn(on); }
 	void setWireframe(bool wireframe);
 
 	int getNumberOfChannels(){return numChannels;}

@@ -358,7 +358,7 @@ void VolumeTextureObject::makeLocalToWorld(DirectX::XMMATRIX parentToWorld)
 	vecO = DirectX::XMVector3TransformNormal(vecU,trans);
 	zDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
 
-	material->setGradientSampleDir(xDir,yDir,zDir);
+	material->typedParams<StaticVolumeParams>()->setGradientSampleDir(xDir, yDir,zDir);
 
 	setLocalToWorld(worldMatrix);
 }
