@@ -155,6 +155,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="D3d\Camera.h" />
+    <ClInclude Include="D3d\EigenToFromDirectX.h" />
     <ClInclude Include="D3d\Initialization.h" />
     <ClInclude Include="D3d\Material.h" />
     <ClInclude Include="D3d\MaterialParams.h" />
@@ -183,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp" />
+    <ClCompile Include="D3d\EigenToFromDirectX.cpp" />
     <ClCompile Include="D3d\Initialization.cpp" />
     <ClCompile Include="D3d\Material.cpp" />
     <ClCompile Include="D3d\MaterialParams.cpp" />

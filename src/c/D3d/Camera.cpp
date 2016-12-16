@@ -128,7 +128,7 @@ void Camera::setUpDirection(Vec<float> upDirectionIn)
 
 void Camera::updateProjectionTransform()
 {
-	projectionTransform = DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, nearZ, 25.0f);
+	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, nearZ, 25.0f));
 }
 
 
@@ -145,12 +145,12 @@ void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& 
 {
 	DirectX::XMFLOAT3 getVal(1,0,0);
 	DirectX::XMVECTOR getVec = DirectX::XMLoadFloat3(&getVal);
-	DirectX::XMVECTOR vals = DirectX::XMVector3TransformNormal(getVec,projectionTransform);
+	DirectX::XMVECTOR vals = DirectX::XMVector3TransformNormal(getVec,ConvertMatrix(projectionTransform));
 	float widthDiv = DirectX::XMVectorGetX(vals);
 
 	getVal = DirectX::XMFLOAT3(0,1,0);
 	getVec = DirectX::XMLoadFloat3(&getVal);
-	vals = DirectX::XMVector3TransformNormal(getVec,projectionTransform);
+	vals = DirectX::XMVector3TransformNormal(getVec, ConvertMatrix(projectionTransform));
 	float heightDiv = DirectX::XMVectorGetY(vals);
 
 	DirectX::XMFLOAT3 v;
@@ -159,7 +159,7 @@ void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& 
 	v.z = -1.0f;
 
 	DirectX::XMVECTOR Det;
-	DirectX::XMMATRIX m(DirectX::XMMatrixInverse(&Det,viewTransform));
+	DirectX::XMMATRIX m(DirectX::XMMatrixInverse(&Det, ConvertMatrix(viewTransform)));
 
 	DirectX::XMFLOAT3 vLoad(0,0,1);
 	DirectX::XMVECTOR vViewSpaceDir = DirectX::XMLoadFloat3(&v);
@@ -175,11 +175,10 @@ void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& 
 
 float Camera::getVolUnitsPerPix() const
 {
-	
 	DirectX::XMFLOAT3 distOrig_f(0, 0, 0);
 	DirectX::XMVECTOR distOrig_v = DirectX::XMLoadFloat3(&distOrig_f);
-	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, viewTransform);
-	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, projectionTransform);
+	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, ConvertMatrix(viewTransform));
+	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, ConvertMatrix(projectionTransform));
 	float z = DirectX::XMVectorGetZ(distOrig_v);
 
 	DirectX::XMFLOAT3 unitOutPt_f(2.0f/gWindowWidth, 0, z);
@@ -188,9 +187,9 @@ float Camera::getVolUnitsPerPix() const
 	DirectX::XMVECTOR unitOrigPt_v = DirectX::XMLoadFloat3(&unitOrigPt_f);
 
 	DirectX::XMVECTOR det;
-	DirectX::XMMATRIX invProjection = DirectX::XMMatrixInverse(&det, projectionTransform);
+	DirectX::XMMATRIX invProjection = DirectX::XMMatrixInverse(&det, ConvertMatrix(projectionTransform));
 	
-	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(&det, viewTransform);
+	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(&det, ConvertMatrix(viewTransform));
 
 	DirectX::XMVECTOR wOutVec = DirectX::XMVector3TransformCoord(unitOutPt_v,invProjection);
 	DirectX::XMVECTOR wOrigVec = DirectX::XMVector3TransformCoord(unitOrigPt_v, invProjection);
@@ -215,7 +214,7 @@ void Camera::updateViewTransform()
 	DirectX::XMFLOAT3 up(upDirection.x,upDirection.y,upDirection.z);
 	DirectX::FXMVECTOR upVec = DirectX::XMLoadFloat3(&up);
 
-	viewTransform = DirectX::XMMatrixLookAtRH(eyeVec,focusVec,upVec);
+	viewTransform = ConvertMatrix(DirectX::XMMatrixLookAtRH(eyeVec,focusVec,upVec));
 }
 
 
@@ -239,6 +238,6 @@ void OrthoCamera::updateProjectionTransform()
 	float ctrY = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowHeight / 2.0f)) - 1.0f;
 	float ctrX = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowWidth / 2.0f)) - 1.0f;
 
-	projectionTransform = DirectX::XMMatrixOrthographicRH(aspectRatio*orthoHeight, orthoHeight, 0.01f, 100.0f)
-		* DirectX::XMMatrixScaling(widgetScale, widgetScale, 1.0f) * DirectX::XMMatrixTranslation(ctrX, ctrY, 0.0f);
+	projectionTransform = ConvertMatrix(DirectX::XMMatrixOrthographicRH(aspectRatio*orthoHeight, orthoHeight, 0.01f, 100.0f)
+		* DirectX::XMMatrixScaling(widgetScale, widgetScale, 1.0f) * DirectX::XMMatrixTranslation(ctrX, ctrY, 0.0f));
 }

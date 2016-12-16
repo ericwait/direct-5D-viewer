@@ -15,8 +15,11 @@
 
 #pragma once
 #include "Global\Vec.h"
-#include <DirectXMath.h>
 #include "Renderer.h"
+
+#include <DirectXMath.h>
+#include <Eigen/Dense>
+#include "EigenToFromDirectX.h"
 
 class Camera
 {
@@ -39,8 +42,8 @@ public:
 	void setCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
 	virtual void updateProjectionTransform();
 
-	DirectX::XMMATRIX getProjectionTransform() const {return projectionTransform;}
-	DirectX::XMMATRIX getViewTransform() const {return viewTransform;}
+	DirectX::XMMATRIX getProjectionTransform() const {return ConvertMatrix(projectionTransform);}
+	DirectX::XMMATRIX getViewTransform() const {return ConvertMatrix(viewTransform);}
 	void getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& directionOut);
 	float Camera::getVolUnitsPerPix() const;
 
@@ -54,9 +57,9 @@ protected:
 	Vec<float> defaultCameraPosition;
 	Vec<float> defaultLookPosition;
 	Vec<float> defaultUpDirection;
-    float nearZ;
-	DirectX::XMMATRIX viewTransform;
-	DirectX::XMMATRIX projectionTransform;
+	float nearZ;
+	Eigen::Matrix4f viewTransform;
+	Eigen::Matrix4f projectionTransform;
 	float zoomFactor;
 };
 

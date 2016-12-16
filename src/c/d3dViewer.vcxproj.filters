@@ -239,9 +239,6 @@
     <ClCompile Include="Messages\LoadData.cpp">
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D3d\EigenToFromDirectX.cpp">
-      <Filter>D3d\Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="Messages\ViewerGlobals.cpp">
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
@@ -250,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="Global\WidgetData.cpp">
       <Filter>Global\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\EigenToFromDirectX.cpp">
+      <Filter>D3d\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,8 +343,8 @@
     <ClInclude Include="Global\WidgetData.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>
-        <ClInclude Include="D3d\EigenToFromDirectX.h">
-      <Filter>D3d\Source Files</Filter>
+    <ClInclude Include="D3d\EigenToFromDirectX.h">
+      <Filter>D3d\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
