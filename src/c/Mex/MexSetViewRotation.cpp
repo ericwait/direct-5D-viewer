@@ -12,7 +12,7 @@ void MexSetViewRotation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	vals[2] = vec[2];
 	vals[3] = mxGetScalar(prhs[1]);
 
-	gMsgQueueToDirectX.writeMessage("SetRotation", (void*)vals);
+	gMsgQueueToDirectX.writeMessage("SetViewRotation", (void*)vals);
 }
 
 std::string MexSetViewRotation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
