@@ -266,7 +266,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 		for ( int j=0; j < numChannel; ++j )
 		{
 			const unsigned char* imFrame = image + i*numChannel*dims.product() + j*dims.product();
-			volumeNode->getMaterial()->attachTexture(0, std::make_shared<Texture>(gRenderer, dims, imFrame));
+			volumeNode->getMaterial()->attachTexture(j, std::make_shared<Texture>(gRenderer, dims, imFrame));
 		}
 
 		gRenderer->attachToRootScene(volumeNode, Renderer::Section::Main, i);
