@@ -28,7 +28,11 @@
 #include <d3dcompiler.h>
 #include <Windows.h>
 
+#include <set>
+#include <map>
+#include <regex>
 #include <string>
+#include <fstream>
 
 // Initialize static root shader memory to null for all object types
 std::shared_ptr<StaticVolumeParams> Renderer::sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume] = {NULL};
@@ -397,94 +401,6 @@ void Renderer::releaseRasterizerStates()
 	SAFE_RELEASE(rasterizerStateFillClip);
 }
 
-HRESULT CompileShaderFromFile( LPCWSTR szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
-{
-	HRESULT hr;
-
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-	// Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-	// Setting this flag improves the shader debugging experience, but still allows 
-	// the shaders to be optimized and to run exactly the way they will run in 
-	// the release configuration of this program.
-	dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-	ID3DBlob* pErrorBlob;
-
-	TCHAR pwd[512];
-	GetCurrentDirectory(MAX_PATH, pwd);
-	hr = D3DCompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
-
-	if( FAILED(hr) )
-	{
-		if( pErrorBlob != NULL )
-			MessageBoxA(NULL, (LPCSTR)pErrorBlob->GetBufferPointer(), "Shader Compile Error", MB_OK | MB_ICONERROR);
-
-		SAFE_RELEASE(pErrorBlob);
-
-		return hr;
-	}
-
-	SAFE_RELEASE(pErrorBlob);
-
-	return S_OK;
-}
-
-HRESULT Renderer::compileVertexShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut)
-{
-	ID3DBlob* shaderBlob = NULL;
-
-	HRESULT hr = CompileShaderFromFile(fileName, shaderFunctionName,"vs_4_0", &shaderBlob);
-
-	if( FAILED( hr ) )
-	{
-		MessageBox(NULL, TEXT("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."), TEXT("Error"), MB_OK);
-		return hr;
-	}
-
-	hr = d3dDevice->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, vertexShaderOut);
-
-	if( FAILED( hr ) )
-	{	
-		shaderBlob->Release();
-		return hr;
-	}
-
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	UINT numElements = ARRAYSIZE(layout);
-
-	hr = d3dDevice->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), vertexLayoutOut);
-
-	shaderBlob->Release();
-
-	return hr;
-}
-
-HRESULT Renderer::compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut)
-{
-	ID3DBlob* shaderBlob = NULL;
-
-	HRESULT hr = CompileShaderFromFile(fileName, shaderFunctionName,"ps_4_0", &shaderBlob);
-
-	if( FAILED( hr ) )
-	{
-		MessageBox(NULL, TEXT("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."), TEXT("Error"), MB_OK);
-		return hr;
-	}
-
-	hr = d3dDevice->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, pixelShaderOut);
-
-	shaderBlob->Release();
-	return hr;
-}
-
 HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
@@ -615,13 +531,23 @@ void Renderer::togglestats()
 		fpsOn = true;
 }
 
-int Renderer::getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction)
+std::string makeVariableString(const std::map<std::string, std::string>& variables)
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
-	std::string shaderLookupName = shaderFilename;
-	shaderLookupName += ":";
-	shaderLookupName += shaderFunction;
+	std::string strOut;
+	for (auto varIter=variables.begin(); varIter != variables.end(); ++varIter)
+	{
+		strOut += varIter->first + "=" + varIter->second + ",";
+	}
 
+	return strOut;
+}
+
+int Renderer::getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string,std::string>& variables)
+{
+	std::string paramStr = makeVariableString(variables);
+
+	//WaitForSingleObject(mutexDevice,INFINITE);
+	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + paramStr;
 	if (0!=vertexShaderMap.count(shaderLookupName))
 	{
 		int idx = vertexShaderMap[shaderLookupName];
@@ -631,11 +557,7 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 
 	ID3D11VertexShader* newShader;
 	ID3D11InputLayout* newLayout;
-
-	std::wstring fn;
-	fn.assign(shaderFilename.begin(),shaderFilename.end());
-
-	if (FAILED(compileVertexShader(fn.c_str(), shaderFunction.c_str(),&newShader,&newLayout)))
+	if (FAILED(compileVertexShader(shaderFilename, shaderFunction, variables, &newShader, &newLayout)))
 	{
 		//ReleaseMutex(mutexDevice);
 		return -1;
@@ -653,10 +575,12 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 	return idx;
 }
 
-int Renderer::getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams)
+int Renderer::getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables)
 {
+	std::string paramStr = makeVariableString(variables);
+
 	//WaitForSingleObject(mutexDevice,INFINITE);
-	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + shaderParams;
+	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + paramStr;
 
 	if (pixelShaderMap.count(shaderLookupName)!=0)
 	{
@@ -666,11 +590,7 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 	}
 
 	ID3D11PixelShader* newShader;
-
-	std::wstring fn;
-	fn.assign(shaderFilename.begin(),shaderFilename.end());
-
-	if (FAILED(compilePixelShader(fn.c_str(), shaderFunction.c_str(),&newShader)))
+	if (FAILED(compilePixelShader(shaderFilename, shaderFunction, variables, &newShader)))
 	{
 		//ReleaseMutex(mutexDevice);
 		return -1;
@@ -857,6 +777,141 @@ void Renderer::startRender()
 void Renderer::endRender()
 {
 	swapChain->Present( 0, 0 );
+}
+
+HRESULT Renderer::compileVertexShader(const std::string& filename, const std::string& functionName, const std::map<std::string,std::string>& variables, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut)
+{
+	HRESULT hr = E_FAIL;
+	ID3DBlob* shaderBlob = compileShaderFile(filename, functionName, "vs_4_0", variables);
+
+	if ( shaderBlob == NULL )
+	{
+		MessageBox(NULL, TEXT("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."), TEXT("Error"), MB_OK);
+		return hr;
+	}
+
+	hr = d3dDevice->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, vertexShaderOut);
+	if (FAILED(hr))
+	{
+		shaderBlob->Release();
+		return hr;
+	}
+
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	UINT numElements = ARRAYSIZE(layout);
+
+	hr = d3dDevice->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), vertexLayoutOut);
+
+	shaderBlob->Release();
+	return hr;
+}
+
+HRESULT Renderer::compilePixelShader(const std::string& filename, const std::string& functionName, const std::map<std::string, std::string>& variables, ID3D11PixelShader** pixelShaderOut)
+{
+	HRESULT hr = E_FAIL;
+	ID3DBlob* shaderBlob = compileShaderFile(filename, functionName, "ps_4_0", variables);
+
+	if (shaderBlob == NULL )
+	{
+		MessageBox(NULL, TEXT("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."), TEXT("Error"), MB_OK);
+		return hr;
+	}
+
+	hr = d3dDevice->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, pixelShaderOut);
+
+	shaderBlob->Release();
+	return hr;
+}
+
+std::string Renderer::preprocessShader(const std::string& shader, const std::map<std::string, std::string>& repVars)
+{
+	std::string outShader = shader;
+
+	// Match shader vars
+	std::regex var_match("\\$(\\w+)");
+	std::sregex_token_iterator regexMatcher(outShader.begin(), outShader.end(), var_match, 1);
+	std::sregex_token_iterator doneMatch = std::sregex_token_iterator();
+
+	std::set<std::string> shaderVars;
+	for (std::sregex_token_iterator matches=regexMatcher; matches != doneMatch; ++matches)
+	{
+		std::string varName = matches->str();
+		std::transform(varName.begin(), varName.end(), varName.begin(), ::toupper);
+
+		shaderVars.insert(varName);
+	}
+
+	// Check for variable references missing definitions
+	std::string missingDef;
+	for (auto varIter = shaderVars.begin(); varIter != shaderVars.end(); ++varIter)
+	{
+		if (repVars.count(*varIter) > 0)
+			continue;
+
+		missingDef += *varIter + std::string(", ");
+	}
+
+	if (missingDef.size() > 0)
+	{
+		std::string err = std::string("Missing definition for ") + missingDef;
+		std::runtime_error(err.c_str());
+
+		return "";
+	}
+
+	// Replace each $ref with values
+	for (auto varIter = shaderVars.begin(); varIter != shaderVars.end(); ++varIter)
+	{
+		std::string matchStr = std::string("(\\$") + *varIter + std::string(")");
+		std::regex var_rep(matchStr, std::regex_constants::icase);
+
+		outShader = std::regex_replace(outShader, var_rep, repVars.at(*varIter));
+	}
+
+	return outShader;
+}
+
+ID3DBlob* Renderer::compileShaderFile(const std::string& filename, const std::string& entryFunction, const std::string& shaderModel, const std::map<std::string, std::string>& repVars)
+{
+	// Just use a file stream to read the whole shader at once
+	std::ifstream shaderFile(filename);
+	std::string shader((std::istreambuf_iterator<char>(shaderFile)), (std::istreambuf_iterator<char>()));
+
+	// Replace any $vars that the material has passed down for this shader
+	std::string finalShader = preprocessShader(shader, repVars);
+
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	// Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
+	// Setting this flag improves the shader debugging experience, but still allows 
+	// the shaders to be optimized and to run exactly the way they will run in 
+	// the release configuration of this program.
+	dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	ID3DBlob* errBlob = NULL;
+	ID3DBlob* shaderBlob = NULL;
+	HRESULT hr = D3DCompile(finalShader.c_str(), finalShader.length(), NULL, NULL, NULL, entryFunction.c_str(), shaderModel.c_str(), dwShaderFlags, 0, &shaderBlob, &errBlob);
+
+	if (FAILED(hr))
+	{
+		if (errBlob != NULL)
+			MessageBoxA(NULL, (LPCSTR)errBlob->GetBufferPointer(), "Shader Compile Error", MB_OK | MB_ICONERROR);
+
+		SAFE_RELEASE(errBlob);
+
+		return NULL;
+	}
+
+	SAFE_RELEASE(errBlob);
+
+	return shaderBlob;
 }
 
 void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip, float backClip)

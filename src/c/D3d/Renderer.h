@@ -133,8 +133,8 @@ public:
 	void setBackgroundColor(Vec<float> background) { backgroundColor = background; }
 
 //Getters
-	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction);
-	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::string& shaderParams);
+	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables = std::map<std::string,std::string>());
+	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables = std::map<std::string, std::string>());
 	ID3D11SamplerState* getSamplerState();
 
 	DirectX::XMMATRIX getRootWorldRotation();
@@ -158,8 +158,6 @@ public:
 	void setDims(Vec<size_t> dimsIn){volDims = dimsIn;}
 
 // Static setup getters
-	unsigned char* getRootShaderMem(GraphicObjectTypes type);
-
 	std::shared_ptr<StaticVolumeParams>& getSharedVolumeParams(int volType);
 	std::shared_ptr<StaticVolumeParams>& createSharedVolumeParams(int volType, int numChannels);
 
@@ -208,8 +206,11 @@ private:
 	void setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer);
 	void drawTriangles(size_t numFaces);
 
-	HRESULT compileVertexShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
-	HRESULT compilePixelShader(const wchar_t* fileName, const char* shaderFunctionName, ID3D11PixelShader** pixelShaderOut);
+	HRESULT compileVertexShader(const std::string& filename, const std::string& functionName, const std::map<std::string, std::string>& variables, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
+	HRESULT compilePixelShader(const std::string& filename, const std::string& functionName, const std::map<std::string, std::string>& variables, ID3D11PixelShader** pixelShaderOut);
+
+	std::string preprocessShader(const std::string& shader, const std::map<std::string, std::string>& repVars);
+	ID3DBlob* compileShaderFile(const std::string& filename, const std::string& entryFunction, const std::string& shaderModel, const std::map<std::string, std::string>& repVars);
 
 	void renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip=-10, float backClip=10);
 	void renderLabel(const Camera* camera, const GraphicObjectNode* node, HDC hdc);
