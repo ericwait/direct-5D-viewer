@@ -282,7 +282,7 @@ private:
 	Vec<float> volPhysSize;
 
 private:
-	static std::shared_ptr<StaticVolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
+	std::shared_ptr<StaticVolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
 };
 
 

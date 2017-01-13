@@ -34,9 +34,6 @@
 #include <string>
 #include <fstream>
 
-// Initialize static root shader memory to null for all object types
-std::shared_ptr<StaticVolumeParams> Renderer::sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume] = {NULL};
-
 Renderer::Renderer()
 {
 	//mutexDevice = CreateMutex(NULL,FALSE,NULL);
