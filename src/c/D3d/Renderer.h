@@ -180,6 +180,9 @@ public:
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
 	ID3D11ShaderResourceView* createTextureResourceView(Vec<size_t> dims, const unsigned char* image);
 
+	ID3D11RasterizerState* getRasterizerState(bool wireframe, bool cullBackface);
+	ID3D11DepthStencilState* getDepthStencilState(bool depthTest);
+
 	void convertToWorldSpace(double* verts, size_t numVerts);
 
     float FrontClipPos() const;
@@ -191,18 +194,17 @@ private:
 	HRESULT initDepthStencils();
 	HRESULT initRenderTarget();
 	HRESULT resetViewPort();
-	HRESULT initRasterizerStates();
 	void createBlendState();
 	
 	void releaseDepthStencils();
 	void releaseRenderTarget();
-	void releaseRasterizerStates();
+	void releaseMaterialStates();
 	void releaseSwapChain();
 
 	void setVertexShader(int vertexShaderListIdx);
-	void setRasterizerState(bool wireframe);
+	void setRasterizerState(ID3D11RasterizerState* rasterState);
 	void setPixelShader(int pixelShaderListIdx);
-	void setDepthStencilState(bool depthTest);
+	void setDepthStencilState(ID3D11DepthStencilState* depthStencilState);
 	void setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer);
 	void drawTriangles(size_t numFaces);
 
@@ -231,12 +233,6 @@ private:
 	ID3D11BlendState* blendState;
 
 	ID3D11DepthStencilView* depthStencilView;
-	ID3D11DepthStencilState* depthStencilStateCompareAlways;
-	ID3D11DepthStencilState* depthStencilStateCompareLess;
-	
-	ID3D11RasterizerState* rasterizerStateNoClip;
-	ID3D11RasterizerState* rasterizerStateWireClip;
-	ID3D11RasterizerState* rasterizerStateFillClip;
 
 	ID3D11Buffer* vertexShaderConstBuffer;
 	
@@ -283,6 +279,9 @@ private:
 
 private:
 	std::shared_ptr<StaticVolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
+
+	std::map<unsigned int,ID3D11DepthStencilState*> depthStencilStates;
+	std::map<unsigned int,ID3D11RasterizerState*> rasterStates;
 };
 
 

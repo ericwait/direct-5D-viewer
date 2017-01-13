@@ -55,6 +55,8 @@ protected:
 	void bindConstants();
 	void bindTextures();
 
+	void setMaterialProps(bool wireframe, bool cullBackface, bool depthTest);
+
 	Renderer* renderer;
 
 	// We use a ref count so that parameters can be shared across materials
@@ -63,12 +65,17 @@ protected:
 	// Shared texture references list
 	std::vector<std::shared_ptr<Texture>> textures;
 
+private:
+	void updateRasterState();
+
 	bool wireframe;
 	bool cullBackFace;
 	bool testDepth;
 
-private:
 	int shaderIdx;
+
+	ID3D11RasterizerState* rasterState;
+	ID3D11DepthStencilState* depthStencilState;
 };
 
 

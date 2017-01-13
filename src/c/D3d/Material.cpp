@@ -15,31 +15,16 @@
 
 #include "Material.h"
 
-void createStaticVolumeShaderText(std::string strChans, Renderer* renderer);
-
-
 Material::Material(Renderer* rendererIn)
+	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL)
 {
-	renderer = rendererIn;
-
-	shaderIdx = -1;
-	wireframe = false;
-	cullBackFace = true;
-	testDepth = true;
-
-	params = NULL;
+	setMaterialProps(false, true, true);
 }
 
 Material::Material(Renderer* rendererIn, std::shared_ptr<MaterialParameters> sharedParams)
+	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL), params(sharedParams)
 {
-	renderer = rendererIn;
-
-	shaderIdx = -1;
-	wireframe = false;
-	cullBackFace = true;
-	testDepth = true;
-
-	params = sharedParams;
+	setMaterialProps(false, true, true);
 }
 
 Material::~Material()
@@ -66,6 +51,8 @@ void Material::attachTexture(int slot, std::shared_ptr<Texture> texture)
 void Material::setWireframe(bool wireframe)
 {
 	this->wireframe = wireframe;
+
+	updateRasterState();
 }
 
 void Material::setShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables)
@@ -92,6 +79,21 @@ void Material::bindTextures()
 
 	renderer->setPixelShaderResourceViews(0, (int)resources.size(), resources.data());
 	renderer->setPixelShaderTextureSamplers(0, (int)samplers.size(), samplers.data());
+}
+
+void Material::setMaterialProps(bool wireframe, bool cullBackface, bool depthTest)
+{
+	this->wireframe = wireframe;
+	this->cullBackFace = cullBackface;
+	this->testDepth = depthTest;
+
+	updateRasterState();
+}
+
+void Material::updateRasterState()
+{
+	rasterState	= renderer->getRasterizerState(wireframe, cullBackFace);
+	depthStencilState = renderer->getDepthStencilState(testDepth);
 }
 
 
@@ -135,9 +137,7 @@ void SingleColoredMaterial::setLightOn(bool on)
 StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn)
 	: Material(rendererIn, paramsIn), numChannels(numChannelsIn), dims(dims)
 {
-	cullBackFace = false;
-	testDepth = false;
-	wireframe = false;
+	setMaterialProps(false, false, false);
 	
 	textures.resize(numChannels);
 

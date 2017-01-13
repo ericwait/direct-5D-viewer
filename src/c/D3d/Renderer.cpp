@@ -45,12 +45,6 @@ Renderer::Renderer()
 	IDXGIBackBuffer= NULL;
 
 	depthStencilView = NULL;
-	depthStencilStateCompareAlways = NULL;
-	depthStencilStateCompareLess = NULL;
-
-	rasterizerStateNoClip = NULL;
-	rasterizerStateWireClip = NULL;
-	rasterizerStateFillClip = NULL;
 
 	linearTextureSampler = NULL;
 
@@ -98,7 +92,7 @@ Renderer::~Renderer()
 	SAFE_RELEASE(linearTextureSampler);
 	SAFE_RELEASE(blendState);
 
-	releaseRasterizerStates();
+	releaseMaterialStates();
 	releaseRenderTarget();
 	releaseDepthStencils();
 	releaseSwapChain();
@@ -125,13 +119,6 @@ HRESULT Renderer::init(std::string rootDir)
 	}
 
 	hr = initRenderTarget();
-	if (FAILED(hr))
-	{
-		//ReleaseMutex(mutexDevice);
-		return hr;
-	}
-
-	hr = initRasterizerStates();
 	if (FAILED(hr))
 	{
 		//ReleaseMutex(mutexDevice);
@@ -260,39 +247,13 @@ HRESULT Renderer::initDepthStencils()
 	if( FAILED(hr) )
 		return hr;
 
-	D3D11_DEPTH_STENCIL_DESC descDS;
-
-	ZeroMemory(&descDS,sizeof(descDS));
-	descDS.DepthEnable = TRUE;
-	descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	descDS.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	descDS.StencilEnable = FALSE;
-
-	hr = d3dDevice->CreateDepthStencilState(&descDS,&depthStencilStateCompareLess);
-	if( FAILED( hr ) )
-		return hr;
-
-	//Compare always depth stencil
-	ZeroMemory(&descDS,sizeof(descDS));
-	descDS.DepthEnable=TRUE;
-	descDS.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ALL;
-	descDS.DepthFunc=D3D11_COMPARISON_ALWAYS;
-	descDS.StencilEnable=FALSE;
-
-	hr = d3dDevice->CreateDepthStencilState(&descDS,&depthStencilStateCompareAlways);
-	if( FAILED( hr ) )
-		return hr;
-
 	// Create the depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 
 	descDSV.Format = descDepth.Format;
 	descDSV.Flags = 0;
 
-	if( descDepth.SampleDesc.Count > 1 )
-		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-	else
-		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
 	descDSV.Texture2D.MipSlice = 0;
 
@@ -309,8 +270,6 @@ HRESULT Renderer::initDepthStencils()
 
 void Renderer::releaseDepthStencils()
 {
-	SAFE_RELEASE(depthStencilStateCompareLess);
-	SAFE_RELEASE(depthStencilStateCompareAlways);
 	SAFE_RELEASE(depthStencilView);
 }
 
@@ -352,50 +311,21 @@ void Renderer::releaseRenderTarget()
 	SAFE_RELEASE(renderTargetView);
 }
 
-HRESULT Renderer::initRasterizerStates()
+void Renderer::releaseMaterialStates()
 {
-	D3D11_RASTERIZER_DESC d3d11rd;
+	std::map<unsigned int,ID3D11DepthStencilState*>::iterator dsIter;
 
-	//DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	//if ( waitResult != WAIT_OBJECT_0 )
-		//return E_FAIL;
+	for ( dsIter = depthStencilStates.begin(); dsIter != depthStencilStates.end(); ++dsIter )
+		SAFE_RELEASE(dsIter->second);
 
-	memset(&d3d11rd,0,sizeof(d3d11rd));
-	d3d11rd.FillMode=D3D11_FILL_SOLID;
-	d3d11rd.CullMode=D3D11_CULL_NONE;
-	//d3d11rd.CullMode=D3D11_CULL_FRONT;
-	d3d11rd.DepthClipEnable=FALSE;
-	d3d11rd.MultisampleEnable=FALSE;
-	d3dDevice->CreateRasterizerState(&d3d11rd,&rasterizerStateNoClip);
+	depthStencilStates.clear();
 
-	memset(&d3d11rd,0,sizeof(d3d11rd));
-	d3d11rd.FillMode=D3D11_FILL_WIREFRAME;
-	d3d11rd.CullMode=D3D11_CULL_NONE;
-	//d3d11rd.CullMode=D3D11_CULL_FRONT;
-	d3d11rd.DepthClipEnable=TRUE;
-	d3d11rd.MultisampleEnable=FALSE;
-	d3d11rd.AntialiasedLineEnable=TRUE;
-	d3dDevice->CreateRasterizerState(&d3d11rd,&rasterizerStateWireClip);
+	std::map<unsigned int,ID3D11RasterizerState*>::iterator rasterIter;
 
-	memset(&d3d11rd,0,sizeof(d3d11rd));
-	d3d11rd.FillMode=D3D11_FILL_SOLID;
-	d3d11rd.CullMode=D3D11_CULL_NONE;
-	//d3d11rd.CullMode=D3D11_CULL_BACK;
-	d3d11rd.DepthClipEnable=TRUE;
-	d3d11rd.MultisampleEnable=FALSE;
-	d3d11rd.AntialiasedLineEnable=TRUE;
-	d3dDevice->CreateRasterizerState(&d3d11rd,&rasterizerStateFillClip);
+	for ( rasterIter = rasterStates.begin(); rasterIter != rasterStates.end(); ++rasterIter )
+		SAFE_RELEASE(rasterIter->second);
 
-	//ReleaseMutex(mutexDevice);
-
-	return S_OK;
-}
-
-void Renderer::releaseRasterizerStates()
-{
-	SAFE_RELEASE(rasterizerStateNoClip);
-	SAFE_RELEASE(rasterizerStateWireClip);
-	SAFE_RELEASE(rasterizerStateFillClip);
+	rasterStates.clear();
 }
 
 HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut)
@@ -936,8 +866,7 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 
 
 	// Material and pixel shader setup
-	setRasterizerState(node->material->wireframe);
-	
+
 	//Pixel Shader setup
 	node->material->updateTransformParams(node->getLocalToWorldTransform(), camera->getViewTransform(), camera->getProjectionTransform());
 	node->material->getParams()->updateParams(); //can be sped up by doing this differently
@@ -950,8 +879,9 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 		setPixelShader(node->material->shaderIdx);
 		previousPixelShaderIdx = node->material->shaderIdx;
 	}
-		
-	setDepthStencilState(node->material->testDepth);
+	
+	setRasterizerState(node->material->rasterState);
+	setDepthStencilState(node->material->depthStencilState);
 	
 	drawTriangles(node->mesh->numFaces);
 }
@@ -1215,12 +1145,9 @@ void Renderer::setVertexShader(int vertexShaderListIdx)
 	immediateContext->VSSetConstantBuffers(0,1,&vertexShaderConstBuffer);
 }
 
-void Renderer::setRasterizerState(bool wireframe)
+void Renderer::setRasterizerState(ID3D11RasterizerState* rasterState)
 {
-	if (wireframe)
-		immediateContext->RSSetState(rasterizerStateWireClip);
-	else
-		immediateContext->RSSetState(rasterizerStateFillClip);
+	immediateContext->RSSetState(rasterState);
 }
 
 void Renderer::setPixelShader(int pixelShaderListIdx)
@@ -1231,12 +1158,9 @@ void Renderer::setPixelShader(int pixelShaderListIdx)
 	immediateContext->PSSetShader(pixelShaderList[pixelShaderListIdx],NULL,0);
 }
 
-void Renderer::setDepthStencilState(bool depthTest)
+void Renderer::setDepthStencilState(ID3D11DepthStencilState* depthStencilState)
 {
-	if (depthTest)
-		immediateContext->OMSetDepthStencilState(depthStencilStateCompareLess,0);
-	else
-		immediateContext->OMSetDepthStencilState(depthStencilStateCompareAlways,0);
+	immediateContext->OMSetDepthStencilState(depthStencilState,NULL);
 }
 
 void Renderer::setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer)
@@ -1317,6 +1241,71 @@ ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, 
 		sendHrErrMessage(hr);
 
 	return localSRV;
+}
+
+ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, bool cullBackface)
+{
+	unsigned int rasterFlags = (((unsigned int)wireframe) << 1) |  ((unsigned int) cullBackface);
+
+	if ( rasterStates.count(rasterFlags) > 0 )
+		return rasterStates[rasterFlags];
+
+	D3D11_RASTERIZER_DESC rasterDesc;
+	ID3D11RasterizerState* rasterState;
+
+	ZeroMemory(&rasterDesc,sizeof(rasterDesc));
+
+	if ( wireframe )
+		rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+	else
+		rasterDesc.FillMode = D3D11_FILL_SOLID;
+
+	if ( cullBackface )
+		rasterDesc.CullMode = D3D11_CULL_BACK;
+	else
+		rasterDesc.CullMode = D3D11_CULL_NONE;
+
+	rasterDesc.DepthClipEnable = TRUE;
+	rasterDesc.FrontCounterClockwise = TRUE;
+	rasterDesc.MultisampleEnable = FALSE;
+
+	d3dDevice->CreateRasterizerState(&rasterDesc,&rasterState);
+
+	rasterStates[rasterFlags] = rasterState;
+	return rasterStates[rasterFlags];
+}
+
+ID3D11DepthStencilState* Renderer::getDepthStencilState(bool depthTest)
+{
+	unsigned int dsFlags = ((unsigned int)depthTest);
+
+	if ( depthStencilStates.count(dsFlags) > 0 )
+		return depthStencilStates[dsFlags];
+
+	ID3D11DepthStencilState* depthStencilState;
+	D3D11_DEPTH_STENCIL_DESC descDS;
+
+	ZeroMemory(&descDS,sizeof(descDS));
+
+	if ( depthTest )
+	{
+		descDS.DepthEnable = TRUE;
+		descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		descDS.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+		descDS.StencilEnable = FALSE;
+	}
+	else
+	{
+		descDS.DepthEnable = TRUE;
+		descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		descDS.DepthFunc = D3D11_COMPARISON_ALWAYS;
+		descDS.StencilEnable = FALSE;
+	}
+
+	d3dDevice->CreateDepthStencilState(&descDS,&depthStencilState);
+
+	depthStencilStates[dsFlags] = depthStencilState;
+	return depthStencilStates[dsFlags];
 }
 
 void Renderer::createBlendState()
