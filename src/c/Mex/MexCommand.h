@@ -30,6 +30,11 @@ public:
 		return name;
 	}
 
+	static HINSTANCE getInstance()
+	{
+		return (HINSTANCE)hModule;
+	}
+
 private:
 	static std::string initName()
 	{

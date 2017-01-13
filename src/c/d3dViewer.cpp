@@ -25,8 +25,6 @@
 HANDLE gTermEvent = NULL;
 volatile bool gRendererInit = false;
 
-HINSTANCE gDllInstance = NULL;
-
 MessageQueue gMsgQueueToMex;
 
 std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];

@@ -19,6 +19,7 @@
 #include <time.h>
 #include "Messages/DirectXCommands.h"
 #include "Messages/MexErrorMsg.h"
+#include "Mex/MexCommand.h"
 
 bool gRendererOn = false;
 bool gPlay = false;
@@ -524,7 +525,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	HRESULT hr;
 	try
 	{
-		hr = windowInit(gDllInstance,true,*rootDir);
+		hr = windowInit(ModuleInfo::getInstance(),true,*rootDir);
 	}
 	catch(const std::exception& e)
 	{
@@ -634,7 +635,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		SAFE_DELETE(gCameraWidget);
 
 		DestroyWindow(gWindowHandle);
-		UnregisterClass(szWndClassName,gDllInstance);
+		UnregisterClass(szWndClassName,ModuleInfo::getInstance());
 
 		gRendererInit = false;
 

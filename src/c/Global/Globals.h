@@ -31,7 +31,6 @@
 //Implemented in lever-3d_mex.cpp
 extern HANDLE gTermEvent;
 extern HWND gWindowHandle;
-extern HINSTANCE gDllInstance;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
 extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
