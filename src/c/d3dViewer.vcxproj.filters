@@ -245,6 +245,9 @@
     <ClCompile Include="Messages\Update.cpp">
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Global\WidgetData.cpp">
+      <Filter>Global\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Messages\DataQueue.h">
@@ -332,6 +335,9 @@
       <Filter>Mex\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Global\ErrorMsg.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\WidgetData.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

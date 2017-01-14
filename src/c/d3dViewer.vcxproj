@@ -110,6 +110,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="D3d\Texture.cpp" />
     <ClCompile Include="D3d\TextureLightingObj.cpp" />
     <ClCompile Include="Global\ModuleInfo.cpp" />
+    <ClCompile Include="Global\WidgetData.cpp" />
     <ClCompile Include="Messages\DataQueue.cpp" />
     <ClCompile Include="Messages\DirectXCommands.cpp" />
     <ClCompile Include="Messages\Image.cpp" />
@@ -184,6 +185,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClInclude Include="Global\ModuleInfo.h" />
     <ClInclude Include="Global\Vec.h" />
     <ClInclude Include="Global\VecFuncs.h" />
+    <ClInclude Include="Global\WidgetData.h" />
     <ClInclude Include="Messages\DataQueue.h" />
     <ClInclude Include="Messages\DirectXCommands.h" />
     <ClInclude Include="Messages\Image.h" />

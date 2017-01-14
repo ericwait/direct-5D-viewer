@@ -18,6 +18,7 @@
 #include "Global/Globals.h"
 #include "Global/ErrorMsg.h"
 #include "Global/ModuleInfo.h"
+#include "Global/WidgetData.h"
 #include "Messages/LoadData.h"
 #include "Messages/DirectXCommands.h"
 
@@ -114,7 +115,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
             gCameraDefaultMesh->setNearZ(nearZ);
         }
 		else if (ctrlDown)
-		{ 
+		{
 			float frontClipPos = gRenderer->FrontClipPos();
 			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
 			{
@@ -132,7 +133,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
 			{
 				backClipPos += 0.01f*alpha;
-			} 
+			}
             else
 			{
 				backClipPos -= 0.01f*alpha;
@@ -530,6 +531,8 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 	try
 	{
 		hr = windowInit(ModuleInfo::getInstance(),true,*rootDir);
+		attachWidget(arrowFaces, numArrowFaces/3, arrowVerts, numArrowVerts/3, arrowNorms, numArrowNorms/3,
+					sphereFaces, numSphereFaces/3, sphereVerts, numSphereVerts/3, sphereNorms, numSphereNorms/3);
 	}
 	catch(const std::exception& e)
 	{
@@ -594,6 +597,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 			sendErrMessage("Caught an unknown error!");
 		}
 
+		//TODO: Get rid of this!!!
 		if(messageLoopHandle != NULL)
 		{
 			gRendererOn = false;
