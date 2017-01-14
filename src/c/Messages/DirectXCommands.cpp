@@ -1,14 +1,14 @@
-#include "Global/Globals.h"
-#include "Global/Vec.h"
-#include "mex.h"
-#include "Mex/MexFunctions.h"
 #include "Image.h"
 #include "TransferObj.h"
 #include "QueuePolygon.h"
+#include "LoadData.h"
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
+#include "Global/Vec.h"
 #include "D3d/TextureLightingObj.h"
-#include <vector>
-#include "MexErrorMsg.h"
 #include "D3d/MessageProcessor.h"
+
+#include <vector>
 
 using std::vector;
 
@@ -29,7 +29,9 @@ void XloadTextureCommand(Message m){
 	{
 		HRESULT hr = createBorder(scale/scale.maxValue());
 		if (FAILED(hr))
-			mexErrMsgTxt("Could not create border!");
+		{
+			sendErrMessage("Could not create border!");
+		}
 	}
 
 	HRESULT hr = loadVolumeTexture(image, dims, numChannels, numFrames, scale, textureType);

@@ -1,7 +1,5 @@
 #include "Global/Globals.h"
-#include "mex.h"
 #include "D3d/MessageProcessor.h"
-#include "Mex/MexFunctions.h"
 #include "Global/Vec.h"
 
 class Image

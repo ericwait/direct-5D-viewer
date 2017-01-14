@@ -1,13 +1,9 @@
 #include "Global/Globals.h"
 #include "Global/Vec.h"
-
 #include "Messages/QueuePolygon.h"
 #include "Messages/MessageQueue.h"
 
-#include "mex.h"
 #include "windows.h"
-
-#include "MexFunctions.h"
 
 #include <set>
 #include <vector>
@@ -55,94 +51,6 @@ std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFac
 	return std::make_shared<MeshPrimitive>(gRenderer,Renderer::VertexShaders::DefaultVS, faces, verts, normals);
 }
 
-
-HRESULT loadPolygons(const mxArray* polygonsIn)
-{
-	size_t numPolygons = mxGetNumberOfElements(polygonsIn);
-
-	vector<QueuePolygon*>* polygons = new vector<QueuePolygon*>(numPolygons);
-
-	for (size_t i = 0; i < numPolygons; ++i)
-	{
-		// Polygon needs this
-		mxArray* mxFaces = mxGetField(polygonsIn, i, "faces");
-		mxArray* mxVerts = mxGetField(polygonsIn, i, "verts");
-		mxArray* mxNorms = mxGetField(polygonsIn, i, "norms");
-		mxArray* mxColor = mxGetField(polygonsIn, i, "color");
-		mxArray* mxFrame = mxGetField(polygonsIn, i, "frame");
-
-
-		mxArray* mxIndex = mxGetField(polygonsIn, i, "index");
-		mxArray* mxLabel = mxGetField(polygonsIn, i, "label");
-
-		// Num of each
-		size_t numFaces = mxGetM(mxFaces);
-		size_t numVerts = mxGetM(mxVerts);
-		size_t numNormals = mxGetM(mxNorms);
-		size_t colorDim = mxGetNumberOfElements(mxColor);
-
-		if (mxFaces == NULL)
-			mexErrMsgTxt("No faces field!");
-		if (mxVerts == NULL)
-			mexErrMsgTxt("No verts field!");
-		if (mxNorms == NULL)
-			mexErrMsgTxt("No norms field!");
-		if (mxColor == NULL)
-			mexErrMsgTxt("No color field!");
-		if (mxFrame == NULL)
-			mexErrMsgTxt("No frame field!");
-		if (mxIndex == NULL)
-			mexErrMsgTxt("No index field!");
-		if (mxLabel == NULL)
-			mexErrMsgTxt("No label field!");
-
-		if (numVerts < 1)
-			mexErrMsgTxt("No verts!");
-
-		if (numFaces < 1)
-			mexErrMsgTxt("No faces!");
-
-		if (numNormals < 1)
-			mexErrMsgTxt("No norms!");
-
-		if(colorDim<3)
-			mexErrMsgTxt("Color is malformed!");
-
-		if (numNormals != numVerts)
-			mexErrMsgTxt("Number of verts does not match the number of normals!");
-
-		double* faceData = (double*)mxGetData(mxFaces);
-		double* vertData = (double*)mxGetData(mxVerts);
-		double* normData = (double*)mxGetData(mxNorms);
-		double* colorDataInit = (double*)mxGetData(mxColor);
-		double colorData[4];
-		if(colorDim<4)
-		{
-			memcpy(colorData, colorDataInit, sizeof(double)*3);
-			colorData[3] = 1.0;
-		}
-		else
-		{
-			memcpy(colorData, colorDataInit, sizeof(double)*4);
-		}
-
-		size_t numColor = mxGetNumberOfElements(mxColor);
-		int frame = int(mxGetScalar(mxFrame)) - 1;
-
-		char buff[255];
-		mxGetString(mxLabel, buff, 255);
-
-		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
-		polygons->at(i)->setfaceData(faceData);
-		polygons->at(i)->setvertData(vertData);
-		polygons->at(i)->setnormData(normData);
-		polygons->at(i)->setcolorData(colorData);
-	}
-
-	gMsgQueueToDirectX.writeMessage("loadPolygons", (void*)polygons);
-
-	return S_OK;
-}
 
 HRESULT createBorder(Vec<float> &scale)
 {
@@ -277,3 +185,37 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 
 	return S_OK;
 }
+
+void attachWidget(double* arrowFaces, size_t numArrowFaces, double* arrowVerts, size_t numArrowVerts, double* arrowNorms, size_t numArrowNorms,
+	double* sphereFaces, size_t numSphereFaces, double* sphereVerts, size_t numSphereVerts, double* sphereNorms, size_t numSphereNorms)
+{
+	SceneNode* widgetScene = new SceneNode(GraphicObjectTypes::Group);
+	gRenderer->attachToRootScene(widgetScene, Renderer::Section::Post, 0);
+
+	std::shared_ptr<MeshPrimitive> arrowMesh = createPolygonMesh(arrowFaces, numArrowFaces, arrowVerts, numArrowVerts, arrowNorms, numArrowNorms);
+	std::shared_ptr<MeshPrimitive> sphereMesh = createPolygonMesh(sphereFaces, numSphereFaces, sphereVerts, numSphereVerts, sphereNorms, numSphereNorms);
+
+	std::shared_ptr<SingleColoredMaterial> arrowXMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(1.0f, 0.2f, 0.2f), 1.0f);
+	std::shared_ptr<SingleColoredMaterial> arrowYMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.1f, 1.0f, 0.1f), 1.0f);
+	std::shared_ptr<SingleColoredMaterial> arrowZMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.4f, 0.4f, 1.0f), 1.0f);
+	std::shared_ptr<SingleColoredMaterial> sphereMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.9f, 0.9f, 0.9f), 1.0f);
+
+	GraphicObjectNode* arrowXnode = new GraphicObjectNode(0, GraphicObjectTypes::Widget, arrowMesh, arrowXMat);
+	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI / 2.0f));
+	arrowXnode->attachToParentNode(widgetScene);
+	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowXnode);
+
+	GraphicObjectNode* arrowYnode = new GraphicObjectNode(1, GraphicObjectTypes::Widget, arrowMesh, arrowYMat);
+	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI / 2.0f));
+	arrowYnode->attachToParentNode(widgetScene);
+	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowYnode);
+
+	GraphicObjectNode* arrowZnode = new GraphicObjectNode(2, GraphicObjectTypes::Widget, arrowMesh, arrowZMat);
+	arrowZnode->attachToParentNode(widgetScene);
+	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowZnode);
+
+	GraphicObjectNode* sphereNode = new GraphicObjectNode(3, GraphicObjectTypes::Widget, sphereMesh, sphereMat);
+	sphereNode->attachToParentNode(widgetScene);
+	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, sphereNode);
+}
+

@@ -16,5 +16,7 @@
 #pragma once
 #include "windows.h"
 
+#include <string>
+
 HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir);
 extern const TCHAR szWndClassName[];

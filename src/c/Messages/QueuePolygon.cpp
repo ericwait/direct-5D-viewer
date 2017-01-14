@@ -1,8 +1,6 @@
 #include "QueuePolygon.h"
 #include "Global/Globals.h"
-#include "mex.h"
 #include "D3d/MessageProcessor.h"
-#include "Mex/MexFunctions.h"
 
 QueuePolygon::QueuePolygon(size_t numFaces, size_t numVerts, size_t numNormals, int frame, int index, std::string label)
 {

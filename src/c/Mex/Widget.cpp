@@ -1,8 +1,7 @@
 #include "Global/Vec.h"
 #include "Global/Globals.h"
-
+#include "Messages/LoadData.h"
 #include "Messages/MessageQueue.h"
-#include "MexFunctions.h"
 
 #include "mex.h"
 #include <windows.h>
@@ -52,35 +51,8 @@ HRESULT loadWidget(const mxArray* widget[])
 	double* sphereVerts = (double*)mxGetData(widget[4]);
 	double* sphereNorms = (double*)mxGetData(widget[5]);
 
-
-	SceneNode* widgetScene = new SceneNode(GraphicObjectTypes::Group);
-	gRenderer->attachToRootScene(widgetScene, Renderer::Section::Post, 0);
-
-	std::shared_ptr<MeshPrimitive> arrowMesh = createPolygonMesh(arrowFaces, numArrowFaces, arrowVerts, numArrowVerts, arrowNorms, numArrowNormals);
-	std::shared_ptr<MeshPrimitive> sphereMesh = createPolygonMesh(sphereFaces, numSphereFaces, sphereVerts, numSphereVerts, sphereNorms, numSphereNormals);
-
-	std::shared_ptr<SingleColoredMaterial> arrowXMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(1.0f, 0.2f, 0.2f), 1.0f);
-	std::shared_ptr<SingleColoredMaterial> arrowYMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.1f, 1.0f, 0.1f), 1.0f);
-	std::shared_ptr<SingleColoredMaterial> arrowZMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.4f, 0.4f, 1.0f), 1.0f);
-	std::shared_ptr<SingleColoredMaterial> sphereMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.9f, 0.9f, 0.9f), 1.0f);
-
-	GraphicObjectNode* arrowXnode = new GraphicObjectNode(0, GraphicObjectTypes::Widget, arrowMesh, arrowXMat);
-	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI / 2.0f));
-	arrowXnode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowXnode);
-
-	GraphicObjectNode* arrowYnode = new GraphicObjectNode(1, GraphicObjectTypes::Widget, arrowMesh, arrowYMat);
-	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI / 2.0f));
-	arrowYnode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowYnode);
-
-	GraphicObjectNode* arrowZnode = new GraphicObjectNode(2, GraphicObjectTypes::Widget, arrowMesh, arrowZMat);
-	arrowZnode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowZnode);
-
-	GraphicObjectNode* sphereNode = new GraphicObjectNode(3, GraphicObjectTypes::Widget, sphereMesh, sphereMat);
-	sphereNode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, sphereNode);
+	attachWidget(arrowFaces, numArrowFaces, arrowVerts, numArrowVerts, arrowNorms, numArrowNormals,
+				sphereFaces, numSphereFaces, sphereVerts, numSphereVerts, sphereNorms, numSphereNormals);
 
 	//gRenderer->releaseMutex();
 

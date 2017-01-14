@@ -38,11 +38,11 @@ end
 if (~D3dIsOpen)
     %% make a widget to show the orentation of the current view in 3D
     [arrowFaces, arrowVerts, arrowNorms] = D3d.Polygon.MakeArrow(0.65,0.05,0.15,40);
-    [sphereFaces, sphereVerts, shereNorms] = D3d.Polygon.MakeSphere(0.20,40);
+    [sphereFaces, sphereVerts, sphereNorms] = D3d.Polygon.MakeSphere(0.20,40);
     
     %% start the viewer dll
     [pathstr,~,~] = fileparts(which('D3d.Viewer'));
-    D3d.Viewer.Init(arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, shereNorms,pathstr);
+    D3d.Viewer.Init(arrowFaces, arrowVerts, arrowNorms,sphereFaces, sphereVerts, sphereNorms,pathstr);
     D3dIsOpen = true;
 end
 

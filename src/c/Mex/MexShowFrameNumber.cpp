@@ -1,5 +1,4 @@
 #include "MexCommand.h"
-#include "MexFunctions.h"
 #include "Global/Globals.h"
 
 void MexShowFrameNumber::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

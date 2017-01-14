@@ -15,7 +15,7 @@
 
 #include "MeshPrimitive.h"
 #include "Global/Globals.h"
-#include "Messages/MexErrorMsg.h"
+#include "Global/ErrorMsg.h"
 
 #include <limits>
 

@@ -23,7 +23,7 @@
 #include "Global/Defines.h"
 #include "Global/Globals.h"
 
-#include "Messages/MexErrorMsg.h"
+#include "Global/ErrorMsg.h"
 
 #include <d3dcompiler.h>
 #include <Windows.h>

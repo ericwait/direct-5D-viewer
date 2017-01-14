@@ -1,5 +1,6 @@
+#include "MexGlobals.h"
 #include "MexCommand.h"
-#include "MexFunctions.h"
+#include "Widget.h"
 #include "Global/Globals.h"
 #include "Messages/Threads.h"
 

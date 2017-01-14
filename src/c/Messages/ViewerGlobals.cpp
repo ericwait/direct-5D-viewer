@@ -13,19 +13,25 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Global\Vec.h"
-#include "mex.h"
-#include "Messages\MessageQueue.h"
-#include "windows.h"
-#include "Global\Globals.h"
-#include "Mex\MexFunctions.h"
-#include <set>
-#include "Messages\MexErrorMsg.h"
+#include "Global/Vec.h"
+#include "Messages/MessageQueue.h"
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
+#include "Messages/LoadData.h"
 
+#include "windows.h"
+
+#include <set>
+
+DWORD threadID;
 HANDLE gTermEvent = NULL;
 volatile bool gRendererInit = false;
 
+bool registerExitFunction = false;
+HANDLE messageLoopHandle = NULL;
+
 MessageQueue gMsgQueueToMex;
+DataQueue gMsgQueueToDirectX;
 
 std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 

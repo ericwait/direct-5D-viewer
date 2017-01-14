@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="D3d">
       <UniqueIdentifier>{9072ba76-63ef-4153-912f-ff5e16bf6520}</UniqueIdentifier>
     </Filter>
@@ -41,17 +37,16 @@
     <Filter Include="Global">
       <UniqueIdentifier>{0c8521fd-2383-4d9b-97b1-6afd452d897c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Global\Header Files">
+      <UniqueIdentifier>{bef64073-b06e-420d-b4d4-0ebba5325921}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Global\Source Files">
+      <UniqueIdentifier>{e864bcde-1dff-46ec-8995-4f852d274bfe}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Mex\Commands.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\LoadData.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\Update.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\Widget.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -104,9 +99,6 @@
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexInit.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="d3dViewer.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\Viewer.cpp">
@@ -238,11 +230,23 @@
     <ClCompile Include="D3d\Texture.cpp">
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Global\ModuleInfo.cpp">
+      <Filter>Global\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\MexErrorMsg.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\LoadData.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\ViewerGlobals.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\Update.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mex\MexFunctions.h">
-      <Filter>Mex\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Messages\DataQueue.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
@@ -253,9 +257,6 @@
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Messages\MessageQueue.h">
-      <Filter>Messaging\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\MexErrorMsg.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Messages\QueuePolygon.h">
@@ -288,18 +289,6 @@
     <ClInclude Include="D3d\TextureLightingObj.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Global\Defines.h">
-      <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="Global\Globals.h">
-      <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="Global\Vec.h">
-      <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="Global\VecFuncs.h">
-      <Filter>Global</Filter>
-    </ClInclude>
     <ClInclude Include="Mex\MexCommand.h">
       <Filter>Mex\Header Files</Filter>
     </ClInclude>
@@ -317,6 +306,33 @@
     </ClInclude>
     <ClInclude Include="D3d\Texture.h">
       <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Defines.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Globals.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\ModuleInfo.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Vec.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\VecFuncs.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\LoadData.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mex\MexGlobals.h">
+      <Filter>Mex\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mex\Widget.h">
+      <Filter>Mex\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\ErrorMsg.h">
+      <Filter>Global\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

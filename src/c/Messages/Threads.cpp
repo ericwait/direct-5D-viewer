@@ -1,9 +1,10 @@
 #include "Threads.h"
 #include "Global/Globals.h"
-#include "mex.h"
 #include "D3d/MessageProcessor.h"
-#include "Mex/MexFunctions.h"
-#include "MexErrorMsg.h"
+#include "Global/ErrorMsg.h"
+#include "Mex/MexGlobals.h"
+
+#include "mex.h"
 
 void startThread(std::string rootDir)
 {

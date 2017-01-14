@@ -99,7 +99,6 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="d3dViewer.cpp" />
     <ClCompile Include="D3d\Camera.cpp" />
     <ClCompile Include="D3d\Initialization.cpp" />
     <ClCompile Include="D3d\Material.cpp" />
@@ -110,15 +109,18 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="D3d\SceneNode.cpp" />
     <ClCompile Include="D3d\Texture.cpp" />
     <ClCompile Include="D3d\TextureLightingObj.cpp" />
+    <ClCompile Include="Global\ModuleInfo.cpp" />
     <ClCompile Include="Messages\DataQueue.cpp" />
     <ClCompile Include="Messages\DirectXCommands.cpp" />
     <ClCompile Include="Messages\Image.cpp" />
+    <ClCompile Include="Messages\LoadData.cpp" />
     <ClCompile Include="Messages\MessageQueue.cpp" />
+    <ClCompile Include="Messages\MexErrorMsg.cpp" />
     <ClCompile Include="Messages\QueuePolygon.cpp" />
     <ClCompile Include="Messages\Threads.cpp" />
     <ClCompile Include="Messages\TransferObj.cpp" />
-    <ClCompile Include="Mex\Commands.cpp" />
-    <ClCompile Include="Mex\LoadData.cpp" />
+    <ClCompile Include="Messages\Update.cpp" />
+    <ClCompile Include="Messages\ViewerGlobals.cpp" />
     <ClCompile Include="Mex\MexAddPolygons.cpp" />
     <ClCompile Include="Mex\MexCaptureSpinMovie.cpp" />
     <ClCompile Include="Mex\MexCaptureWindow.cpp" />
@@ -161,7 +163,6 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexSetViewRotation.cpp" />
     <ClCompile Include="Mex\MexZoomDecrement.cpp" />
     <ClCompile Include="Mex\MexZoomIncrement.cpp" />
-    <ClCompile Include="Mex\Update.cpp" />
     <ClCompile Include="Mex\Viewer.cpp" />
     <ClCompile Include="Mex\Widget.cpp" />
   </ItemGroup>
@@ -178,20 +179,23 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClInclude Include="D3d\TextureLightingObj.h" />
     <ClInclude Include="D3d\Timer.h" />
     <ClInclude Include="Global\Defines.h" />
+    <ClInclude Include="Global\ErrorMsg.h" />
     <ClInclude Include="Global\Globals.h" />
+    <ClInclude Include="Global\ModuleInfo.h" />
     <ClInclude Include="Global\Vec.h" />
     <ClInclude Include="Global\VecFuncs.h" />
     <ClInclude Include="Messages\DataQueue.h" />
     <ClInclude Include="Messages\DirectXCommands.h" />
     <ClInclude Include="Messages\Image.h" />
+    <ClInclude Include="Messages\LoadData.h" />
     <ClInclude Include="Messages\MessageQueue.h" />
-    <ClInclude Include="Messages\MexErrorMsg.h" />
     <ClInclude Include="Messages\QueuePolygon.h" />
     <ClInclude Include="Messages\Threads.h" />
     <ClInclude Include="Messages\TransferObj.h" />
     <ClInclude Include="Mex\CommandList.h" />
     <ClInclude Include="Mex\MexCommand.h" />
-    <ClInclude Include="Mex\MexFunctions.h" />
+    <ClInclude Include="Mex\MexGlobals.h" />
+    <ClInclude Include="Mex\Widget.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,8 +1,10 @@
 #include "DataQueue.h"
+#include "Global/ErrorMsg.h"
+
+#include "comdef.h"
+
 #include <string>
 #include <iostream>
-#include "mex.h"
-#include "comdef.h"
 
 DataQueue::DataQueue()
 {
@@ -30,7 +32,7 @@ Message DataQueue::getNextMessage()
 	}
 	else
 	{
-		mexErrMsgTxt("No messages available in queue!");
+		sendErrMessage("No messages available in queue!");
 	}
 
 	ReleaseMutex(mutex);

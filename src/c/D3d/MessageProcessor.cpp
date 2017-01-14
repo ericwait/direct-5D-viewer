@@ -13,13 +13,17 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Global/Globals.h"
 #include "MessageProcessor.h"
 #include "Initialization.h"
-#include <time.h>
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
+#include "Global/ModuleInfo.h"
+#include "Messages/LoadData.h"
 #include "Messages/DirectXCommands.h"
-#include "Messages/MexErrorMsg.h"
-#include "Mex/MexCommand.h"
+
+#include "Mex/MexGlobals.h" // TODO: Get rid of this!!!
+
+#include <time.h>
 
 bool gRendererOn = false;
 bool gPlay = false;
@@ -615,13 +619,6 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 				gGraphicObjectNodes[i].clear();
 			}
 		}
-
-		if(mexMessageMutex != NULL)
-		{
-			CloseHandle(mexMessageMutex);
-			mexMessageMutex = NULL;
-		}
-
 	}
 	else
 	{

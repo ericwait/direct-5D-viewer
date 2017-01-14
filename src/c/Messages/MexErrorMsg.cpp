@@ -1,11 +1,10 @@
-#pragma once
-
-#include <string>
+#include "Global/ErrorMsg.h"
 #include "Global/Globals.h"
 #include "MessageQueue.h"
+
 #include <comdef.h>
 
-inline void errMessage(std::string message, char *file, int line)
+void errMessage(std::string message, const char *file, int line)
 {
 	char ln[5];
 	sprintf(ln, "%d", line);
@@ -17,9 +16,8 @@ inline void errMessage(std::string message, char *file, int line)
 
 	gMsgQueueToMex.addErrorMessage(msg);
 }
-#define sendErrMessage(ans) { errMessage((ans), __FILE__, __LINE__); }
 
-inline void hrErrMessage(HRESULT hr, char *file, int line)
+void hrErrMessage(HRESULT hr, const char *file, int line)
 {
 	_com_error err(hr);
 	LPCTSTR errMsg = err.ErrorMessage();
@@ -39,4 +37,3 @@ inline void hrErrMessage(HRESULT hr, char *file, int line)
 
 	gMsgQueueToMex.addErrorMessage(msg);
 }
-#define sendHrErrMessage(ans) { hrErrMessage((ans), __FILE__, __LINE__); }
