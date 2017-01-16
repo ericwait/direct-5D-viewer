@@ -28,7 +28,7 @@ class Camera;
 class MeshPrimitive;
 class Material;
 class MaterialParameters;
-class StaticVolumeParams;
+class VolumeParams;
 class SceneNode;
 class RootSceneNode;
 class GraphicObjectNode;
@@ -158,8 +158,8 @@ public:
 	void setDims(Vec<size_t> dimsIn){volDims = dimsIn;}
 
 // Static setup getters
-	std::shared_ptr<StaticVolumeParams>& getSharedVolumeParams(int volType);
-	std::shared_ptr<StaticVolumeParams>& createSharedVolumeParams(int volType, int numChannels);
+	std::shared_ptr<VolumeParams>& getSharedVolumeParams(int volType);
+	std::shared_ptr<VolumeParams>& createSharedVolumeParams(int volType, int numChannels);
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
@@ -278,7 +278,7 @@ private:
 	Vec<float> volPhysSize;
 
 private:
-	std::shared_ptr<StaticVolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
+	std::shared_ptr<VolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
 
 	std::map<unsigned int,ID3D11DepthStencilState*> depthStencilStates;
 	std::map<unsigned int,ID3D11RasterizerState*> rasterStates;

@@ -178,5 +178,5 @@ void StaticVolumeTextureMaterial::updateTransformParams(DirectX::XMMATRIX localT
 	vecO = DirectX::XMVector3TransformNormal(vecU,trans);
 	zDir = Vec<float>(DirectX::XMVectorGetX(vecO),DirectX::XMVectorGetY(vecO),DirectX::XMVectorGetZ(vecO));
 
-	typedParams<StaticVolumeParams>()->setGradientSampleDir(xDir, yDir,zDir);
+	typedParams<StaticVolumeParams>()->setGradientSampleDir(xDir,yDir,zDir);
 }

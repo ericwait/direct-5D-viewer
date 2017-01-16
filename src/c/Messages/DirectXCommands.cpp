@@ -66,7 +66,7 @@ void XtransferUpdateCommand(Message m){
 
 	size_t numElem = sentTranfser->numElem;
 
-	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(fvtIdx);
+	std::shared_ptr<VolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(fvtIdx);
 	if ( sharedParams )
 	{
 		sharedParams->setTransferFunction(sentTranfser->chan, sentTranfser->transferFunction);
@@ -191,7 +191,7 @@ void XtextureLightingUpdateCommand(Message m){
 	TextureLightingObj* localLightObj = (TextureLightingObj*)m.data;
 
 	// TODO: what is the expected behavior of these on the MATLAB side?
-	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(localLightObj->index);
+	std::shared_ptr<VolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(localLightObj->index);
 	if ( sharedParams )
 		sharedParams->setLightOn(localLightObj->value);
 
@@ -204,7 +204,7 @@ void XtextureAttenUpdateCommand(Message m)
 
 	for(int i = 0; i<2; ++i)
 	{
-		std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(i);
+		std::shared_ptr<VolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(i);
 		if ( sharedParams )
 			sharedParams->setAttenuationOn(*on);
 	}

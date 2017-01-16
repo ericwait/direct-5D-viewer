@@ -1690,12 +1690,12 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 	return imOut;
 }
 
-std::shared_ptr<StaticVolumeParams>& Renderer::getSharedVolumeParams(int volType)
+std::shared_ptr<VolumeParams>& Renderer::getSharedVolumeParams(int volType)
 {
 	return sharedVolumeParams[volType];
 }
 
-std::shared_ptr<StaticVolumeParams>& Renderer::createSharedVolumeParams(int volType, int numChannels)
+std::shared_ptr<VolumeParams>& Renderer::createSharedVolumeParams(int volType, int numChannels)
 {
 	sharedVolumeParams[volType] = std::make_shared<StaticVolumeParams>(this, numChannels);
 	return sharedVolumeParams[volType];

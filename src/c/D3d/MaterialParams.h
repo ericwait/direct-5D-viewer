@@ -90,11 +90,24 @@ protected:
 	void clearParams();
 
 	// Render resources
-	void createResources(){renderer->createConstantBuffer(constMemory.size(), &constBuffer);}
+	void createResources()
+	{
+		releaseResources();
+		renderer->createConstantBuffer(constMemory.size(), &constBuffer);
+	}
+
 	void releaseResources(){SAFE_RELEASE(constBuffer);}
 
 	void setShaderResources(){renderer->setPixelShaderConsts(constBuffer);}
-	void updateParams(){renderer->updateShaderParams(constMemory.data(),constBuffer);}
+
+	void updateParams()
+	{
+		// TODO: Use lazy resource creation for now, should probably figure out a better way post construction!
+		if ( !constBuffer )
+			createResources();
+
+		renderer->updateShaderParams(constMemory.data(),constBuffer);
+	}
 
 	Renderer* renderer;
 	ID3D11Buffer* constBuffer;
@@ -116,28 +129,42 @@ private:
 	SingleColorParams() : MaterialParameters(NULL){};
 };
 
-class StaticVolumeParams : public MaterialParameters
+// Intermediate parameter class for any volume renderer,
+// Handles channel colors and transfer functions.
+class VolumeParams : public MaterialParameters
 {
 public:
-	StaticVolumeParams(Renderer* rendererIn);
-	StaticVolumeParams(Renderer* rendererIn, int numChannelsIn);
-
-	//NOTE: This will reset all param data
-	void resetChannels(int numChannelsIn);
-
 	void setTransferFunction(int channel, Vec<float> transferFunction);
 	void setRange(int channel, Vec<float> ranges);
 
 	void setColor(int channel, Vec<float> color, float alphaMod);
 
+protected:
+	VolumeParams(Renderer* rendererIn);
+	VolumeParams(Renderer* rendererIn, int numChannelsIn);
+
+	//NOTE: This will reset all transfer function data
+	void resetChannels(int numChannelsIn);
+	void setDefaultParams();
+
+private:
+	static const Vec<float> defaultColors[6];
+
+	// Invalid constructor
+	VolumeParams() : MaterialParameters(NULL){}
+
+	int numChannels;
+};
+
+
+class StaticVolumeParams : public VolumeParams
+{
+public:
+	StaticVolumeParams(Renderer* rendererIn);
+	StaticVolumeParams(Renderer* rendererIn, int numChannelsIn);
+
 	void setGradientSampleDir(Vec<float> xDir, Vec<float> yDir, Vec<float> zDir);
 
 private:
-	static const Vec<float> colors[6];
-
-	StaticVolumeParams() : MaterialParameters(NULL){};
-
-	void setDefaultParams();
-
-	int numChannels;
+	StaticVolumeParams() : VolumeParams(NULL,0){};
 };

@@ -163,7 +163,7 @@ HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel
 	if ( !gRenderer->getSharedVolumeParams(volType) )
 		gRenderer->createSharedVolumeParams(volType, numChannel);
 
-	std::shared_ptr<StaticVolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(volType);
+	std::shared_ptr<StaticVolumeParams>& sharedParams = std::dynamic_pointer_cast<StaticVolumeParams>(gRenderer->getSharedVolumeParams(volType));
 	std::shared_ptr<ViewAlignedPlanes> planeMesh = std::make_shared<ViewAlignedPlanes>(gRenderer, dims, scales);
 
 	for (int i = 0; i < numFrames; ++i)
