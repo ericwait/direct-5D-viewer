@@ -185,7 +185,7 @@ const Vec<float> ViewAlignedPlanes::planeVertices[4] =
 };
 
 ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, Vec<float> scaleDims)
-	: dims(volDims), scaleFactor(scaleDims / scaleDims.maxValue()), MeshPrimitive(renderer, Renderer::VertexShaders::ViewAligned)
+	: dims(volDims), physicalSize(scaleDims), MeshPrimitive(renderer, Renderer::VertexShaders::ViewAligned)
 {
 	std::vector<Vec<float>> texUVs;
 	buildViewAlignedPlanes(dims, faces, vertices, normals, texUVs);

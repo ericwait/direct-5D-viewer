@@ -92,5 +92,7 @@ private:
 	// Need to keep these around for transforms
 	// TODO: Put all shader refs together into the material?
 	Vec<size_t> dims;
-	Vec<float> scaleFactor;
+
+    // This is the size of the texture in physical space
+	Vec<float> physicalSize;
 };
