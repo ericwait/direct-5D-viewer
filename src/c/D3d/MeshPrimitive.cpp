@@ -196,25 +196,28 @@ ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, V
 	initializeResources(texUVs);
 }
 
-DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX parentToWorld)
+DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX parentToWorld_dx)
 {
-	DirectX::XMVECTOR det;
-	DirectX::XMMATRIX invParentWorld = DirectX::XMMatrixInverse(&det,parentToWorld);
+    Eigen::Matrix4f parentToWorld = ConvertMatrix(parentToWorld_dx);
 
-	DirectX::XMMATRIX handedCorrection(0.0f,1.0f,0.0f,0.0f,
-									1.0f,0.0f,0.0f,0.0f,
-									0.0f,0.0f,1.0f,0.0f,
-									0.0f,0.0f,0.0f,1.0f);
+    Eigen::Matrix4f textureCoordinateCorrection;
+    textureCoordinateCorrection<<
+        0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f;
 
-	DirectX::XMMATRIX localToWorld = DirectX::XMMatrixTranslation(-0.5f, -0.5f, -0.5f) //centering texture coord at vol origin
-						* DirectX::XMMatrixScaling(2.0f, 2.0f, 2.0f) // upscale centered texCoord [-0.5,0.5] --> [-1,1]
-						* invParentWorld   // Apply this inverted volume to world transform
-						* handedCorrection // Invert handedness (This is a MATLAB column-major thing!)
-						* DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f) // downscale back to texCoord [-1,1] --> [-0.5,0.5]
-						* DirectX::XMMatrixScaling(1.0f/scaleFactor.x, 1.0f/scaleFactor.y, 1.0f/scaleFactor.z) // Scale from physical coordinates to normalized coordinates
-						* DirectX::XMMatrixTranslation(0.5f, 0.5f, 0.5f); // Put the origin back to upper left in texture coordinates
+    Vec<float> physicalScaling = physicalSize / physicalSize.maxValue();
 
-	return localToWorld;
+    Eigen::Affine3f compute(Eigen::Translation3f(0.5f, 0.5f, 0.5f));
+    compute *= Eigen::Scaling(1.0f/physicalScaling.x, 1.0f/physicalScaling.y, 1.0f/physicalScaling.z);
+    compute *= Eigen::Scaling(0.5f, 0.5f, 0.5f);
+    compute *= textureCoordinateCorrection;
+    compute *= parentToWorld.inverse();
+    compute *= Eigen::Scaling(2.0f, 2.0f, 2.0f);
+    compute *= Eigen::Translation3f(-0.5f, -0.5f, -0.5f);
+
+	return ConvertMatrix(compute.matrix());
 }
 
 void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
