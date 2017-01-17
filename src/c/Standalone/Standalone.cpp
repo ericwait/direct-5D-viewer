@@ -48,6 +48,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	GraphicObjectTypes* textureType = new GraphicObjectTypes(GraphicObjectTypes::OriginalVolume);
 	gMsgQueueToDirectX.writeMessage("ViewTexture", (void*)textureType);
 
+	SetProcessDPIAware();
 	messageLoop(pRootDir);
 
 	// This is sort of a leak, but we can't delete the image data until application close.
