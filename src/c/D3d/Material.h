@@ -51,7 +51,7 @@ protected:
 	Material(Renderer* rendererIn);
 	Material(Renderer* rendererIn, std::shared_ptr<MaterialParameters> sharedParams);
 
-	void setShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
+	void setShader(Renderer::PixelShaders shader, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
 	void bindConstants();
 	void bindTextures();
 

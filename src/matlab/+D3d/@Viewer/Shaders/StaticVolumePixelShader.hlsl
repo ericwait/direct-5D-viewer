@@ -67,11 +67,11 @@ float maxIntensity = 0;
 		float lightMod = 1.0f;
 		if(flags.x>0)
 		{
-			grad.x = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[0]) - 
+			grad.x = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[0]) -
 				g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[0]);
-			grad.y = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[1]) - 
+			grad.y = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[1]) -
 				g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[1]);
-			grad.z = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[2]) - 
+			grad.z = g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV+gradientSampleDirection[2]) -
 				g_txDiffuse[i].Sample(g_samLinear[i], input.TextureUV-gradientSampleDirection[2]);
 			grad = normalize(grad);
 			float ambientLight = 0.45f;

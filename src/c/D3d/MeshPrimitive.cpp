@@ -45,11 +45,7 @@ void MeshPrimitive::cleanupMesh()
 
 void MeshPrimitive::loadShader(Renderer::VertexShaders shader)
 {
-	std::string root = renderer->getDllDir();
-	vertShaderIdx = renderer->getVertexShader(root+VERTEX_SHADER_FILENAMES[shader],VERTEX_SHADER_FUNCNAMES[shader]);
-
-	if (vertShaderIdx == -1)
-		throw std::runtime_error("Cannot get vertex shader!");
+	vertShaderIdx = renderer->getVertexShader(shader);
 }
 
 void MeshPrimitive::initializeResources(const std::vector<Vec<float>>& textureUV)

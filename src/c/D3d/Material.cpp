@@ -55,9 +55,9 @@ void Material::setWireframe(bool wireframe)
 	updateRasterState();
 }
 
-void Material::setShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables)
+void Material::setShader(Renderer::PixelShaders shader, const std::map<std::string,std::string>& variables)
 {
-	shaderIdx = renderer->getPixelShader(shaderFilename,shaderFunction,variables);
+	shaderIdx = renderer->getPixelShader(shader,variables);
 }
 
 void Material::bindConstants()
@@ -98,24 +98,18 @@ void Material::updateRasterState()
 
 
 
-SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn)
+SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn, float alpha)
 	: Material(rendererIn)
-{
-	params = std::make_shared<SingleColorParams>(rendererIn, Vec<float>(1.0f,1.0f,1.0f), 1.0f);
-
-	std::string root = renderer->getDllDir();
-	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
-		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS]);
-}
-
-SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn, float alpha) : Material(rendererIn)
 {
 	params = std::make_shared<SingleColorParams>(rendererIn, colorIn, alpha);
 
 	std::string root = renderer->getDllDir();
-	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::DefaultPS],
-		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::DefaultPS]);
+	setShader(Renderer::PixelShaders::DefaultPS);
 }
+
+SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn)
+	: SingleColoredMaterial(rendererIn, Vec<float>(1.0f,1.0f,1.0f), 1.0f)
+{}
 
 void SingleColoredMaterial::setColor(Vec<float> colorIn, float alpha)
 {
@@ -148,8 +142,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, i
 	vars["NUM_CHAN"] = cBuffer;
 
 	std::string root = renderer->getDllDir();
-	setShader(root + PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::StaticVolume],
-		PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::StaticVolume], vars);
+	setShader(Renderer::PixelShaders::StaticVolume, vars);
 }
 
 void StaticVolumeTextureMaterial::updateTransformParams(DirectX::XMMATRIX localToWorld, DirectX::XMMATRIX view, DirectX::XMMATRIX projection)

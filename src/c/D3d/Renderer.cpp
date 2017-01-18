@@ -138,6 +138,9 @@ HRESULT Renderer::init(std::string rootDir)
 
 	resetRootWorldTransform();
 
+	getVertexShader(FallbackVS);
+	getPixelShader(FallbackPS);
+
 	//ReleaseMutex(mutexDevice);
 
 	return hr;
@@ -469,8 +472,12 @@ std::string makeVariableString(const std::map<std::string, std::string>& variabl
 	return strOut;
 }
 
-int Renderer::getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string,std::string>& variables)
+int Renderer::getVertexShader(Renderer::VertexShaders shader, const std::map<std::string,std::string>& variables)
 {
+	std::string rootDir = getDllDir();
+
+	const std::string& shaderFilename = VERTEX_SHADER_FILENAMES[shader];
+	const std::string& shaderFunction = VERTEX_SHADER_FUNCNAMES[shader];
 	std::string paramStr = makeVariableString(variables);
 
 	//WaitForSingleObject(mutexDevice,INFINITE);
@@ -482,9 +489,11 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 		return idx;
 	}
 
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + shaderFilename + ".hlsl";
+
 	ID3D11VertexShader* newShader;
 	ID3D11InputLayout* newLayout;
-	if (FAILED(compileVertexShader(shaderFilename, shaderFunction, variables, &newShader, &newLayout)))
+	if (FAILED(compileVertexShader(shaderPath, shaderFunction, variables, &newShader, &newLayout)))
 	{
 		//ReleaseMutex(mutexDevice);
 		return -1;
@@ -502,8 +511,12 @@ int Renderer::getVertexShader(const std::string& shaderFilename, const std::stri
 	return idx;
 }
 
-int Renderer::getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables)
+int Renderer::getPixelShader(Renderer::PixelShaders shader, const std::map<std::string,std::string>& variables)
 {
+	std::string rootDir = getDllDir();
+
+	const std::string& shaderFilename = PIXEL_SHADER_FILENAMES[shader];
+	const std::string& shaderFunction = PIXEL_SHADER_FUNCNAMES[shader];
 	std::string paramStr = makeVariableString(variables);
 
 	//WaitForSingleObject(mutexDevice,INFINITE);
@@ -516,8 +529,10 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 		return idx;
 	}
 
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + shaderFilename + ".hlsl";
+
 	ID3D11PixelShader* newShader;
-	if (FAILED(compilePixelShader(shaderFilename, shaderFunction, variables, &newShader)))
+	if (FAILED(compilePixelShader(shaderPath, shaderFunction, variables, &newShader)))
 	{
 		//ReleaseMutex(mutexDevice);
 		return -1;
@@ -532,6 +547,11 @@ int Renderer::getPixelShader(const std::string& shaderFilename, const std::strin
 	//ReleaseMutex(mutexDevice);
 
 	return idx;
+}
+
+int Renderer::getFallbackShaders()
+{
+	return 0;
 }
 
 void Renderer::clearVertexShaderList()
@@ -713,7 +733,6 @@ HRESULT Renderer::compileVertexShader(const std::string& filename, const std::st
 
 	if ( shaderBlob == NULL )
 	{
-		MessageBox(NULL, TEXT("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."), TEXT("Error"), MB_OK);
 		return hr;
 	}
 
@@ -746,7 +765,6 @@ HRESULT Renderer::compilePixelShader(const std::string& filename, const std::str
 
 	if (shaderBlob == NULL )
 	{
-		MessageBox(NULL, TEXT("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."), TEXT("Error"), MB_OK);
 		return hr;
 	}
 
@@ -829,7 +847,10 @@ ID3DBlob* Renderer::compileShaderFile(const std::string& filename, const std::st
 	if (FAILED(hr))
 	{
 		if (errBlob != NULL)
-			MessageBoxA(NULL, (LPCSTR)errBlob->GetBufferPointer(), "Shader Compile Error", MB_OK | MB_ICONERROR);
+		{
+			std::string errTitle = "Shader Compile Error: " + filename;
+			MessageBoxA(NULL, (LPCSTR)errBlob->GetBufferPointer(), errTitle.c_str(), MB_OK | MB_ICONERROR);
+		}
 
 		SAFE_RELEASE(errBlob);
 
@@ -846,6 +867,20 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 	static int previousVertexShaderIdx = -1;
 	static int previousPixelShaderIdx = -1;
 
+	int vertShaderIdx = node->mesh->vertShaderIdx;
+	int pixShaderIdx = node->material->shaderIdx;
+
+	if ( vertShaderIdx < 0 )
+	{
+		vertShaderIdx = getFallbackShaders();
+		pixShaderIdx = getFallbackShaders();
+	}
+
+	if ( pixShaderIdx < 0 )
+	{
+		pixShaderIdx = getFallbackShaders();
+	}
+
 	//Vertex Shader setup
 	VertexShaderConstBuffer vcb;
 
@@ -856,10 +891,10 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 	vcb.depthPeelPlanes.y = backClip;
 	updateShaderParams(&vcb,vertexShaderConstBuffer);
 
-	if ( previousVertexShaderIdx != node->mesh->vertShaderIdx )
+	if ( previousVertexShaderIdx != vertShaderIdx )
 	{
-		setVertexShader(node->mesh->vertShaderIdx);
-		previousVertexShaderIdx = node->mesh->vertShaderIdx;
+		setVertexShader(vertShaderIdx);
+		previousVertexShaderIdx = vertShaderIdx;
 	}
 
 	setGeometry(node->mesh->vertexBuffer, node->mesh->indexBuffer);
@@ -874,10 +909,10 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 	node->material->bindTextures();
 	node->material->bindConstants(); //TODO this needs tweeking
 	
-	if (previousPixelShaderIdx != node->material->shaderIdx)
+	if (previousPixelShaderIdx != pixShaderIdx)
 	{
-		setPixelShader(node->material->shaderIdx);
-		previousPixelShaderIdx = node->material->shaderIdx;
+		setPixelShader(pixShaderIdx);
+		previousPixelShaderIdx = pixShaderIdx;
 	}
 	
 	setRasterizerState(node->material->rasterState);

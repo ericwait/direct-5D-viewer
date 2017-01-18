@@ -64,6 +64,7 @@ public:
 
 	enum VertexShaders
 	{
+		FallbackVS,
 		DefaultVS,
 		ViewAligned,
 		VertexShadersEnd
@@ -71,6 +72,7 @@ public:
 
 	enum PixelShaders
 	{
+		FallbackPS,
 		DefaultPS,
 		StaticVolume,
 		PixelShadersEnd
@@ -133,8 +135,10 @@ public:
 	void setBackgroundColor(Vec<float> background) { backgroundColor = background; }
 
 //Getters
-	int getVertexShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables = std::map<std::string,std::string>());
-	int getPixelShader(const std::string& shaderFilename, const std::string& shaderFunction, const std::map<std::string, std::string>& variables = std::map<std::string, std::string>());
+	int getVertexShader(Renderer::VertexShaders shader, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
+	int getPixelShader(Renderer::PixelShaders shader, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
+	int getFallbackShaders();
+
 	ID3D11SamplerState* getSamplerState();
 
 	DirectX::XMMATRIX getRootWorldRotation();
@@ -284,9 +288,9 @@ private:
 	std::map<unsigned int,ID3D11RasterizerState*> rasterStates;
 };
 
+const std::string SHADER_DIR = "Shaders";
+const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"Fallback","DefaultMeshShaders","ViewAlignedVertexShader"};
+const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"FallbackVertexShader","DefaultMeshVertexShader","ViewAlignedVertexShader"};
 
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {".//Shaders//DefaultMeshShaders.fx",".//Shaders//ViewAlignedVertexShader.fx"};
-const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"DefaultMeshVertexShader","ViewAlignedVertexShader"};
-
-const std::string PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::PixelShadersEnd] ={".//Shaders//DefaultMeshShaders.fx",".//Shaders//StaticVolumePixelShader.fx"};
-const std::string PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::PixelShadersEnd] ={"DefaultMeshPixelShader","MultiChanVolumePixelShader"};
+const std::string PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::PixelShadersEnd] ={"Fallback","DefaultMeshShaders","StaticVolumePixelShader"};
+const std::string PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::PixelShadersEnd] ={"FallbackPixelShader","DefaultMeshPixelShader","MultiChanVolumePixelShader"};
