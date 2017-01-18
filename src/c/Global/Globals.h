@@ -44,6 +44,7 @@ extern OrthoCamera* gCameraWidget;
 extern Camera* gCameraDefaultMesh;
 
 //Implemented in MessageProcessor.cpp
+extern bool gUpdateShaders;
 extern bool gRendererOn;
 extern bool gPlay;
 extern bool gRotate;

@@ -62,22 +62,6 @@ public:
 		SectionEnd
 	};
 
-	enum VertexShaders
-	{
-		FallbackVS,
-		DefaultVS,
-		ViewAligned,
-		VertexShadersEnd
-	};
-
-	enum PixelShaders
-	{
-		FallbackPS,
-		DefaultPS,
-		StaticVolume,
-		PixelShadersEnd
-	};
-
 	struct VertexShaderConstBuffer
 	{
 		DirectX::XMMATRIX worldTransform;
@@ -135,9 +119,9 @@ public:
 	void setBackgroundColor(Vec<float> background) { backgroundColor = background; }
 
 //Getters
-	int getVertexShader(Renderer::VertexShaders shader, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
-	int getPixelShader(Renderer::PixelShaders shader, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
-	int getFallbackShaders();
+	int updateRegisteredShaders();
+	int registerVertexShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
+	int registerPixelShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
 
 	ID3D11SamplerState* getSamplerState();
 
@@ -205,9 +189,13 @@ private:
 	void releaseMaterialStates();
 	void releaseSwapChain();
 
-	void setVertexShader(int vertexShaderListIdx);
+	void initFallbackShaders();
+	void updateVertexShader(int entryIdx);
+	void updatePixelShader(int entryIdx);
+
+	void setVertexShader(ID3D11VertexShader* shader, ID3D11InputLayout* layout);
 	void setRasterizerState(ID3D11RasterizerState* rasterState);
-	void setPixelShader(int pixelShaderListIdx);
+	void setPixelShader(ID3D11PixelShader* shader);
 	void setDepthStencilState(ID3D11DepthStencilState* depthStencilState);
 	void setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer);
 	void drawTriangles(size_t numFaces);
@@ -243,9 +231,39 @@ private:
 	std::map<std::string,int> pixelShaderMap;
 	std::map<std::string,int> vertexShaderMap;
 
-	std::vector<ID3D11PixelShader*> pixelShaderList;
-	std::vector<ID3D11VertexShader*> vertexShaderList;
-	std::vector<ID3D11InputLayout*> vertexLayoutList;
+	struct VertexShaderEntry
+	{
+		bool error;
+
+		FILETIME update;
+
+		std::string filename;
+		std::string entryFunc;
+		std::map<std::string,std::string> vars;
+
+		ID3D11VertexShader* shader;
+		ID3D11InputLayout* layout;
+	};
+
+	struct PixelShaderEntry
+	{
+		bool error;
+
+		FILETIME update;
+
+		std::string filename;
+		std::string entryFunc;
+		std::map<std::string,std::string> vars;
+
+		ID3D11PixelShader* shader;
+	};
+
+	std::vector<VertexShaderEntry> vertexShaderRegistry;
+	std::vector<PixelShaderEntry> pixelShaderRegistry;
+
+	ID3D11PixelShader* fallbackPS;
+	ID3D11VertexShader* fallbackVS;
+	ID3D11InputLayout* fallbackLayout;
 
 	ID3D11SamplerState* linearTextureSampler;
 
@@ -287,10 +305,3 @@ private:
 	std::map<unsigned int,ID3D11DepthStencilState*> depthStencilStates;
 	std::map<unsigned int,ID3D11RasterizerState*> rasterStates;
 };
-
-const std::string SHADER_DIR = "Shaders";
-const std::string VERTEX_SHADER_FILENAMES[Renderer::VertexShaders::VertexShadersEnd] = {"Fallback","DefaultMeshShaders","ViewAlignedVertexShader"};
-const std::string VERTEX_SHADER_FUNCNAMES[Renderer::VertexShaders::VertexShadersEnd] = {"FallbackVertexShader","DefaultMeshVertexShader","ViewAlignedVertexShader"};
-
-const std::string PIXEL_SHADER_FILENAMES[Renderer::PixelShaders::PixelShadersEnd] ={"Fallback","DefaultMeshShaders","StaticVolumePixelShader"};
-const std::string PIXEL_SHADER_FUNCNAMES[Renderer::PixelShaders::PixelShadersEnd] ={"FallbackPixelShader","DefaultMeshPixelShader","MultiChanVolumePixelShader"};

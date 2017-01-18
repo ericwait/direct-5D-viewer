@@ -48,7 +48,7 @@ std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFac
 		normals[i] = curNormal;
 	}
 
-	return std::make_shared<MeshPrimitive>(gRenderer,Renderer::VertexShaders::DefaultVS, faces, verts, normals);
+	return std::make_shared<MeshPrimitive>(gRenderer, faces, verts, normals);
 }
 
 
@@ -127,7 +127,7 @@ HRESULT createBorder(Vec<float> &scale)
 			normals[faces[2 * i].x + j] = norm;
 	}
 
-	std::shared_ptr<MeshPrimitive> borderMesh = std::make_shared<MeshPrimitive>(gRenderer, Renderer::VertexShaders::DefaultVS, faces, vertices, normals);
+	std::shared_ptr<MeshPrimitive> borderMesh = std::make_shared<MeshPrimitive>(gRenderer, faces, vertices, normals);
 	std::shared_ptr<SingleColoredMaterial> borderMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);
 	GraphicObjectNode* borderNode = new GraphicObjectNode(0, GraphicObjectTypes::Border, borderMesh, borderMat);
 	

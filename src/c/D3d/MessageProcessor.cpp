@@ -26,6 +26,7 @@
 
 #include <time.h>
 
+bool gUpdateShaders = false;
 bool gRendererOn = false;
 bool gPlay = false;
 bool gRotate = false;
@@ -465,6 +466,7 @@ HRESULT messageProcess(MSG& msg)
 	HRESULT hr = S_OK;
 	static clock_t lastTimeUpdate = clock();
 	static clock_t lastRotateUpdate = clock();
+	static clock_t lastShaderUpdate = clock();
 	static int curAngle = 0;
 
 	if(msg.message==WM_QUIT)
@@ -491,6 +493,7 @@ HRESULT messageProcess(MSG& msg)
 				}
 			}
 		}
+
 		if(gRotate)
 		{
 			float timeFromLast = (float)(clock() - lastRotateUpdate) / CLOCKS_PER_SEC;
@@ -513,6 +516,16 @@ HRESULT messageProcess(MSG& msg)
 						curAngle = 0;
 					}
 				}
+			}
+		}
+
+		if ( gUpdateShaders )
+		{
+			float shaderUpdateElapsed = (float)(clock() - lastShaderUpdate) / CLOCKS_PER_SEC;
+			if ( shaderUpdateElapsed > 1.0f )
+			{
+				pleaseRender = gRenderer->updateRegisteredShaders();
+				lastShaderUpdate = clock();
 			}
 		}
 	}

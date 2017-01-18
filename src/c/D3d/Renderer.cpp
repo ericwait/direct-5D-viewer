@@ -34,6 +34,8 @@
 #include <string>
 #include <fstream>
 
+const std::string SHADER_DIR = "Shaders";
+
 Renderer::Renderer()
 {
 	//mutexDevice = CreateMutex(NULL,FALSE,NULL);
@@ -138,8 +140,7 @@ HRESULT Renderer::init(std::string rootDir)
 
 	resetRootWorldTransform();
 
-	getVertexShader(FallbackVS);
-	getPixelShader(FallbackPS);
+	initFallbackShaders();
 
 	//ReleaseMutex(mutexDevice);
 
@@ -472,109 +473,261 @@ std::string makeVariableString(const std::map<std::string, std::string>& variabl
 	return strOut;
 }
 
-int Renderer::getVertexShader(Renderer::VertexShaders shader, const std::map<std::string,std::string>& variables)
+FILETIME getFileUpdateTime(const std::string& filePath)
+{
+	FILETIME lastUpdate = {0};
+
+	HANDLE hFile = CreateFile(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	if ( hFile == INVALID_HANDLE_VALUE )
+		return lastUpdate;
+
+	GetFileTime(hFile, NULL, NULL, &lastUpdate);
+
+	CloseHandle(hFile);
+
+	return lastUpdate;
+}
+
+int Renderer::registerVertexShader(const std::string & filename, const std::string & entrypoint, const std::map<std::string, std::string>& variables)
 {
 	std::string rootDir = getDllDir();
 
-	const std::string& shaderFilename = VERTEX_SHADER_FILENAMES[shader];
-	const std::string& shaderFunction = VERTEX_SHADER_FUNCNAMES[shader];
 	std::string paramStr = makeVariableString(variables);
 
-	//WaitForSingleObject(mutexDevice,INFINITE);
-	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + paramStr;
-	if (0!=vertexShaderMap.count(shaderLookupName))
+	std::string shaderLookupName = filename + ":" + entrypoint + ":" + paramStr;
+	if ( 0 != vertexShaderMap.count(shaderLookupName) )
 	{
-		int idx = vertexShaderMap[shaderLookupName];
-		//ReleaseMutex(mutexDevice);
-		return idx;
+		return vertexShaderMap[shaderLookupName];
 	}
 
-	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + shaderFilename + ".hlsl";
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + filename + ".hlsl";
+
+	// Add a new shader entry regardless of error state (build error entry by default)
+	int entryIdx = (int)vertexShaderRegistry.size();
+
+	VertexShaderEntry newEntry;
+	newEntry.filename = filename;
+	newEntry.entryFunc = entrypoint;
+	newEntry.vars = variables;
+	newEntry.update = getFileUpdateTime(shaderPath);
+
+	// Assume an error case
+	newEntry.error = true;
+	newEntry.shader = fallbackVS;
+	newEntry.layout = fallbackLayout;
+
+	vertexShaderRegistry.push_back(newEntry);
+	vertexShaderMap.insert(std::pair<std::string,int>(shaderLookupName,entryIdx));
 
 	ID3D11VertexShader* newShader;
 	ID3D11InputLayout* newLayout;
-	if (FAILED(compileVertexShader(shaderPath, shaderFunction, variables, &newShader, &newLayout)))
+	if ( FAILED(compileVertexShader(shaderPath, entrypoint, variables, &newShader, &newLayout)) )
 	{
-		//ReleaseMutex(mutexDevice);
-		return -1;
+		return entryIdx;
 	}
 
-	vertexShaderList.push_back(newShader);
-	vertexLayoutList.push_back(newLayout);
+	vertexShaderRegistry[entryIdx].error = false;
+	vertexShaderRegistry[entryIdx].shader = newShader;
+	vertexShaderRegistry[entryIdx].layout = newLayout;
 
-	vertexShaderMap.insert(std::pair<std::string,int>(shaderLookupName,(int)vertexShaderList.size()-1));
-
-	int idx = vertexShaderMap[shaderLookupName];
-
-	//ReleaseMutex(mutexDevice);
-
-	return idx;
+	return entryIdx;
 }
 
-int Renderer::getPixelShader(Renderer::PixelShaders shader, const std::map<std::string,std::string>& variables)
+int Renderer::registerPixelShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string, std::string>& variables)
 {
 	std::string rootDir = getDllDir();
 
-	const std::string& shaderFilename = PIXEL_SHADER_FILENAMES[shader];
-	const std::string& shaderFunction = PIXEL_SHADER_FUNCNAMES[shader];
 	std::string paramStr = makeVariableString(variables);
 
-	//WaitForSingleObject(mutexDevice,INFINITE);
-	std::string shaderLookupName = shaderFilename + ":" + shaderFunction + ":" + paramStr;
-
-	if (pixelShaderMap.count(shaderLookupName)!=0)
+	std::string shaderLookupName = filename + ":" + entrypoint + ":" + paramStr;
+	if ( 0 != pixelShaderMap.count(shaderLookupName) )
 	{
-		int idx = pixelShaderMap[shaderLookupName];
-		//ReleaseMutex(mutexDevice);
-		return idx;
+		return pixelShaderMap[shaderLookupName];
 	}
 
-	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + shaderFilename + ".hlsl";
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + filename + ".hlsl";
+
+	// Add a new shader entry regardless of error state (build error entry by default)
+	int entryIdx = (int)pixelShaderRegistry.size();
+
+	PixelShaderEntry newEntry;
+	newEntry.filename = filename;
+	newEntry.entryFunc = entrypoint;
+	newEntry.vars = variables;
+	newEntry.error = true;
+	newEntry.update = getFileUpdateTime(shaderPath);
+
+	// Assume an error case
+	newEntry.error = true;
+	newEntry.shader = fallbackPS;
+
+	pixelShaderRegistry.push_back(newEntry);
+	pixelShaderMap.insert(std::pair<std::string,int>(shaderLookupName,entryIdx));
 
 	ID3D11PixelShader* newShader;
-	if (FAILED(compilePixelShader(shaderPath, shaderFunction, variables, &newShader)))
+	if ( FAILED(compilePixelShader(shaderPath, entrypoint, variables, &newShader)) )
 	{
-		//ReleaseMutex(mutexDevice);
-		return -1;
+		return entryIdx;
 	}
 
-	pixelShaderList.push_back(newShader);
+	pixelShaderRegistry[entryIdx].error = false;
+	pixelShaderRegistry[entryIdx].shader = newShader;
 
-	pixelShaderMap.insert(std::pair<std::string,int>(shaderLookupName,(int)pixelShaderList.size()-1));
-
-	int idx = pixelShaderMap[shaderLookupName];
-
-	//ReleaseMutex(mutexDevice);
-
-	return idx;
+	return entryIdx;
 }
 
-int Renderer::getFallbackShaders()
+void Renderer::initFallbackShaders()
 {
-	return 0;
+	std::string rootDir = getDllDir();
+
+	if ( !pixelShaderRegistry.empty() )
+		clearVertexShaderList();
+
+	if ( !vertexShaderRegistry.empty() )
+		clearPixelShaderList();
+
+	std::string vertexFunc = "FallbackVertexShader";
+	std::string pixelFunc = "FallbackPixelShader";
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/Fallback.hlsl";
+	std::map<std::string,std::string> emptyVar;
+
+	ID3D11VertexShader* newVertShader;
+	ID3D11InputLayout* newVertLayout;
+	if ( FAILED(compileVertexShader(shaderPath, vertexFunc, emptyVar, &newVertShader, &newVertLayout)) )
+	{
+		throw std::runtime_error("Unable to create default fallback vertex shader!");
+	}
+
+	ID3D11PixelShader* newPixelShader;
+	if ( FAILED(compilePixelShader(shaderPath, pixelFunc, emptyVar, &newPixelShader)) )
+	{
+		throw std::runtime_error("Unable to create default fallback pixel shader!");
+	}
+
+	fallbackLayout = newVertLayout;
+	fallbackVS = newVertShader;
+	fallbackPS = newPixelShader;
+}
+
+int Renderer::updateRegisteredShaders()
+{
+	std::string rootDir = getDllDir();
+
+	int updatedShaders = FALSE;
+
+	// Check for updated file times in vertex shader files
+	for ( int i = 0; i < vertexShaderRegistry.size(); ++i )
+	{
+		std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + vertexShaderRegistry[i].filename + ".hlsl";
+		FILETIME updateTime = getFileUpdateTime(shaderPath);
+
+		if ( CompareFileTime(&vertexShaderRegistry[i].update,&updateTime) >= 0 )
+			continue;
+
+		updateVertexShader(i);
+		vertexShaderRegistry[i].update = updateTime;
+
+		updatedShaders = TRUE;
+	}
+
+	// Check for updated file times in pixel shader files
+	for ( int i = 0; i < pixelShaderRegistry.size(); ++i )
+	{
+		std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + pixelShaderRegistry[i].filename + ".hlsl";
+		FILETIME updateTime = getFileUpdateTime(shaderPath);
+
+		if ( CompareFileTime(&pixelShaderRegistry[i].update,&updateTime) >= 0 )
+			continue;
+
+		updatePixelShader(i);
+		pixelShaderRegistry[i].update = updateTime;
+
+		updatedShaders = TRUE;
+	}
+
+	return updatedShaders;
+}
+
+void Renderer::updateVertexShader(int entryIdx)
+{
+	VertexShaderEntry& vsEntry = vertexShaderRegistry[entryIdx];
+
+	std::string rootDir = getDllDir();
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + vsEntry.filename + ".hlsl";
+
+	bool error = vsEntry.error;
+
+	// Clean out the old shader and layout entries
+	if ( !error )
+	{
+		SAFE_RELEASE(vsEntry.shader);
+		SAFE_RELEASE(vsEntry.layout);
+	}
+
+	// Set up shader entry for the error case
+	vsEntry.error = true;
+	vsEntry.shader = fallbackVS;
+	vsEntry.layout = fallbackLayout;
+
+	ID3D11VertexShader* newShader;
+	ID3D11InputLayout* newLayout;
+	if ( FAILED(compileVertexShader(shaderPath, vsEntry.entryFunc, vsEntry.vars, &newShader, &newLayout)) )
+	{
+		return;
+	}
+
+	vsEntry.error = false;
+	vsEntry.shader = newShader;
+	vsEntry.layout = newLayout;
+}
+
+void Renderer::updatePixelShader(int entryIdx)
+{
+	PixelShaderEntry& psEntry = pixelShaderRegistry[entryIdx];
+
+	std::string rootDir = getDllDir();
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/" + psEntry.filename + ".hlsl";
+
+	bool error = psEntry.error;
+
+	// Clean out the old shader and layout entries
+	if ( !error )
+	{
+		SAFE_RELEASE(psEntry.shader);
+	}
+
+	// Set up shader entry for the error case
+	psEntry.error = true;
+	psEntry.shader = fallbackPS;
+
+	ID3D11PixelShader* newShader;
+	if ( FAILED(compilePixelShader(shaderPath, psEntry.entryFunc, psEntry.vars, &newShader)) )
+	{
+		return;
+	}
+
+	psEntry.error = false;
+	psEntry.shader = newShader;
 }
 
 void Renderer::clearVertexShaderList()
 {
-	for (int i = 0; i<vertexShaderList.size(); ++i)
-		SAFE_RELEASE(vertexShaderList[i]);
+	for (int i = 0; i<vertexShaderRegistry.size(); ++i)
+	{
+		SAFE_RELEASE(vertexShaderRegistry[i].shader);
+		SAFE_RELEASE(vertexShaderRegistry[i].layout);
+	}
 
-	vertexShaderList.clear();
-
-	for (int i = 0; i<vertexLayoutList.size(); ++i)
-		SAFE_RELEASE(vertexLayoutList[i]);
-
-	vertexLayoutList.clear();
-
+	vertexShaderRegistry.clear();
 	vertexShaderMap.clear();
 }
 
 void Renderer::clearPixelShaderList()
 {
-	for (int i = 0; i<pixelShaderList.size(); ++i)
-		SAFE_RELEASE(pixelShaderList[i]);
+	for (int i = 0; i<pixelShaderRegistry.size(); ++i)
+		SAFE_RELEASE(pixelShaderRegistry[i].shader);
 
-	pixelShaderList.clear();
+	pixelShaderRegistry.clear();
 	pixelShaderMap.clear();
 }
 
@@ -864,22 +1017,19 @@ ID3DBlob* Renderer::compileShaderFile(const std::string& filename, const std::st
 
 void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip, float backClip)
 {
-	static int previousVertexShaderIdx = -1;
-	static int previousPixelShaderIdx = -1;
+	static ID3D11VertexShader* previousVertexShader = NULL;
+	static ID3D11PixelShader* previousPixelShader = NULL;
 
-	int vertShaderIdx = node->mesh->vertShaderIdx;
-	int pixShaderIdx = node->material->shaderIdx;
+	const VertexShaderEntry& vsEntry = vertexShaderRegistry[node->mesh->vertShaderIdx];
+	const PixelShaderEntry& psEntry = pixelShaderRegistry[node->material->shaderIdx];
 
-	if ( vertShaderIdx < 0 )
-	{
-		vertShaderIdx = getFallbackShaders();
-		pixShaderIdx = getFallbackShaders();
-	}
+	ID3D11InputLayout* vertLayout = vsEntry.layout;
+	ID3D11VertexShader* vertShader = vsEntry.shader;
+	ID3D11PixelShader* pixShader = psEntry.shader;
 
-	if ( pixShaderIdx < 0 )
-	{
-		pixShaderIdx = getFallbackShaders();
-	}
+	// Don't try to use a good pixel-shader with a bad vertex shader
+	if ( vsEntry.error )
+		pixShader = fallbackPS;
 
 	//Vertex Shader setup
 	VertexShaderConstBuffer vcb;
@@ -891,10 +1041,10 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 	vcb.depthPeelPlanes.y = backClip;
 	updateShaderParams(&vcb,vertexShaderConstBuffer);
 
-	if ( previousVertexShaderIdx != vertShaderIdx )
+	if ( previousVertexShader != vertShader )
 	{
-		setVertexShader(vertShaderIdx);
-		previousVertexShaderIdx = vertShaderIdx;
+		setVertexShader(vertShader, vertLayout);
+		previousVertexShader = vertShader;
 	}
 
 	setGeometry(node->mesh->vertexBuffer, node->mesh->indexBuffer);
@@ -909,10 +1059,10 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 	node->material->bindTextures();
 	node->material->bindConstants(); //TODO this needs tweeking
 	
-	if (previousPixelShaderIdx != pixShaderIdx)
+	if (previousPixelShader != pixShader)
 	{
-		setPixelShader(pixShaderIdx);
-		previousPixelShaderIdx = pixShaderIdx;
+		setPixelShader(pixShader);
+		previousPixelShader = pixShader;
 	}
 	
 	setRasterizerState(node->material->rasterState);
@@ -1169,14 +1319,11 @@ void Renderer::renderFPS(HDC hdc)
 	}
 }
 
-void Renderer::setVertexShader(int vertexShaderListIdx)
+void Renderer::setVertexShader(ID3D11VertexShader* shader, ID3D11InputLayout* layout)
 {
-	if (vertexShaderListIdx>vertexShaderList.size()-1)
-		sendErrMessage("There is no shader in the list of this type!");
-
 	immediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	immediateContext->VSSetShader(vertexShaderList[vertexShaderListIdx],NULL,0);
-	immediateContext->IASetInputLayout(vertexLayoutList[vertexShaderListIdx]);
+	immediateContext->VSSetShader(shader,NULL,0);
+	immediateContext->IASetInputLayout(layout);
 	immediateContext->VSSetConstantBuffers(0,1,&vertexShaderConstBuffer);
 }
 
@@ -1185,12 +1332,9 @@ void Renderer::setRasterizerState(ID3D11RasterizerState* rasterState)
 	immediateContext->RSSetState(rasterState);
 }
 
-void Renderer::setPixelShader(int pixelShaderListIdx)
+void Renderer::setPixelShader(ID3D11PixelShader* shader)
 {
-	if (pixelShaderListIdx>pixelShaderList.size()-1)
-		sendErrMessage("No pixel shader found in list with this index!");
-
-	immediateContext->PSSetShader(pixelShaderList[pixelShaderListIdx],NULL,0);
+	immediateContext->PSSetShader(shader,NULL,0);
 }
 
 void Renderer::setDepthStencilState(ID3D11DepthStencilState* depthStencilState)

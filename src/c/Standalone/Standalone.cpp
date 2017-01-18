@@ -27,9 +27,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	ModuleInfo::setModuleHandle(hInstance);
 	ModuleInfo::initModuleInfo();
 
-	std::string* pRootDir = new std::string("./");
+	std::string* pRootDir = new std::string(".");
 
 	gRendererOn = true;
+	gUpdateShaders = true;
 
 	// Queue up a random volume to render
 	const int numChan = 2;

@@ -19,10 +19,17 @@
 
 #include <limits>
 
-MeshPrimitive::MeshPrimitive(Renderer* rendererIn, Renderer::VertexShaders shader)
+MeshPrimitive::MeshPrimitive(Renderer* rendererIn, const std::string& shaderFile, const std::string& shaderFunc)
 	: renderer(rendererIn), vertShaderIdx(-1), vertexBuffer(NULL), indexBuffer(NULL)
 {
-	loadShader(shader);
+	loadShader(shaderFile,shaderFunc);
+}
+
+MeshPrimitive::MeshPrimitive(Renderer * rendererIn, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV)
+	: MeshPrimitive(rendererIn)
+{
+	setupMesh(faces, vertices, normals, textureUV);
 }
 
 void MeshPrimitive::setupMesh(const std::vector<Vec<unsigned int>>& facesIn, const std::vector<Vec<float>>& verticesIn,
@@ -43,9 +50,9 @@ void MeshPrimitive::cleanupMesh()
 	SAFE_RELEASE(indexBuffer);
 }
 
-void MeshPrimitive::loadShader(Renderer::VertexShaders shader)
+void MeshPrimitive::loadShader(const std::string& shaderFile, const std::string& shaderFunc)
 {
-	vertShaderIdx = renderer->getVertexShader(shader);
+	vertShaderIdx = renderer->registerVertexShader(shaderFile,shaderFunc);
 }
 
 void MeshPrimitive::initializeResources(const std::vector<Vec<float>>& textureUV)
@@ -130,13 +137,6 @@ bool MeshPrimitive::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntV
 	return true;
 }
 
-MeshPrimitive::MeshPrimitive(Renderer * rendererIn, Renderer::VertexShaders shader, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
-	const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV)
-	: MeshPrimitive(rendererIn, shader)
-{
-	setupMesh(faces, vertices, normals, textureUV);
-}
-
 bool MeshPrimitive::checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, float & depthOut)
 {
 	bool found = false;
@@ -181,7 +181,7 @@ const Vec<float> ViewAlignedPlanes::planeVertices[4] =
 };
 
 ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, Vec<float> scaleDims)
-	: dims(volDims), physicalSize(scaleDims), MeshPrimitive(renderer, Renderer::VertexShaders::ViewAligned)
+	: dims(volDims), physicalSize(scaleDims), MeshPrimitive(renderer, "ViewAlignedVertexShader","ViewAlignedVertexShader")
 {
 	std::vector<Vec<float>> texUVs;
 	buildViewAlignedPlanes(dims, faces, vertices, normals, texUVs);

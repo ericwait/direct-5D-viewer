@@ -19,6 +19,7 @@
 
 #include <d3d11.h>
 #include <vector>
+#include <string>
 
 class MeshPrimitive
 {
@@ -26,21 +27,21 @@ public:
 	friend class Renderer;
 	friend class GraphicObjectNode;
 
-	MeshPrimitive(Renderer* rendererIn, Renderer::VertexShaders shader, const std::vector<Vec<unsigned int>>& faces,const std::vector<Vec<float>>& vertices,
+	MeshPrimitive(Renderer* rendererIn, const std::vector<Vec<unsigned int>>& faces,const std::vector<Vec<float>>& vertices,
 		const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV = std::vector<Vec<float>>());
 
 	bool checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
 
 	~MeshPrimitive();
 protected:
-	MeshPrimitive(Renderer* rendererIn, Renderer::VertexShaders shader);
+	MeshPrimitive(Renderer* rendererIn, const std::string& shaderFile = "DefaultMeshShaders", const std::string& shaderFunc = "DefaultMeshVertexShader");
 
 	void setupMesh(const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
 		const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV = std::vector<Vec<float>>());
 
 	void cleanupMesh();
 
-	void loadShader(Renderer::VertexShaders shader);
+	void loadShader(const std::string& shaderFile, const std::string& shaderFunc);
 	void initializeResources(const std::vector<Vec<float>>& textureUV);
 	void updateCenterOfMass();
 
