@@ -18,13 +18,13 @@
 Material::Material(Renderer* rendererIn)
 	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL)
 {
-	setMaterialProps(false, true, true);
+	setMaterialProps(false, false, true);
 }
 
 Material::Material(Renderer* rendererIn, std::shared_ptr<MaterialParameters> sharedParams)
 	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL), params(sharedParams)
 {
-	setMaterialProps(false, true, true);
+	setMaterialProps(false, false, true);
 }
 
 Material::~Material()
