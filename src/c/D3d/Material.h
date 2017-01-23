@@ -90,6 +90,7 @@ public:
 
 	void setLightOn(bool on);
 
+	virtual DirectX::XMFLOAT4 getColor();
 private:
 	SingleColoredMaterial(){}
 };

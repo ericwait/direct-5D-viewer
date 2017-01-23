@@ -54,6 +54,11 @@ void SingleColorParams::setColorModifier(Vec<float> colorMod, float alphaMod)
 	ref<DirectX::XMFLOAT4>("colorModifier") = DirectX::XMFLOAT4(colorMod.x,colorMod.y,colorMod.z,alphaMod);
 }
 
+DirectX::XMFLOAT4 SingleColorParams::getColor()
+{
+	return ref<DirectX::XMFLOAT4>("color");
+}
+
 
 
 // Material parameters for any volume renderer

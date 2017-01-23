@@ -126,6 +126,11 @@ void SingleColoredMaterial::setLightOn(bool on)
 	static_cast<SingleColorParams*>(params.get())->setLightOn(on);
 }
 
+DirectX::XMFLOAT4 SingleColoredMaterial::getColor()
+{
+	return params->getColor();
+}
+
 
 
 StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn)

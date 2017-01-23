@@ -125,6 +125,7 @@ public:
 	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
 
+	virtual DirectX::XMFLOAT4 getColor();
 private:
 	SingleColorParams() : MaterialParameters(NULL){};
 };
