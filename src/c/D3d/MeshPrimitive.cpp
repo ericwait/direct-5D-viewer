@@ -39,6 +39,8 @@ void MeshPrimitive::setupMesh(const std::vector<Vec<unsigned int>>& facesIn, con
 	vertices = verticesIn;
 	normals = normalsIn;
 
+	updateCenterOfMass();
+
 	initializeResources(textureUVIn);
 }
 
