@@ -17,6 +17,7 @@
 #include "Global/Vec.h"
 
 #include <d3d11.h>
+#include <DXGI1_2.h>
 #include <DirectXMath.h>
 
 #include <vector>
@@ -32,6 +33,9 @@ class VolumeParams;
 class SceneNode;
 class RootSceneNode;
 class GraphicObjectNode;
+class RenderTarget;
+class DepthTarget;
+class SwapChainTarget;
 
 struct Vertex
 {
@@ -49,6 +53,18 @@ enum GraphicObjectTypes
 	OriginalVolume,
 	ProcessedVolume,
 	VTend
+};
+
+enum RenderTargetTypes
+{
+	SwapChain = 0,
+	NumRT
+};
+
+enum DepthTargetTypes
+{
+	Default = 0,
+	NumDT
 };
 
 class Renderer
@@ -84,11 +100,11 @@ public:
 	void decrementFrame();
 	unsigned int getNumberOfFrames();
 	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
-	void removeFromRootScene(SceneNode* sceneIn);
 
 	void clearVertexShaderList();
 	void clearPixelShaderList();
 	void resizeViewPort();
+	void flushContext();
 
 	void updateShaderParams(const void* params, ID3D11Buffer* buffer);
 	void setPixelShaderConsts(ID3D11Buffer* buffer);
@@ -122,8 +138,6 @@ public:
 	int updateRegisteredShaders();
 	int registerVertexShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
 	int registerPixelShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
-
-	ID3D11SamplerState* getSamplerState();
 
 	DirectX::XMMATRIX getRootWorldRotation();
 	//void getMutex(); // comment these out
@@ -166,10 +180,24 @@ public:
 	HRESULT createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut);
 	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
-	ID3D11ShaderResourceView* createTextureResourceView(Vec<size_t> dims, const unsigned char* image);
+
+	IDXGISwapChain1* createSwapChain(HWND hWnd, Vec<size_t> dims, DXGI_FORMAT format, UINT flags);
+
+	ID3D11SamplerState* createSamplerState();
+	ID3D11ShaderResourceView* createShaderResourceView(ID3D11Resource* textureResource);
+	ID3D11RenderTargetView* createRenderTargetView(ID3D11Resource* textureResource);
+	ID3D11DepthStencilView* createDepthTargetView(ID3D11Resource* textureResource);
+	ID3D11Texture2D* createTexture2D(D3D11_TEXTURE2D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData = NULL);
+	ID3D11Texture3D* createTexture3D(D3D11_TEXTURE3D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData = NULL);
 
 	ID3D11RasterizerState* getRasterizerState(bool wireframe, bool cullBackface);
 	ID3D11DepthStencilState* getDepthStencilState(bool depthTest);
+
+	void detachTargets();
+	void attachTargets(RenderTargetTypes rt, DepthTargetTypes dt);
+
+	void clearRenderTarget(RenderTargetTypes rt, Vec<float> clearColor);
+	void clearDepthTarget(DepthTargetTypes dt, float clearDepth);
 
 	void convertToWorldSpace(double* verts, size_t numVerts);
 
@@ -178,16 +206,16 @@ public:
     float BackClipPos() const;
     void BackClipPos(float val);
 private:
-	HRESULT initSwapChain();
+	HRESULT initDevice();
 	HRESULT initDepthStencils();
-	HRESULT initRenderTarget();
+	HRESULT initRenderTargets();
 	HRESULT resetViewPort();
 	void createBlendState();
 	
 	void releaseDepthStencils();
 	void releaseRenderTarget();
 	void releaseMaterialStates();
-	void releaseSwapChain();
+	void releaseDevice();
 
 	void initFallbackShaders();
 	void updateVertexShader(int entryIdx);
@@ -213,18 +241,19 @@ private:
 	void renderFrameNum(HDC hdc);
 	void renderFPS(HDC hdc);
 
+	const SwapChainTarget* getSwapChain() const;
+
 	//Member variables 
 	Vec<float> backgroundColor;
 
 	//HANDLE mutexDevice; // comment this out
-	IDXGISwapChain*	swapChain;
-	ID3D11Device* d3dDevice;
-	ID3D11DeviceContext* immediateContext;
-	ID3D11RenderTargetView* renderTargetView;
-	IDXGISurface1* IDXGIBackBuffer;	
-	ID3D11BlendState* blendState;
+	D3D_FEATURE_LEVEL renderFeatureLevel;
 
-	ID3D11DepthStencilView* depthStencilView;
+	ID3D11Device* renderDevice;
+	ID3D11DeviceContext* renderContext;
+	IDXGIFactory2* renderFactory;
+
+	ID3D11BlendState* blendState;
 
 	ID3D11Buffer* vertexShaderConstBuffer;
 	
@@ -265,8 +294,6 @@ private:
 	ID3D11VertexShader* fallbackVS;
 	ID3D11InputLayout* fallbackLayout;
 
-	ID3D11SamplerState* linearTextureSampler;
-
 	// Scene objects
 	//TODO: Should probably put cameras in the scene
 	RootSceneNode* rootScene;
@@ -301,6 +328,9 @@ private:
 
 private:
 	std::shared_ptr<VolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
+
+	std::shared_ptr<RenderTarget> renderTargets[RenderTargetTypes::NumRT];
+	std::shared_ptr<DepthTarget> depthTargets[DepthTargetTypes::NumDT];
 
 	std::map<unsigned int,ID3D11DepthStencilState*> depthStencilStates;
 	std::map<unsigned int,ID3D11RasterizerState*> rasterStates;

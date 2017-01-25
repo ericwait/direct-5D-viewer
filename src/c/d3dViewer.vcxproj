@@ -100,6 +100,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp" />
+    <ClCompile Include="D3d\DepthTarget.cpp" />
     <ClCompile Include="D3d\EigenToFromDirectX.cpp" />
     <ClCompile Include="D3d\Initialization.cpp" />
     <ClCompile Include="D3d\Material.cpp" />
@@ -107,6 +108,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="D3d\MeshPrimitive.cpp" />
     <ClCompile Include="D3d\MessageProcessor.cpp" />
     <ClCompile Include="D3d\Renderer.cpp" />
+    <ClCompile Include="D3d\RenderTarget.cpp" />
     <ClCompile Include="D3d\SceneNode.cpp" />
     <ClCompile Include="D3d\Texture.cpp" />
     <ClCompile Include="D3d\TextureLightingObj.cpp" />
@@ -170,6 +172,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3d\Camera.h" />
+    <ClInclude Include="D3d\DepthTarget.h" />
     <ClInclude Include="D3d\EigenToFromDirectX.h" />
     <ClInclude Include="D3d\Initialization.h" />
     <ClInclude Include="D3d\Material.h" />
@@ -177,6 +180,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClInclude Include="D3d\MeshPrimitive.h" />
     <ClInclude Include="D3d\MessageProcessor.h" />
     <ClInclude Include="D3d\Renderer.h" />
+    <ClInclude Include="D3d\RenderTarget.h" />
     <ClInclude Include="D3d\SceneNode.h" />
     <ClInclude Include="D3d\Texture.h" />
     <ClInclude Include="D3d\TextureLightingObj.h" />

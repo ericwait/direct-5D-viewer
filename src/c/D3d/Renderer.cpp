@@ -19,6 +19,8 @@
 #include "MaterialParams.h"
 #include "Camera.h"
 #include "Timer.h"
+#include "RenderTarget.h"
+#include "DepthTarget.h"
 
 #include "Global/Defines.h"
 #include "Global/Globals.h"
@@ -38,18 +40,6 @@ const std::string SHADER_DIR = "Shaders";
 
 Renderer::Renderer()
 {
-	//mutexDevice = CreateMutex(NULL,FALSE,NULL);
-
-	swapChain = NULL;
-	d3dDevice = NULL;
-	immediateContext = NULL;
-	renderTargetView = NULL;
-	IDXGIBackBuffer= NULL;
-
-	depthStencilView = NULL;
-
-	linearTextureSampler = NULL;
-
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 	currentFrame = 0;
 	clipChunkPercent = 1.0f;
@@ -91,50 +81,35 @@ Renderer::~Renderer()
 	clearPixelShaderList();
 
 	SAFE_RELEASE(vertexShaderConstBuffer);
-	SAFE_RELEASE(linearTextureSampler);
 	SAFE_RELEASE(blendState);
 
 	releaseMaterialStates();
-	releaseRenderTarget();
 	releaseDepthStencils();
-	releaseSwapChain();
+	releaseRenderTarget();
+	releaseDevice();
 }
 
 HRESULT Renderer::init(std::string rootDir)
 {
 	dllRoot = rootDir;
 
-	//WaitForSingleObject(mutexDevice,INFINITE);
-
-	HRESULT hr = initSwapChain();
+	HRESULT hr = initDevice();
 	if (FAILED(hr))
-	{
-		//ReleaseMutex(mutexDevice);
 		return hr;
-	}
+
+	hr = initRenderTargets();
+	if (FAILED(hr))
+		return hr;
 
 	hr = initDepthStencils();
 	if (FAILED(hr))
-	{
-		//ReleaseMutex(mutexDevice);
 		return hr;
-	}
-
-	hr = initRenderTarget();
-	if (FAILED(hr))
-	{
-		//ReleaseMutex(mutexDevice);
-		return hr;
-	}
 
 	createBlendState();
 
 	hr = createConstantBuffer(sizeof(VertexShaderConstBuffer),&vertexShaderConstBuffer);
 	if (FAILED(hr))
-	{
-		//ReleaseMutex(mutexDevice);
 		return hr;
-	}
 
 	rootScene = new RootSceneNode();
 
@@ -142,12 +117,12 @@ HRESULT Renderer::init(std::string rootDir)
 
 	initFallbackShaders();
 
-	//ReleaseMutex(mutexDevice);
+	resetViewPort();
 
 	return hr;
 }
 
-HRESULT Renderer::initSwapChain()
+HRESULT Renderer::initDevice()
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 
@@ -163,35 +138,11 @@ HRESULT Renderer::initSwapChain()
 	D3D_FEATURE_LEVEL featureLevels[] =	{D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0};
 	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
-	//Swap chain descriptor
-	DXGI_SWAP_CHAIN_DESC sd;
-	ZeroMemory(&sd, sizeof(sd));
-	sd.BufferCount = 1;
-	sd.BufferDesc.Width = gWindowWidth;
-	sd.BufferDesc.Height = gWindowHeight;
-	sd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	sd.BufferDesc.RefreshRate.Numerator = 60;
-	sd.BufferDesc.RefreshRate.Denominator = 1;
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = gWindowHandle;
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Windowed = TRUE;
-	sd.Flags= DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE | DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
 	for(UINT driverTypeIndex=0; driverTypeIndex<numDriverTypes; ++driverTypeIndex)
 	{
 		D3D_DRIVER_TYPE driverType = driverTypes[driverTypeIndex];
-		for (UINT featureLevelTypeIndex=0; featureLevelTypeIndex<numFeatureLevels; ++featureLevelTypeIndex)
-		{
-			D3D_FEATURE_LEVEL featureLevel = featureLevels[featureLevelTypeIndex];
-
-			hr = D3D11CreateDeviceAndSwapChain(NULL, driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-				D3D11_SDK_VERSION, &sd, &swapChain, &d3dDevice, &featureLevel, &immediateContext);
-
-			if( SUCCEEDED(hr) )
-				break;
-		}
+		hr = D3D11CreateDevice(NULL, driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION,
+								&renderDevice, &renderFeatureLevel, &renderContext);
 
 		if( SUCCEEDED(hr) )
 			break;
@@ -200,119 +151,60 @@ HRESULT Renderer::initSwapChain()
 	if (FAILED(hr))
 		return hr;
 
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)gWindowWidth;
-	vp.Height = (float)gWindowHeight;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	immediateContext->RSSetViewports( 1, &vp );
+	// Get a hold of the IDXGIFactory2 factory that creates our devices, etc. Necessary for making new swap chains.
+	IDXGIDevice2* pDXGIDevice2;
+	hr = renderDevice->QueryInterface(__uuidof(IDXGIDevice2), (void **)&pDXGIDevice2);
+	if ( FAILED(hr) )
+		return hr;
+
+	IDXGIAdapter* pDXGIAdapter;
+	hr = pDXGIDevice2->GetParent(__uuidof(IDXGIAdapter), (void **)&pDXGIAdapter);
+	if ( FAILED(hr) )
+		return hr;
+
+	hr = pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), (void **)&renderFactory);
+	if ( FAILED(hr) )
+		return hr;
 
 	//ReleaseMutex(mutexDevice);
 
 	return hr;
 }
 
-void Renderer::releaseSwapChain()
+void Renderer::releaseDevice()
 {
-	immediateContext->ClearState();
-	SAFE_RELEASE(swapChain);
-	SAFE_RELEASE(d3dDevice);
-	SAFE_RELEASE(immediateContext);
+	flushContext();
+
+	SAFE_RELEASE(renderDevice);
+	SAFE_RELEASE(renderContext);
 }
 
-HRESULT Renderer::initDepthStencils()
+HRESULT Renderer::initRenderTargets()
 {
-	HRESULT hr = E_FAIL;
-
-	//DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	//if ( waitResult != WAIT_OBJECT_0 )
-		//return E_FAIL;
-
-	// Create depth stencil texture
-	ID3D11Texture2D* depthStencil = NULL;
-
-	D3D11_TEXTURE2D_DESC descDepth;
-
-	descDepth.Width = gWindowWidth;
-	descDepth.Height = gWindowHeight;
-	descDepth.MipLevels = 1;
-	descDepth.ArraySize = 1;
-	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
-	descDepth.SampleDesc.Count = 1;
-	descDepth.SampleDesc.Quality = 0;
-	descDepth.Usage = D3D11_USAGE_DEFAULT;
-	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	descDepth.CPUAccessFlags = 0;
-	descDepth.MiscFlags = 0;
-
-	hr = d3dDevice->CreateTexture2D(&descDepth, NULL, &depthStencil);
-	if( FAILED(hr) )
-		return hr;
-
-	// Create the depth stencil view
-	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-
-	descDSV.Format = descDepth.Format;
-	descDSV.Flags = 0;
-
-	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-
-	descDSV.Texture2D.MipSlice = 0;
-
-	hr = d3dDevice->CreateDepthStencilView(depthStencil, &descDSV, &depthStencilView);
-	if( FAILED( hr ) )
-		return hr;
-
-	depthStencil->Release();
-
-	//ReleaseMutex(mutexDevice);
-
-	return S_OK;
-}
-
-void Renderer::releaseDepthStencils()
-{
-	SAFE_RELEASE(depthStencilView);
-}
-
-HRESULT Renderer::initRenderTarget()
-{
-	HRESULT hr;
-
-	// Create a render target view
-	ID3D11Texture2D* backBuffer = NULL;
-	hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
-	if( FAILED(hr) )
-		return hr;
-
-	hr = backBuffer->QueryInterface(__uuidof( IDXGISurface1) ,(LPVOID*)&IDXGIBackBuffer);
-	if( FAILED(hr) )
-		return hr;
-
-	//DWORD waitResult = WaitForSingleObject(mutexDevice, INFINITE);
-	//if ( waitResult != WAIT_OBJECT_0 )
-		//return E_FAIL;
-
-	hr = d3dDevice->CreateRenderTargetView(backBuffer, NULL, &renderTargetView);
-
-	//ReleaseMutex(mutexDevice);
-
-	backBuffer->Release();
-
-	if( FAILED(hr) )
-		return hr;
-
-	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+	renderTargets[RenderTargetTypes::SwapChain] = std::make_shared<SwapChainTarget>(this, gWindowHandle, gWindowWidth, gWindowHeight);
 
 	return S_OK;
 }
 
 void Renderer::releaseRenderTarget()
 {
-	SAFE_RELEASE(IDXGIBackBuffer);
-	SAFE_RELEASE(renderTargetView);
+	// Assign null (these are shared pointers, so it'll clear the render targets)
+	for ( int i=0; i < RenderTargetTypes::NumRT; ++i )
+		renderTargets[i] = nullptr;
+}
+
+HRESULT Renderer::initDepthStencils()
+{
+	depthTargets[DepthTargetTypes::Default] = std::make_shared<RenderDepthTarget>(this, gWindowWidth, gWindowHeight);
+
+	return S_OK;
+}
+
+void Renderer::releaseDepthStencils()
+{
+	// Assign null (these are shared pointers, so it'll clear the depth targets)
+	for ( int i=0; i < DepthTargetTypes::NumDT; ++i )
+		depthTargets[i] = nullptr;
 }
 
 void Renderer::releaseMaterialStates()
@@ -353,7 +245,7 @@ HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** 
 	vertData.SysMemPitch = 0;
 	vertData.SysMemSlicePitch = 0;
 
-	HRESULT result = d3dDevice->CreateBuffer(&vertBufferDesc, &vertData, vertexBufferOut);
+	HRESULT result = renderDevice->CreateBuffer(&vertBufferDesc, &vertData, vertexBufferOut);
 	if ( FAILED(result) )
 		*vertexBufferOut = NULL;
 
@@ -382,7 +274,7 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
-	HRESULT result = d3dDevice->CreateBuffer(&indexBufferDesc, &indexData, indexBufferOut);
+	HRESULT result = renderDevice->CreateBuffer(&indexBufferDesc, &indexData, indexBufferOut);
 	if ( FAILED(result) )
 		*indexBufferOut = NULL;
 
@@ -441,7 +333,7 @@ HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOu
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
 
-	HRESULT hr = d3dDevice->CreateBuffer(&bufferDesc, NULL, constBufferOut);
+	HRESULT hr = renderDevice->CreateBuffer(&bufferDesc, NULL, constBufferOut);
 
 	//ReleaseMutex(mutexDevice);
 
@@ -450,9 +342,7 @@ HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOu
 
 void Renderer::updateShaderParams(const void* params, ID3D11Buffer* buffer)
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
-	immediateContext->UpdateSubresource(buffer,0,NULL,params,0,0);
-	//ReleaseMutex(mutexDevice);
+	renderContext->UpdateSubresource(buffer,0,NULL,params,0,0);
 }
 
 void Renderer::togglestats()
@@ -764,24 +654,52 @@ void Renderer::renderAll()
 
 		frameTimes[curTimeIdx] = GetTimeMs64()-frameTime;
 		++curTimeIdx;
-		if(curTimeIdx>=NUM_TIMES)
+		if(curTimeIdx >= NUM_TIMES)
 			curTimeIdx = 0;
 	}
 }
 
 void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
-
 	sceneIn->attachToParentNode(rootScene->getRenderSectionNode(section,frame));
-
-	//ReleaseMutex(mutexDevice);
 }
+
+
+void Renderer::attachTargets(RenderTargetTypes rt, DepthTargetTypes dt)
+{
+	ID3D11RenderTargetView*	renderTarget = renderTargets[rt]->getRenderTarget();
+	ID3D11DepthStencilView*	depthTarget = depthTargets[dt]->getDepthTarget();
+
+	renderContext->OMSetRenderTargets(1, &renderTarget, depthTarget);
+}
+
+void Renderer::detachTargets()
+{
+	renderContext->OMSetRenderTargets(0, NULL, NULL);
+}
+
+void Renderer::clearRenderTarget(RenderTargetTypes rt, Vec<float> clearColor)
+{
+	ID3D11RenderTargetView*	renderTarget = renderTargets[rt]->getRenderTarget();
+	float color[4] = {clearColor.x, clearColor.y, clearColor.z, 1.0f};
+
+	renderContext->ClearRenderTargetView(renderTarget, color);
+}
+
+void Renderer::clearDepthTarget(DepthTargetTypes dt, float clearDepth)
+{
+	ID3D11DepthStencilView*	depthTarget = depthTargets[dt]->getDepthTarget();
+
+	renderContext->ClearDepthStencilView(depthTarget, D3D11_CLEAR_DEPTH, clearDepth, 0);
+}
+
 
 void Renderer::preRenderLoop()
 {
 	if (rootScene->getNumRenderableObjects(Pre)<1)
 		return;
+
+	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
 
 	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre,currentFrame);
 	for (int i=0; i<renderPreList.size(); ++i)
@@ -795,7 +713,8 @@ void Renderer::mainRenderLoop()
 	if (rootScene->getNumRenderableObjects(Main)<1)
 		return;
 
-	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
+	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 
 	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
 
@@ -820,7 +739,8 @@ void Renderer::postRenderLoop()
 	if (rootScene->getNumRenderableObjects(Post)<1)
 		return;
 
-	immediateContext->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0 );
+	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 
 	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post,currentFrame);
 	for (int i=0; i<renderPostList.size(); ++i)
@@ -834,16 +754,9 @@ void Renderer::gdiRenderLoop()
 	if (rootScene->getNumRenderableObjects(Main)<1)
 		return;
 
-	immediateContext->OMSetRenderTargets(0, 0, 0);
+	detachTargets();
 
-	HDC hdc;
-	HRESULT hr=IDXGIBackBuffer->GetDC(FALSE,&hdc );
-	if (FAILED(hr))
-	{
-		sendErrMessage("Unable to get window's GDI device context!");
-		return;
-	}
-
+	HDC hdc = getSwapChain()->getDC();
 	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
 
 	if(labelsOn)
@@ -862,21 +775,18 @@ void Renderer::gdiRenderLoop()
 			renderFPS(hdc);
 	}
 
-	IDXGIBackBuffer->ReleaseDC(NULL);
-	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+	getSwapChain()->releaseDC();
 }
 
 void Renderer::startRender()
 {
-	float ClearColor[4] = {backgroundColor.x, backgroundColor.y, backgroundColor.z};
-	immediateContext->ClearRenderTargetView(renderTargetView, ClearColor);
-	immediateContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
-	immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+	clearRenderTarget(RenderTargetTypes::SwapChain, backgroundColor);
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 }
 
 void Renderer::endRender()
 {
-	swapChain->Present( 0, 0 );
+	getSwapChain()->present(0,0);
 }
 
 HRESULT Renderer::compileVertexShader(const std::string& filename, const std::string& functionName, const std::map<std::string,std::string>& variables, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut)
@@ -889,7 +799,7 @@ HRESULT Renderer::compileVertexShader(const std::string& filename, const std::st
 		return hr;
 	}
 
-	hr = d3dDevice->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, vertexShaderOut);
+	hr = renderDevice->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, vertexShaderOut);
 	if (FAILED(hr))
 	{
 		shaderBlob->Release();
@@ -905,7 +815,7 @@ HRESULT Renderer::compileVertexShader(const std::string& filename, const std::st
 
 	UINT numElements = ARRAYSIZE(layout);
 
-	hr = d3dDevice->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), vertexLayoutOut);
+	hr = renderDevice->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), vertexLayoutOut);
 
 	shaderBlob->Release();
 	return hr;
@@ -921,7 +831,7 @@ HRESULT Renderer::compilePixelShader(const std::string& filename, const std::str
 		return hr;
 	}
 
-	hr = d3dDevice->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, pixelShaderOut);
+	hr = renderDevice->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, pixelShaderOut);
 
 	shaderBlob->Release();
 	return hr;
@@ -1319,27 +1229,32 @@ void Renderer::renderFPS(HDC hdc)
 	}
 }
 
+const SwapChainTarget* Renderer::getSwapChain() const
+{
+	return static_cast<SwapChainTarget*>(renderTargets[RenderTargetTypes::SwapChain].get());
+}
+
 void Renderer::setVertexShader(ID3D11VertexShader* shader, ID3D11InputLayout* layout)
 {
-	immediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	immediateContext->VSSetShader(shader,NULL,0);
-	immediateContext->IASetInputLayout(layout);
-	immediateContext->VSSetConstantBuffers(0,1,&vertexShaderConstBuffer);
+	renderContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	renderContext->VSSetShader(shader,NULL,0);
+	renderContext->IASetInputLayout(layout);
+	renderContext->VSSetConstantBuffers(0,1,&vertexShaderConstBuffer);
 }
 
 void Renderer::setRasterizerState(ID3D11RasterizerState* rasterState)
 {
-	immediateContext->RSSetState(rasterState);
+	renderContext->RSSetState(rasterState);
 }
 
 void Renderer::setPixelShader(ID3D11PixelShader* shader)
 {
-	immediateContext->PSSetShader(shader,NULL,0);
+	renderContext->PSSetShader(shader,NULL,0);
 }
 
 void Renderer::setDepthStencilState(ID3D11DepthStencilState* depthStencilState)
 {
-	immediateContext->OMSetDepthStencilState(depthStencilState,NULL);
+	renderContext->OMSetDepthStencilState(depthStencilState,NULL);
 }
 
 void Renderer::setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer)
@@ -1347,80 +1262,138 @@ void Renderer::setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 
-	immediateContext->IASetIndexBuffer(indexBuffer,DXGI_FORMAT_R32_UINT,0);
-	immediateContext->IASetVertexBuffers(0,1,&vertexBuffer,&stride,&offset);
+	renderContext->IASetIndexBuffer(indexBuffer,DXGI_FORMAT_R32_UINT,0);
+	renderContext->IASetVertexBuffers(0,1,&vertexBuffer,&stride,&offset);
 }
 
 void Renderer::drawTriangles(size_t numFaces)
 {
-	immediateContext->DrawIndexed(unsigned int(3*numFaces),0,0);
+	renderContext->DrawIndexed(unsigned int(3*numFaces),0,0);
 }
 
 void Renderer::setPixelShaderConsts(ID3D11Buffer* buffer)
 {
-	immediateContext->PSSetConstantBuffers(1,1,&buffer);
+	renderContext->PSSetConstantBuffers(1,1,&buffer);
 }
 
-ID3D11SamplerState* Renderer::getSamplerState()
+IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, DXGI_FORMAT format, UINT flags)
 {
-	if (linearTextureSampler==NULL)
-	{
-		D3D11_SAMPLER_DESC samDesc;
-		ZeroMemory( &samDesc, sizeof(samDesc) );
-		samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		samDesc.AddressU = samDesc.AddressV = samDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-		samDesc.BorderColor[0] = 0.0;
-		samDesc.BorderColor[1] = 0.0;
-		samDesc.BorderColor[2] = 0.0;
-		samDesc.BorderColor[3] = 0.0;
-		samDesc.MaxAnisotropy = 16;
-		samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-		samDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//Swap chain descriptor
+	DXGI_SWAP_CHAIN_DESC1 swapDesc;
+	ZeroMemory(&swapDesc, sizeof(swapDesc));
 
-		HRESULT hr = d3dDevice->CreateSamplerState(&samDesc,&linearTextureSampler);
-		if (FAILED(hr))
-			sendHrErrMessage(hr);
-	}
+	swapDesc.Width = (UINT) dims.x;
+	swapDesc.Height = (UINT) dims.y;
+	swapDesc.Format = format;
 
-	return linearTextureSampler;
+	swapDesc.Stereo = FALSE;
+
+	swapDesc.SampleDesc.Count = 1;
+	swapDesc.SampleDesc.Quality = 0;
+
+	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+	swapDesc.BufferCount = 1;
+	swapDesc.Scaling = DXGI_SCALING_STRETCH;
+	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+	// TODO: Which alpha mode is desired?
+	swapDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+
+	// TODO: We should look into GDI alternatives, and may not need mode-switch capability
+	swapDesc.Flags = flags;
+
+	IDXGISwapChain1* swapChain;
+	HRESULT hr = renderFactory->CreateSwapChainForHwnd(renderDevice, hWnd, &swapDesc, NULL, NULL, &swapChain);
+	if ( FAILED(hr) )
+		sendHrErrMessage(hr);
+
+	return swapChain;
 }
 
-ID3D11ShaderResourceView* Renderer::createTextureResourceView(Vec<size_t> dims, const unsigned char* image)
+ID3D11SamplerState* Renderer::createSamplerState()
 {
-	HRESULT hr = S_OK;
-	UINT iMipCount = 1;
-	UINT BitSize = 0;
+	D3D11_SAMPLER_DESC samplerDesc;
 
-	D3D11_TEXTURE3D_DESC desc;
-	desc.Format = DXGI_FORMAT_R8_UNORM;
-	desc.Width = (unsigned int)dims.x;
-	desc.Height = (unsigned int)dims.y;
-	desc.Depth = (unsigned int)dims.z;
-	desc.MipLevels = iMipCount;
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 
-	ID3D11Texture3D* pTex3D = NULL;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 
-	D3D11_SUBRESOURCE_DATA initData;
-	initData.SysMemPitch = (unsigned int)dims.x;
-	initData.SysMemSlicePitch = unsigned int(dims.x*dims.y);
-	initData.pSysMem = (void*)image;
+	samplerDesc.BorderColor[0] = 0.0f;
+	samplerDesc.BorderColor[1] = 0.0f;
+	samplerDesc.BorderColor[2] = 0.0f;
+	samplerDesc.BorderColor[3] = 0.0f;
 
-	hr = d3dDevice->CreateTexture3D( &desc, &initData, &pTex3D );
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+
+	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	samplerDesc.MipLODBias = 0.0f;
+
+	ID3D11SamplerState* sampler;
+	HRESULT hr = renderDevice->CreateSamplerState(&samplerDesc, &sampler);
+	if (FAILED(hr))
+		sendHrErrMessage(hr);
+
+	return sampler;
+}
+
+ID3D11ShaderResourceView* Renderer::createShaderResourceView(ID3D11Resource* textureResource)
+{
+	ID3D11ShaderResourceView* resourceView;
+	HRESULT hr = renderDevice->CreateShaderResourceView(textureResource, NULL, &resourceView);
 	if( FAILED( hr ))
 		sendHrErrMessage(hr);
 
-	ID3D11ShaderResourceView* localSRV;
-	hr = d3dDevice->CreateShaderResourceView( pTex3D, NULL, &localSRV);
-	SAFE_RELEASE( pTex3D );
+	return resourceView;
+}
+
+ID3D11RenderTargetView* Renderer::createRenderTargetView(ID3D11Resource* textureResource)
+{
+	ID3D11RenderTargetView* targetView;
+	HRESULT hr = renderDevice->CreateRenderTargetView(textureResource, NULL, &targetView);
 	if( FAILED( hr ))
 		sendHrErrMessage(hr);
 
-	return localSRV;
+	return targetView;
 }
+
+ID3D11DepthStencilView* Renderer::createDepthTargetView(ID3D11Resource* textureResource)
+{
+	ID3D11DepthStencilView* depthView;
+	HRESULT hr = renderDevice->CreateDepthStencilView(textureResource, NULL, &depthView);
+	if( FAILED( hr ) )
+		sendHrErrMessage(hr);
+
+	return depthView;
+}
+
+ID3D11Texture2D* Renderer::createTexture2D(D3D11_TEXTURE2D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData)
+{
+	ID3D11Texture2D* texture2D = NULL;
+
+	HRESULT hr = renderDevice->CreateTexture2D(desc, initData, &texture2D );
+	if( FAILED( hr ))
+		sendHrErrMessage(hr);
+
+	return texture2D;
+}
+
+ID3D11Texture3D* Renderer::createTexture3D(D3D11_TEXTURE3D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData)
+{
+	ID3D11Texture3D* texture3D = NULL;
+
+	HRESULT hr = renderDevice->CreateTexture3D(desc, initData, &texture3D );
+	if( FAILED( hr ))
+		sendHrErrMessage(hr);
+
+	return texture3D;
+}
+
+
 
 ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, bool cullBackface)
 {
@@ -1448,7 +1421,7 @@ ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, bool cullBac
 	rasterDesc.FrontCounterClockwise = TRUE;
 	rasterDesc.MultisampleEnable = FALSE;
 
-	d3dDevice->CreateRasterizerState(&rasterDesc,&rasterState);
+	renderDevice->CreateRasterizerState(&rasterDesc,&rasterState);
 
 	rasterStates[rasterFlags] = rasterState;
 	return rasterStates[rasterFlags];
@@ -1481,7 +1454,7 @@ ID3D11DepthStencilState* Renderer::getDepthStencilState(bool depthTest)
 		descDS.StencilEnable = FALSE;
 	}
 
-	d3dDevice->CreateDepthStencilState(&descDS,&depthStencilState);
+	renderDevice->CreateDepthStencilState(&descDS, &depthStencilState);
 
 	depthStencilStates[dsFlags] = depthStencilState;
 	return depthStencilStates[dsFlags];
@@ -1511,18 +1484,18 @@ void Renderer::createBlendState()
 	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	d3dDevice->CreateBlendState(&BlendState, &blendState);
-	immediateContext->OMSetBlendState(blendState, 0, 0xffffffff);
+	renderDevice->CreateBlendState(&BlendState, &blendState);
+	renderContext->OMSetBlendState(blendState, 0, 0xffffffff);
 }
 
 void Renderer::setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView)
 {
-	immediateContext->PSSetShaderResources(startIdx,length,shaderResourceView);
+	renderContext->PSSetShaderResources(startIdx,length,shaderResourceView);
 }
 
 void Renderer::setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState)
 {
-	immediateContext->PSSetSamplers(startIdx,length,samplerState);
+	renderContext->PSSetSamplers(startIdx,length,samplerState);
 }
 
 DirectX::XMMATRIX Renderer::getRootWorldRotation()
@@ -1545,28 +1518,21 @@ int Renderer::getPolygon(Vec<float> pnt, Vec<float> direction)
 
 void Renderer::resizeViewPort()
 {
-	//WaitForSingleObject(mutexDevice,INFINITE);
+	for ( int i=0; i < RenderTargetTypes::NumRT; ++i )
+		renderTargets[i]->resizeTarget(gWindowWidth, gWindowHeight);
 
-	DXGI_SWAP_CHAIN_DESC desc;  
-	swapChain->GetDesc( &desc );  
-
-	immediateContext->OMSetRenderTargets(0, 0, 0);
-
-	releaseRenderTarget();
-	releaseDepthStencils();
-
-	HRESULT hr;
-	hr = swapChain->ResizeBuffers(2, gWindowWidth, gWindowHeight,DXGI_FORMAT_B8G8R8A8_UNORM,
-		DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE | DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
-
-	initDepthStencils();
-	initRenderTarget();
+	for ( int i=0; i < DepthTargetTypes::NumDT; ++i )
+		depthTargets[i]->resizeDepth(gWindowWidth, gWindowHeight);
 
 	resetViewPort();
 	gCameraWidget->updateProjectionTransform();
 	gCameraDefaultMesh->updateProjectionTransform();
+}
 
-	//ReleaseMutex(mutexDevice);
+void Renderer::flushContext()
+{
+	renderContext->ClearState();
+	renderContext->Flush();
 }
 
 HRESULT Renderer::resetViewPort()
@@ -1578,7 +1544,8 @@ HRESULT Renderer::resetViewPort()
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	immediateContext->RSSetViewports( 1, &vp );
+
+	renderContext->RSSetViewports( 1, &vp );
 
 	return S_OK;
 }
@@ -1753,7 +1720,7 @@ HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, 
 
 unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 {
-	HDC hdcWindow;
+	HRESULT hr = E_FAIL;
 	HDC hdcMemDC = NULL;
 	HBITMAP hbmScreen = NULL;
 	BITMAP bmpScreen;
@@ -1763,13 +1730,9 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 
 	// Retrieve the handle to a display device context for the client 
 	// area of the window. 
-	immediateContext->OMSetRenderTargets(0,0,0);
-	HRESULT hr = IDXGIBackBuffer->GetDC(FALSE,&hdcWindow);
-	if(FAILED(hr))
-	{
-		MessageBox(gWindowHandle,"GetDC has failed","Failed",MB_OK);
-		return lpbitmap;
-	}
+	renderContext->OMSetRenderTargets(0,0,0);
+
+	HDC hdcWindow = getSwapChain()->getDC();
 
 	// Create a compatible DC which is used in a BitBlt from the window DC
 	hdcMemDC = CreateCompatibleDC(hdcWindow);
@@ -1777,7 +1740,6 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 	if(!hdcMemDC)
 	{
 		MessageBox(gWindowHandle,"CreateCompatibleDC has failed","Failed",MB_OK);
-		hr = E_FAIL;
 		return lpbitmap;
 	}
 
@@ -1794,7 +1756,6 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 	if(!hbmScreen)
 	{
 		MessageBox(gWindowHandle,"CreateCompatibleBitmap Failed","Failed",MB_OK);
-		hr = E_FAIL;
 		return lpbitmap;
 	}
 
@@ -1810,7 +1771,6 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 		SRCCOPY))
 	{
 		MessageBox(gWindowHandle,"BitBlt has failed","Failed",MB_OK);
-		hr = E_FAIL;
 		return lpbitmap;
 	}
 
@@ -1855,16 +1815,9 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
 	if(!bSuccess)
 	{
 		MessageBox(gWindowHandle, "Delete DC Failed", "Failed", MB_OK);
-		hr = E_FAIL;
 	}
 
-	hr = IDXGIBackBuffer->ReleaseDC(NULL);
-
-	if(FAILED(hr))
-	{
-		MessageBox(gWindowHandle, "Release DC has failed", "Failed", MB_OK);
-	}
-   immediateContext->OMSetRenderTargets(1,&renderTargetView,depthStencilView);
+	getSwapChain()->releaseDC();
 
 	return imOut;
 }

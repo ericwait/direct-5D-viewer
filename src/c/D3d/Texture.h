@@ -5,19 +5,35 @@
 class Texture
 {
 public:
-	Texture(Renderer* rendererIn, Vec<size_t> dims, const unsigned char* texData);
-	~Texture();
+	Texture(Renderer* rendererIn);
 
+	ID3D11SamplerState* getSampler(){return samplerState;}
+	virtual ID3D11ShaderResourceView* getShaderResource() = 0;
 
+	virtual ~Texture();
 
-	ID3D11SamplerState* getSampler(){return sampler;}
-	ID3D11ShaderResourceView* getResource(){return resource;}
-
-protected:
+private:
 	Texture(){};
+	Texture(const Texture& other){}
+
+	ID3D11SamplerState* samplerState;
+};
+
+
+class ConstTexture : public Texture
+{
+public:
+	ConstTexture(Renderer* rendererIn, Vec<size_t> dims, const unsigned char* texData);
+
+	virtual ID3D11ShaderResourceView* getShaderResource(){return resourceView;}
+	virtual ~ConstTexture();
+
+private:
+	ConstTexture();
 
 	Renderer* renderer;
+	Vec<size_t> dims;
 
-	ID3D11SamplerState* sampler;
-	ID3D11ShaderResourceView* resource;
+	ID3D11ShaderResourceView* resourceView;
 };
+

@@ -74,7 +74,7 @@ void Material::bindTextures()
 	for ( int i=0; i < textures.size(); ++i )
 	{
 		samplers.push_back(textures[i]->getSampler());
-		resources.push_back(textures[i]->getResource());
+		resources.push_back(textures[i]->getShaderResource());
 	}
 
 	renderer->setPixelShaderResourceViews(0, (int)resources.size(), resources.data());
