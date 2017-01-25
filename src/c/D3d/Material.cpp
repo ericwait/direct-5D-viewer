@@ -18,13 +18,13 @@
 Material::Material(Renderer* rendererIn)
 	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL)
 {
-	setMaterialProps(false, false, true);
+	setMaterialProps(false, CullMode::CullNone, true);
 }
 
 Material::Material(Renderer* rendererIn, std::shared_ptr<MaterialParameters> sharedParams)
 	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL), params(sharedParams)
 {
-	setMaterialProps(false, false, true);
+	setMaterialProps(false, CullMode::CullNone, true);
 }
 
 Material::~Material()
@@ -55,6 +55,13 @@ void Material::setWireframe(bool wireframe)
 	updateRasterState();
 }
 
+void Material::setCullMode(CullMode cullMode)
+{
+	this->cullMode = cullMode;
+
+	updateRasterState();
+}
+
 void Material::setShader(const std::string& shaderFile, const std::string& shaderFunction, const std::map<std::string,std::string>& variables)
 {
 	shaderIdx = renderer->registerPixelShader(shaderFile, shaderFunction, variables);
@@ -81,10 +88,10 @@ void Material::bindTextures()
 	renderer->setPixelShaderTextureSamplers(0, (int)samplers.size(), samplers.data());
 }
 
-void Material::setMaterialProps(bool wireframe, bool cullBackface, bool depthTest)
+void Material::setMaterialProps(bool wireframe, CullMode cullMode, bool depthTest)
 {
 	this->wireframe = wireframe;
-	this->cullBackFace = cullBackface;
+	this->cullMode = cullMode;
 	this->testDepth = depthTest;
 
 	updateRasterState();
@@ -92,7 +99,7 @@ void Material::setMaterialProps(bool wireframe, bool cullBackface, bool depthTes
 
 void Material::updateRasterState()
 {
-	rasterState	= renderer->getRasterizerState(wireframe, cullBackFace);
+	rasterState	= renderer->getRasterizerState(wireframe, (D3D11_CULL_MODE)cullMode);
 	depthStencilState = renderer->getDepthStencilState(testDepth);
 }
 
@@ -136,7 +143,7 @@ DirectX::XMFLOAT4 SingleColoredMaterial::getColor()
 StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn)
 	: Material(rendererIn, paramsIn), numChannels(numChannelsIn), dims(dims)
 {
-	setMaterialProps(false, false, false);
+	setMaterialProps(false, CullMode::CullNone, true);
 	
 	textures.resize(numChannels);
 

@@ -54,9 +54,8 @@ std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFac
 
 HRESULT createBorder(Vec<float> &scale)
 {
-	if (gRenderer == NULL) return E_FAIL;
-
-	//gRenderer->getMutex();
+	if (gRenderer == NULL)
+		return E_FAIL;
 
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<unsigned int>> faces;
@@ -114,7 +113,7 @@ HRESULT createBorder(Vec<float> &scale)
 	for (int i = 0; i < 6; ++i)
 	{
 		Vec<float> edge1, edge2;
-		Vec<double> norm;
+		Vec<float> norm;
 
 		edge1 = vertices[faces[2 * i].y] - vertices[faces[2 * i].x];
 		edge2 = vertices[faces[2 * i].z] - vertices[faces[2 * i].x];
@@ -134,8 +133,6 @@ HRESULT createBorder(Vec<float> &scale)
 	borderNode->setLightOn(false);
 	gRenderer->attachToRootScene(borderNode, Renderer::Pre, 0);
 	insertGlobalGraphicsObject(GraphicObjectTypes::Border, borderNode);
-
-	//gRenderer->releaseMutex();
 
 	return S_OK;
 }

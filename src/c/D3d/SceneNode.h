@@ -20,8 +20,11 @@
 #include "MeshPrimitive.h"
 #include "Material.h"
 
+#include "Eigen/Eigen"
+
 #include <DirectXMath.h>
 #include <vector>
+#include <queue>
 
 class GraphicObjectNode;
 
@@ -32,8 +35,12 @@ GraphicObjectNode* getGlobalGraphicsObject(GraphicObjectTypes objType, unsigned 
 
 class SceneNode
 {
+protected:
+	typedef Eigen::Matrix<size_t, GraphicObjectTypes::VTend, 1> Histogram;
+
 public:
 	friend class RootSceneNode;
+	friend class RenderFilter;
 
 	SceneNode(GraphicObjectTypes type);
 
@@ -68,6 +75,12 @@ protected:
 	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 	virtual void requestUpdate();
 
+	void updateAddTypes();
+	void updateSubtractTypes();
+
+	virtual void addTypes(const Histogram& deltas);
+	virtual void subtractTypes(const Histogram& deltas);
+
 	DirectX::XMMATRIX localToParentTransform;
 	DirectX::XMMATRIX parentToWorld;
 
@@ -79,6 +92,8 @@ protected:
 	int index;
 	std::string label;
 
+	// Type filter and child type listing
+	Histogram childTypes;
 	GraphicObjectTypes type;
 
 	Vec<float> BoundingBox[2];
@@ -122,6 +137,27 @@ private:
 	// Render properties
 	std::shared_ptr<MeshPrimitive> mesh;
 	std::shared_ptr<Material> material;
+};
+
+
+class RenderFilter
+{
+public:
+	RenderFilter(SceneNode* rootNode, GraphicObjectTypes filter);
+
+	GraphicObjectNode* first();
+	GraphicObjectNode* next();
+
+private:
+	SceneNode* getNext();
+	bool checkFilter(SceneNode* node, GraphicObjectTypes filter);
+	bool checkChildren(SceneNode* node, GraphicObjectTypes filter);
+
+	SceneNode* root;
+	GraphicObjectTypes filter;
+
+	int checkIdx;
+	std::queue<std::vector<SceneNode*>*> queue;
 };
 
 

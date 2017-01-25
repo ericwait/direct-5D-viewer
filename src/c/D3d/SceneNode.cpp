@@ -57,6 +57,9 @@ void SceneNode::attachToParentNode(SceneNode* parent)
 
 	setParentNode(parent);
 
+	// Propagate type counts up the tree
+	updateAddTypes();
+
 	updateTransforms(parent->getLocalToWorldTransform());
 	requestUpdate();
 }
@@ -64,6 +67,10 @@ void SceneNode::attachToParentNode(SceneNode* parent)
 void SceneNode::detatchFromParentNode()
 {
 	parentNode->detatchChildNode(this);
+
+	// Remove type counts up the tree
+	updateSubtractTypes();
+
 	setParentNode(NULL);
 }
 
@@ -127,7 +134,7 @@ void SceneNode::updateTransforms(DirectX::XMMATRIX parentToWorldIn)
 
 bool SceneNode::addChildNode(SceneNode* child)
 {
-	//TODO check for dups
+	//TODO check for dups (cycles)
 	childrenNodes.push_back(child);
 
 	return true;
@@ -137,6 +144,37 @@ void SceneNode::requestUpdate()
 {
 	if (parentNode!=NULL)
 		parentNode->requestUpdate();
+}
+
+void SceneNode::updateAddTypes()
+{
+	Histogram deltas = childTypes;
+	deltas(type) += 1;
+
+	parentNode->addTypes(deltas);
+}
+
+void SceneNode::updateSubtractTypes()
+{
+	Histogram deltas = childTypes;
+	deltas(type) += 1;
+
+	parentNode->subtractTypes(deltas);
+}
+
+void SceneNode::addTypes(const Histogram& deltas)
+{
+	childTypes += deltas;
+
+	if ( parentNode )
+		parentNode->addTypes(deltas);
+}
+
+void SceneNode::subtractTypes(const Histogram& deltas)
+{
+	childTypes -= deltas;
+	if ( parentNode )
+		parentNode->subtractTypes(deltas);
 }
 
 void SceneNode::detatchChildNode(SceneNode* child)
@@ -150,6 +188,7 @@ void SceneNode::detatchChildNode(SceneNode* child)
 		}
 	}
 }
+
 
 
 GraphicObjectNode::GraphicObjectNode(int index, GraphicObjectTypes type, std::shared_ptr<MeshPrimitive> mesh, std::shared_ptr<Material> material)
@@ -214,6 +253,74 @@ GraphicObjectNode::~GraphicObjectNode()
 {
 	releaseRenderResources();
 }
+
+
+
+RenderFilter::RenderFilter(SceneNode* rootNode, GraphicObjectTypes filter)
+	: root(rootNode), filter(filter), checkIdx(0)
+{}
+
+GraphicObjectNode* RenderFilter::first()
+{
+	checkIdx = 0;
+	queue.swap(queue);
+
+	if ( checkChildren(root, filter) )
+		queue.push(&root->childrenNodes);
+
+	// Return the root node if it's renderable
+	if ( checkFilter(root, filter) )
+		return dynamic_cast<GraphicObjectNode*>(root);
+
+	// Otherwise just start traversing in breadth-first order
+	return next();
+}
+
+GraphicObjectNode* RenderFilter::next()
+{
+	SceneNode* nextNode = getNext();
+	++checkIdx;
+
+	if ( nextNode )
+		return dynamic_cast<GraphicObjectNode*>(nextNode);
+
+	return NULL;
+}
+
+SceneNode* RenderFilter::getNext()
+{
+	while ( !queue.empty() )
+	{
+		std::vector<SceneNode*>& childList = *queue.front();
+		for ( ; checkIdx < childList.size(); ++checkIdx )
+		{
+			if ( checkChildren(childList[checkIdx],filter) )
+				queue.push(&childList[checkIdx]->childrenNodes);
+
+			if ( checkFilter(childList[checkIdx],filter) )
+				return childList[checkIdx];
+		}
+
+		queue.pop();
+		checkIdx = 0;
+	}
+
+	return NULL;
+}
+
+bool RenderFilter::checkFilter(SceneNode* node, GraphicObjectTypes filter)
+{
+	if ( !node->isRenderable() )
+		return false;
+
+	return (node->type == filter);
+}
+
+bool RenderFilter::checkChildren(SceneNode* node, GraphicObjectTypes filter)
+{
+	return (node->childTypes(filter) > 0);
+}
+
 
 
 RootSceneNode::RootSceneNode()
@@ -382,7 +489,6 @@ void RootSceneNode::makeRenderableList()
 			std::vector<SceneNode*> curChildList;
 			curChildList.push_back(rootChildrenNodes[i][k]);
 
-			std::vector<SceneNode*>::iterator it = curChildList.begin();
 			size_t j = 0;
 			while (j<curChildList.size())
 			{

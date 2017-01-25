@@ -21,12 +21,6 @@ struct VS_OUTPUT
 	float4 clipPlane[2] : SV_ClipDistance;
 };
 
-struct PS_OUTPUT
-{
-	float4 color : SV_TARGET;
-	float depth : SV_DEPTH;
-};
-
 VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TEXCOORD, float3 Normal : NORMAL )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
@@ -46,9 +40,8 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 	return output;
 }
 
-PS_OUTPUT DefaultMeshPixelShader( VS_OUTPUT input )
+float4 DefaultMeshPixelShader( VS_OUTPUT input ) : SV_TARGET
 {
-	PS_OUTPUT output;
 	float4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);
 	float3 cval = color;
 
@@ -59,8 +52,5 @@ PS_OUTPUT DefaultMeshPixelShader( VS_OUTPUT input )
 		cval *= lightInt;
 	}
 
-	output.color = float4(cval.x, cval.y, cval.z, color.w) * colorModifier;
-	output.depth = input.Pos.z;
-
-	return output;
+	return float4(cval.x, cval.y, cval.z, color.w) * colorModifier;
 }

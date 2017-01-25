@@ -39,9 +39,9 @@ struct VS_OUTPUT
 	float3 Dpth : TEXCOORD1;
 };
 
-PixelOutputType MultiChanVolumePixelShader( VS_OUTPUT input )
+float4 MultiChanVolumePixelShader( VS_OUTPUT input ) : SV_TARGET
 {
-	PixelOutputType output = (PixelOutputType)0;
+	float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float alpha = 0.0f;
 
 	float4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);
@@ -78,7 +78,7 @@ float maxIntensity = 0;
 			lightMod = saturate(dot(grad,mainLightDir)*2.0*(1-ambientLight) + ambientLight);
 		}
 
-		output.color.rgb += (lightMod*intensity*channelColor[i].rgb);
+		color.rgb += (lightMod*intensity*channelColor[i].rgb);
 		unlitComposite += intensity*channelColor[i].rgb;
 		alphaComposite += intensity*channelColor[i].rgb*channelColor[i].a;
 	}
@@ -87,27 +87,25 @@ float maxIntensity = 0;
 	float maxAplha = max(max(alphaComposite.r,alphaComposite.g),alphaComposite.b);
 	if (maxComponent!=0)
 	{
-		output.color.rgb /= maxComponent;
-		output.color.rgb *= maxIntensity;
+		color.rgb /= maxComponent;
+		color.rgb *= maxIntensity;
 	}
 	if (maxAplha!=0)
 	{
-		output.color.a = maxAplha;
+		color.a = maxAplha;
 	}else{
-		output.color.a = 0;
+		color.a = 0;
 	}
 
 
 	if(flags.y>0)
 	{
 		float distMult = (input.Dpth.z<=0) ? (1) : (1-input.Dpth.z);
-		output.color.r *= distMult;
-		output.color.g *= distMult;
-		output.color.b *= distMult;
-		output.color.a *= distMult;
+		color.r *= distMult;
+		color.g *= distMult;
+		color.b *= distMult;
+		color.a *= distMult;
 	}
 
-	output.depth = 1.0f;
-
-	return output;
+	return color;
 }

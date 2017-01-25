@@ -26,6 +26,13 @@
 class Material
 {
 public:
+	enum CullMode
+	{
+		CullNone = 1,
+		CullFront = 2,
+		CullBack = 3
+	};
+
 	friend class Renderer;
 	virtual ~Material();
 
@@ -41,6 +48,7 @@ public:
 
 
 	void setWireframe(bool wireframe);
+	void setCullMode(CullMode cullMode);
 	virtual DirectX::XMFLOAT4 getColor(){return DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f);}
 
 	// Overloaded to potentially pass transform related variables to the pixel shader
@@ -55,7 +63,7 @@ protected:
 	void bindConstants();
 	void bindTextures();
 
-	void setMaterialProps(bool wireframe, bool cullBackface, bool depthTest);
+	void setMaterialProps(bool wireframe, CullMode cullMode, bool depthTest);
 
 	Renderer* renderer;
 
@@ -68,8 +76,8 @@ protected:
 private:
 	void updateRasterState();
 
+	CullMode cullMode;
 	bool wireframe;
-	bool cullBackFace;
 	bool testDepth;
 
 	int shaderIdx;

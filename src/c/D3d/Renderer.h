@@ -33,6 +33,7 @@ class VolumeParams;
 class SceneNode;
 class RootSceneNode;
 class GraphicObjectNode;
+class RenderFilter;
 class RenderTarget;
 class DepthTarget;
 class SwapChainTarget;
@@ -57,12 +58,14 @@ enum GraphicObjectTypes
 
 enum RenderTargetTypes
 {
+	NoneRT = -1,
 	SwapChain = 0,
 	NumRT
 };
 
 enum DepthTargetTypes
 {
+	NoneDT = -1,
 	Default = 0,
 	NumDT
 };
@@ -168,10 +171,14 @@ public:
 //////////////////////////////////////////////////////////////////////////
 	void renderAll();
 	void startRender();
-	void preRenderLoop();
-	void mainRenderLoop();
-	void postRenderLoop();
-	void gdiRenderLoop();
+
+	void renderBackground();
+	void renderPolygons();
+	void renderVolume();
+	void renderWidget();
+
+	void renderGDIOverlay();
+
 	void endRender();
 
 //////////////////////////////////////////////////////////////////////////
@@ -181,7 +188,7 @@ public:
 	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
 
-	IDXGISwapChain1* createSwapChain(HWND hWnd, Vec<size_t> dims, DXGI_FORMAT format, UINT flags);
+	IDXGISwapChain1* createSwapChain(HWND hWnd, Vec<size_t> dims, bool stereo, DXGI_FORMAT format, UINT flags);
 
 	ID3D11SamplerState* createSamplerState();
 	ID3D11ShaderResourceView* createShaderResourceView(ID3D11Resource* textureResource);
@@ -190,7 +197,7 @@ public:
 	ID3D11Texture2D* createTexture2D(D3D11_TEXTURE2D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData = NULL);
 	ID3D11Texture3D* createTexture3D(D3D11_TEXTURE3D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData = NULL);
 
-	ID3D11RasterizerState* getRasterizerState(bool wireframe, bool cullBackface);
+	ID3D11RasterizerState* getRasterizerState(bool wireframe, D3D11_CULL_MODE cullFaces);
 	ID3D11DepthStencilState* getDepthStencilState(bool depthTest);
 
 	void detachTargets();

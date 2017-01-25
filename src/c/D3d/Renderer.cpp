@@ -626,26 +626,33 @@ void Renderer::renderAll()
 	if (gRendererOn)
 	{
 		UINT64 frameTime = GetTimeMs64();
-		rootScene->updateRenderableList();
+		//rootScene->updateRenderableList();
 
 		UINT64 startTime = GetTimeMs64();
 		startRender();
 		startTimes[curTimeIdx] = GetTimeMs64()-startTime;
 
 		UINT64 preTime = GetTimeMs64();
-		preRenderLoop();
+		renderBackground();
 		preTimes[curTimeIdx] = GetTimeMs64()-preTime;
 
+		// Clear depth target before rendering polygons and volume data
+		clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+
 		UINT64 mainTime = GetTimeMs64();
-		mainRenderLoop();
+		renderPolygons();
+		renderVolume();
 		mainTimes[curTimeIdx] = GetTimeMs64()-mainTime;
 
+		// And again before rendering the widget
+		clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+
 		UINT64 postTime = GetTimeMs64();
-		postRenderLoop();
+		renderWidget();
 		postTimes[curTimeIdx] = GetTimeMs64()-postTime;
 
 		UINT64 gdiTime = GetTimeMs64();
-		gdiRenderLoop();
+		renderGDIOverlay();
 		gdiTimes[curTimeIdx] = GetTimeMs64()-gdiTime;
 
 		UINT64 endTime = GetTimeMs64();
@@ -667,10 +674,19 @@ void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
 
 void Renderer::attachTargets(RenderTargetTypes rt, DepthTargetTypes dt)
 {
-	ID3D11RenderTargetView*	renderTarget = renderTargets[rt]->getRenderTarget();
-	ID3D11DepthStencilView*	depthTarget = depthTargets[dt]->getDepthTarget();
+	int numRT = 0;
+	ID3D11RenderTargetView*	renderTarget = NULL;
+	ID3D11DepthStencilView*	depthTarget = NULL;
+	if ( rt > RenderTargetTypes::NoneRT )
+	{
+		numRT = 1;
+		renderTarget = renderTargets[rt]->getRenderTarget();
+	}
+	
+	if ( dt > DepthTargetTypes::NoneDT )
+		depthTarget = depthTargets[dt]->getDepthTarget();
 
-	renderContext->OMSetRenderTargets(1, &renderTarget, depthTarget);
+	renderContext->OMSetRenderTargets(numRT, &renderTarget, depthTarget);
 }
 
 void Renderer::detachTargets()
@@ -694,92 +710,93 @@ void Renderer::clearDepthTarget(DepthTargetTypes dt, float clearDepth)
 }
 
 
-void Renderer::preRenderLoop()
+void Renderer::renderBackground()
 {
-	if (rootScene->getNumRenderableObjects(Pre)<1)
+	SceneNode* preRoot = rootScene->getRenderSectionNode(Renderer::Section::Pre, 0);
+	if ( !preRoot )
 		return;
 
-	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
+	RenderFilter renderFilter(preRoot, GraphicObjectTypes::Border);
 
-	const std::vector<GraphicObjectNode*>& renderPreList = rootScene->getRenderableList(Pre,currentFrame);
-	for (int i=0; i<renderPreList.size(); ++i)
-	{
-		renderNode(gCameraDefaultMesh, renderPreList[i], FrontClipPos(),BackClipPos());
-	}
+	GraphicObjectNode* node = renderFilter.first();
+	for ( ; node != NULL; node = renderFilter.next() )
+		renderNode(gCameraDefaultMesh, node);
 }
 
-void Renderer::mainRenderLoop()
+void Renderer::renderPolygons()
 {
-	if (rootScene->getNumRenderableObjects(Main)<1)
+	SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
+	if ( !mainRoot )
 		return;
 
-	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	RenderFilter renderFilter(mainRoot, GraphicObjectTypes::Polygons);
 
-	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
-
-	float numChunks = numPlanes*clipChunkPercent +1;
-
-	float chunkWidth = (BackClipPos()-FrontClipPos())/numChunks;
-
-	for (int i=(int)numChunks-1; i>=0; --i)
-	{
-		float frontPlane = i*chunkWidth + FrontClipPos();
-		float backPlane = frontPlane + chunkWidth;
-
-		for (int i=0; i<renderMainList.size(); ++i)
-		{
-			renderNode(gCameraDefaultMesh, renderMainList[i], frontPlane, backPlane);
-		}
-	}
+	GraphicObjectNode* node = renderFilter.first();
+	for ( ; node != NULL; node = renderFilter.next() )
+		renderNode(gCameraDefaultMesh, node);
 }
 
-void Renderer::postRenderLoop()
+void Renderer::renderVolume()
 {
-	if (rootScene->getNumRenderableObjects(Post)<1)
+	SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
+	if ( !mainRoot )
 		return;
 
-	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	RenderFilter filt(mainRoot, GraphicObjectTypes::OriginalVolume);
+	for (GraphicObjectNode* node = filt.first() ; node != NULL; node = filt.next() )
+		renderNode(gCameraDefaultMesh, node);
 
-	const std::vector<GraphicObjectNode*>& renderPostList = rootScene->getRenderableList(Post,currentFrame);
-	for (int i=0; i<renderPostList.size(); ++i)
-	{
-		renderNode(gCameraWidget, renderPostList[i]);
-	}
+	RenderFilter renderFilter(mainRoot, GraphicObjectTypes::ProcessedVolume);
+	for (GraphicObjectNode* node = filt.first(); node != NULL; node = filt.next() )
+		renderNode(gCameraDefaultMesh, node);
 }
 
-void Renderer::gdiRenderLoop()
+void Renderer::renderWidget()
 {
-	if (rootScene->getNumRenderableObjects(Main)<1)
+	SceneNode* postRoot = rootScene->getRenderSectionNode(Renderer::Section::Post, 0);
+	if ( !postRoot )
+		return;
+
+	RenderFilter renderFilter(postRoot, GraphicObjectTypes::Widget);
+
+	GraphicObjectNode* node = renderFilter.first();
+	for ( ; node != NULL; node = renderFilter.next() )
+		renderNode(gCameraWidget, node);
+}
+
+void Renderer::renderGDIOverlay()
+{
+	SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
+	if ( !mainRoot )
 		return;
 
 	detachTargets();
 
 	HDC hdc = getSwapChain()->getDC();
-	const std::vector<GraphicObjectNode*>& renderMainList = rootScene->getRenderableList(Main,currentFrame);
 
-	if(labelsOn)
+	if ( labelsOn )
 	{
-		for(int i = 1; i<renderMainList.size(); ++i)
-			renderLabel(gCameraDefaultMesh, renderMainList[i], hdc);
+		RenderFilter renderFilter(mainRoot, GraphicObjectTypes::Polygons);
+
+		GraphicObjectNode* node = renderFilter.first();
+		for ( ; node != NULL; node = renderFilter.next() )
+			renderLabel(gCameraDefaultMesh, node, hdc);
 	}
 
-	if(!renderMainList.empty())
-	{
-		if (scaleBarOn)
-			renderScaleValue(gCameraDefaultMesh, hdc);
-		if (frameNumOn)
-			renderFrameNum(hdc);
-		if(fpsOn)
-			renderFPS(hdc);
-	}
+	if (scaleBarOn)
+		renderScaleValue(gCameraDefaultMesh, hdc);
+	if (frameNumOn)
+		renderFrameNum(hdc);
+	if(fpsOn)
+		renderFPS(hdc);
 
 	getSwapChain()->releaseDC();
 }
 
 void Renderer::startRender()
 {
+	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
+
 	clearRenderTarget(RenderTargetTypes::SwapChain, backgroundColor);
 	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 }
@@ -1276,7 +1293,7 @@ void Renderer::setPixelShaderConsts(ID3D11Buffer* buffer)
 	renderContext->PSSetConstantBuffers(1,1,&buffer);
 }
 
-IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, DXGI_FORMAT format, UINT flags)
+IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, bool stereo, DXGI_FORMAT format, UINT flags)
 {
 	//Swap chain descriptor
 	DXGI_SWAP_CHAIN_DESC1 swapDesc;
@@ -1286,7 +1303,7 @@ IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, DXGI_FOR
 	swapDesc.Height = (UINT) dims.y;
 	swapDesc.Format = format;
 
-	swapDesc.Stereo = FALSE;
+	swapDesc.Stereo = stereo;
 
 	swapDesc.SampleDesc.Count = 1;
 	swapDesc.SampleDesc.Quality = 0;
@@ -1395,9 +1412,9 @@ ID3D11Texture3D* Renderer::createTexture3D(D3D11_TEXTURE3D_DESC* desc, D3D11_SUB
 
 
 
-ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, bool cullBackface)
+ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, D3D11_CULL_MODE cullFaces)
 {
-	unsigned int rasterFlags = (((unsigned int)wireframe) << 1) |  ((unsigned int) cullBackface);
+	unsigned int rasterFlags = (((unsigned int)wireframe) << 2) |  ((unsigned int) cullFaces);
 
 	if ( rasterStates.count(rasterFlags) > 0 )
 		return rasterStates[rasterFlags];
@@ -1412,10 +1429,7 @@ ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, bool cullBac
 	else
 		rasterDesc.FillMode = D3D11_FILL_SOLID;
 
-	if ( cullBackface )
-		rasterDesc.CullMode = D3D11_CULL_BACK;
-	else
-		rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.CullMode = cullFaces;
 
 	rasterDesc.DepthClipEnable = TRUE;
 	rasterDesc.FrontCounterClockwise = TRUE;

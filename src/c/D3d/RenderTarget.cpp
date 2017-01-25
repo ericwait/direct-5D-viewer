@@ -9,7 +9,7 @@ const UINT SwapChainTarget::chainFlags = DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE
 SwapChainTarget::SwapChainTarget(Renderer* rendererIn, HWND hWnd, size_t width, size_t height)
 	: renderer(rendererIn), dims(Vec<size_t>(width,height,1)), renderTarget(NULL)
 {
-	swapChain = renderer->createSwapChain(hWnd, dims, format, chainFlags);
+	swapChain = renderer->createSwapChain(hWnd, dims, false, format, chainFlags);
 	initRenderTarget();
 }
 
