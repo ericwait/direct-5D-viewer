@@ -26,7 +26,7 @@
 
 #include <time.h>
 
-bool gUpdateShaders = false;
+bool gUpdateShaders = true;
 bool gRendererOn = false;
 bool gPlay = false;
 bool gRotate = false;
