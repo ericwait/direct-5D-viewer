@@ -18,35 +18,91 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D3d\Camera.h" />
+    <ClInclude Include="D3d\DepthTarget.h" />
+    <ClInclude Include="D3d\EigenToFromDirectX.h" />
+    <ClInclude Include="D3d\Initialization.h" />
+    <ClInclude Include="D3d\Material.h" />
+    <ClInclude Include="D3d\MaterialParams.h" />
+    <ClInclude Include="D3d\MeshPrimitive.h" />
+    <ClInclude Include="D3d\MessageProcessor.h" />
+    <ClInclude Include="D3d\Renderer.h" />
+    <ClInclude Include="D3d\RenderTarget.h" />
+    <ClInclude Include="D3d\SceneNode.h" />
+    <ClInclude Include="D3d\Texture.h" />
+    <ClInclude Include="D3d\TextureLightingObj.h" />
+    <ClInclude Include="D3d\Timer.h" />
+    <ClInclude Include="Global\Defines.h" />
+    <ClInclude Include="Global\Globals.h" />
+    <ClInclude Include="Global\ModuleInfo.h" />
+    <ClInclude Include="Global\Vec.h" />
+    <ClInclude Include="Global\VecFuncs.h" />
+    <ClInclude Include="Global\WidgetData.h" />
+    <ClInclude Include="Messages\DataQueue.h" />
+    <ClInclude Include="Messages\DirectXCommands.h" />
+    <ClInclude Include="Messages\Image.h" />
+    <ClInclude Include="Messages\LoadData.h" />
+    <ClInclude Include="Messages\MessageQueue.h" />
+    <ClInclude Include="Messages\QueuePolygon.h" />
+    <ClInclude Include="Messages\TransferObj.h" />
+    <ClInclude Include="Standalone\ErrorMsg.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="D3d\Camera.cpp" />
+    <ClCompile Include="D3d\DepthTarget.cpp" />
+    <ClCompile Include="D3d\EigenToFromDirectX.cpp" />
+    <ClCompile Include="D3d\Initialization.cpp" />
+    <ClCompile Include="D3d\Material.cpp" />
+    <ClCompile Include="D3d\MaterialParams.cpp" />
+    <ClCompile Include="D3d\MeshPrimitive.cpp" />
+    <ClCompile Include="D3d\MessageProcessor.cpp" />
+    <ClCompile Include="D3d\Renderer.cpp" />
+    <ClCompile Include="D3d\RenderTarget.cpp" />
+    <ClCompile Include="D3d\SceneNode.cpp" />
+    <ClCompile Include="D3d\Texture.cpp" />
+    <ClCompile Include="D3d\TextureLightingObj.cpp" />
+    <ClCompile Include="Global\ModuleInfo.cpp" />
+    <ClCompile Include="Global\WidgetData.cpp" />
+    <ClCompile Include="Messages\DataQueue.cpp" />
+    <ClCompile Include="Messages\DirectXCommands.cpp" />
+    <ClCompile Include="Messages\Image.cpp" />
+    <ClCompile Include="Messages\LoadData.cpp" />
+    <ClCompile Include="Messages\MessageQueue.cpp" />
+    <ClCompile Include="Messages\MexErrorMsg.cpp" />
+    <ClCompile Include="Messages\QueuePolygon.cpp" />
+    <ClCompile Include="Messages\TransferObj.cpp" />
+    <ClCompile Include="Messages\Update.cpp" />
+    <ClCompile Include="Messages\ViewerGlobals.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{227F33B1-BFB0-4997-A405-FAC8AD9C81B7}</ProjectGuid>
+    <ProjectGuid>{68DC3628-F4EC-49C2-8A31-9EBBD111330F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>d3dStandalone</RootNamespace>
+    <RootNamespace>D3dLib</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>d3dStandalone</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,19 +126,11 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Output\$(ProjectName)\$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)_$(PlatformName)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Output\$(ProjectName)\$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)_$(PlatformName)\</IntDir>
   </PropertyGroup>
@@ -92,12 +140,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,16 +152,15 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>D3dLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Output/D3dLib/$(Configuration)_$(PlatformName)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -125,14 +170,12 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,22 +186,18 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>D3dLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Output/D3dLib/$(Configuration)_$(PlatformName)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Standalone\Standalone.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="D3d">
+      <UniqueIdentifier>{188548ba-62a7-4a55-bcd3-458cb6662c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D3d\Header Files">
+      <UniqueIdentifier>{b6721fcf-759f-4b69-b220-cb065129618e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D3d\Source Files">
+      <UniqueIdentifier>{a18f3415-004f-4c55-bf6a-4569af50a060}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{11b9f855-f188-4b16-a408-7cb011f26bba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global\Header Files">
+      <UniqueIdentifier>{3e324cb2-55f1-4930-9f0e-6c51560249bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global\Source Files">
+      <UniqueIdentifier>{06375afd-5f6c-4878-8174-d1d6f95c6b9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Messaging">
+      <UniqueIdentifier>{f1ef335a-ae8b-46aa-89fa-7e2d93ae5726}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Messaging\Header Files">
+      <UniqueIdentifier>{7fd5d693-61b5-4677-8528-810a717f9d37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Messaging\Source Files">
+      <UniqueIdentifier>{49c5add5-5e48-4ab7-9830-7b25a92107f2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D3d\Camera.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\DepthTarget.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\EigenToFromDirectX.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\Initialization.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\Material.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\MaterialParams.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\MeshPrimitive.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\MessageProcessor.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\Renderer.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\RenderTarget.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\SceneNode.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\Texture.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\TextureLightingObj.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3d\Timer.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Defines.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Globals.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\ModuleInfo.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Vec.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\VecFuncs.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\WidgetData.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Standalone\ErrorMsg.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\DataQueue.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\DirectXCommands.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\Image.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\LoadData.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\MessageQueue.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\QueuePolygon.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\TransferObj.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="D3d\Camera.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\DepthTarget.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\EigenToFromDirectX.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\Initialization.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\Material.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\MaterialParams.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\MeshPrimitive.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\MessageProcessor.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\Renderer.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\RenderTarget.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\SceneNode.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\Texture.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\TextureLightingObj.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Global\ModuleInfo.cpp">
+      <Filter>Global\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Global\WidgetData.cpp">
+      <Filter>Global\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\DataQueue.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\DirectXCommands.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\Image.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\LoadData.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\MessageQueue.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\MexErrorMsg.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\QueuePolygon.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\TransferObj.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\Update.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\ViewerGlobals.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
