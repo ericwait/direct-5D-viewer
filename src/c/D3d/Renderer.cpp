@@ -742,13 +742,12 @@ void Renderer::renderVolume()
 	if ( !mainRoot )
 		return;
 
-	RenderFilter filt(mainRoot, GraphicObjectTypes::OriginalVolume);
-	for (GraphicObjectNode* node = filt.first() ; node != NULL; node = filt.next() )
-		renderNode(gCameraDefaultMesh, node);
-
-	RenderFilter renderFilter(mainRoot, GraphicObjectTypes::ProcessedVolume);
-	for (GraphicObjectNode* node = filt.first(); node != NULL; node = filt.next() )
-		renderNode(gCameraDefaultMesh, node);
+	for ( int i = GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	{
+		RenderFilter filt(mainRoot, (GraphicObjectTypes)i);
+		for (GraphicObjectNode* node = filt.first() ; node != NULL; node = filt.next() )
+			renderNode(gCameraDefaultMesh, node);
+	}
 }
 
 void Renderer::renderWidget()
