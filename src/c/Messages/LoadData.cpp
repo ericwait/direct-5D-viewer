@@ -118,9 +118,9 @@ HRESULT createBorder(Vec<float> &scale)
 		edge1 = vertices[faces[2 * i].y] - vertices[faces[2 * i].x];
 		edge2 = vertices[faces[2 * i].z] - vertices[faces[2 * i].x];
 
-		Vec<float> triDir = edge1.cross(edge2);
+		Vec<float> triDir = Vec<float>::cross(edge1,edge2);
 
-		norm = triDir.norm();
+		norm = triDir.normal();
 
 		for (int j = 0; j < 4; ++j)
 			normals[faces[2 * i].x + j] = norm;

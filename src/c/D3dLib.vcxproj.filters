@@ -84,9 +84,6 @@
     <ClInclude Include="Global\Vec.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Global\VecFuncs.h">
-      <Filter>Global\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Global\WidgetData.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>

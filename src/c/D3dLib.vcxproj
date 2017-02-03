@@ -37,7 +37,6 @@
     <ClInclude Include="Global\Globals.h" />
     <ClInclude Include="Global\ModuleInfo.h" />
     <ClInclude Include="Global\Vec.h" />
-    <ClInclude Include="Global\VecFuncs.h" />
     <ClInclude Include="Global\WidgetData.h" />
     <ClInclude Include="Messages\DataQueue.h" />
     <ClInclude Include="Messages\DirectXCommands.h" />

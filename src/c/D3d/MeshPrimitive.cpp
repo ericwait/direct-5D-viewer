@@ -99,10 +99,10 @@ bool MeshPrimitive::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntV
 	Vec<float> edge1(vertices[face.y]-vertices[face.x]);
 	Vec<float> edge2(vertices[face.z]-vertices[face.x]);
 
-	Vec<float> crossVec = lclDirVec.cross(edge2);
+	Vec<float> crossVec = Vec<float>::cross(lclDirVec,edge2);
 
 	// If determinant is near zero, ray lies in plane of triangle
-	float det = edge1.dot(crossVec);
+	float det = Vec<float>::dot(edge1,crossVec);
 
 	if( abs(det) < 1e-5f )
 		return false;
@@ -119,20 +119,20 @@ bool MeshPrimitive::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntV
 	}
 
 	// Calculate U parameter and test bounds
-	triCoord.x = tvec.dot(crossVec);
+	triCoord.x = Vec<float>::dot(tvec,crossVec);
 	if( triCoord.x < 0.0f || triCoord.x > det )
 		return false;
 
 	// Prepare to test V parameter
-	Vec<float> qvec = tvec.cross(edge1);
+	Vec<float> qvec = Vec<float>::cross(tvec,edge1);
 
 	// Calculate V parameter and test bounds
-	triCoord.y = lclDirVec.dot(qvec);
+	triCoord.y = Vec<float>::dot(lclDirVec,qvec);
 	if( triCoord.y < 0.0f || triCoord.x + triCoord.y > det )
 		return false;
 
 	// Calculate t, scale parameters, ray intersects triangle
-	triCoord.z = edge2.dot(qvec);
+	triCoord.z = Vec<float>::dot(edge2,qvec);
 
 	triCoord = triCoord / det;
 
@@ -196,24 +196,24 @@ ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, V
 
 DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX parentToWorld_dx)
 {
-    Eigen::Matrix4f parentToWorld = ConvertMatrix(parentToWorld_dx);
+	Eigen::Matrix4f parentToWorld = ConvertMatrix(parentToWorld_dx);
 
-    Eigen::Matrix4f textureCoordinateCorrection;
-    textureCoordinateCorrection<<
-        0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f;
+	Eigen::Matrix4f textureCoordinateCorrection;
+	textureCoordinateCorrection<<
+		0.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f;
 
-    Vec<float> physicalScaling = physicalSize / physicalSize.maxValue();
+	Vec<float> physicalScaling = physicalSize / physicalSize.maxValue();
 
-    Eigen::Affine3f compute(Eigen::Translation3f(0.5f, 0.5f, 0.5f));
-    compute *= Eigen::Scaling(1.0f/physicalScaling.x, 1.0f/physicalScaling.y, 1.0f/physicalScaling.z);
-    compute *= Eigen::Scaling(0.5f, 0.5f, 0.5f);
-    compute *= textureCoordinateCorrection;
-    compute *= parentToWorld.inverse();
-    compute *= Eigen::Scaling(2.0f, 2.0f, 2.0f);
-    compute *= Eigen::Translation3f(-0.5f, -0.5f, -0.5f);
+	Eigen::Affine3f compute(Eigen::Translation3f(0.5f, 0.5f, 0.5f));
+	compute *= Eigen::Scaling(1.0f/physicalScaling.x, 1.0f/physicalScaling.y, 1.0f/physicalScaling.z);
+	compute *= Eigen::Scaling(0.5f, 0.5f, 0.5f);
+	compute *= textureCoordinateCorrection;
+	compute *= parentToWorld.inverse();
+	compute *= Eigen::Scaling(2.0f, 2.0f, 2.0f);
+	compute *= Eigen::Translation3f(-0.5f, -0.5f, -0.5f);
 
 	return ConvertMatrix(compute.matrix());
 }
@@ -260,9 +260,9 @@ void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<
 		edge1 = vertices[faces[2*planeIdx].y] - vertices[faces[2*planeIdx].x];
 		edge2 = vertices[faces[2*planeIdx].z] - vertices[faces[2*planeIdx].x];
 
-		Vec<float> triDir = edge1.cross(edge2);
+		Vec<float> triDir = Vec<float>::cross(edge1,edge2);
 
-		norm = triDir.norm();
+		norm = triDir.normal();
 
 		for (int i=0; i<4 ; ++i)
 			normals[planesFirstVert+i] = norm;
