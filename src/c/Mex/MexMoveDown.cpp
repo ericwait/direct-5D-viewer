@@ -7,7 +7,7 @@ void MexMoveDown::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* pr
     double* speed = new double;
     *speed = speedFactorM;
 
-    gMsgQueueToDirectX.writeMessage("moveDown", NULL);
+    gMsgQueueToDirectX.writeMessage("moveDown", speed);
 }
 
 std::string MexMoveDown::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
