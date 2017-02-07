@@ -15,6 +15,8 @@
 
 #pragma once
 
+#define _USE_MATH_DEFINES 1
+
 #ifndef SQR
 #define SQR(x) ((x)*(x))
 #endif

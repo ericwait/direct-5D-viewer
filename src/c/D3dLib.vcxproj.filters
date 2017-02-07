@@ -36,6 +36,9 @@
     <ClInclude Include="D3d\DepthTarget.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3d\EigenHelpers.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="D3d\EigenToFromDirectX.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>

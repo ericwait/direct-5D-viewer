@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="D3d\Camera.h" />
     <ClInclude Include="D3d\DepthTarget.h" />
+    <ClInclude Include="D3d\EigenHelpers.h" />
     <ClInclude Include="D3d\EigenToFromDirectX.h" />
     <ClInclude Include="D3d\Initialization.h" />
     <ClInclude Include="D3d\Material.h" />
