@@ -52,6 +52,13 @@ public:
 	{}
 
 	template<typename U>
+	MIXED_PREFIX Vec(const U* elems)
+		:	x(static_cast<T>(elems[0])),
+			y(static_cast<T>(elems[1])),
+			z(static_cast<T>(elems[2]))
+	{}
+
+	template<typename U>
 	MIXED_PREFIX Vec(const Vec<U>& other)
 		:	x(static_cast<T>(other.x)),
 			y(static_cast<T>(other.y)),
@@ -226,7 +233,7 @@ public:
 	MIXED_PREFIX Vec& operator= (const Vec<U>& other)
 	{
 		for ( int i=0; i < 3; ++i )
-			e[i] = other.e[i];
+			e[i] = static_cast<T>(other.e[i]);
 
 		return *this;
 	}
@@ -350,7 +357,7 @@ public:
 	template <typename U, typename V>
 	static MIXED_PREFIX Vec<typename std::common_type<U,V>::type> cross(const Vec<U>& a, const Vec<V>& b)
 	{
-		Vec<std::common_type<U, V>::type> o;
+		Vec<typename std::common_type<U, V>::type> o;
 
 		o.x = a.y*b.z - a.z*b.y;
 		o.y = -(a.x*b.z - a.z*b.x);
@@ -365,31 +372,5 @@ public:
 		return a.x*b.x + a.y*b.y + a.z*b.z;
 	}
 };
-
-// Additional support for scalar binary operators
-template <typename T, typename U>
-MIXED_PREFIX Vec<typename std::common_type<T, U>::type> operator+(U val, const Vec<T>& vec)
-{
-	return (vec + val);
-}
-
-template <typename T, typename U>
-MIXED_PREFIX Vec<typename std::common_type<T, U>::type> operator-(U val, const Vec<T>& vec)
-{
-	return Vec<U>(val) - vec;
-}
-
-template <typename T, typename U>
-MIXED_PREFIX Vec<typename std::common_type<T, U>::type> operator*(U val, const Vec<T>& vec)
-{
-	return vec * val;
-}
-
-template <typename T, typename U>
-MIXED_PREFIX Vec<typename std::common_type<T, U>::type> operator/(U val, const Vec<T>& vec)
-{
-	return Vec<U>(val) / vec;
-}
-
 
 #endif
