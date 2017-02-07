@@ -111,6 +111,7 @@ public:
 	void releaseRenderResources();
 	void setLightOn(bool on){material->getParams()->setLightOn(on);}
 
+	void setColor(Vec<float> color, float alpha);
 	void setRenderable(bool render);
 	void setWireframe(bool wireframe);
 

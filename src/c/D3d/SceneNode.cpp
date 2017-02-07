@@ -205,6 +205,11 @@ void GraphicObjectNode::releaseRenderResources()
 	renderable = false;
 }
 
+void GraphicObjectNode::setColor(Vec<float> color, float alpha)
+{
+	material->setColor(color, alpha);
+}
+
 void GraphicObjectNode::setRenderable(bool render)
 {
 	renderable = render;

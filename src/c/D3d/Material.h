@@ -46,9 +46,10 @@ public:
 	// Return requested material parameters type
 	template<class T> T* typedParams(){return dynamic_cast<T*>(params.get());}
 
-
 	void setWireframe(bool wireframe);
 	void setCullMode(CullMode cullMode);
+
+	virtual void setColor(Vec<float> color, float alpha){}
 	virtual DirectX::XMFLOAT4 getColor(){return DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f);}
 
 	// Overloaded to potentially pass transform related variables to the pixel shader
@@ -93,11 +94,11 @@ public:
 	SingleColoredMaterial(Renderer* renderer);
 	SingleColoredMaterial(Renderer* renderer, Vec<float> colorIn, float alpha = 1.0f);
 
-	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
 
 	void setLightOn(bool on);
 
+	virtual void setColor(Vec<float> colorIn, float alpha);
 	virtual DirectX::XMFLOAT4 getColor();
 private:
 	SingleColoredMaterial(){}
