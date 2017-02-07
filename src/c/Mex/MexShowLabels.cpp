@@ -1,12 +1,13 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexShowLabels::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double onD = mxGetScalar(prhs[0]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	gMsgQueueToDirectX.writeMessage("showLabels", (void*)onD2);
+	bool labelOn = (mxGetScalar(prhs[0]) != 0.0);
+	gMsgQueueToDirectX.pushMessage(new MessageShowLabels(labelOn));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowLabels::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

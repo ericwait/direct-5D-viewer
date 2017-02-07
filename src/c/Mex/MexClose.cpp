@@ -2,14 +2,14 @@
 #include "Global/Globals.h"
 #include "Messages/Threads.h"
 
+#include "Messages/LoadMessages.h"
+
 void MexClose::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gMsgQueueToDirectX.writeMessage("close", NULL);
+	gMsgQueueToDirectX.pushMessage(new MessageClose(), true);
+
 	cleanUp();
-	while(!gMsgQueueToMex.doneLoading() && !gMsgQueueToMex.isempty())
-	{
-		;
-	}
+
 	gMsgQueueToMex.clear();
 	gMsgQueueToDirectX.clear();
 }

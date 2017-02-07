@@ -1,17 +1,13 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexSetViewOrigin::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double* origin = (double*)mxGetData(prhs[0]);
-	size_t numDims = mxGetNumberOfElements(prhs[0]);
-
-	double* originMsg = new double[3];
-	originMsg[0] = origin[0];
-	originMsg[1] = origin[1];
-	originMsg[2] = origin[2];
-
-	gMsgQueueToDirectX.writeMessage("setViewOrigin", (void*)originMsg);
+	Vec<double> origin((double*)mxGetData(prhs[0]));
+	gMsgQueueToDirectX.pushMessage(new MessageSetViewOrigin(origin));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetViewOrigin::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

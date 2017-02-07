@@ -1,14 +1,17 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
-#include "D3d/TextureLightingObj.h"
+
+#include "Messages/ViewMessages.h"
+
 
 void MexTextureLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	for (int i = 0; i < 2; ++i)
-	{
-		TextureLightingObj* textureLightObj = new TextureLightingObj((mxGetScalar(prhs[0]) > 0.0), i);
-		gMsgQueueToDirectX.writeMessage("TextureLighting", (void*)textureLightObj);
-	}
+	bool texLightOn = (mxGetScalar(prhs[0]) != 0.0);
+
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+		gMsgQueueToDirectX.pushMessage(new MessageSetTextureLighting((GraphicObjectTypes)i, texLightOn));
+
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexTextureLighting::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

@@ -1,7 +1,8 @@
 #include "Global/Globals.h"
 #include "Global/ModuleInfo.h"
 #include "D3d/MessageProcessor.h"
-#include "Messages/Image.h"
+#include "Messages/LoadMessages.h"
+#include "Messages/ViewMessages.h"
 
 #include <random>
 
@@ -29,7 +30,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	std::string* pRootDir = new std::string(".");
 
-	gRendererOn = true;
 	gUpdateShaders = true;
 
 	// Queue up a random volume to render
@@ -38,16 +38,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	unsigned char* pixelVals = createRandomVolume(numChan, dims);
 
-	Image* testIm = new Image(numChan, 1, dims);
-	testIm->setPixels(pixelVals);
-	testIm->setTextureType(GraphicObjectTypes::OriginalVolume);
-	testIm->setPhysicalDim(Vec<float>(1.0f,1.0f,1.0f));
+	MessageLoadTexture* loadMsg = new MessageLoadTexture(numChan, 1, dims, pixelVals);
+	loadMsg->setTextureType(GraphicObjectTypes::OriginalVolume);
+	loadMsg->setPhysSize(Vec<float>(1.0f, 1.0f, 1.0f)*Vec<float>(dims));
 
-	std::string s = "loadTexture";
-	gMsgQueueToDirectX.writeMessage(s, (void*)testIm);
-
-	GraphicObjectTypes* textureType = new GraphicObjectTypes(GraphicObjectTypes::OriginalVolume);
-	gMsgQueueToDirectX.writeMessage("ViewTexture", (void*)textureType);
+	gMsgQueueToDirectX.pushMessage(loadMsg);
+	gMsgQueueToDirectX.pushMessage(new MessageShowObjectType(GraphicObjectTypes::OriginalVolume,true));
 
 	SetProcessDPIAware();
 	messageLoop(pRootDir);

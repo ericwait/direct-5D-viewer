@@ -1,6 +1,8 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/AnimMessages.h"
+
 void MexSetCapturePath::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	char filePath[512];
@@ -8,8 +10,7 @@ void MexSetCapturePath::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArr
 	mxGetString(prhs[0], filePath, 512);
 	mxGetString(prhs[1], fileName, 255);
 
-	gRenderer->setCaptureFilePath(filePath);
-	gRenderer->setCaptureFileName(fileName);
+	gMsgQueueToDirectX.pushMessage(new MessageSetCapturePath(filePath, fileName));
 }
 
 std::string MexSetCapturePath::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

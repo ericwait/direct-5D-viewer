@@ -1,12 +1,13 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/LoadMessages.h"
+
 void MexRemovePolygon::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double d = mxGetScalar(prhs[0]);
-	int* label = new int;
-	*label = (int)d;
-	gMsgQueueToDirectX.writeMessage("removePolygon", (void*)label);
+	int index = (int)mxGetScalar(prhs[0]);
+	gMsgQueueToDirectX.pushMessage(new MessageDeletePoly(index));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexRemovePolygon::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

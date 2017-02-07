@@ -1,12 +1,12 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/AnimMessages.h"
+
 void MexPlay::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double onD = mxGetScalar(prhs[0]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	gMsgQueueToDirectX.writeMessage("play", (void*)onD2);
+	bool playMovie = (mxGetScalar(prhs[0]) != 0.0);
+	gMsgQueueToDirectX.pushMessage(new MessageSetPlayMovie(playMovie));
 }
 
 std::string MexPlay::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

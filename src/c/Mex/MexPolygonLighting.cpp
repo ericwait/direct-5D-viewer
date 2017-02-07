@@ -1,12 +1,13 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexPolygonLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double onD = mxGetScalar(prhs[0]);
-	double* onD2 = new double;
-	*onD2 = onD;
-	gMsgQueueToDirectX.writeMessage("PolygonLighting", (void*)onD2);
+	bool lightingOn = (mxGetScalar(prhs[0]) != 0.0);
+	gMsgQueueToDirectX.pushMessage(new MessageSetPolyLighting(lightingOn));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexPolygonLighting::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

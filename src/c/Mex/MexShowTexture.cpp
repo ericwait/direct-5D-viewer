@@ -1,19 +1,24 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexShowTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	char buff[96];
 	mxGetString(prhs[0], buff, 96);
 
-	GraphicObjectTypes* textureType = new GraphicObjectTypes;// GraphicObjectTypes::OriginalVolume;
+	GraphicObjectTypes showType = GraphicObjectTypes::OriginalVolume;
 
-	if (_strcmpi("original", buff) == 0)
-		*textureType = GraphicObjectTypes::OriginalVolume;
-	else if (_strcmpi("processed", buff) == 0)
-		*textureType = GraphicObjectTypes::ProcessedVolume;
+	if ( _strcmpi("original", buff) == 0 )
+		showType = GraphicObjectTypes::OriginalVolume;
+	else if ( _strcmpi("processed", buff) == 0 )
+		showType = GraphicObjectTypes::ProcessedVolume;
 
-	gMsgQueueToDirectX.writeMessage("ViewTexture", (void*)textureType);
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+		gMsgQueueToDirectX.pushMessage(new MessageShowObjectType((GraphicObjectTypes)i, (showType == i)));
+
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

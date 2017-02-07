@@ -1,6 +1,7 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
-#include "Messages/Image.h"
+
+#include "Messages/LoadMessages.h"
 
 #pragma optimize("",off)
 void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
@@ -27,42 +28,27 @@ void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	// ptr to image data
 	unsigned char* image = (unsigned char*)mxGetData(prhs[0]);
 
-	Image* img = new Image(numChannels, numFrames, dims);
-	img->setPixels(image);
-
+	MessageLoadTexture* texMsg = new MessageLoadTexture(numChannels, numFrames, dims, image);
+	texMsg->setTextureType(GraphicObjectTypes::OriginalVolume);
 	if (nrhs > 2)
 	{
 		// Physical dimensions
 		double* physDims = (double*)mxGetData(prhs[1]);
-		img->setPhysicalDim(Vec<float>(float(physDims[1]), float(physDims[0]), float(physDims[2])));
+		texMsg->setPhysSize(Vec<float>(dims) * Vec<float>(float(physDims[1]), float(physDims[0]), float(physDims[2])));
 	}
 
-	if (nrhs > 2)
+	if (nrhs > 3)
 	{
 		char buff[96];
 		mxGetString(prhs[2], buff, 96);
 
 		if (_strcmpi("original", buff) == 0)
-			img->setTextureType(GraphicObjectTypes::OriginalVolume);
+			texMsg->setTextureType(GraphicObjectTypes::OriginalVolume);
 		else if (_strcmpi("processed", buff) == 0)
-			img->setTextureType(GraphicObjectTypes::ProcessedVolume);
-	}
-	else
-	{
-		img->setTextureType(GraphicObjectTypes::OriginalVolume);
+			texMsg->setTextureType(GraphicObjectTypes::ProcessedVolume);
 	}
 
-	std::string s = "loadTexture";
-	gMsgQueueToDirectX.writeMessage(s, (void*)img);
-
-	unsigned int i = 0;
-	while(!gMsgQueueToMex.hasError() && !gMsgQueueToMex.doneLoading())
-	{
-		++i;
-	}
-
-	if(gMsgQueueToMex.doneLoading())
-		gMsgQueueToMex.clearLoadFlag();
+	gMsgQueueToDirectX.pushMessage(texMsg, true);
 }
 #pragma optimize("",on)
 

@@ -55,9 +55,6 @@
     <ClCompile Include="Mex\MexLoadTexture.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MexPeelUpdate.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\MexPlay.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -68,9 +65,6 @@
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexResetView.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexRotate.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mex\MexSetBackColor.cpp">
@@ -130,27 +124,6 @@
     <ClCompile Include="Mex\MexShowFrameNumber.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mex\MexSetBoarderColor.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexMoveLeft.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexMoveRight.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexMoveUp.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexMoveDown.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexZoomDecrement.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mex\MexZoomIncrement.cpp">
-      <Filter>Mex\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mex\MexSetViewRotation.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
@@ -159,6 +132,15 @@
     </ClCompile>
     <ClCompile Include="Messages\Threads.cpp">
       <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSpin.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexSetBorderColor.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mex\MexMoveCamera.cpp">
+      <Filter>Mex\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,18 +1,17 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
+
 #include "Global/Vec.h"
+
+#include "Messages/ViewMessages.h"
 
 void MexSetViewRotation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double* vec = (double*)mxGetData(prhs[0]);
-	
-	double* vals = new double[4];
-	vals[0] = vec[0];
-	vals[1] = vec[1];
-	vals[2] = vec[2];
-	vals[3] = mxGetScalar(prhs[1]);
+	Vec<double> axis((double*)mxGetData(prhs[0]));
+	double angle = mxGetScalar(prhs[1]);
 
-	gMsgQueueToDirectX.writeMessage("SetViewRotation", (void*)vals);
+	gMsgQueueToDirectX.pushMessage(new MessageSetViewRotation(axis, angle));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetViewRotation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

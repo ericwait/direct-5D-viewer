@@ -1,13 +1,15 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexSetWindowSize::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double* dims = new double[2];
-	dims[0] = mxGetScalar(prhs[0]);
-	dims[1] = mxGetScalar(prhs[1]);
+	int width = (int)mxGetScalar(prhs[0]);
+	int height = (int)mxGetScalar(prhs[1]);
 
-	gMsgQueueToDirectX.writeMessage("windowSize", (void*)dims);
+	gMsgQueueToDirectX.pushMessage(new MessageSetWindowSize(width, height));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetWindowSize::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

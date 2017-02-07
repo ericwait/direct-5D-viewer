@@ -1,12 +1,16 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
-#include "D3d/TextureLightingObj.h"
+
+#include "Messages/ViewMessages.h"
 
 void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	bool* on = new bool;
-	*on = mxGetScalar(prhs[0])>0.0;
-	gMsgQueueToDirectX.writeMessage("textureAttenUpdate", (void*)on);
+	bool attenuateOn = (mxGetScalar(prhs[0]) != 0.0);
+
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+		gMsgQueueToDirectX.pushMessage(new MessageSetTextureAttenuation((GraphicObjectTypes)i, attenuateOn));
+
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexTextureAttenuation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

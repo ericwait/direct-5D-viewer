@@ -2,6 +2,8 @@
 #include "Global/Globals.h"
 #include "Messages/QueuePolygon.h"
 
+#include "Messages/LoadMessages.h"
+
 #include <vector>
 
 void MexAddPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
@@ -10,8 +12,7 @@ void MexAddPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 
 	size_t numPolygons = mxGetNumberOfElements(mxPolygons);
 
-	std::vector<QueuePolygon*>* polygons = new std::vector<QueuePolygon*>(numPolygons);
-
+	MessageLoadPolys* loadMsg = new MessageLoadPolys(numPolygons);
 	for(size_t i = 0; i<numPolygons; ++i)
 	{
 		mxArray* mxFaces = mxGetField(mxPolygons, i, "faces");
@@ -59,14 +60,18 @@ void MexAddPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 
 		mxGetString(mxLabel, buff, 256);
 
-		polygons->at(i) = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
-		polygons->at(i)->setfaceData(faceData);
-		polygons->at(i)->setvertData(vertData);
-		polygons->at(i)->setnormData(normData);
-		polygons->at(i)->setcolorData(colorData);
+
+		QueuePolygon* newPoly = new QueuePolygon(numFaces, numVerts, numNormals, frame, (int)mxGetScalar(mxIndex), buff);
+		newPoly->setfaceData(faceData);
+		newPoly->setvertData(vertData);
+		newPoly->setnormData(normData);
+		newPoly->setcolorData(colorData);
+
+		loadMsg->addPoly(newPoly);
 	}
 
-	gMsgQueueToDirectX.writeMessage("AddPolygons", (void*)polygons);
+	gMsgQueueToDirectX.pushMessage(loadMsg);
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexAddPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

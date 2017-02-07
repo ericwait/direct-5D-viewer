@@ -1,18 +1,21 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 #include <set>
 
 void MexShowPolygonList::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
+	mwSize numPolys = mxGetNumberOfElements(prhs[0]);
 	double* polyList = (double*)mxGetData(prhs[0]);
-	size_t numPolygons = mxGetNumberOfElements(prhs[0]);
 
-	std::set<int>* polygonSet = new std::set<int>;
-	for(size_t i = 0; i<numPolygons; ++i)
-		polygonSet->insert((int)(polyList[i]));
+	MessageShowPolys* polyMsg = new MessageShowPolys(true);
+	for ( mwSize i = 0; i < numPolys; ++i )
+		polyMsg->setPoly((int) polyList[i]);
 
-	gMsgQueueToDirectX.writeMessage("DisplayPolygons", (void*)polygonSet);
+	gMsgQueueToDirectX.pushMessage(polyMsg);
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowPolygonList::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

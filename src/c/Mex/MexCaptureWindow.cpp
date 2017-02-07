@@ -1,6 +1,7 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
-#include "Messages/Image.h"
+
+#include "Messages/AnimMessages.h"
 
 #include <chrono>
 #include <thread>
@@ -9,56 +10,52 @@ void MexCaptureWindow::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArra
 {
 	if(nlhs==0)
 	{
-		gMsgQueueToDirectX.writeMessage("CaptureWindow", NULL);
+		gMsgQueueToDirectX.pushMessage(new MessageCaptureWindow());
+
 		return;
 	}
 	
 	// This is when the caller would like to receive the image in memory instead of the file system
-	Image* outImage = NULL;
-	outImage = new Image(1, 1, Vec<size_t>(0, 0, 0));
-	gMsgQueueToDirectX.writeMessage("CaptureWindow", outImage);
+	MessageCaptureWindow::BMPData outData;
+	gMsgQueueToDirectX.pushMessage(new MessageCaptureWindow(&outData), true);
 
-	while(!gMsgQueueToMex.doneLoading())
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-
+	// TODO: Remove this!
 	gMsgQueueToMex.clearLoadFlag();
 	
-	const Vec<size_t> dims = outImage->getDimensions();
-	const mwSize DIMS[3] = {dims.y,dims.x,dims.z};
+	const mwSize DIMS[3] = {outData.height, outData.width, 3};
 
 	plhs[0] = mxCreateNumericArray(3, DIMS, mxUINT8_CLASS, mxREAL);
-	unsigned char* mIm = (unsigned char*)mxGetData(plhs[0]);
-	unsigned char* screenIm = outImage->getPixels();
+	unsigned char* outIm = (unsigned char*)mxGetData(plhs[0]);
 
-	size_t scanLine = ceil((float)dims.x/4.0f)*4;
+	size_t pad = ((outData.width & 0x3) > 0);
+	size_t padWidth = ((outData.width >> 2) + pad) << 2;
 
-	size_t matlabColorStride = dims.y*dims.x;
+	size_t matlabColorStride = outData.height * outData.width;
 
-	for(size_t c = 0; c<3; ++c)
+	for(size_t c = 0; c < 3; ++c)
 	{
-		size_t bmpC = 3-c-1;
-		size_t matC = c*matlabColorStride;
+		size_t bmpC = 3 - c - 1;
+		size_t matC = c * matlabColorStride;
 
-		for(size_t y = 0; y<dims.y; ++y)
+		for(size_t y = 0; y < outData.height; ++y)
 		{
-			size_t bmpY = dims.y-y-1;
+			size_t bmpY = outData.height - y - 1;
 			size_t matY = y;
 
-			for(size_t x = 0; x<dims.x; ++x)
+			for(size_t x = 0; x < outData.width; ++x)
 			{
-				size_t bmpX = x*4;
+				size_t bmpX = x * 4;
 				size_t matX = x;
 
-				size_t bmpIdx = bmpX + bmpY*scanLine*4 + bmpC;
-				size_t matIdx = matY + matX*dims.y + matC;
+				size_t bmpIdx = bmpX + bmpY * padWidth * 4 + bmpC;
+				size_t matIdx = matY + matX * outData.height + matC;
 
-				mIm[matIdx] = screenIm[bmpIdx];
+				outIm[matIdx] = outData.data[bmpIdx];
 			}
 		}
 	}
 
-	delete[] screenIm;
-	delete outImage;
+	delete[] outData.data;
 }
 
 std::string MexCaptureWindow::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

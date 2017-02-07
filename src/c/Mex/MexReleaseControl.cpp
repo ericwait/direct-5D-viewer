@@ -1,9 +1,11 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/AnimMessages.h"
+
 void MexReleaseControl::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gMsgQueueToDirectX.writeMessage("releaseControl", NULL);
+	gMsgQueueToDirectX.pushMessage(new MessageReleaseControl());
 }
 
 std::string MexReleaseControl::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

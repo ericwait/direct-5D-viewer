@@ -16,7 +16,6 @@ void MexInit::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]
 	// TODO: Should probably figure out what we want to do about the widget
 	//       For now data is compiled in and loaded right after renderer init
 	//loadWidget(prhs);
-	gRendererOn = true;
 }
 
 std::string MexInit::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

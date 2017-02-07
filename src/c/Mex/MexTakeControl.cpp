@@ -1,9 +1,11 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/AnimMessages.h"
+
 void MexTakeControl::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gMsgQueueToDirectX.writeMessage("takeControl", NULL);
+	gMsgQueueToDirectX.pushMessage(new MessageTakeControl(),true);
 }
 
 std::string MexTakeControl::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

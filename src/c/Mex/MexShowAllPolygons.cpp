@@ -1,13 +1,13 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexShowAllPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	double mexOn = mxGetScalar(prhs[0]);
-	double* on = new double;
-	*on = mexOn;
-
-	gMsgQueueToDirectX.writeMessage("ShowPolygons", (void*)on);
+	bool polyOn = (mxGetScalar(prhs[0]) != 0.0);
+	gMsgQueueToDirectX.pushMessage(new MessageShowObjectType(GraphicObjectTypes::Polygons, polyOn));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowAllPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

@@ -1,9 +1,11 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/AnimMessages.h"
+
 void MexCaptureSpinMovie::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gMsgQueueToDirectX.writeMessage("captureSpinMovie", (void*)NULL);
+	gMsgQueueToDirectX.pushMessage(new MessageCaptureSpinMovie());
 }
 
 std::string MexCaptureSpinMovie::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

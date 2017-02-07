@@ -1,12 +1,12 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/AnimMessages.h"
+
 void MexSetFrame::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	int curFrame = (int)mxGetScalar(prhs[0]);
-	int* onD2 = new int;
-	*onD2 = curFrame - 1;
-	gMsgQueueToDirectX.writeMessage("setFrame", (void*)onD2);
+	int frame = (int)mxGetScalar(prhs[0]);
+	gMsgQueueToDirectX.pushMessage(new MessageSetMovieFrame(frame));
 }
 
 std::string MexSetFrame::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

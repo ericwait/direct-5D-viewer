@@ -1,9 +1,12 @@
 #include "MexCommand.h"
 #include "Global/Globals.h"
 
+#include "Messages/ViewMessages.h"
+
 void MexResetView::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
-	gMsgQueueToDirectX.writeMessage("resetView", NULL);
+	gMsgQueueToDirectX.pushMessage(new MessageResetView());
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexResetView::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
