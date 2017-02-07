@@ -90,9 +90,6 @@
     <ClInclude Include="Global\WidgetData.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Standalone\ErrorMsg.h">
-      <Filter>Global\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Messages\DataQueue.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>

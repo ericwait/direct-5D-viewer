@@ -46,7 +46,6 @@
     <ClInclude Include="Messages\MessageQueue.h" />
     <ClInclude Include="Messages\QueuePolygon.h" />
     <ClInclude Include="Messages\TransferObj.h" />
-    <ClInclude Include="Standalone\ErrorMsg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp" />
