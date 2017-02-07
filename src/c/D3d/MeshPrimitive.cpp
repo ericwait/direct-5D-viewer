@@ -265,7 +265,7 @@ void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<
 		norm = triDir.normal();
 
 		for (int i=0; i<4 ; ++i)
-			normals[planesFirstVert+i] = norm;
+			normals[planesFirstVert+i] = Vec<float>(norm);
 
 		planesFirstVert += 4;
 	}

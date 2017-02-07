@@ -22,7 +22,7 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 	lookPosition = defaultLookPosition = lookPositionIn;
 	upDirection = defaultUpDirection = upDirectionIn;
 
-    nearZ = 0.1f;
+	nearZ = 0.1f;
 
 	zoomFactor = 25;
 
@@ -30,73 +30,21 @@ Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float
 	updateProjectionTransform();
 }
 
-void Camera::moveLeft(double speedFactor/*=1.0f*/)
+void Camera::move(Vec<float> delta)
 {
-	cameraPosition.x -= 0.03*speedFactor;
-	lookPosition.x	 -= 0.03*speedFactor;
+	// TODO: Should this be in here?
+	const float panFactor = 0.03;
+
+	cameraPosition += delta * panFactor;
+	lookPosition += delta * panFactor;
+
 	updateViewTransform();
 }
-
-void Camera::moveRight(double speedFactor/*=1.0f*/)
-{
-	cameraPosition.x += 0.03*speedFactor;
-	lookPosition.x	 += 0.03*speedFactor;
-	updateViewTransform();
-}
-
-void Camera::moveUp(double speedFactor/*=1.0f*/)
-{
-	cameraPosition.y -= 0.03*speedFactor;
-	lookPosition.y	 -= 0.03*speedFactor;
-	updateViewTransform();
-}
-
-void Camera::moveDown(double speedFactor/*=1.0f*/)
-{
-	cameraPosition.y += 0.03*speedFactor;
-	lookPosition.y	 += 0.03*speedFactor;
-	updateViewTransform();
-}
-
-void Camera::zoomIncrement(double speedFactor/*=1.0f*/)
-{
-    double curDelta = lookPosition.z-cameraPosition.z;
-	if (curDelta>0.02f)
-	{
-        double lclZoomFactor = zoomFactor/speedFactor;
-        double newDelta = curDelta - SQR(curDelta)/lclZoomFactor;
-
-		if (newDelta>0.02f)
-			cameraPosition.z = lookPosition.z - newDelta;
-		else
-			cameraPosition.z = lookPosition.z - 0.02f;
-
-		updateViewTransform();
-	}
-}
-
-void Camera::zoomDecrement(double speedFactor/*=1.0f*/)
-{
-    double curDelta = lookPosition.z-cameraPosition.z;
-	if (curDelta<10.0f)
-	{
-        double lclZoomFactor = zoomFactor/speedFactor;
-        double newDelta = lclZoomFactor/2.0f - sqrt(abs(SQR(lclZoomFactor) - 4.0f*lclZoomFactor*(curDelta))) /2.0f;
-
-		if (newDelta<10.0f)
-			cameraPosition.z = lookPosition.z - newDelta;
-		else
-			cameraPosition.z = lookPosition.z - 10.0f;
-
-		updateViewTransform();
-	}
-}
-
 
 void Camera::setNearZ(float val)
 {
-    nearZ = MAX(val,0.0f);
-    updateProjectionTransform();
+	nearZ = MAX(val,0.0f);
+	updateProjectionTransform();
 }
 
 void Camera::resetCamera()
@@ -104,8 +52,10 @@ void Camera::resetCamera()
 	cameraPosition = defaultCameraPosition;
 	lookPosition = defaultLookPosition;
 	upDirection = defaultUpDirection;
-    nearZ = 0.1f;
+	nearZ = 0.1f;
+
 	updateViewTransform();
+	updateProjectionTransform();
 }
 
 void Camera::setCameraPosition(Vec<float> cameraPositionIn)

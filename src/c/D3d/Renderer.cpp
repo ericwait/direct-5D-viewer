@@ -40,6 +40,8 @@ const std::string SHADER_DIR = "Shaders";
 
 Renderer::Renderer()
 {
+	isDirty = true;
+	isRendering = false;
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 	currentFrame = 0;
 	clipChunkPercent = 1.0f;
@@ -118,6 +120,8 @@ HRESULT Renderer::init(std::string rootDir)
 	initFallbackShaders();
 
 	resetViewPort();
+
+	setRendering(true);
 
 	return hr;
 }
@@ -283,43 +287,24 @@ HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D1
 	return result;
 }
 
-void Renderer::convertToWorldSpace(double* verts, size_t numVerts)
-{
-	Vec<size_t> dims = getDims();
-	Vec<double> scales = getScales();
-	scales = Vec<double>(scales.y, scales.x, scales.z);
-
-	Vec<double> dimsNeg1to1 = Vec<double>(dims.y,dims.x,dims.z) / 2.0;
-
-	for (size_t i = 0; i < numVerts; ++i)
-	{
-		Vec<double> newVert = Vec<double>(verts[i],verts[i+numVerts],verts[i+2*numVerts]);
-		newVert = ((newVert-1) / dimsNeg1to1 - 1) * scales;
-
-		verts[i] = newVert.x; 
-		verts[i+numVerts] = newVert.y;
-		verts[i+2*numVerts] = newVert.z;
-	}
-}
-
 float Renderer::FrontClipPos() const
 {
-    return frontClipPos;
+	return frontClipPos;
 }
 
 void Renderer::FrontClipPos(float val)
 {
-    frontClipPos = val;
+	frontClipPos = val;
 }
 
 float Renderer::BackClipPos() const
 {
-    return backClipPos;
+	return backClipPos;
 }
 
 void Renderer::BackClipPos(float val)
 {
-    backClipPos = val;
+	backClipPos = val;
 }
 
 HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut)
@@ -621,49 +606,56 @@ void Renderer::clearPixelShaderList()
 	pixelShaderMap.clear();
 }
 
+void Renderer::renderUpdate()
+{
+	if ( needsUpdate() )
+	{
+		renderAll();
+
+		isDirty = false;
+	}
+}
+
 void Renderer::renderAll()
 {
-	if (gRendererOn)
-	{
-		UINT64 frameTime = GetTimeMs64();
-		//rootScene->updateRenderableList();
+	UINT64 frameTime = GetTimeMs64();
+	//rootScene->updateRenderableList();
 
-		UINT64 startTime = GetTimeMs64();
-		startRender();
-		startTimes[curTimeIdx] = GetTimeMs64()-startTime;
+	UINT64 startTime = GetTimeMs64();
+	startRender();
+	startTimes[curTimeIdx] = GetTimeMs64()-startTime;
 
-		UINT64 preTime = GetTimeMs64();
-		renderBackground();
-		preTimes[curTimeIdx] = GetTimeMs64()-preTime;
+	UINT64 preTime = GetTimeMs64();
+	renderBackground();
+	preTimes[curTimeIdx] = GetTimeMs64()-preTime;
 
-		// Clear depth target before rendering polygons and volume data
-		clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	// Clear depth target before rendering polygons and volume data
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 
-		UINT64 mainTime = GetTimeMs64();
-		renderPolygons();
-		renderVolume();
-		mainTimes[curTimeIdx] = GetTimeMs64()-mainTime;
+	UINT64 mainTime = GetTimeMs64();
+	renderPolygons();
+	renderVolume();
+	mainTimes[curTimeIdx] = GetTimeMs64()-mainTime;
 
-		// And again before rendering the widget
-		clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	// And again before rendering the widget
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 
-		UINT64 postTime = GetTimeMs64();
-		renderWidget();
-		postTimes[curTimeIdx] = GetTimeMs64()-postTime;
+	UINT64 postTime = GetTimeMs64();
+	renderWidget();
+	postTimes[curTimeIdx] = GetTimeMs64()-postTime;
 
-		UINT64 gdiTime = GetTimeMs64();
-		renderGDIOverlay();
-		gdiTimes[curTimeIdx] = GetTimeMs64()-gdiTime;
+	UINT64 gdiTime = GetTimeMs64();
+	renderGDIOverlay();
+	gdiTimes[curTimeIdx] = GetTimeMs64()-gdiTime;
 
-		UINT64 endTime = GetTimeMs64();
-		endRender();
-		endTimes[curTimeIdx] = GetTimeMs64()-endTime;
+	UINT64 endTime = GetTimeMs64();
+	endRender();
+	endTimes[curTimeIdx] = GetTimeMs64()-endTime;
 
-		frameTimes[curTimeIdx] = GetTimeMs64()-frameTime;
-		++curTimeIdx;
-		if(curTimeIdx >= NUM_TIMES)
-			curTimeIdx = 0;
-	}
+	frameTimes[curTimeIdx] = GetTimeMs64()-frameTime;
+	++curTimeIdx;
+	if ( curTimeIdx >= NUM_TIMES )
+		curTimeIdx = 0;
 }
 
 void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
@@ -1731,7 +1723,7 @@ HRESULT Renderer::captureWindow(std::string filePathIn, std::string fileNameIn, 
 	return hr;
 }
 
-unsigned char* Renderer::captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi)
+unsigned char* Renderer::captureWindow(DWORD& dwBmpSize, BITMAPINFOHEADER& bi)
 {
 	HRESULT hr = E_FAIL;
 	HDC hdcMemDC = NULL;

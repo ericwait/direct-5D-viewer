@@ -25,16 +25,11 @@ class Camera
 {
 public:
 	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
-    virtual ~Camera() {}
+	virtual ~Camera() {}
 
-	void moveLeft(double speedFactor=1.0);
-	void moveRight(double speedFactor=1.0);
-	void moveUp(double speedFactor=1.0);
-	void moveDown(double speedFactor=1.0);
-	virtual void zoomIncrement(double speedFactor=1.0);
-	virtual void zoomDecrement(double speedFactor=1.0);
-    float getNearZ() const { return nearZ; }
-    void setNearZ(float val);
+	void move(Vec<float> delta);
+	float getNearZ() const { return nearZ; }
+	void setNearZ(float val);
 	void resetCamera();
 	void setCameraPosition(Vec<float> cameraPositionIn);
 	void setLookPosition(Vec<float> lookPositionIn);
@@ -70,8 +65,6 @@ public:
 	OrthoCamera(Vec<float> cameraPostionIn, Vec<float> lookPostionIn, Vec<float> upDirectionIn);
 
 	void updateProjectionTransform();
-    virtual void zoomIncrement() {}
-    virtual void zoomDecrement() {}
 
 private:
 	OrthoCamera();

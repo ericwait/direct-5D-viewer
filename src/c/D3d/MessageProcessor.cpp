@@ -20,20 +20,20 @@
 #include "Global/ModuleInfo.h"
 #include "Global/WidgetData.h"
 #include "Messages/LoadData.h"
-#include "Messages/DirectXCommands.h"
-
-#include "Mex/MexGlobals.h" // TODO: Get rid of this!!!
+#include "Messages/MessageHelpers.h"
 
 #include <time.h>
+#include <thread>
 
 bool gUpdateShaders = true;
-bool gRendererOn = false;
 bool gPlay = false;
 bool gRotate = false;
 bool gCapture = false;
+
 float gFramesPerSec = 5;
-float numAngles = 720;
-const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(-1/(numAngles)*DirectX::XM_2PI);
+float numAngles = 720.0f;
+
+const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(-1.0f/(numAngles)*DirectX::XM_2PI);
 
 void ClientResize(HWND hWnd, int nWidth, int nHeight)
 {
@@ -67,14 +67,17 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	static bool minimized = false;
 	static bool hullsOn = true;
 	static bool widgetOn = true;
-    float alpha = (altDown) ? (0.1f) : (1.0f);
+
+	float alpha = (altDown) ? (0.1f) : (1.0f);
+
+	float wheelTicks = 0.0f;
 
 	int index;
 	Vec<float> pnt;
 	Vec<float> direction;
 
 	switch(message)
-    {
+	{
 	case WM_NULL:
 		break;
 	case WM_CREATE:
@@ -84,13 +87,13 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	case WM_SIZE:
 		if(wParam == SIZE_MINIMIZED)
 		{
-			gRendererOn = false;
+			gRenderer->setRendering(false);
 			minimized = true;
 			break;
 		}
 		else if(wParam == SIZE_MAXIMIZED || (wParam == SIZE_RESTORED && minimized))
 		{
-			gRendererOn = true;
+			gRenderer->setRendering(true);
 			minimized = false;
 		}
 
@@ -99,56 +102,37 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		if(gRenderer != NULL)
 		{
 			gRenderer->resizeViewPort();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		break;
 	case WM_MOUSEWHEEL:
-        if(shiftDown && ctrlDown)
-        {
-            float nearZ = gCameraDefaultMesh->getNearZ();
-            if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
-            {
-                nearZ += 0.05f*alpha;
-            } else
-            {
-                nearZ -= 0.05f*alpha;
-            }
-            gCameraDefaultMesh->setNearZ(nearZ);
-        }
+		wheelTicks = ((float)GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
+		if(shiftDown && ctrlDown)
+		{
+			float nearZ = gCameraDefaultMesh->getNearZ();
+			nearZ += 0.05f * alpha * wheelTicks;
+
+			gCameraDefaultMesh->setNearZ(nearZ);
+		}
 		else if (ctrlDown)
 		{
 			float frontClipPos = gRenderer->FrontClipPos();
-			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
-			{
-				frontClipPos += 0.01f*alpha;
-			}
-			else
-			{
-				frontClipPos -= 0.01f*alpha;
-			}
+			frontClipPos += 0.01f * alpha * wheelTicks;
+
 			gRenderer->FrontClipPos(frontClipPos);
 		}
 		else if (shiftDown)
 		{
 			float backClipPos = gRenderer->BackClipPos();
-			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
-			{
-				backClipPos += 0.01f*alpha;
-			}
-            else
-			{
-				backClipPos -= 0.01f*alpha;
-			}
+			backClipPos += 0.01f * alpha * wheelTicks;
+
 			gRenderer->BackClipPos(backClipPos);
 		}
 		else
 		{
-			if(GET_WHEEL_DELTA_WPARAM(wParam)>0)
-				gCameraDefaultMesh->zoomIncrement(alpha);
-			else
-				gCameraDefaultMesh->zoomDecrement(alpha);
+			gCameraDefaultMesh->move(Vec<float>(0.0f, 0.0f, 2.0f*alpha*wheelTicks));
 		}
-		gRenderer->renderAll();
+		gRenderer->forceUpdate();
 		break;
 	case WM_MOUSEMOVE:
 		if(leftButtonDown)
@@ -165,7 +149,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / gWindowHeight)*DirectX::XM_2PI*alpha);
 
 			gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		break;
 	case WM_LBUTTONDOWN:
@@ -189,53 +173,53 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gMsgQueueToMex.addMessage("rightClick",index);
 		}
 		ctrlDown = false;
-		gRenderer->renderAll();
+		gRenderer->forceUpdate();
 		break;
 	case WM_LBUTTONUP:
 		leftButtonDown = false;
 		gRenderer->setClipChunkPercent(previousPeel);
-		gRenderer->renderAll();
+		gRenderer->forceUpdate();
 		break;
 	case WM_KEYDOWN:
 		if(VK_LEFT==wParam)
 		{
-			gCameraDefaultMesh->moveLeft();
-			gRenderer->renderAll();
+			gCameraDefaultMesh->move(Vec<float>(-1.0f, 0.0f, 0.0f));
+			gRenderer->forceUpdate();
 		}
 		else if(VK_RIGHT==wParam)
 		{
-			gCameraDefaultMesh->moveRight();
-			gRenderer->renderAll();
+			gCameraDefaultMesh->move(Vec<float>(1.0f, 0.0f, 0.0f));
+			gRenderer->forceUpdate();
 		}
 		else if(VK_UP==wParam)
 		{
-			gCameraDefaultMesh->moveUp();
-			gRenderer->renderAll();
+			gCameraDefaultMesh->move(Vec<float>(0.0f, 1.0f, 0.0f));
+			gRenderer->forceUpdate();
 		}
 		else if(VK_DOWN==wParam)
 		{
-			gCameraDefaultMesh->moveDown();
-			gRenderer->renderAll();
+			gCameraDefaultMesh->move(Vec<float>(0.0f, -1.0f, 0.0f));
+			gRenderer->forceUpdate();
 		}
 		else if(VK_PRIOR==wParam) //Page Up key
 		{
 			gRenderer->decrementFrame();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if(VK_NEXT==wParam) //Page Down key
 		{
 			gRenderer->incrementFrame();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if(VK_HOME==wParam)
 		{
 			gRenderer->setCurrentFrame(0);
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if(VK_END==wParam)
 		{
 			gRenderer->setCurrentFrame(gRenderer->getNumberOfFrames() - 1);
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if(VK_SPACE==wParam)
 		{
@@ -264,14 +248,14 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			else
 				gRenderer->togglescaleBar();
 
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('C' == wParam)
 		{
-            gRenderer->FrontClipPos(-1.5f);
-            gRenderer->BackClipPos(1.5f);
+			gRenderer->FrontClipPos(-1.5f);
+			gRenderer->BackClipPos(1.5f);
 			gCameraDefaultMesh->resetCamera();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('F' == wParam)
 		{
@@ -282,7 +266,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			else
 				gRenderer->toggleFrameNum();
 
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('H' == wParam)
 		{
@@ -296,26 +280,26 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			}
 
 			gRenderer->updateRenderList();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('L' == wParam)
 		{
 			gRenderer->toggleLabels();
 			gMsgQueueToMex.addMessage("toggleLabels",0.0);
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('P' == wParam)
 		{
 			if(ctrlDown)
 			{
 				gRenderer->captureWindow(NULL);
-				gRenderer->renderAll();
+				gRenderer->forceUpdate();
 			}
 		}
 		else if('R' == wParam)
 		{
 			gRenderer->resetRootWorldTransform();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('S' == wParam)
 		{
@@ -325,15 +309,15 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		else if('W' == wParam)
 		{
 			widgetOn = !widgetOn;
-			toggleWidget(widgetOn);
+			setObjectTypeVisibility(GraphicObjectTypes::Widget, widgetOn);
 
 			gRenderer->updateRenderList();
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('X' == wParam)
 		{
 			gMsgQueueToMex.addMessage("centerSelectedPolygon",1.0);
-			gRenderer->renderAll();
+			gRenderer->forceUpdate();
 		}
 		else if('1' == wParam || VK_NUMPAD1 == wParam)
 		{
@@ -424,13 +408,13 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gMsgQueueToMex.addMessage("keyDown","number",0.0);
 		}
 		break;
-    case WM_SYSKEYDOWN:
-        if(VK_MENU==wParam)
-        {
-            altDown = true;
-            gMsgQueueToMex.addMessage("keyDown", "alt");
-        }
-        break;
+	case WM_SYSKEYDOWN:
+		if(VK_MENU==wParam)
+		{
+			altDown = true;
+			gMsgQueueToMex.addMessage("keyDown", "alt");
+		}
+		break;
 	case WM_KEYUP:
 		if(VK_SHIFT==wParam)
 		{
@@ -448,93 +432,89 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			gMsgQueueToMex.addMessage("keyUp","alt");
 		}
 		break;
-    case WM_SYSKEYUP:
-        if(VK_MENU==wParam)
-        {
-            altDown = false;
-            gMsgQueueToMex.addMessage("keyDown", "alt");
-        }
-        break;
+	case WM_SYSKEYUP:
+		if(VK_MENU==wParam)
+		{
+			altDown = false;
+			gMsgQueueToMex.addMessage("keyDown", "alt");
+		}
+		break;
 
 	}
 
 	return DefWindowProc(hWnd,message,wParam,lParam);
 }
 
-HRESULT messageProcess(MSG& msg)
+void updateTime()
 {
-	HRESULT hr = S_OK;
 	static clock_t lastTimeUpdate = clock();
 	static clock_t lastRotateUpdate = clock();
 	static clock_t lastShaderUpdate = clock();
+
+	if(gPlay)
+	{
+		float timeFromLast = (float)(clock() - lastTimeUpdate) / CLOCKS_PER_SEC;
+		if(timeFromLast > 1.0f/gFramesPerSec)
+		{
+			lastTimeUpdate = clock();
+
+			gRenderer->incrementFrame();
+		}
+	}
+
+	if(gRotate)
+	{
+		float timeFromLast = (float)(clock() - lastRotateUpdate) / CLOCKS_PER_SEC;
+		if(timeFromLast > 2.5f/numAngles)
+		{
+			lastRotateUpdate = clock();
+
+			DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
+			gRenderer->setWorldRotation(previousWorldRotation*ROT_X);
+		}
+	}
+
+	if ( gUpdateShaders )
+	{
+		float shaderUpdateElapsed = (float)(clock() - lastShaderUpdate) / CLOCKS_PER_SEC;
+		if ( shaderUpdateElapsed > 1.0f )
+		{
+			lastShaderUpdate = clock();
+
+			bool update = gRenderer->updateRegisteredShaders();
+		}
+	}
+}
+
+void updateCapture()
+{
 	static int curAngle = 0;
 
-	if(msg.message==WM_QUIT)
-		return E_FAIL;
-
-	int pleaseRender = 0;
-
-	if(gRendererOn)
+	if ( gCapture )
 	{
-		//gRenderer->renderAll();
+		gRenderer->captureWindow(NULL);
 
-		if(gPlay)
+		if ( gRotate )
 		{
-			float timeFromLast = (float)(clock() - lastTimeUpdate) / CLOCKS_PER_SEC;
-			if(timeFromLast > 1.0f/gFramesPerSec)
+			++curAngle;
+			if ( curAngle == numAngles )
 			{
-				lastTimeUpdate = clock();
-				gRenderer->incrementFrame();
-				pleaseRender = 1;
-				if(gCapture)
-				{
-					//gRenderer->renderAll();
-					gRenderer->captureWindow(NULL);
-				}
-			}
-		}
-
-		if(gRotate)
-		{
-			float timeFromLast = (float)(clock() - lastRotateUpdate) / CLOCKS_PER_SEC;
-			if(timeFromLast > 2.5f/numAngles)
-			{
-				lastRotateUpdate = clock();
-				DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
-				gRenderer->setWorldRotation(previousWorldRotation*ROT_X);
-				pleaseRender = 1;
-				if(gCapture)
-				{
-					++curAngle;
-					// This guy renders
-					//gRenderer->renderAll();
-					gRenderer->captureWindow(NULL);
-					if(curAngle == numAngles)
-					{
-						gCapture = false;
-						gRotate = false;
-						curAngle = 0;
-					}
-				}
-			}
-		}
-
-		if ( gUpdateShaders )
-		{
-			float shaderUpdateElapsed = (float)(clock() - lastShaderUpdate) / CLOCKS_PER_SEC;
-			if ( shaderUpdateElapsed > 1.0f )
-			{
-				pleaseRender = gRenderer->updateRegisteredShaders();
-				lastShaderUpdate = clock();
+				gCapture = false;
+				gRotate = false;
+				curAngle = 0;
 			}
 		}
 	}
-	if(pleaseRender == 1)
-	{
-		gRenderer->renderAll();
-	}
+}
 
-	return hr;
+void startThreadQueue()
+{
+	gMsgQueueToDirectX.open();
+}
+
+void stopThreadQueue()
+{
+	gMsgQueueToDirectX.close();
 }
 
 DWORD WINAPI messageLoop(LPVOID lpParam)
@@ -566,6 +546,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 	if(hr==S_OK)
 	{
+		startThreadQueue();
 		gRendererInit = true;
 
 		DWORD termWait = WaitForSingleObject(gTermEvent,0);
@@ -573,7 +554,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		try
 		{
 			// DirectX thread
-			while(termWait != WAIT_OBJECT_0 && hr==S_OK)
+			while(termWait != WAIT_OBJECT_0 && SUCCEEDED(hr))
 			{
 				if(PeekMessage(&msg,NULL,0,0,PM_REMOVE))
 				{
@@ -581,18 +562,25 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 					DispatchMessage(&msg);
 				}
 
-				// Inside here check for a message from queue
-				// checkQueue();
-				if(gMsgQueueToDirectX.getNumMessages() > 0)
+				// Start tearing down the thread in the case of WM_QUIT
+				if ( msg.message == WM_QUIT )
 				{
-					hr = checkMessage();
-					if(hr==S_FALSE)
-						break;
+					hr = S_FALSE;
+					break;
 				}
 
+				// Check messages from the MEX thread
+				hr = checkMessage();
+				if ( FAILED(hr) )
+					break;
 
-				/**/
-				hr = messageProcess(msg);
+				// Update any time-related parts of renderer
+				updateTime();
+				updateCapture();
+
+				// This function checks if renderer needs update then calls renderall()
+				gRenderer->renderUpdate();
+
 
 				termWait = WaitForSingleObject(gTermEvent,0);
 			}
@@ -610,31 +598,24 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 			sendErrMessage("Caught an unknown error!");
 		}
 
-		//TODO: Get rid of this!!!
-		if(messageLoopHandle != NULL)
+		gRenderer->setRendering(false);
+		stopThreadQueue();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		for ( int i = 0; i < GraphicObjectTypes::VTend; ++i )
 		{
-			gRendererOn = false;
-
-			Sleep(1000);
-
-			//if (gRenderer != NULL)
-			//gRenderer->getMutex();
-
-			for(int i = 0; i < GraphicObjectTypes::VTend; ++i)
+			if ( gRenderer != NULL )
 			{
-				if(gRenderer != NULL)
+				std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[i].begin();
+				for ( ; objectIter != gGraphicObjectNodes[i].end(); ++objectIter )
 				{
-					std::map<int,GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[i].begin();
-					for(; objectIter != gGraphicObjectNodes[i].end(); ++objectIter)
-					{
-						GraphicObjectNode* node = objectIter->second;
-						node->detatchFromParentNode();
-						delete node;
-					}
+					GraphicObjectNode* node = objectIter->second;
+					node->detatchFromParentNode();
+					delete node;
 				}
-
-				gGraphicObjectNodes[i].clear();
 			}
+
+			gGraphicObjectNodes[i].clear();
 		}
 	}
 	else
@@ -674,275 +655,10 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 
 HRESULT checkMessage()
 {
-	HRESULT hr = S_OK;
-	Message m = gMsgQueueToDirectX.getNextMessage();
+	if ( gMsgQueueToDirectX.getNumMessages() == 0 )
+		return S_OK;
 
-	if(m.command == "loadTexture")
-	{
-		XloadTextureCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "close")
-	{
-		hr = S_FALSE;
-	}
-	else if(m.command == "ViewTexture")
-	{
-		GraphicObjectTypes* typ = (GraphicObjectTypes*)m.data;
+	bool success = gMsgQueueToDirectX.processNext();
 
-		setCurrentTexture(*typ);
-		gRenderer->renderAll();
-		delete typ;
-	}
-	else if(m.command == "peelUpdate")
-	{
-		XpeelUpdateCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "TextureLighting")
-	{
-		XtextureLightingUpdateCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "textureAttenUpdate")
-	{
-		XtextureAttenUpdateCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "PolygonLighting")
-	{
-		XpolygonLighting(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "play")
-	{
-		XplayCommand(m);
-	}
-	else if(m.command == "rotate")
-	{
-		XrotateCommand(m);
-	}
-	else if(m.command == "showLabels")
-	{
-		XshowLabelsCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "resetView")
-	{
-		XresetViewCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "captureSpinMovie")
-	{
-		XcaptureSpinMovieCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "TransferFunction")
-	{
-		XtransferUpdateCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "ToggleWireframe")
-	{
-		XtoggleWireframe(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "removePolygon")
-	{
-		XremovePolygonCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "ShowPolygons")
-	{
-		double* on = (double*)m.data;
-		togglePolygons((*on)>0);
-		delete on;
-
-		gRenderer->renderAll();
-	}
-	else if(m.command == "DisplayPolygons")
-	{
-		XdisplayPolygonsCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "setFrame")
-	{
-		XsetFrameCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "setViewOrigin")
-	{
-		XsetViewOriginCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "updatePolygons")
-	{
-
-	}
-	else if(m.command == "AddPolygons")
-	{
-		XaddPolygonsCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "setCapturePath")
-	{
-
-	}
-	else if(m.command == "CaptureWindow")
-	{
-		XcaptureWindow(m.data);
-	}
-	else if(m.command == "centerSelectedCell")
-	{
-
-	}
-	else if(m.command == "deleteAllPolygons")
-	{
-		XdeleteAllPolygonsCommand(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "SetViewRotation")
-	{
-		double* rotationAxis = (double*)m.data;
-		double angle = rotationAxis[3];
-		angle = angle/180.0 *DirectX::XM_PI;
-
-		DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
-		DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
-
-		DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
-
-		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
-		gRenderer->setWorldRotation(previousWorldRotation*rotMat);
-		gRenderer->renderAll();
-
-		delete[] rotationAxis;
-	}
-	else if(m.command=="SetWorldRotation")
-	{
-		double* rotationAxis = (double*)m.data;
-		double angle = rotationAxis[3];
-		angle = angle/180.0 *DirectX::XM_PI;
-
-		DirectX::XMFLOAT3 rotFloat(rotationAxis[0], rotationAxis[1], rotationAxis[2]);
-		DirectX::XMVECTOR rotVec = DirectX::XMLoadFloat3(&rotFloat);
-
-		DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationAxis(rotVec, angle);
-
-		DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
-		gRenderer->setWorldRotation(rotMat*previousWorldRotation);
-		gRenderer->renderAll();
-
-		delete[] rotationAxis;
-	}
-	else if(m.command == "takeControl")
-	{
-		gRendererOn = false;
-	}
-	else if(m.command == "releaseControl")
-	{
-		gRendererOn = true;
-		gRenderer->renderAll();
-	}
-	else if(m.command == "setBackgroundColor")
-	{
-		XsetBackgroundColor(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "windowSize")
-	{
-		XsetWindowSize(m);
-		gRenderer->renderAll();
-	}
-	else if(m.command == "showFrameNumber")
-	{
-		double* onD = (double*)m.data;
-		bool on = (*onD)>0;
-		gRenderer->setFrameNumOn(on);
-		gRenderer->renderAll();
-		delete m.data;
-	}
-	else if(m.command == "showScaleBar")
-	{
-		double* onD = (double*)m.data;
-		bool on = (*onD)>0;
-		gRenderer->setscaleBarOn(on);
-		gRenderer->renderAll();
-		delete m.data;
-	}
-	else if(m.command == "showWidget")
-	{
-		double* onD = (double*)m.data;
-		bool on = (*onD)>0;
-		toggleWidget(on);
-		gRenderer->renderAll();
-		delete m.data;
-	}
-	else if(m.command == "setBorderColor")
-	{
-		Vec<float>* color = (Vec<float>*)m.data;
-
-		const GraphicObjectTypes borderType = GraphicObjectTypes::Border;
-		for(auto objectIter = gGraphicObjectNodes[borderType].begin(); objectIter!=gGraphicObjectNodes[borderType].end(); ++objectIter)
-			objectIter->second->getMaterial()->typedParams<SingleColoredMaterial>()->setColor(*color, 1.0f);
-
-		gRenderer->renderAll();
-		delete m.data;
-	}
-	else if(m.command == "moveLeft")
-	{
-		double* speed = (double*)m.data;
-		gCameraDefaultMesh->moveLeft(*speed);
-		gRenderer->renderAll();
-
-		delete speed;
-	}
-	else if(m.command == "moveRight")
-	{
-		double* speed = (double*)m.data;
-		gCameraDefaultMesh->moveRight(*speed);
-		gRenderer->renderAll();
-
-		delete speed;
-	}
-	else if(m.command == "moveUp")
-	{
-		double* speed = (double*)m.data;
-		gCameraDefaultMesh->moveUp(*speed);
-		gRenderer->renderAll();
-
-		delete speed;
-	}
-	else if(m.command == "moveDown")
-	{
-		double* speed = (double*)m.data;
-		gCameraDefaultMesh->moveDown(*speed);
-		gRenderer->renderAll();
-
-		delete speed;
-	}
-	else if(m.command == "zoomDecrement")
-	{
-		double* speed = (double*)m.data;
-		gCameraDefaultMesh->zoomDecrement(*speed);
-		gRenderer->renderAll();
-
-		delete speed;
-	}
-	else if(m.command == "zoomIncrement")
-	{
-		double* speed = (double*)m.data;
-		gCameraDefaultMesh->zoomIncrement(*speed);
-		gRenderer->renderAll();
-
-		delete speed;
-	}
-	else
-	{
-		// Print an error message
-		char buff[255];
-		sprintf(buff, "%s is not a valid command!\n", m.command.c_str());
-		sendErrMessage(buff);
-	}
-	return hr;
+	return ((success) ? (S_OK) : (S_FALSE));
 }

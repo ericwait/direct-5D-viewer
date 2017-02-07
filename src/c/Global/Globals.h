@@ -20,8 +20,9 @@
 
 #include "Defines.h"
 #include "Messages/MessageQueue.h"
+#include "Messages/ReturnQueue.h"
+
 #include "DirectXMath.h"
-#include "Messages/DataQueue.h"
 
 #include "windows.h"
 
@@ -34,7 +35,6 @@ extern HWND gWindowHandle;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
 extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
-extern MessageQueue gMsgQueueToMex;
 
 //Implemented in Initialization.cpp
 extern unsigned int gWindowWidth;
@@ -45,11 +45,11 @@ extern Camera* gCameraDefaultMesh;
 
 //Implemented in MessageProcessor.cpp
 extern bool gUpdateShaders;
-extern bool gRendererOn;
 extern bool gPlay;
 extern bool gRotate;
 extern bool gCapture;
 extern float gFramesPerSec;
 
-// Global Queue
-extern DataQueue gMsgQueueToDirectX;
+// Global Queues
+extern MessageQueue gMsgQueueToDirectX;
+extern ReturnQueue gMsgQueueToMex;

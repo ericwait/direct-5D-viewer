@@ -5,15 +5,6 @@
 #include <vector>
 #include <set>
 
-extern std::vector<SceneNode*> hullRootNodes;
-
-void setCurrentTexture(GraphicObjectTypes textureType);
-void togglePolygons(bool on);
-void toggleWidget(bool on);
-void togglePolygonWireframe(bool wireframe);
-void togglePolygonLighting(bool lighting);
-void toggleSelectedPolygon(std::set<int> labels);
-
 std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals);
 
 HRESULT createBorder(Vec<float> &scale);

@@ -30,8 +30,8 @@ volatile bool gRendererInit = false;
 bool registerExitFunction = false;
 HANDLE messageLoopHandle = NULL;
 
-MessageQueue gMsgQueueToMex;
-DataQueue gMsgQueueToDirectX;
+ReturnQueue gMsgQueueToMex;
+MessageQueue gMsgQueueToDirectX(true);
 
 std::map<int, GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 

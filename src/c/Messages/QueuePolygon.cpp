@@ -27,7 +27,7 @@ void QueuePolygon::setfaceData(double* faceData)
 void QueuePolygon::setvertData(double* vertData)
 {
 	memcpy(this->vertData, vertData, numVerts * 3 * sizeof(double));
-	gRenderer->convertToWorldSpace(this->vertData, numVerts);
+	gRenderer->imageToModelSpace(this->vertData, numVerts);
 }
 
 void QueuePolygon::setnormData(double* normData)

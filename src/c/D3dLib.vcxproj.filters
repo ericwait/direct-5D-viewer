@@ -90,15 +90,6 @@
     <ClInclude Include="Global\WidgetData.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Messages\DataQueue.h">
-      <Filter>Messaging\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\DirectXCommands.h">
-      <Filter>Messaging\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\Image.h">
-      <Filter>Messaging\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Messages\LoadData.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
@@ -108,7 +99,25 @@
     <ClInclude Include="Messages\QueuePolygon.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Messages\TransferObj.h">
+    <ClInclude Include="Messages\Message.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\LoadMessages.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\ViewMessages.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\AnimMessages.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\ReturnQueue.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\MessageHelpers.h">
+      <Filter>Messaging\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages\RenderMessages.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -158,15 +167,6 @@
     <ClCompile Include="Global\WidgetData.cpp">
       <Filter>Global\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Messages\DataQueue.cpp">
-      <Filter>Messaging\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\DirectXCommands.cpp">
-      <Filter>Messaging\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\Image.cpp">
-      <Filter>Messaging\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Messages\LoadData.cpp">
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
@@ -179,13 +179,25 @@
     <ClCompile Include="Messages\QueuePolygon.cpp">
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Messages\TransferObj.cpp">
-      <Filter>Messaging\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\Update.cpp">
-      <Filter>Messaging\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Messages\ViewerGlobals.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\LoadMessages.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\ViewMessages.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\ReturnQueue.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\AnimMessages.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\MessageHelpers.cpp">
+      <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Messages\RenderMessages.cpp">
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

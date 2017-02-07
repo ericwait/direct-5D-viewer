@@ -20,6 +20,8 @@
 #include <DXGI1_2.h>
 #include <DirectXMath.h>
 
+#include <Eigen/Dense>
+
 #include <vector>
 #include <map>
 #include <string>
@@ -98,6 +100,7 @@ public:
 	HRESULT init(std::string rootDir);
 
 //Setters	
+	void setRendering(bool rendering){isRendering = rendering;}
 	void setCurrentFrame(int frame);
 	void incrementFrame();
 	void decrementFrame();
@@ -159,8 +162,31 @@ public:
 	Vec<float> getPhysSize(){return volPhysSize;}
 	Vec<size_t> getDims(){return volDims;}
 
-	void setPhysSize(Vec<float> physSizeIn){volPhysSize = physSizeIn;}
-	void setDims(Vec<size_t> dimsIn){volDims = dimsIn;}
+	void setPhysSize(Vec<float> physSizeIn)
+	{
+		volPhysSize = physSizeIn;
+		updateImToModel();
+	}
+
+	void setDims(Vec<size_t> dimsIn)
+	{
+		volDims = dimsIn;
+		updateImToModel();
+	}
+
+	template <typename T>
+	void imageToModelSpace(T* verts, size_t numVerts)
+	{
+		for ( size_t i = 0; i < numVerts; ++i )
+		{
+			Eigen::Vector4f newVert((T)verts[i], (T)verts[i+numVerts], (T)verts[i+2*numVerts], 1.0f);
+			newVert = imToModel * newVert;
+
+			verts[i] = newVert[0];
+			verts[i+numVerts] = newVert[1];
+			verts[i+2*numVerts] = newVert[2];
+		}
+	}
 
 // Static setup getters
 	std::shared_ptr<VolumeParams>& getSharedVolumeParams(int volType);
@@ -169,6 +195,11 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
 //////////////////////////////////////////////////////////////////////////
+	void forceUpdate() { isDirty = true; }
+	bool needsUpdate(){return (isRendering && isDirty);}
+
+	void renderUpdate();
+
 	void renderAll();
 	void startRender();
 
@@ -206,12 +237,10 @@ public:
 	void clearRenderTarget(RenderTargetTypes rt, Vec<float> clearColor);
 	void clearDepthTarget(DepthTargetTypes dt, float clearDepth);
 
-	void convertToWorldSpace(double* verts, size_t numVerts);
-
-    float FrontClipPos() const;
-    void FrontClipPos(float val);
-    float BackClipPos() const;
-    void BackClipPos(float val);
+	float FrontClipPos() const;
+	void FrontClipPos(float val);
+	float BackClipPos() const;
+	void BackClipPos(float val);
 private:
 	HRESULT initDevice();
 	HRESULT initDepthStencils();
@@ -250,7 +279,24 @@ private:
 
 	const SwapChainTarget* getSwapChain() const;
 
+
+	void updateImToModel()
+	{
+		Vec<float> dimsf = getDims();
+		Vec<float> sizef = getPhysSize();
+
+		Vec<float> scaleFactor = volPhysSize * 2.0f / dimsf / volPhysSize.maxValue();
+
+		imToModel = (Eigen::Translation3f(-1.0f, -1.0f, -1.0f)
+			* Eigen::Scaling(scaleFactor.x, scaleFactor.y, scaleFactor.z)
+			* Eigen::Translation3f(-1.0f, -1.0f, -1.0f)).matrix();
+	}
+
+
 	//Member variables 
+	bool isDirty;
+	bool isRendering;
+
 	Vec<float> backgroundColor;
 
 	//HANDLE mutexDevice; // comment this out
@@ -307,8 +353,8 @@ private:
 
 	unsigned int currentFrame;
 	float clipChunkPercent;
-    float frontClipPos;
-    float backClipPos;
+	float frontClipPos;
+	float backClipPos;
 	int numPlanes;
 	bool labelsOn;
 	bool frameNumOn;
@@ -332,6 +378,8 @@ private:
 
 	Vec<size_t> volDims;
 	Vec<float> volPhysSize;
+
+	Eigen::Matrix4f imToModel;
 
 private:
 	std::shared_ptr<VolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
