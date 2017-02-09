@@ -1,4 +1,4 @@
-function [im,imData] = LoadImage( im, imData, imagePath, bufferNum )
+function [varargout] = LoadImage( im, imData, imagePath, bufferNum )
 %LOADIMAGE [varargout] = D3d.LoadImage( im, imData, imagePath, bufferNum )
 %sends the image data to the directX viewer.
 %
@@ -102,6 +102,13 @@ if (~isempty(im) && ~isempty(imData))
     
     D3d.Viewer.LoadTexture(im8,imData.PixelPhysicalSize,bufferType);
     D3d.UI.Ctrl.EnableBuffer(bufferNum);
+end
+
+if (nargout>1)
+    varargout{2} = imData;
+end
+if (nargout>0)
+    varargout{1} = im;
 end
 end
 
