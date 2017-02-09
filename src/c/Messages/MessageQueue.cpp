@@ -25,6 +25,7 @@ MessageQueue::~MessageQueue()
 void MessageQueue::open()
 {
 	queueOpen = true;
+    failed = false;
 }
 
 void MessageQueue::close()
@@ -37,6 +38,7 @@ bool MessageQueue::pushMessage(Message* newMessage, bool forceWait)
 {
 	DWORD waitTerm = WaitForSingleObject(mutex, INFINITE);
 
+    failed = false;
 	messages.push(newMessage);
 
 	ReleaseMutex(mutex);
