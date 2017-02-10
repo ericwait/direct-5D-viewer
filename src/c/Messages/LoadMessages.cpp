@@ -5,40 +5,86 @@
 #include "Global/Globals.h"
 #include "Global/ErrorMsg.h"
 
-MessageLoadTexture::MessageLoadTexture(int numChannels, int numFrames, Vec<size_t> dims, unsigned char* inData)
-	: columnMajor(true), numChannels(numChannels), numFrames(numFrames), dims(dims), imageData(inData)
+
+MessageInitVolume::MessageInitVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physSize, bool columnMajor)
+	: numFrames(numFrames), numChannels(numChannels), dims(dims), physicalSize(physSize), columnMajor(true)
 {}
 
-void MessageLoadTexture::setTextureType(GraphicObjectTypes inType)
+bool MessageInitVolume::process()
 {
-	textureType = inType;
+	if ( !gRenderer )
+		return false;
+
+	HRESULT hr = initVolume(numFrames, numChannels, dims, physicalSize, columnMajor);
+	if ( FAILED(hr) )
+	{
+		sendHrErrMessage(hr);
+		return false;
+	}
+
+	return true;
 }
 
-void MessageLoadTexture::setPhysSize(Vec<float> physSize)
+
+
+MessageLoadTextureFrame::MessageLoadTextureFrame(GraphicObjectTypes type, int frame, unsigned char* data)
+	: textureType(type), frame(frame), imageData(data)
+{}
+
+bool MessageLoadTextureFrame::process()
 {
-	physicalSize = physSize;
+	if ( !gRenderer )
+		false;
+
+	const VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( !info )
+	{
+		sendErrMessage("Must initialize volume first with InitVolume!");
+		return false;
+	}
+
+	HRESULT hr = loadTextureFrame(textureType, frame, imageData);
+	if ( FAILED(hr) )
+	{
+		sendHrErrMessage(hr);
+		return false;
+	}
+
+	//TODO: Should we also set visibility here?
+
+	return true;
 }
+
+
+
+MessageLoadTexture::MessageLoadTexture(GraphicObjectTypes inType, unsigned char* inData)
+	: textureType(inType), imageData(inData)
+{}
 
 bool MessageLoadTexture::process()
 {
-	if ( gGraphicObjectNodes[GraphicObjectTypes::Border].empty() )
+	if ( !gRenderer )
+		return false;
+
+	const VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( !info )
 	{
-		HRESULT hr = createBorder(physicalSize/physicalSize.maxValue());
-		if ( FAILED(hr) )
-			sendHrErrMessage(hr);
+		sendErrMessage("Must initialize volume first with InitVolume!");
+		return false;
 	}
 
-	HRESULT hr = loadVolumeTexture(imageData, dims, numChannels, numFrames, physicalSize, textureType);
+	HRESULT hr = loadVolumeTexture(imageData, textureType);
 	if ( FAILED(hr) )
+	{
 		sendHrErrMessage(hr);
+		return false;
+	}
 
 	// Reset visibility for all volume types (assumes they are at the end of the list
 	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
 		setObjectTypeVisibility((GraphicObjectTypes)i, (i == textureType));
 
-	gMsgQueueToMex.addMessage("loadDone", 0);
-
-	return SUCCEEDED(hr);
+	return true;
 }
 
 

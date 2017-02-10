@@ -188,9 +188,6 @@ ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, V
 	std::vector<Vec<float>> texUVs;
 	buildViewAlignedPlanes(dims, faces, vertices, normals, texUVs);
 
-	renderer->setDims(volDims);
-	renderer->setPhysSize(scaleDims);
-
 	initializeResources(texUVs);
 }
 

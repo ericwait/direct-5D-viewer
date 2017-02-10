@@ -22,8 +22,6 @@
 #include "Messages/MessageQueue.h"
 #include "Messages/ReturnQueue.h"
 
-#include "DirectXMath.h"
-
 #include "windows.h"
 
 #undef max

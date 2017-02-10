@@ -6,7 +6,7 @@
 void MexSetFrame::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	int frame = (int)mxGetScalar(prhs[0]);
-	gMsgQueueToDirectX.pushMessage(new MessageSetMovieFrame(frame));
+	gMsgQueueToDirectX.pushMessage(new MessageSetMovieFrame(MAT_TO_C(frame)));
     gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 

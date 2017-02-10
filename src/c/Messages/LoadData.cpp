@@ -1,5 +1,6 @@
 #include "Global/Globals.h"
 #include "Global/Vec.h"
+#include "D3d/VolumeInfo.h"
 #include "Messages/QueuePolygon.h"
 #include "Messages/MessageQueue.h"
 
@@ -137,48 +138,107 @@ HRESULT createBorder(Vec<float> &scale)
 	return S_OK;
 }
 
-HRESULT loadVolumeTexture(unsigned char* image, Vec<size_t> dims, int numChannel, int numFrames, Vec<float> scales, GraphicObjectTypes typ)
+void clearAllTextures(GraphicObjectTypes type)
 {
-	if (gRenderer == NULL) return E_FAIL;
+	if ( gGraphicObjectNodes[type].empty() )
+		return;
 
-	//gRenderer->getMutex();
-
-	if (!gGraphicObjectNodes[typ].empty())
+	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[type].begin();
+	for ( ; objectIter != gGraphicObjectNodes[type].end(); ++objectIter )
 	{
-		std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[typ].begin();
-		for ( ; objectIter != gGraphicObjectNodes[typ].end(); ++objectIter )
+		GraphicObjectNode* node = objectIter->second;
+		node->detatchFromParentNode();
+		delete node;
+	}
+
+	gGraphicObjectNodes[type].clear();
+}
+
+HRESULT initVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physicalSize, bool columnMajor)
+{
+	if ( gRenderer == NULL )
+		return E_FAIL;
+
+	// Setup volume information
+	gRenderer->initVolumeInfo(numFrames, numChannels, dims, physicalSize, columnMajor);
+
+	// Delete old border volumes if they exist
+	if ( !gGraphicObjectNodes[GraphicObjectTypes::Border].empty() )
+	{
+		for ( auto it : gGraphicObjectNodes[GraphicObjectTypes::Border] )
 		{
-			GraphicObjectNode* node = objectIter->second;
+			GraphicObjectNode* node = it.second;
+
 			node->detatchFromParentNode();
 			delete node;
 		}
 
-		gGraphicObjectNodes[typ].clear();
+		gGraphicObjectNodes[GraphicObjectTypes::Border].clear();
 	}
 
-	int volType = typ - GraphicObjectTypes::OriginalVolume;
-	if ( !gRenderer->getSharedVolumeParams(volType) )
-		gRenderer->createSharedVolumeParams(volType, numChannel);
+	HRESULT hr = createBorder(physicalSize/physicalSize.maxValue());
+	if ( FAILED(hr) )
+		return hr;
 
-	std::shared_ptr<StaticVolumeParams>& sharedParams = std::dynamic_pointer_cast<StaticVolumeParams>(gRenderer->getSharedVolumeParams(volType));
-	std::shared_ptr<ViewAlignedPlanes> planeMesh = std::make_shared<ViewAlignedPlanes>(gRenderer, dims, scales);
+	// Clear out old texture graphic object nodes
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+		clearAllTextures((GraphicObjectTypes)i);
+
+	return S_OK;
+}
+
+void clearTextureFrame(int frame, GraphicObjectTypes typ)
+{
+	GraphicObjectNode* node = getGlobalGraphicsObject(typ, frame);
+	if ( node )
+	{
+		removeGlobalGraphicsObject(typ, frame);
+
+		node->detatchFromParentNode();
+		delete node;
+	}
+}
+
+HRESULT loadTextureFrame(GraphicObjectTypes typ, int frame, unsigned char* image)
+{
+	if ( gRenderer == NULL )
+		return E_FAIL;
+
+	clearTextureFrame(frame, typ);
+
+	const VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( info == NULL )
+		return S_FALSE;
+
+	GraphicObjectNode* volumeNode = info->createNode(typ, frame, image);
+
+	gRenderer->attachToRootScene(volumeNode, Renderer::Section::Main, frame);
+	insertGlobalGraphicsObject(typ, volumeNode, frame);
+
+	return S_OK;
+}
+
+HRESULT loadVolumeTexture(unsigned char* image, GraphicObjectTypes typ)
+{
+	if (gRenderer == NULL)
+		return E_FAIL;
+
+	clearAllTextures(typ);
+
+	const VolumeInfo* info = gRenderer->getVolumeInfo();
+
+	int numFrames = info->getFrames();
+	int numChannels = info->getChannels();
+	Vec<size_t> dims = info->getDims();
 
 	for (int i = 0; i < numFrames; ++i)
 	{
-		std::shared_ptr<StaticVolumeTextureMaterial> planeMat = std::make_shared<StaticVolumeTextureMaterial>(gRenderer, numChannel, dims, sharedParams);
-
-		GraphicObjectNode* volumeNode = new GraphicObjectNode(i, typ, planeMesh, planeMat);
-		for ( int j=0; j < numChannel; ++j )
-		{
-			const unsigned char* imFrame = image + i*numChannel*dims.product() + j*dims.product();
-			volumeNode->getMaterial()->attachTexture(j, std::make_shared<ConstTexture>(gRenderer, dims, imFrame));
-		}
+		const unsigned char* imFrame = image + i*numChannels*dims.product();
+		GraphicObjectNode* volumeNode = info->createNode(typ, i, imFrame);
 
 		gRenderer->attachToRootScene(volumeNode, Renderer::Section::Main, i);
 		insertGlobalGraphicsObject(typ,volumeNode,i);
 	}
-
-	//gRenderer->releaseMutex();
 
 	return S_OK;
 }

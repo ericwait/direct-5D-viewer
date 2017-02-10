@@ -120,6 +120,9 @@
     <ClInclude Include="Messages\RenderMessages.h">
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3d\VolumeInfo.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp">
@@ -199,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="Messages\RenderMessages.cpp">
       <Filter>Messaging\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\VolumeInfo.cpp">
+      <Filter>D3d\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -21,6 +21,7 @@
 #include "Timer.h"
 #include "RenderTarget.h"
 #include "DepthTarget.h"
+#include "VolumeInfo.h"
 
 #include "Global/Defines.h"
 #include "Global/Globals.h"
@@ -40,6 +41,7 @@ const std::string SHADER_DIR = "Shaders";
 
 Renderer::Renderer()
 {
+	volInfo = NULL;
 	isDirty = true;
 	isRendering = false;
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
@@ -69,14 +71,12 @@ Renderer::Renderer()
 		endTimes  [i] = 0;
 	}
 
-	volDims = Vec<size_t>(1,1,1);
-	volPhysSize = Vec<float>(1.0f,1.0f,1.0f);
-
 	curTimeIdx = 0;
 }
 
 Renderer::~Renderer()
 {
+	SAFE_DELETE(volInfo);
 	SAFE_DELETE(rootScene);
 
 	clearVertexShaderList();
@@ -1024,12 +1024,15 @@ void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node, 
 
 void Renderer::renderScaleValue(const Camera* camera, HDC hdc)
 {
+	if ( !volInfo )
+		return;
+
 	float sz = camera->getVolUnitsPerPix();
 
-	Vec<size_t> dims = getDims();
+	Vec<size_t> dims = volInfo->getDims();
 
 	//sz *= dims.maxValue()/2.0;
-	Vec<float> volSize = getPhysSize();
+	Vec<float> volSize = volInfo->getPhysSize();
 	sz *= volSize.maxValue()/2.0f;
 
 	float numUnits = 100.0f;
@@ -1503,6 +1506,13 @@ void Renderer::setPixelShaderTextureSamplers(int startIdx, int length, ID3D11Sam
 	renderContext->PSSetSamplers(startIdx,length,samplerState);
 }
 
+void Renderer::initVolumeInfo(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physSize, bool columnMajor)
+{
+	SAFE_DELETE(volInfo);
+
+	volInfo = new VolumeInfo(this, numFrames, numChannels, dims, physSize, columnMajor);
+}
+
 DirectX::XMMATRIX Renderer::getRootWorldRotation()
 {
 	return rootScene->getWorldRotation();
@@ -1826,16 +1836,3 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize, BITMAPINFOHEADER& bi)
 
 	return imOut;
 }
-
-std::shared_ptr<VolumeParams>& Renderer::getSharedVolumeParams(int volType)
-{
-	return sharedVolumeParams[volType];
-}
-
-std::shared_ptr<VolumeParams>& Renderer::createSharedVolumeParams(int volType, int numChannels)
-{
-	sharedVolumeParams[volType] = std::make_shared<StaticVolumeParams>(this, numChannels);
-	return sharedVolumeParams[volType];
-}
-
-

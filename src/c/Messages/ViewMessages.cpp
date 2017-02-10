@@ -3,6 +3,7 @@
 
 #include "Global/Globals.h"
 #include "D3d/MessageProcessor.h"
+#include "D3d/VolumeInfo.h"
 
 #include "D3d/EigenHelpers.h"
 
@@ -36,7 +37,9 @@ bool MessageSetViewOrigin::process()
 	if ( !gRenderer )
 		return false;
 
-	gRenderer->imageToModelSpace(origin.e, 1);
+	VolumeInfo* info = gRenderer->getVolumeInfo();
+
+	info->imageToModelSpace(origin.e, 1);
 	gRenderer->setWorldOrigin(origin);
 
 	return true;
@@ -250,9 +253,11 @@ bool MessageUpdateTransferFcn::process()
 	if ( !gRenderer )
 		return false;
 
-	int volTypeIdx = type - GraphicObjectTypes::OriginalVolume;
+	VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( !info )
+		return false;
 
-	std::shared_ptr<VolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(volTypeIdx);
+	std::shared_ptr<VolumeParams> sharedParams = info->getParams(type);
 	if ( !sharedParams )
 		return false;
 
@@ -270,9 +275,11 @@ bool MessageSetTextureLighting::process()
 	if ( !gRenderer )
 		return false;
 
-	int volTypeIdx = type - GraphicObjectTypes::OriginalVolume;
+	VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( !info )
+		return false;
 
-	std::shared_ptr<VolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(volTypeIdx);
+	std::shared_ptr<VolumeParams> sharedParams = info->getParams(type);
 	if ( !sharedParams )
 		return false;
 
@@ -288,9 +295,11 @@ bool MessageSetTextureAttenuation::process()
 	if ( !gRenderer )
 		return false;
 
-	int volTypeIdx = type - GraphicObjectTypes::OriginalVolume;
+	VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( !info )
+		return false;
 
-	std::shared_ptr<VolumeParams>& sharedParams = gRenderer->getSharedVolumeParams(volTypeIdx);
+	std::shared_ptr<VolumeParams> sharedParams = info->getParams(type);
 	if ( !sharedParams )
 		return false;
 

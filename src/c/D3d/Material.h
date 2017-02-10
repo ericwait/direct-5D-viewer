@@ -25,6 +25,8 @@
 
 class Material
 {
+	typedef void ParamType;
+
 public:
 	enum CullMode
 	{
@@ -90,6 +92,7 @@ private:
 
 class SingleColoredMaterial : public Material
 {
+	typedef SingleColorParams ParamType;
 public:
 	SingleColoredMaterial(Renderer* renderer);
 	SingleColoredMaterial(Renderer* renderer, Vec<float> colorIn, float alpha = 1.0f);
@@ -107,6 +110,10 @@ private:
 
 class StaticVolumeTextureMaterial : public Material
 {
+	typedef StaticVolumeParams ParamType;
+
+	friend class VolumeInfo;
+
 public:
 	StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn);
 

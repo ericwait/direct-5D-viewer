@@ -94,6 +94,6 @@ private:
 	// TODO: Put all shader refs together into the material?
 	Vec<size_t> dims;
 
-    // This is the size of the texture in physical space
+	// This is the size of the texture in physical space
 	Vec<float> physicalSize;
 };

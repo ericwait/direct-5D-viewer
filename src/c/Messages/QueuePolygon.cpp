@@ -1,6 +1,7 @@
 #include "QueuePolygon.h"
 #include "Global/Globals.h"
 #include "D3d/MessageProcessor.h"
+#include "D3d/VolumeInfo.h"
 
 QueuePolygon::QueuePolygon(size_t numFaces, size_t numVerts, size_t numNormals, int frame, int index, std::string label)
 {
@@ -26,8 +27,10 @@ void QueuePolygon::setfaceData(double* faceData)
 
 void QueuePolygon::setvertData(double* vertData)
 {
+	VolumeInfo* info = gRenderer->getVolumeInfo();
+
 	memcpy(this->vertData, vertData, numVerts * 3 * sizeof(double));
-	gRenderer->imageToModelSpace(this->vertData, numVerts);
+	info->imageToModelSpace(this->vertData, numVerts);
 }
 
 void QueuePolygon::setnormData(double* normData)

@@ -39,6 +39,7 @@ class RenderFilter;
 class RenderTarget;
 class DepthTarget;
 class SwapChainTarget;
+class VolumeInfo;
 
 struct Vertex
 {
@@ -117,6 +118,8 @@ public:
 	void setPixelShaderResourceViews(int startIdx, int length, ID3D11ShaderResourceView** shaderResourceView);
 	void setPixelShaderTextureSamplers(int startIdx, int length, ID3D11SamplerState** samplerState);
 
+	void initVolumeInfo(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physSize, bool columnMajor);
+
 	void setWorldOrigin(Vec<float> org);
 	void setWorldRotation(DirectX::XMMATRIX rotation);
 	void resetRootWorldTransform();
@@ -145,9 +148,8 @@ public:
 	int registerVertexShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
 	int registerPixelShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
 
+	VolumeInfo* getVolumeInfo(){ return volInfo; }
 	DirectX::XMMATRIX getRootWorldRotation();
-	//void getMutex(); // comment these out
-	//void releaseMutex();
 
 	int getPolygon(Vec<float> pnt, Vec<float> direction);
 	float getClipChunkPercent(){return clipChunkPercent;}
@@ -156,41 +158,6 @@ public:
 	unsigned char* captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi);
 
 	std::string getDllDir() { return dllRoot; }
-
-	// Keep around dims/scale from volume for converting vertices
-	Vec<float> getScales(){return volPhysSize / volPhysSize.maxValue();}
-	Vec<float> getPhysSize(){return volPhysSize;}
-	Vec<size_t> getDims(){return volDims;}
-
-	void setPhysSize(Vec<float> physSizeIn)
-	{
-		volPhysSize = physSizeIn;
-		updateImToModel();
-	}
-
-	void setDims(Vec<size_t> dimsIn)
-	{
-		volDims = dimsIn;
-		updateImToModel();
-	}
-
-	template <typename T>
-	void imageToModelSpace(T* verts, size_t numVerts)
-	{
-		for ( size_t i = 0; i < numVerts; ++i )
-		{
-			Eigen::Vector4f newVert((T)verts[i], (T)verts[i+numVerts], (T)verts[i+2*numVerts], 1.0f);
-			newVert = imToModel * newVert;
-
-			verts[i] = newVert[0];
-			verts[i+numVerts] = newVert[1];
-			verts[i+2*numVerts] = newVert[2];
-		}
-	}
-
-// Static setup getters
-	std::shared_ptr<VolumeParams>& getSharedVolumeParams(int volType);
-	std::shared_ptr<VolumeParams>& createSharedVolumeParams(int volType, int numChannels);
 
 //////////////////////////////////////////////////////////////////////////
 // Rendering to screen
@@ -280,26 +247,14 @@ private:
 	const SwapChainTarget* getSwapChain() const;
 
 
-	void updateImToModel()
-	{
-		Vec<float> dimsf = getDims();
-		Vec<float> sizef = getPhysSize();
-
-		Vec<float> scaleFactor = volPhysSize * 2.0f / dimsf / volPhysSize.maxValue();
-
-		imToModel = (Eigen::Translation3f(-1.0f, -1.0f, -1.0f)
-			* Eigen::Scaling(scaleFactor.x, scaleFactor.y, scaleFactor.z)
-			* Eigen::Translation3f(-1.0f, -1.0f, -1.0f)).matrix();
-	}
-
-
 	//Member variables 
 	bool isDirty;
 	bool isRendering;
 
 	Vec<float> backgroundColor;
 
-	//HANDLE mutexDevice; // comment this out
+	VolumeInfo* volInfo;
+
 	D3D_FEATURE_LEVEL renderFeatureLevel;
 
 	ID3D11Device* renderDevice;
@@ -376,14 +331,7 @@ private:
 	UINT64 endTimes[NUM_TIMES];
 	int curTimeIdx;
 
-	Vec<size_t> volDims;
-	Vec<float> volPhysSize;
-
-	Eigen::Matrix4f imToModel;
-
 private:
-	std::shared_ptr<VolumeParams> sharedVolumeParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
-
 	std::shared_ptr<RenderTarget> renderTargets[RenderTargetTypes::NumRT];
 	std::shared_ptr<DepthTarget> depthTargets[DepthTargetTypes::NumDT];
 

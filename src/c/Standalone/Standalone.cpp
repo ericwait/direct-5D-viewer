@@ -33,17 +33,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	gUpdateShaders = true;
 
 	// Queue up a random volume to render
+	const bool columnMajor = false;
 	const int numChan = 2;
 	const Vec<size_t> dims(128,128,50);
+	const Vec<float> physSize(1.0f,1.0f,1.0f);
 
 	unsigned char* pixelVals = createRandomVolume(numChan, dims);
 
-	MessageLoadTexture* loadMsg = new MessageLoadTexture(numChan, 1, dims, pixelVals);
-	loadMsg->setTextureType(GraphicObjectTypes::OriginalVolume);
-	loadMsg->setPhysSize(Vec<float>(1.0f, 1.0f, 1.0f)*Vec<float>(dims));
-
-	gMsgQueueToDirectX.pushMessage(loadMsg);
-	gMsgQueueToDirectX.pushMessage(new MessageShowObjectType(GraphicObjectTypes::OriginalVolume,true));
+	// Setup demo noise volume
+	gMsgQueueToDirectX.pushMessage(new MessageInitVolume(numChan, 1, dims, physSize, columnMajor));
+	gMsgQueueToDirectX.pushMessage(new MessageLoadTexture(GraphicObjectTypes::OriginalVolume, pixelVals));
+	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 
 	SetProcessDPIAware();
 	messageLoop(pRootDir);

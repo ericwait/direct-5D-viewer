@@ -28,27 +28,19 @@ void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	// ptr to image data
 	unsigned char* image = (unsigned char*)mxGetData(prhs[0]);
 
-	MessageLoadTexture* texMsg = new MessageLoadTexture(numChannels, numFrames, dims, image);
-	texMsg->setTextureType(GraphicObjectTypes::OriginalVolume);
-	if (nrhs > 2)
-	{
-		// Physical dimensions
-		double* physDims = (double*)mxGetData(prhs[1]);
-		texMsg->setPhysSize(Vec<float>(dims) * Vec<float>(float(physDims[1]), float(physDims[0]), float(physDims[2])));
-	}
-
-	if (nrhs > 3)
+	GraphicObjectTypes texType = GraphicObjectTypes::OriginalVolume;
+	if (nrhs > 1)
 	{
 		char buff[96];
-		mxGetString(prhs[2], buff, 96);
+		mxGetString(prhs[1], buff, 96);
 
 		if (_strcmpi("original", buff) == 0)
-			texMsg->setTextureType(GraphicObjectTypes::OriginalVolume);
+			texType = GraphicObjectTypes::OriginalVolume;
 		else if (_strcmpi("processed", buff) == 0)
-			texMsg->setTextureType(GraphicObjectTypes::ProcessedVolume);
+			texType = GraphicObjectTypes::ProcessedVolume;
 	}
 
-	gMsgQueueToDirectX.pushMessage(texMsg, true);
+	gMsgQueueToDirectX.pushMessage(new MessageLoadTexture(texType, image), true);
 }
 #pragma optimize("",on)
 
@@ -67,7 +59,6 @@ std::string MexLoadTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxA
 void MexLoadTexture::usage(std::vector<std::string>& outArgs, std::vector<std::string>& inArgs) const
 {
 	inArgs.push_back("Image");
-	inArgs.push_back("AnisotropicVoxelDimension");
 	inArgs.push_back("BufferType");
 }
 
@@ -76,6 +67,5 @@ void MexLoadTexture::help(std::vector<std::string>& helpLines) const
 	helpLines.push_back("this will load the image into texture buffers for display in the D3d viewer.");
 
 	helpLines.push_back("\tImage -- This should be an matrix up to five dimensions in the order (y,x,z,channel,time).");
-	helpLines.push_back("\tAnisotropicVoxelDimension -- This is the dimensions of a voxel (3D pixel) in microns. This will ensure that the displayed voxels are isotropic and that the scale bar displays properly.");
 	helpLines.push_back("\tBufferType -- this can either be 'original' or 'processed' and corresponds to the first and second texture buffer available to load images into.");
 }

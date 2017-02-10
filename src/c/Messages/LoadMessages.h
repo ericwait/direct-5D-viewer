@@ -15,21 +15,16 @@ protected:
 };
 
 
-// Texture Loading
-class MessageLoadTexture: public Message
+// Volume setup and load messages
+class MessageInitVolume: public Message
 {
 public:
-	MessageLoadTexture(int numChannels, int numFrames, Vec<size_t> dims, unsigned char* inData);
-
-	void setTextureType(GraphicObjectTypes inType);
-	void setPhysSize(Vec<float> physSize);
+	MessageInitVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physSize, bool columnMajor);
 
 protected:
 	virtual bool process();
 
 private:
-	GraphicObjectTypes textureType;
-
 	bool columnMajor;
 
 	int numChannels;
@@ -37,6 +32,35 @@ private:
 
 	Vec<size_t> dims;
 	Vec<float> physicalSize;
+};
+
+
+class MessageLoadTextureFrame: public Message
+{
+public:
+	MessageLoadTextureFrame(GraphicObjectTypes type, int frame, unsigned char* data);
+
+protected:
+	virtual bool process();
+
+private:
+	GraphicObjectTypes textureType;
+	int frame;
+
+	unsigned char* imageData;
+};
+
+
+class MessageLoadTexture: public Message
+{
+public:
+	MessageLoadTexture(GraphicObjectTypes inType, unsigned char* inData);
+
+protected:
+	virtual bool process();
+
+private:
+	GraphicObjectTypes textureType;
 
 	unsigned char* imageData;
 };
