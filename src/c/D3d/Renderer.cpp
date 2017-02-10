@@ -725,7 +725,7 @@ void Renderer::renderPolygons()
 
 	GraphicObjectNode* node = renderFilter.first();
 	for ( ; node != NULL; node = renderFilter.next() )
-		renderNode(gCameraDefaultMesh, node);
+		renderNode(gCameraDefaultMesh, node, FrontClipPos(), BackClipPos());
 }
 
 void Renderer::renderVolume()
@@ -738,7 +738,7 @@ void Renderer::renderVolume()
 	{
 		RenderFilter filt(mainRoot, (GraphicObjectTypes)i);
 		for (GraphicObjectNode* node = filt.first() ; node != NULL; node = filt.next() )
-			renderNode(gCameraDefaultMesh, node);
+			renderNode(gCameraDefaultMesh, node, FrontClipPos(), BackClipPos());
 	}
 }
 

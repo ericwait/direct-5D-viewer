@@ -142,6 +142,9 @@
     <ClCompile Include="Mex\MexMoveCamera.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexSetFrontClip.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexCommand.h">

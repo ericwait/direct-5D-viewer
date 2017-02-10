@@ -72,6 +72,19 @@ private:
 };
 
 
+class MessageSetFrontClipPlane: public Message
+{
+public:
+	MessageSetFrontClipPlane(float clipDistance) : clipDistance(clipDistance){}
+
+protected:
+	virtual bool process();
+
+private:
+	float clipDistance;
+};
+
+
 // Show/Hide GUI elements
 class MessageShowFrame: public Message
 {

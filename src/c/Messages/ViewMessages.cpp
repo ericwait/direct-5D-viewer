@@ -78,6 +78,18 @@ bool MessageSetWorldRotation::process()
 
 
 
+bool MessageSetFrontClipPlane::process()
+{
+	if ( !gRenderer )
+		return false;
+
+	gRenderer->FrontClipPos(clipDistance);
+
+	return true;
+}
+
+
+
 bool MessageShowFrame::process()
 {
 	if ( !gRenderer )
