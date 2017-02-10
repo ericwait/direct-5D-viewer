@@ -352,7 +352,7 @@ end
 % --- Executes on button press in cb_Rotate.
 function cb_Rotate_Callback(hObject, eventdata, handles)
 on = get(handles.cb_Rotate,'Value');
-D3d.Viewer.Rotate(on);
+D3d.Viewer.Spin(on);
 end
 
 % --- Executes on button press in pb_ResetView.

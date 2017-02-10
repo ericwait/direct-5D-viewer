@@ -451,26 +451,30 @@ void updateTime()
 	static clock_t lastRotateUpdate = clock();
 	static clock_t lastShaderUpdate = clock();
 
-	if(gPlay)
+	if ( gPlay )
 	{
 		float timeFromLast = (float)(clock() - lastTimeUpdate) / CLOCKS_PER_SEC;
-		if(timeFromLast > 1.0f/gFramesPerSec)
+		if ( timeFromLast > 1.0f/gFramesPerSec )
 		{
 			lastTimeUpdate = clock();
 
 			gRenderer->incrementFrame();
+
+			gRenderer->forceUpdate();
 		}
 	}
 
-	if(gRotate)
+	if ( gRotate )
 	{
 		float timeFromLast = (float)(clock() - lastRotateUpdate) / CLOCKS_PER_SEC;
-		if(timeFromLast > 2.5f/numAngles)
+		if ( timeFromLast > 2.5f/numAngles )
 		{
 			lastRotateUpdate = clock();
 
 			DirectX::XMMATRIX previousWorldRotation = gRenderer->getRootWorldRotation();
 			gRenderer->setWorldRotation(previousWorldRotation*ROT_X);
+
+			gRenderer->forceUpdate();
 		}
 	}
 
@@ -482,6 +486,8 @@ void updateTime()
 			lastShaderUpdate = clock();
 
 			bool update = gRenderer->updateRegisteredShaders();
+			if ( update )
+				gRenderer->forceUpdate();
 		}
 	}
 }
@@ -490,20 +496,20 @@ void updateCapture()
 {
 	static int curAngle = 0;
 
-	if ( gCapture )
-	{
-		gRenderer->captureWindow(NULL);
+	if ( !gCapture )
+		return;
 
-		if ( gRotate )
-		{
-			++curAngle;
-			if ( curAngle == numAngles )
-			{
-				gCapture = false;
-				gRotate = false;
-				curAngle = 0;
-			}
-		}
+	gRenderer->captureWindow(NULL);
+
+	if ( !gRotate )
+		return;
+
+	++curAngle;
+	if ( curAngle == numAngles )
+	{
+		gCapture = false;
+		gRotate = false;
+		curAngle = 0;
 	}
 }
 
