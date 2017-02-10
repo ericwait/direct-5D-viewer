@@ -100,7 +100,9 @@ if (~isempty(im) && ~isempty(imData))
         im8 = im;
     end
     
-    D3d.Viewer.LoadTexture(im8,imData.PixelPhysicalSize,bufferType);
+    D3d.Viewer.InitVolume(size(im8), imData.PixelPhysicalSize);
+    D3d.Viewer.LoadTexture(im8,bufferType);
+    
     D3d.UI.Ctrl.EnableBuffer(bufferNum);
 end
 
