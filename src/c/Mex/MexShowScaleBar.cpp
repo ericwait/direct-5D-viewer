@@ -6,7 +6,7 @@
 void MexShowScaleBar::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	bool scaleBarOn = (mxGetScalar(prhs[0]) != 0.0);
-	gMsgQueueToDirectX.pushMessage(new MessageShowLabels(scaleBarOn));
+	gMsgQueueToDirectX.pushMessage(new MessageShowScale(scaleBarOn));
 	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
