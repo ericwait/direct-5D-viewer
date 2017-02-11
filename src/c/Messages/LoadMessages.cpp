@@ -127,7 +127,7 @@ bool MessageLoadPolys::process()
 			return false;
 		}
 
-		GraphicObjectNode* oldNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, poly->getIndex());
+		GraphicObjectNode* oldNode = gRenderer->findSceneObject(GraphicObjectTypes::Polygons, poly->getIndex());
 		if ( oldNode )
 		{
 			char buff[128];
@@ -160,7 +160,6 @@ bool MessageLoadPolys::process()
 		polyNode->setWireframe(true);
 
 		polyNode->attachToParentNode(rootNodes[poly->getFrame()]);
-		insertGlobalGraphicsObject(GraphicObjectTypes::Polygons, polyNode);
 	}
 
 	return true;
@@ -170,18 +169,15 @@ bool MessageLoadPolys::process()
 
 bool MessageDeletePoly::process()
 {
-	GraphicObjectNode* removeNode = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, index);
-	// TODO: Should this be a processing error?
+	if ( !gRenderer )
+		return true;
+
+	GraphicObjectNode* removeNode = gRenderer->findSceneObject(GraphicObjectTypes::Polygons, index);
 	if ( !removeNode )
 		return true;
 
-	removeGlobalGraphicsObject(GraphicObjectTypes::Polygons, index);
 	removeNode->detatchFromParentNode();
-
 	delete removeNode;
-
-	// TODO: Remove renderlist this entirely?
-	gRenderer->updateRenderList();
 
 	return true;
 }
@@ -190,20 +186,10 @@ bool MessageDeletePoly::process()
 
 bool MessageDeleteAllPolys::process()
 {
-	const GraphicObjectTypes polyType = GraphicObjectTypes::Polygons;
+	if ( !gRenderer )
+		return true;
 
-	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[polyType].begin();
-	for ( ; objectIter != gGraphicObjectNodes[polyType].end(); ++objectIter )
-	{
-		GraphicObjectNode* node = objectIter->second;
-		node->detatchFromParentNode();
-
-		delete node;
-	}
-
-	gGraphicObjectNodes[polyType].clear();
-
-	gRenderer->updateRenderList();
+	gRenderer->removeSceneObjects(GraphicObjectTypes::Polygons);
 
 	return true;
 }

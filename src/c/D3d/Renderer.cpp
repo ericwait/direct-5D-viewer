@@ -664,6 +664,26 @@ void Renderer::attachToRootScene(SceneNode* sceneIn, Section section,int frame)
 	sceneIn->attachToParentNode(rootScene->getRenderSectionNode(section,frame));
 }
 
+void Renderer::removeSceneObjects(GraphicObjectTypes type)
+{
+	rootScene->removeRegisteredObjects(type);
+}
+
+GraphicObjectNode* Renderer::findSceneObject(GraphicObjectTypes type, int index)
+{
+	std::map<int, GraphicObjectNode*>& sceneObjects = rootScene->sceneObjectRegistry(type);
+
+	if ( sceneObjects.count(index) == 0 )
+		return NULL;
+
+	return sceneObjects[index];
+}
+
+std::map<int, GraphicObjectNode*>& Renderer::allSceneObjects(GraphicObjectTypes type)
+{
+	return rootScene->sceneObjectRegistry(type);
+}
+
 
 void Renderer::attachTargets(RenderTargetTypes rt, DepthTargetTypes dt)
 {
@@ -1511,6 +1531,7 @@ void Renderer::initVolumeInfo(int numFrames, int numChannels, Vec<size_t> dims, 
 {
 	SAFE_DELETE(volInfo);
 
+	rootScene->initRenderSectionNodes(Section::Main, numFrames);
 	volInfo = new VolumeInfo(this, numFrames, numChannels, dims, physSize, columnMajor);
 }
 
@@ -1621,11 +1642,6 @@ void Renderer::setNumPlanes(int numPlanesIn)
 {
 	if (numPlanes < numPlanesIn)
 		numPlanes = numPlanesIn;
-}
-
-void Renderer::updateRenderList()
-{
-	rootScene->requestUpdate();
 }
 
 void Renderer::setWorldOrigin(Vec<float> org)

@@ -28,14 +28,10 @@
 
 class GraphicObjectNode;
 
-// A few of global helper functions for managing the graphic object node list
-void insertGlobalGraphicsObject(GraphicObjectTypes objType, GraphicObjectNode* node, int forceLabel = -1);
-void removeGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID);
-GraphicObjectNode* getGlobalGraphicsObject(GraphicObjectTypes objType, unsigned int uniqueID);
-
 class SceneNode
 {
 protected:
+	typedef std::map<int, GraphicObjectNode*> NodeRegistry;
 	typedef Eigen::Matrix<size_t, GraphicObjectTypes::VTend, 1> Histogram;
 
 public:
@@ -67,6 +63,10 @@ protected:
 	SceneNode(int index, GraphicObjectTypes type);
 
 	void setParentNode(SceneNode* parent);
+
+	virtual NodeRegistry* getRegistry();
+	virtual bool addEntries(NodeRegistry* registry);
+	virtual bool removeEntries(NodeRegistry* registry);
 
 	virtual bool addChildNode(SceneNode* child);
 	virtual void detatchChildNode(SceneNode* child);
@@ -106,7 +106,7 @@ public:
 	friend class Renderer;
 
 	GraphicObjectNode(int index, GraphicObjectTypes type, std::shared_ptr<MeshPrimitive> mesh, std::shared_ptr<Material> material);
-	~GraphicObjectNode();
+	virtual ~GraphicObjectNode();
 
 	void releaseRenderResources();
 	void setLightOn(bool on){material->getParams()->setLightOn(on);}
@@ -127,6 +127,8 @@ protected:
 	virtual bool addChildNode(SceneNode* child) { return false; }; //TODO: should probably be an error
 	virtual void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 
+	virtual bool addEntries(NodeRegistry* registry);
+	virtual bool removeEntries(NodeRegistry* registry);
 private:
 	GraphicObjectNode();
 
@@ -166,15 +168,17 @@ class RootSceneNode : public SceneNode
 {
 public:
 	RootSceneNode();
-	~RootSceneNode();
+	virtual ~RootSceneNode();
 
 	virtual void attachToParentNode(SceneNode* parent){}
 
+	void initRenderSectionNodes(Renderer::Section section, int numFrames);
 	SceneNode* getRenderSectionNode(Renderer::Section section, int frame);
-	size_t getNumRenderableObjects(Renderer::Section section){return renderList[section].size();}
-	const std::vector<GraphicObjectNode*>& getRenderableList(Renderer::Section section, unsigned int frame);
 
 	int getNumFrames();
+
+	std::map<int,GraphicObjectNode*>& sceneObjectRegistry(GraphicObjectTypes type);
+	void removeRegisteredObjects(GraphicObjectTypes type);
 
 	SceneNode* pickNode(Vec<float> pnt, Vec<float> direction, unsigned int currentFrame, GraphicObjectTypes filter,float& depthOut);
 	virtual SceneNode* pickNode(Vec<float> pnt, Vec<float> direction, GraphicObjectTypes filter, float& depthOut){return NULL;}
@@ -186,22 +190,19 @@ public:
 	void updateTranslation(Vec<float> origin);
 	void updateRotation(DirectX::XMMATRIX& rotation);
 
-	// Propagate rendering info
-	virtual void requestUpdate();
-	void updateRenderableList();
-
 protected:
 	virtual bool addChildNode(SceneNode* child);
 	void updateTransforms(DirectX::XMMATRIX parentToWorldIn);
 
+	void clearSectionNodes(Renderer::Section section);
+
+	virtual NodeRegistry* getRegistry(){return registry;}
+
 private:
-	void makeRenderableList();
-
-	bool bRenderListDirty;
-
 	Vec<float> origin;
 	DirectX::XMMATRIX rootRotationMatrix;
 
+	NodeRegistry registry[GraphicObjectTypes::VTend];
+
 	std::vector<SceneNode*> rootChildrenNodes[Renderer::Section::SectionEnd];
-	std::vector<std::vector<GraphicObjectNode*>> renderList[Renderer::Section::SectionEnd];
 };

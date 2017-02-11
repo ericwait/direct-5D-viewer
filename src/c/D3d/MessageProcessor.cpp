@@ -273,13 +273,11 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			hullsOn = !hullsOn;
 			gMsgQueueToMex.addMessage("togglePolygons",double(hullsOn));
 
-			for(std::map<int,GraphicObjectNode*>::iterator it=gGraphicObjectNodes[GraphicObjectTypes::Polygons].begin();
-				it!=gGraphicObjectNodes[GraphicObjectTypes::Polygons].end(); ++it)
+			for ( auto& it : gRenderer->allSceneObjects(GraphicObjectTypes::Polygons) )
 			{
-				it->second->setRenderable(hullsOn);
+				it.second->setRenderable(hullsOn);
 			}
 
-			gRenderer->updateRenderList();
 			gRenderer->forceUpdate();
 		}
 		else if('L' == wParam)
@@ -311,7 +309,6 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			widgetOn = !widgetOn;
 			setObjectTypeVisibility(GraphicObjectTypes::Widget, widgetOn);
 
-			gRenderer->updateRenderList();
 			gRenderer->forceUpdate();
 		}
 		else if('X' == wParam)
@@ -608,20 +605,14 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		stopThreadQueue();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		for ( int i = 0; i < GraphicObjectTypes::VTend; ++i )
-		{
-			if ( gRenderer != NULL )
-			{
-				std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[i].begin();
-				for ( ; objectIter != gGraphicObjectNodes[i].end(); ++objectIter )
-				{
-					GraphicObjectNode* node = objectIter->second;
-					node->detatchFromParentNode();
-					delete node;
-				}
-			}
 
-			gGraphicObjectNodes[i].clear();
+		// TODO: Just let this cleanup in the renderer destructor?
+		if ( gRenderer != NULL )
+		{
+			for ( int i = 0; i < GraphicObjectTypes::VTend; ++i )
+			{
+				gRenderer->removeSceneObjects((GraphicObjectTypes)i);
+			}
 		}
 	}
 	else

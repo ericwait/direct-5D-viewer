@@ -32,7 +32,6 @@ extern HANDLE gTermEvent;
 extern HWND gWindowHandle;
 extern HFONT gFont;
 extern volatile bool gRendererInit;
-extern std::map<int,GraphicObjectNode*> gGraphicObjectNodes[GraphicObjectTypes::VTend];
 
 //Implemented in Initialization.cpp
 extern unsigned int gWindowWidth;

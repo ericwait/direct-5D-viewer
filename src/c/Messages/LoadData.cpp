@@ -133,25 +133,13 @@ HRESULT createBorder(Vec<float> &scale)
 	
 	borderNode->setLightOn(false);
 	gRenderer->attachToRootScene(borderNode, Renderer::Pre, 0);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Border, borderNode);
 
 	return S_OK;
 }
 
 void clearAllTextures(GraphicObjectTypes type)
 {
-	if ( gGraphicObjectNodes[type].empty() )
-		return;
-
-	std::map<int, GraphicObjectNode*>::iterator objectIter = gGraphicObjectNodes[type].begin();
-	for ( ; objectIter != gGraphicObjectNodes[type].end(); ++objectIter )
-	{
-		GraphicObjectNode* node = objectIter->second;
-		node->detatchFromParentNode();
-		delete node;
-	}
-
-	gGraphicObjectNodes[type].clear();
+	gRenderer->removeSceneObjects(type);
 }
 
 HRESULT initVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physicalSize, bool columnMajor)
@@ -163,18 +151,7 @@ HRESULT initVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> 
 	gRenderer->initVolumeInfo(numFrames, numChannels, dims, physicalSize, columnMajor);
 
 	// Delete old border volumes if they exist
-	if ( !gGraphicObjectNodes[GraphicObjectTypes::Border].empty() )
-	{
-		for ( auto it : gGraphicObjectNodes[GraphicObjectTypes::Border] )
-		{
-			GraphicObjectNode* node = it.second;
-
-			node->detatchFromParentNode();
-			delete node;
-		}
-
-		gGraphicObjectNodes[GraphicObjectTypes::Border].clear();
-	}
+	gRenderer->removeSceneObjects(GraphicObjectTypes::Border);
 
 	HRESULT hr = createBorder(physicalSize/physicalSize.maxValue());
 	if ( FAILED(hr) )
@@ -189,14 +166,9 @@ HRESULT initVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> 
 
 void clearTextureFrame(int frame, GraphicObjectTypes typ)
 {
-	GraphicObjectNode* node = getGlobalGraphicsObject(typ, frame);
+	GraphicObjectNode* node = gRenderer->findSceneObject(typ, frame);
 	if ( node )
-	{
-		removeGlobalGraphicsObject(typ, frame);
-
-		node->detatchFromParentNode();
 		delete node;
-	}
 }
 
 HRESULT loadTextureFrame(GraphicObjectTypes typ, int frame, unsigned char* image)
@@ -213,7 +185,6 @@ HRESULT loadTextureFrame(GraphicObjectTypes typ, int frame, unsigned char* image
 	GraphicObjectNode* volumeNode = info->createNode(typ, frame, image);
 
 	gRenderer->attachToRootScene(volumeNode, Renderer::Section::Main, frame);
-	insertGlobalGraphicsObject(typ, volumeNode, frame);
 
 	return S_OK;
 }
@@ -237,7 +208,6 @@ HRESULT loadVolumeTexture(unsigned char* image, GraphicObjectTypes typ)
 		GraphicObjectNode* volumeNode = info->createNode(typ, i, imFrame);
 
 		gRenderer->attachToRootScene(volumeNode, Renderer::Section::Main, i);
-		insertGlobalGraphicsObject(typ,volumeNode,i);
 	}
 
 	return S_OK;
@@ -260,19 +230,15 @@ void attachWidget(double* arrowFaces, size_t numArrowFaces, double* arrowVerts, 
 	GraphicObjectNode* arrowXnode = new GraphicObjectNode(0, GraphicObjectTypes::Widget, arrowMesh, arrowXMat);
 	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI / 2.0f));
 	arrowXnode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowXnode);
 
 	GraphicObjectNode* arrowYnode = new GraphicObjectNode(1, GraphicObjectTypes::Widget, arrowMesh, arrowYMat);
 	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI / 2.0f));
 	arrowYnode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowYnode);
 
 	GraphicObjectNode* arrowZnode = new GraphicObjectNode(2, GraphicObjectTypes::Widget, arrowMesh, arrowZMat);
 	arrowZnode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, arrowZnode);
 
 	GraphicObjectNode* sphereNode = new GraphicObjectNode(3, GraphicObjectTypes::Widget, sphereMesh, sphereMat);
 	sphereNode->attachToParentNode(widgetScene);
-	insertGlobalGraphicsObject(GraphicObjectTypes::Widget, sphereNode);
 }
 

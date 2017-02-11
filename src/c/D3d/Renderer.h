@@ -108,7 +108,11 @@ public:
 	void incrementFrame();
 	void decrementFrame();
 	unsigned int getNumberOfFrames();
+
 	void attachToRootScene(SceneNode* sceneIn, Section section, int frame);
+	void removeSceneObjects(GraphicObjectTypes type);
+	GraphicObjectNode* findSceneObject(GraphicObjectTypes type, int index);
+	std::map<int,GraphicObjectNode*>& allSceneObjects(GraphicObjectTypes type);
 
 	void clearVertexShaderList();
 	void clearPixelShaderList();
@@ -128,7 +132,6 @@ public:
 	
 	void setClipChunkPercent(float ccp);
 	void setNumPlanes(int numPlanes); //TODO this could be changed to be smarter about where to peel from
-	void updateRenderList();
 	void setLabels(bool on){labelsOn=on;}
 	void toggleLabels(){labelsOn = !labelsOn;}
 	void setFrameNumOn(bool on) { frameNumOn = on; }

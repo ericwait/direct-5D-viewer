@@ -180,10 +180,11 @@ bool MessageShowPolys::process()
 	}
 	else
 	{
-		for ( auto it = indices.begin(); it != indices.end(); ++it )
+		for ( auto it : indices )
 		{
-			GraphicObjectNode* node = getGlobalGraphicsObject(GraphicObjectTypes::Polygons, *it);
-			node->setRenderable(visible);
+			GraphicObjectNode* node = gRenderer->findSceneObject(GraphicObjectTypes::Polygons, it);
+			if ( node )
+				node->setRenderable(visible);
 		}
 	}
 
@@ -209,9 +210,7 @@ bool MessageSetPolyWireframe::process()
 	if ( !gRenderer )
 		return false;
 
-	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
-	for ( auto itr : gGraphicObjectNodes[cellType] )
-		itr.second->setWireframe(wireframe);
+	setObjectWireframe(GraphicObjectTypes::Polygons, wireframe);
 
 	return true;
 }
@@ -223,9 +222,7 @@ bool MessageSetPolyLighting::process()
 	if ( !gRenderer )
 		return false;
 
-	const GraphicObjectTypes cellType = GraphicObjectTypes::Polygons;
-	for ( auto itr : gGraphicObjectNodes[cellType] )
-		itr.second->setLightOn(lightingOn);
+	setObjectLighting(GraphicObjectTypes::Polygons, lightingOn);
 
 	return true;
 }
