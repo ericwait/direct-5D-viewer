@@ -23,7 +23,7 @@ end
 polygon = D3d.Polygon.MakeEmptyStruct();
 
 % padd the subimage to get some room to blur
-PADDING = 3*reductions;
+PADDING = ceil(3*1./reductions);
 
 maxExtent_rc = Utils.SwapXY_RC(max(pixelList_xy,[],1)) + PADDING;
 indList = Utils.CoordToInd(maxExtent_rc,Utils.SwapXY_RC(pixelList_xy));
@@ -36,19 +36,22 @@ cc.NumObjects = 1;
 cc.PixelIdxList = {find(im)};
 rp = regionprops(cc,'Centroid');
 
-[x,y,z,D] = reducevolume(im,reductions);
-D = smooth3(D);
+imR = ImProc.Resize(im2uint8(im),reductions,[],'mean');
 
-[faces, v_xy] = isosurface(x,y,z,D,graythresh(D));
+R = linspace(startCoords_rcz(1),maxExtent_rc(1),size(imR,1));
+C = linspace(startCoords_rcz(2),maxExtent_rc(2),size(imR,2));
+Z = linspace(startCoords_rcz(3),maxExtent_rc(3),size(imR,3));
+[x,y,z] = meshgrid(C,R,Z);
+
+[faces, v_xy] = isosurface(x,y,z,imR,128);
 
 if (isempty(v_xy))
     return
 end
 
 % center the vert in the middle of the voxel
-v_xy = v_xy + 0.5;
+verts_xy = v_xy - 0.5;
 
-verts_xy = v_xy + repmat(startCoords_xy -1,size(v_xy,1),1);
 com = rp.Centroid + startCoords_xy -1;
 
 if (any(faces(:)==0))
