@@ -30,6 +30,11 @@
 #endif
 
 
+// Helper type definition, forces template match only on fundamental scalar types
+template <typename T>
+using ScalarTypeCheck = typename std::enable_if<std::is_fundamental<T>::value, T>::type;
+
+
 template<typename T>
 class Vec
 {
@@ -45,20 +50,22 @@ public:
 		};
 	};
 
+	template<ScalarTypeCheck<T>* = 0>
 	MIXED_PREFIX Vec() : x(0),y(0),z(0){}
 	
+	template<ScalarTypeCheck<T>* = 0>
 	MIXED_PREFIX Vec(T val)
 		: x(val), y(val), z(val)
 	{}
 
-	template<typename U>
+	template<typename U, ScalarTypeCheck<U>* = 0>
 	MIXED_PREFIX Vec(const U* elems)
 		:	x(static_cast<T>(elems[0])),
 			y(static_cast<T>(elems[1])),
 			z(static_cast<T>(elems[2]))
 	{}
 
-	template<typename U>
+	template<typename U, ScalarTypeCheck<U>* = 0>
 	MIXED_PREFIX Vec(const Vec<U>& other)
 		:	x(static_cast<T>(other.x)),
 			y(static_cast<T>(other.y)),
@@ -66,6 +73,7 @@ public:
 	{}
 
 
+	template<ScalarTypeCheck<T>* = 0>
 	MIXED_PREFIX Vec(T x, T y, T z)
 		: x(x), y(y), z(z)
 	{}
@@ -269,7 +277,7 @@ public:
 	}
 
 	template <typename U>
-	MIXED_PREFIX Vec<typename std::common_type<T, U>::type>  operator* (const Vec<U>& other) const
+	MIXED_PREFIX Vec<typename std::common_type<T, U>::type> operator* (const Vec<U>& other) const
 	{
 		Vec<typename std::common_type<T, U>::type> outVec;
 		for ( int i=0; i < 3; ++i )
@@ -277,6 +285,28 @@ public:
 
 		return outVec;
 	}
+
+	template <typename U>
+	MIXED_PREFIX Vec<typename std::common_type<T, U>::type> subFrom(U scalar) const
+	{
+		Vec<typename std::common_type<T, U>::type> outVec;
+		for ( int i=0; i < 3; ++i )
+			outVec.e[i] = scalar - e[i];
+
+		return outVec;
+	}
+
+	template <typename U>
+	MIXED_PREFIX Vec<typename std::common_type<T, U>::type> divideRight(U scalar) const
+	{
+		Vec<typename std::common_type<T, U>::type> outVec;
+		for ( int i=0; i < 3; ++i )
+			outVec.e[i] = scalar / e[i];
+
+		return outVec;
+	}
+
+
 
 	template <typename U>
 	MIXED_PREFIX Vec<T>& operator+= (const Vec<U>& other)
@@ -372,5 +402,31 @@ public:
 		return a.x*b.x + a.y*b.y + a.z*b.z;
 	}
 };
+
+// Scalar-vector binary operator definitions
+template <typename U, typename V, ScalarTypeCheck<U>* = 0>
+MIXED_PREFIX Vec<typename std::common_type<U, V>::type> operator+(U scalar, const Vec<V>& vec)
+{
+	return (vec + scalar);
+}
+
+template <typename U, typename V, ScalarTypeCheck<U>* = 0>
+MIXED_PREFIX Vec<typename std::common_type<U, V>::type> operator-(U scalar, const Vec<V>& vec)
+{
+	return vec.subFrom(scalar);
+}
+
+template <typename U, typename V, ScalarTypeCheck<U>* = 0>
+MIXED_PREFIX Vec<typename std::common_type<U, V>::type> operator*(U scalar, const Vec<V>& vec)
+{
+	return (vec * scalar);
+}
+
+template <typename U, typename V, ScalarTypeCheck<U>* = 0>
+MIXED_PREFIX Vec<typename std::common_type<U, V>::type> operator/(U scalar, const Vec<V>& vec)
+{
+	return vec.divideRight(scalar);
+}
+
 
 #endif
