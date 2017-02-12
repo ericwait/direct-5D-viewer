@@ -87,8 +87,18 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         D3dIsOpen = true;
     end
 
-    D3d.Viewer.InitVolume(size(im),imData.PixelPhysicalSize([2,1,3]));
-    D3d.LoadImage(im, imagePath);
+    D3d.Viewer.InitVolume([imData.Dimensions([2,1,3]),imData.NumberOfChannels,imData.NumberOfFrames],imData.PixelPhysicalSize([2,1,3]));
+    
+    if (size(im,4)<imData.NumberOfChannels)
+        error('You must pass in all of the channels when opening!');
+    end
+    if (size(im,5)<imData.NumberOfFrames)
+        for t=1:size(im,5)
+            D3d.LoadImage(im(:,:,:,:,t),1,t);
+        end
+    else
+        D3d.LoadImage(im);
+    end
     D3d.UI.Controls(imData);
     
     %% start a timer that will check for any messages that the viewer might want to return
