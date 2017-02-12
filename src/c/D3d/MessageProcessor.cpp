@@ -252,8 +252,8 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if('C' == wParam)
 		{
-			gRenderer->FrontClipPos(-1.5f);
-			gRenderer->BackClipPos(1.5f);
+			gRenderer->FrontClipPos(-Renderer::cornerVolumeDist);
+			gRenderer->BackClipPos(Renderer::cornerVolumeDist);
 			gCameraDefaultMesh->resetCamera();
 			gRenderer->forceUpdate();
 		}

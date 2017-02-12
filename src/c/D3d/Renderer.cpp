@@ -38,6 +38,7 @@
 #include <fstream>
 
 const std::string SHADER_DIR = "Shaders";
+const float Renderer::cornerVolumeDist = 1.75f;
 
 Renderer::Renderer()
 {
@@ -47,8 +48,8 @@ Renderer::Renderer()
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
 	currentFrame = 0;
 	clipChunkPercent = 1.0f;
-	FrontClipPos(-1.5f);
-	BackClipPos(1.5f);
+	FrontClipPos(-cornerVolumeDist);
+	BackClipPos(cornerVolumeDist);
 	numPlanes = 0;
 	labelsOn = true;
 	frameNumOn = true;

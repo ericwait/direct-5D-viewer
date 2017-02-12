@@ -218,13 +218,16 @@ DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX paren
 void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
 	std::vector<Vec<float>>& vertices,std::vector<Vec<float>>& normals, std::vector<Vec<float>>& textureUV)
 {
+	//3.0 is to reduce moire
+	const float samplePadding = 3.0/2.0;
+
 	faces.clear();
 	vertices.clear();
 	normals.clear();
 	textureUV.clear();
 
-	int numPlanes = int(volDims.maxValue() * 1.5f * 3.0f);//3.0 is to reduce moire
-	renderer->setNumPlanes((int)(ceil(numPlanes/1.5)));
+	int numPlanes = int(volDims.maxValue() * 2.0f * Renderer::cornerVolumeDist * samplePadding);
+	renderer->setNumPlanes((int)(ceil(numPlanes / Renderer::cornerVolumeDist)));
 
 	vertices.resize(4*numPlanes);
 	faces.resize(2*numPlanes);
@@ -239,8 +242,8 @@ void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<
 		//i is making each plane
 		for (int i=0; i<4; i++)
 		{
-			vertices[planesFirstVert+i] = planeVertices[i]*3.0f;
-			vertices[planesFirstVert+i].z = zPosition*1.5f;
+			vertices[planesFirstVert+i] = planeVertices[i] * 2.0f * Renderer::cornerVolumeDist;
+			vertices[planesFirstVert+i].z = zPosition * Renderer::cornerVolumeDist;
 
 			//Vec<float> temp(vertices[planesFirstVert+i].y,vertices[planesFirstVert+i].x,vertices[planesFirstVert+i].z);
 			//textureUVs[planesFirstVert+i] = temp * 0.5f + 0.5f;

@@ -92,6 +92,8 @@ public:
 		DirectX::XMFLOAT4 depthPeelPlanes;
 	};
 
+	static const float cornerVolumeDist;
+
 	Renderer();
 	~Renderer();
 
