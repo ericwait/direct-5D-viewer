@@ -1,6 +1,11 @@
 %LOADIMAGE D3d.LoadImage( im, bufferNum, frameNumber)
 
 function LoadImage( im, bufferNum, frameNumber )
+    global D3dIsOpen
+    if (~D3dIsOpen)
+        error('You need to open the viewer before you can load images! Call D3d.Open first.');
+    end
+    
     if (~exist('bufferNum','var') || isempty(bufferNum))
         bufferNum = 1;
     else
