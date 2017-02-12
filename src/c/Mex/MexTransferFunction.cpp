@@ -8,41 +8,37 @@ void MexTransferFunction::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 	char bufferType[256];
 	mxGetString(prhs[1], bufferType, 256);
 
-	GraphicObjectTypes volType = GraphicObjectTypes::OriginalVolume;
-
-	if ( _strcmpi("original", bufferType) == 0 )
-		volType = GraphicObjectTypes::OriginalVolume;
-	else if ( _strcmpi("processed", bufferType) == 0 )
-		volType = GraphicObjectTypes::ProcessedVolume;
-
-	size_t numChannels = mxGetNumberOfElements(prhs[0]);
-	for ( int c=0; c < numChannels; ++c )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
 	{
-		MessageUpdateTransferFcn* msg = new MessageUpdateTransferFcn(volType, c);
+		size_t numChannels = mxGetNumberOfElements(prhs[0]);
+		for ( int c=0; c < numChannels; ++c )
+		{
+			MessageUpdateTransferFcn* msg = new MessageUpdateTransferFcn((GraphicObjectTypes)i, c);
 
-		mxArray* mxOn = mxGetField(prhs[0], c, "visible");
-		mxArray* mxAlpha = mxGetField(prhs[0], c, "alphaMod");
+			mxArray* mxOn = mxGetField(prhs[0], c, "visible");
+			mxArray* mxAlpha = mxGetField(prhs[0], c, "alphaMod");
 
-		// Setup channel color and relative alpha
-		float alpha = (float)mxGetScalar(mxAlpha);
-		if ( mxGetScalar(mxOn) == 0.0 )
-			alpha = 0.0f;
+			// Setup channel color and relative alpha
+			float alpha = (float)mxGetScalar(mxAlpha);
+			if ( mxGetScalar(mxOn) == 0.0 )
+				alpha = 0.0f;
 
-		mxArray* mxColor = mxGetField(prhs[0], c, "color");
-		msg->setColor((double*)mxGetData(mxColor), alpha);
+			mxArray* mxColor = mxGetField(prhs[0], c, "color");
+			msg->setColor((double*)mxGetData(mxColor), alpha);
 
-		// Setup min/max range
-		mxArray* mxMin = mxGetField(prhs[0], c, "minVal");
-		mxArray* mxMax = mxGetField(prhs[0], c, "maxVal");
-		msg->setRange(Vec<float>((float)mxGetScalar(mxMin), (float)mxGetScalar(mxMax), 1.0f));
+			// Setup min/max range
+			mxArray* mxMin = mxGetField(prhs[0], c, "minVal");
+			mxArray* mxMax = mxGetField(prhs[0], c, "maxVal");
+			msg->setRange(Vec<float>((float)mxGetScalar(mxMin), (float)mxGetScalar(mxMax), 1.0f));
 
-		// Setup transfer function parameters
-		mxArray* mxA = mxGetField(prhs[0], c, "a");
-		mxArray* mxB = mxGetField(prhs[0], c, "b");
-		mxArray* mxC = mxGetField(prhs[0], c, "c");
-		msg->setTransferFcn(Vec<float>((float)mxGetScalar(mxA), (float)mxGetScalar(mxB), (float)mxGetScalar(mxC)));
+			// Setup transfer function parameters
+			mxArray* mxA = mxGetField(prhs[0], c, "a");
+			mxArray* mxB = mxGetField(prhs[0], c, "b");
+			mxArray* mxC = mxGetField(prhs[0], c, "c");
+			msg->setTransferFcn(Vec<float>((float)mxGetScalar(mxA), (float)mxGetScalar(mxB), (float)mxGetScalar(mxC)));
 
-		gMsgQueueToDirectX.pushMessage(msg);
+			gMsgQueueToDirectX.pushMessage(msg);
+		}
 	}
 	
 	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
