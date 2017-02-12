@@ -27,7 +27,11 @@ void MexInitVolume::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 	// Set up voxel dimensions if provided
 	Vec<float> physVoxel(1.0f, 1.0f, 1.0f);
 	if ( nrhs > 1 )
-		physVoxel = Vec<float>((double*)mxGetData(prhs[1]));
+	{
+		// TODO: Should look over this and verify it's right for x-y anisotropy!
+		double* physData = (double*)mxGetData(prhs[1]);
+		physVoxel = Vec<float>(physData[1], physData[0], physData[2]);
+	}
 
 	// Compute total volume size in physical units
 	Vec<float> physSize = Vec<float>(dims) * physVoxel;

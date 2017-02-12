@@ -48,15 +48,17 @@ void VolumeInfo::updateImToModel()
 	Vec<float> dimsf = getDims();
 	Vec<float> sizef = getPhysSize();
 
-	Vec<float> scaleFactor = sizef * 2.0f / dimsf / sizef.maxValue();
+	Vec<float> normalizeFactor = Vec<float>(2.0f) / dimsf;
+	Vec<float> anisotropicFactor = sizef / sizef.maxValue();
 
 	// TODO: Use this correction for left-handedness of column-major data buffers?
 	Eigen::Matrix4f cmCorrection(Eigen::Matrix4f::Identity());
 	if ( columnMajor )
 		cmCorrection.row(0).swap(cmCorrection.row(1));
 
-	Eigen::Affine3f transform = Eigen::Translation3f(-1.0f, -1.0f, -1.0f)
-							* Eigen::Scaling(scaleFactor.x, scaleFactor.y, scaleFactor.z)
+	Eigen::Affine3f transform = Eigen::Scaling(anisotropicFactor.y, anisotropicFactor.x, anisotropicFactor.z)
+							* Eigen::Translation3f(-1.0f, -1.0f, -1.0f)
+							* Eigen::Scaling(normalizeFactor.y, normalizeFactor.x, normalizeFactor.z)
 							* Eigen::Translation3f(-1.0f, -1.0f, -1.0f);
 
 	imToModel = (transform).matrix();
