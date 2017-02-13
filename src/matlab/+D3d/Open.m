@@ -93,7 +93,9 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         error('You must pass in all of the channels when opening!');
     end
     if (size(im,5)<imData.NumberOfFrames)
-        for t=1:size(im,5)
+        D3d.LoadImage(im(:,:,:,:,1),1,1);
+        D3d.Viewer.UpdateRender();
+        for t=2:size(im,5)
             D3d.LoadImage(im(:,:,:,:,t),1,t);
         end
     else
