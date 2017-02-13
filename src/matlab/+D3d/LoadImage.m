@@ -2,7 +2,7 @@
 
 function LoadImage( im, bufferNum, frameNumber )
     global D3dIsOpen
-    if (~D3dIsOpen)
+    if (~D3dIsOpen || isempty(D3dIsOpen))
         error('You need to open the viewer before you can load images! Call D3d.Open first.');
     end
     
