@@ -1,6 +1,6 @@
 #include "EigenToFromDirectX.h"
 
-DirectX::XMMATRIX ConvertMatrix(Eigen::Matrix4f eignMatrix)
+DirectX::XMMATRIX ConvertMatrix(const Eigen::Matrix4f& eignMatrix)
 {
     DirectX::XMFLOAT4X4 floatMatrix;
     for(int r = 0; r<4; ++r)
