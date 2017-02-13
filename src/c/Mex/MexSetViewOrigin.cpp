@@ -7,7 +7,6 @@ void MexSetViewOrigin::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArra
 {
 	Vec<double> origin((double*)mxGetData(prhs[0]));
 	gMsgQueueToDirectX.pushMessage(new MessageSetViewOrigin(origin));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetViewOrigin::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

@@ -9,7 +9,6 @@ void MexSetWindowSize::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArra
 	int height = (int)mxGetScalar(prhs[1]);
 
 	gMsgQueueToDirectX.pushMessage(new MessageSetWindowSize(width, height));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetWindowSize::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

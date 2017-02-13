@@ -7,7 +7,6 @@ void MexSetFrontClip::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray
 {
 	double clipDistance = mxGetScalar(prhs[0]);
 	gMsgQueueToDirectX.pushMessage(new MessageSetFrontClipPlane((float)clipDistance));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetFrontClip::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

@@ -11,7 +11,6 @@ void MexSetViewRotation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	double angle = mxGetScalar(prhs[1]);
 
 	gMsgQueueToDirectX.pushMessage(new MessageSetViewRotation(axis, angle));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetViewRotation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

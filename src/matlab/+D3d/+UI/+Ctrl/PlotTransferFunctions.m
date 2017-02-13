@@ -33,6 +33,8 @@ if (~isempty(D3dUICtrlHandles))
         D3d.Viewer.TransferFunction(channelData,'original');
     end
     
+    D3d.Update();
+    
     D3d.UI.Ctrl.SetUserData(imageData,colors,channelData)
 end
 end

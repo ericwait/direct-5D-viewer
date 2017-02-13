@@ -141,6 +141,7 @@ copy "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Mex.mexw64"</Command>
     <ClCompile Include="Mex\MexShowTexture.cpp" />
     <ClCompile Include="Mex\MexToggleWireframe.cpp" />
     <ClCompile Include="Mex\MexSetViewRotation.cpp" />
+    <ClCompile Include="Mex\MexUpdateRender.cpp" />
     <ClCompile Include="Mex\Viewer.cpp" />
     <ClCompile Include="Mex\Widget.cpp" />
   </ItemGroup>

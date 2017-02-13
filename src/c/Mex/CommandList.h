@@ -78,4 +78,5 @@ DEF_MEX_COMMAND(TextureAttenuation)
 DEF_MEX_COMMAND(TextureLighting)
 DEF_MEX_COMMAND(TransferFunction)
 DEF_MEX_COMMAND(ToggleWireframe)
+DEF_MEX_COMMAND(UpdateRender)
 END_MEX_COMMANDS

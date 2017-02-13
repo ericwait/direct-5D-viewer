@@ -10,7 +10,6 @@ void MexSetWorldRotation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 	double angle = mxGetScalar(prhs[1]);
 
 	gMsgQueueToDirectX.pushMessage(new MessageSetWorldRotation(axis, angle));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetWorldRotation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

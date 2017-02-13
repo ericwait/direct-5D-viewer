@@ -7,7 +7,6 @@ void MexShowFrameNumber::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 {
 	bool frameOn = (mxGetScalar(prhs[0]) != 0.0);
 	gMsgQueueToDirectX.pushMessage(new MessageShowFrame(frameOn));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowFrameNumber::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

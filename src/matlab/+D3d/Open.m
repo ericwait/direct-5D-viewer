@@ -100,8 +100,10 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         end
     else
         D3d.LoadImage(im);
+        D3d.Update();
     end
     D3d.UI.Controls(imData);
+    
     
     %% start a timer that will check for any messages that the viewer might want to return
     D3d.Messaging.StartTimer();

@@ -7,7 +7,6 @@ void MexRemovePolygon::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArra
 {
 	int index = (int)mxGetScalar(prhs[0]);
 	gMsgQueueToDirectX.pushMessage(new MessageDeletePoly(index));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexRemovePolygon::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

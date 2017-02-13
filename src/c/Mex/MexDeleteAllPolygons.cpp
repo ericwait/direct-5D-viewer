@@ -6,7 +6,6 @@
 void MexDeleteAllPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	gMsgQueueToDirectX.pushMessage(new MessageDeleteAllPolys());
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexDeleteAllPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

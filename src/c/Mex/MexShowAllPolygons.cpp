@@ -7,7 +7,6 @@ void MexShowAllPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 {
 	bool polyOn = (mxGetScalar(prhs[0]) != 0.0);
 	gMsgQueueToDirectX.pushMessage(new MessageShowObjectType(GraphicObjectTypes::Polygons, polyOn));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowAllPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

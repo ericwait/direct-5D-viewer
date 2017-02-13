@@ -7,7 +7,6 @@ void MexSetBorderColor::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArr
 {
 	Vec<float> bgColor((double*)mxGetData(prhs[0]));
 	gMsgQueueToDirectX.pushMessage(new MessageSetObjectColor(GraphicObjectTypes::Border, bgColor));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetBorderColor::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

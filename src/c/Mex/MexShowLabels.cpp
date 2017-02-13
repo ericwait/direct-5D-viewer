@@ -7,7 +7,6 @@ void MexShowLabels::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 {
 	bool labelOn = (mxGetScalar(prhs[0]) != 0.0);
 	gMsgQueueToDirectX.pushMessage(new MessageShowLabels(labelOn));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowLabels::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

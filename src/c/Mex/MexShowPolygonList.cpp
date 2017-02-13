@@ -15,7 +15,6 @@ void MexShowPolygonList::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 		polyMsg->setPoly((int) polyList[i]);
 
 	gMsgQueueToDirectX.pushMessage(polyMsg);
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowPolygonList::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

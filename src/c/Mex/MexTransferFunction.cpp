@@ -40,8 +40,6 @@ void MexTransferFunction::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 			gMsgQueueToDirectX.pushMessage(msg);
 		}
 	}
-	
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexTransferFunction::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

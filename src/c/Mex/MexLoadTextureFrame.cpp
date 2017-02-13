@@ -39,7 +39,6 @@ void MexLoadTextureFrame::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 	}
 
 	gMsgQueueToDirectX.pushMessage(new MessageLoadTextureFrame(texType, MAT_TO_C(frame), image), true);
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexLoadTextureFrame::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

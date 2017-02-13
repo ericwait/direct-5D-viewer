@@ -8,7 +8,6 @@ void MexMoveCamera::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 	double* deltas = (double*)mxGetData(prhs[0]);
 
 	gMsgQueueToDirectX.pushMessage(new MessageMoveCamera(deltas));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexMoveCamera::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

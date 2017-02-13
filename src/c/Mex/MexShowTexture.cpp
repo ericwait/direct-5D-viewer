@@ -17,8 +17,6 @@ void MexShowTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 
 	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
 		gMsgQueueToDirectX.pushMessage(new MessageShowObjectType((GraphicObjectTypes)i, (showType == i)));
-
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

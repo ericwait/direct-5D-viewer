@@ -7,7 +7,6 @@ void MexPolygonLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 {
 	bool lightingOn = (mxGetScalar(prhs[0]) != 0.0);
 	gMsgQueueToDirectX.pushMessage(new MessageSetPolyLighting(lightingOn));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexPolygonLighting::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

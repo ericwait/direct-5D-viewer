@@ -71,7 +71,6 @@ void MexAddPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	}
 
 	gMsgQueueToDirectX.pushMessage(loadMsg);
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexAddPolygons::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

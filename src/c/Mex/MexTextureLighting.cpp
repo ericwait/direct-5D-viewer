@@ -10,8 +10,6 @@ void MexTextureLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 
 	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
 		gMsgQueueToDirectX.pushMessage(new MessageSetTextureLighting((GraphicObjectTypes)i, texLightOn));
-
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexTextureLighting::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

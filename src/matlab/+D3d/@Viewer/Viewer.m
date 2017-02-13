@@ -42,6 +42,7 @@ methods (Static)
     TextureLighting(lightOn)
     TransferFunction(TransferFunctionStruct,BufferType)
     ToggleWireframe(wireFrameOn)
+    UpdateRender()
 end
 methods (Static, Access = private)
     varargout = Mex(command, varargin)

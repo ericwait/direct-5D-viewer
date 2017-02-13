@@ -9,7 +9,6 @@ void MexSetBackgroundColor::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 	Vec<float> color(colorData);
 
 	gMsgQueueToDirectX.pushMessage(new MessageSetBackgroundColor(color));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexSetBackgroundColor::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

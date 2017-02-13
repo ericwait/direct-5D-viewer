@@ -9,8 +9,6 @@ void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 
 	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
 		gMsgQueueToDirectX.pushMessage(new MessageSetTextureAttenuation((GraphicObjectTypes)i, attenuateOn));
-
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexTextureAttenuation::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

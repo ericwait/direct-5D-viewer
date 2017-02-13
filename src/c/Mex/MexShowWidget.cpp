@@ -7,7 +7,6 @@ void MexShowWidget::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 {
 	bool widgetOn = (mxGetScalar(prhs[0]) != 0.0);
 	gMsgQueueToDirectX.pushMessage(new MessageShowObjectType(GraphicObjectTypes::Widget, widgetOn));
-	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 }
 
 std::string MexShowWidget::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
