@@ -36,12 +36,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	const bool columnMajor = false;
 	const int numChan = 2;
 	const Vec<size_t> dims(128,128,50);
-	const Vec<float> physSize(1.0f,1.0f,1.0f);
+	const Vec<float> physSize = 1.0f * dims;
 
 	unsigned char* pixelVals = createRandomVolume(numChan, dims);
 
 	// Setup demo noise volume
-	gMsgQueueToDirectX.pushMessage(new MessageInitVolume(numChan, 1, dims, physSize, columnMajor));
+	gMsgQueueToDirectX.pushMessage(new MessageInitVolume(1, numChan, dims, physSize, columnMajor));
 	gMsgQueueToDirectX.pushMessage(new MessageLoadTexture(GraphicObjectTypes::OriginalVolume, pixelVals));
 	gMsgQueueToDirectX.pushMessage(new MessageUpdateRender());
 
