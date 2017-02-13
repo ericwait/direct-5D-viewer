@@ -2,6 +2,8 @@
 #include "LoadData.h"
 #include "MessageHelpers.h"
 
+#include "D3d/VolumeInfo.h"
+
 #include "Global/Globals.h"
 #include "Global/ErrorMsg.h"
 
@@ -114,24 +116,31 @@ bool MessageLoadPolys::process()
 	if ( !gRenderer )
 		return false;
 
+	VolumeInfo* info = gRenderer->getVolumeInfo();
+	if ( !info )
+		return false;
+
 	for ( int i=0; i < polygons.size(); ++i )
 	{
 		QueuePolygon* poly = polygons[i];
 
-		if ( poly->getFrame() < 0 )
+		int index = poly->getIndex();
+		int frame = poly->getFrame();
+
+		if ( frame < 0 )
 		{
 			char buff[128];
-			sprintf(buff, "Cannot add a polygon to a negative frame! Polygon:%d, Frame:%d", poly->getIndex(), poly->getFrame());
+			sprintf(buff, "Cannot add a polygon to a negative frame! Polygon:%d, Frame:%d", index, frame);
 			sendErrMessage(buff);
 
 			return false;
 		}
 
-		GraphicObjectNode* oldNode = gRenderer->findSceneObject(GraphicObjectTypes::Polygons, poly->getIndex());
+		GraphicObjectNode* oldNode = gRenderer->findSceneObject(GraphicObjectTypes::Polygons, index);
 		if ( oldNode )
 		{
 			char buff[128];
-			sprintf(buff, "Polygon index already exists! Polygon:%d", poly->getIndex());
+			sprintf(buff, "Polygon index already exists! Polygon:%d", index);
 			sendErrMessage(buff);
 
 			return false;
@@ -145,30 +154,36 @@ bool MessageLoadPolys::process()
 				rootNodes[i] = NULL;
 		}
 
-		if ( poly->getFrame() >= gRenderer->getNumberOfFrames() )
+		if ( frame >= gRenderer->getNumberOfFrames() )
 		{
 			char buff[128];
-			sprintf(buff, "Polygon frame: %d is greater than movie frames: %d!", poly->getFrame(), gRenderer->getNumberOfFrames());
+			sprintf(buff, "Polygon frame: %d is greater than movie frames: %d!", frame, gRenderer->getNumberOfFrames());
 			sendErrMessage(buff);
 
 			return false;
 		}
 
-		if ( rootNodes[poly->getFrame()] == NULL )
+		SceneNode* frameNode = rootNodes[frame];
+		if ( frameNode == NULL )
 		{
-			rootNodes[poly->getFrame()] = new SceneNode(GraphicObjectTypes::Group);
-			gRenderer->attachToRootScene(rootNodes[poly->getFrame()], Renderer::Section::Main, poly->getFrame());
+			frameNode = new SceneNode(GraphicObjectTypes::Group);
+			gRenderer->attachToRootScene(frameNode, Renderer::Section::Main, frame);
+			rootNodes[frame] = frameNode;
 		}
 
 		double* color = poly->getcolorData();
+
+		// TODO: Can we build this into the local to parent without screwing up normals?
+		info->imageToModelSpace(poly->getvertData(), poly->getNumVerts());
+
 		std::shared_ptr<MeshPrimitive> polyMesh = createPolygonMesh(poly->getfaceData(), poly->getNumFaces(), poly->getvertData(), poly->getNumVerts(), poly->getnormData(), poly->getNumNormals());
 		std::shared_ptr<SingleColoredMaterial> polyMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), 1.0f);
 
-		GraphicObjectNode* polyNode = new GraphicObjectNode(poly->getIndex(), GraphicObjectTypes::Polygons, polyMesh, polyMat);
+		GraphicObjectNode* polyNode = new GraphicObjectNode(index, GraphicObjectTypes::Polygons, polyMesh, polyMat);
 		polyNode->setLabel(poly->getLabel());
 		polyNode->setWireframe(true);
 
-		polyNode->attachToParentNode(rootNodes[poly->getFrame()]);
+		polyNode->attachToParentNode(frameNode);
 	}
 
 	return true;

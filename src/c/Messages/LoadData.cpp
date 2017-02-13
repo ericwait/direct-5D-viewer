@@ -22,31 +22,30 @@ std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFac
 	verts.resize(numVerts);
 	normals.resize(numNormals);
 
-	Vec<unsigned int> curFace;
 	for (int i = 0; i < numFaces; ++i)
 	{
+		Vec<unsigned int>& curFace = faces[i];
+
 		curFace.x = unsigned int(faceData[i]);
 		curFace.y = unsigned int(faceData[i + numFaces]);
 		curFace.z = unsigned int(faceData[i + 2 * numFaces]);
 
 		curFace = curFace - 1;
-
-		faces[i] = curFace;
 	}
 
-	Vec<float> curVert, curNormal;
 	for (int i = 0; i < numVerts; ++i)
 	{
+		Vec<float>& curVert = verts[i];
+
 		curVert.x = float(vertData[i]);
 		curVert.y = float(vertData[i + numVerts]);
 		curVert.z = float(vertData[i + 2 * numVerts]);
 
+		Vec<float>& curNormal = normals[i];
+
 		curNormal.x = float(normData[i]);
 		curNormal.y = float(normData[i + numVerts]);
 		curNormal.z = float(normData[i + 2 * numVerts]);
-
-		verts[i] = curVert;
-		normals[i] = curNormal;
 	}
 
 	return std::make_shared<MeshPrimitive>(gRenderer, faces, verts, normals);
