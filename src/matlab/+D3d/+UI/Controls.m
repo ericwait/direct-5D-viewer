@@ -307,12 +307,6 @@ D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
 D3d.UI.Ctrl.PlotTransferFunctions();
 end
 
-% --- Executes on slider movement.
-function s_peelSize_Callback(hObject, eventdata, handles)
-val = get(handles.s_peelSize,'Value');
-D3d.Viewer.PeelUpdate(val);
-end
-
 % --- Executes on button press in cb_textureLighting.
 function cb_textureLighting_Callback(hObject, eventdata, handles)
 D3d.Viewer.TextureLighting(get(handles.cb_textureLighting,'Value'));
@@ -423,11 +417,6 @@ function m_channelPicker_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-end
-
-% --- Executes during object creation, after setting all properties.
-function s_peelSize_CreateFcn(hObject, eventdata, handles)
-
 end
 
 % --- Executes during object creation, after setting all properties.
