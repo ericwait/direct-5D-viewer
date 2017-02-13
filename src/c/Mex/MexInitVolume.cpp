@@ -3,7 +3,6 @@
 
 #include "Messages/LoadMessages.h"
 
-#pragma optimize("",off)
 void MexInitVolume::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	// check the message queue for an error message before continuing
@@ -39,7 +38,6 @@ void MexInitVolume::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* 
 	const bool columnMajor = true;
 	gMsgQueueToDirectX.pushMessage(new MessageInitVolume(numFrames, numChannels, dims, physSize, columnMajor));
 }
-#pragma optimize("",on)
 
 std::string MexInitVolume::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

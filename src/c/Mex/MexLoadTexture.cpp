@@ -3,7 +3,6 @@
 
 #include "Messages/LoadMessages.h"
 
-#pragma optimize("",off)
 void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
 	// check the message queue for an error message before continuing
@@ -42,7 +41,6 @@ void MexLoadTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 
 	gMsgQueueToDirectX.pushMessage(new MessageLoadTexture(texType, image), true);
 }
-#pragma optimize("",on)
 
 std::string MexLoadTexture::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
