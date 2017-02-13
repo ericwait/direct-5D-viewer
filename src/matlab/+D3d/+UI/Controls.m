@@ -155,9 +155,11 @@ end
 D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
 
 set(handles.m_channelPicker,'string',strng);
+set(handles.tb_numFrames,'string',num2str(imageData.NumberOfFrames));
 if (imageData.NumberOfFrames > 1)
-    set(handles.tb_numFrames,'string',num2str(imageData.NumberOfFrames));
     set(handles.s_curFrame,'Max',imageData.NumberOfFrames,'Min',1,'Enable','on','SliderStep',[1/imageData.NumberOfFrames, 0.1],'Value',1);
+else
+    set(handles.s_curFrame,'enable','off');
 end
 set(handles.tb_numChan,'string',num2str(imageData.NumberOfChannels));
 set(handles.tb_title,'string',imageData.DatasetName);
