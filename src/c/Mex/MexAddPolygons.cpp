@@ -56,7 +56,7 @@ void MexAddPolygons::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 		double* vertData = (double*)mxGetData(mxVerts);
 		double* normData = (double*)mxGetData(mxNorms);
 		double* colorData = (double*)mxGetData(mxColor);
-		int frame = int(mxGetScalar(mxFrame))-1;
+		int frame = MAT_TO_C(int(mxGetScalar(mxFrame)));
 
 		mxGetString(mxLabel, buff, 256);
 

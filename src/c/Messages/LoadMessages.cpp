@@ -145,6 +145,15 @@ bool MessageLoadPolys::process()
 				rootNodes[i] = NULL;
 		}
 
+		if ( poly->getFrame() >= gRenderer->getNumberOfFrames() )
+		{
+			char buff[128];
+			sprintf(buff, "Polygon frame: %d is greater than movie frames: %d!", poly->getFrame(), gRenderer->getNumberOfFrames());
+			sendErrMessage(buff);
+
+			return false;
+		}
+
 		if ( rootNodes[poly->getFrame()] == NULL )
 		{
 			rootNodes[poly->getFrame()] = new SceneNode(GraphicObjectTypes::Group);
@@ -153,7 +162,7 @@ bool MessageLoadPolys::process()
 
 		double* color = poly->getcolorData();
 		std::shared_ptr<MeshPrimitive> polyMesh = createPolygonMesh(poly->getfaceData(), poly->getNumFaces(), poly->getvertData(), poly->getNumVerts(), poly->getnormData(), poly->getNumNormals());
-		std::shared_ptr<SingleColoredMaterial> polyMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), (float)(color[3]));
+		std::shared_ptr<SingleColoredMaterial> polyMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), 1.0f);
 
 		GraphicObjectNode* polyNode = new GraphicObjectNode(poly->getIndex(), GraphicObjectTypes::Polygons, polyMesh, polyMat);
 		polyNode->setLabel(poly->getLabel());

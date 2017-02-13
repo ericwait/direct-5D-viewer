@@ -152,6 +152,8 @@ bool SceneNode::addEntries(SceneNode::NodeRegistry* registry)
 
 	for ( int i=0; i < childrenNodes.size(); ++i )
 		childrenNodes[i]->addEntries(registry);
+
+	return true;
 }
 
 bool SceneNode::removeEntries(SceneNode::NodeRegistry* registry)
@@ -161,6 +163,8 @@ bool SceneNode::removeEntries(SceneNode::NodeRegistry* registry)
 
 	for ( int i=0; i < childrenNodes.size(); ++i )
 		childrenNodes[i]->removeEntries(registry);
+
+	return true;
 }
 
 bool SceneNode::addChildNode(SceneNode* child)
@@ -173,9 +177,7 @@ bool SceneNode::addChildNode(SceneNode* child)
 	if ( !registry )
 		return true;
 
-	child->addEntries(registry);
-
-	return true;
+	return child->addEntries(registry);
 }
 
 void SceneNode::requestUpdate()
@@ -301,6 +303,7 @@ bool GraphicObjectNode::addEntries(SceneNode::NodeRegistry* registry)
 		return false;
 
 	registry[type].insert(std::make_pair(index, this));
+	return true;
 }
 
 bool GraphicObjectNode::removeEntries(SceneNode::NodeRegistry* registry)
@@ -309,6 +312,7 @@ bool GraphicObjectNode::removeEntries(SceneNode::NodeRegistry* registry)
 		return false;
 
 	registry[type].erase(index);
+	return true;
 }
 
 
@@ -430,7 +434,7 @@ void RootSceneNode::initRenderSectionNodes(Renderer::Section section, int numFra
 	for ( int i=0; i < numFrames; ++i )
 	{
 		rootChildrenNodes[section].push_back(new SceneNode(GraphicObjectTypes::Group));
-		rootChildrenNodes[section][0]->setParentNode(this);
+		rootChildrenNodes[section][i]->setParentNode(this);
 	}
 
 	updateTransforms(parentToWorld);

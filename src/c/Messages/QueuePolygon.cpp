@@ -17,7 +17,7 @@ QueuePolygon::QueuePolygon(size_t numFaces, size_t numVerts, size_t numNormals, 
 	faceData = new double[numFaces * 3];
 	vertData = new double[numVerts * 3];
 	normData = new double[numVerts * 3];
-	colorData = new double[numVerts * 3];
+	colorData = new double[3];
 }
 
 void QueuePolygon::setfaceData(double* faceData)
@@ -41,7 +41,7 @@ void QueuePolygon::setnormData(double* normData)
 void QueuePolygon::setcolorData(double* colorData)
 {
 	// Possibly going out of memory space here
-	memcpy(this->colorData, colorData, 4 * sizeof(double));
+	memcpy(this->colorData, colorData, 3 * sizeof(double));
 }
 
 double* QueuePolygon::getfaceData()
