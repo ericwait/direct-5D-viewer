@@ -59,6 +59,38 @@ bool MessageLoadTextureFrame::process()
 
 
 
+MessageClearTextureFrame::MessageClearTextureFrame(GraphicObjectTypes type, int frame)
+    : textureType(type), frame(frame)
+{}
+
+bool MessageClearTextureFrame::process()
+{
+    if(!gRenderer)
+        return false;
+
+    clearTextureFrame(frame, textureType);
+    return true;
+}
+
+
+
+MessageClearAllTexture::MessageClearAllTexture(GraphicObjectTypes inType)
+    : textureType(inType)
+{}
+
+
+bool MessageClearAllTexture::process()
+{
+    if(!gRenderer)
+        return false;
+
+    clearAllTextures(textureType);
+    return true;
+}
+
+
+
+
 MessageLoadTexture::MessageLoadTexture(GraphicObjectTypes inType, unsigned char* inData)
 	: textureType(inType), imageData(inData)
 {}
@@ -88,7 +120,6 @@ bool MessageLoadTexture::process()
 
 	return true;
 }
-
 
 
 std::vector<SceneNode*> MessageLoadPolys::rootNodes;

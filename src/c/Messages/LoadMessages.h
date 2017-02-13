@@ -50,6 +50,19 @@ private:
 	unsigned char* imageData;
 };
 
+class MessageClearTextureFrame: public Message
+{
+public:
+    MessageClearTextureFrame(GraphicObjectTypes type, int frame);
+
+protected:
+    virtual bool process();
+
+private:
+    GraphicObjectTypes textureType;
+    int frame;
+};
+
 
 class MessageLoadTexture: public Message
 {
@@ -63,6 +76,18 @@ private:
 	GraphicObjectTypes textureType;
 
 	unsigned char* imageData;
+};
+
+class MessageClearAllTexture: public Message
+{
+public:
+    MessageClearAllTexture(GraphicObjectTypes inType);
+
+protected:
+    virtual bool process();
+
+private:
+    GraphicObjectTypes textureType;
 };
 
 
