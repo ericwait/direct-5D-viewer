@@ -193,12 +193,12 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else if(VK_UP==wParam)
 		{
-			gCameraDefaultMesh->move(Vec<float>(0.0f, 1.0f, 0.0f));
+			gCameraDefaultMesh->move(Vec<float>(0.0f, -1.0f, 0.0f));
 			gRenderer->forceUpdate();
 		}
 		else if(VK_DOWN==wParam)
 		{
-			gCameraDefaultMesh->move(Vec<float>(0.0f, -1.0f, 0.0f));
+			gCameraDefaultMesh->move(Vec<float>(0.0f, 1.0f, 0.0f));
 			gRenderer->forceUpdate();
 		}
 		else if(VK_PRIOR==wParam) //Page Up key
