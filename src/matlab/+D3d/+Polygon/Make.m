@@ -49,7 +49,7 @@ C = linspace(startCoords_rcz(2),endCoords_rcz(2),size(imR,2));
 Z = linspace(startCoords_rcz(3),endCoords_rcz(3),size(imR,3));
 [x,y,z] = meshgrid(C,R,Z);
 
-[faces, v_xy] = isosurface(x,y,z,imR,128);
+[faces, v_xy] = isosurface(x,y,z,imR,160);
 
 if (isempty(v_xy))
     return
