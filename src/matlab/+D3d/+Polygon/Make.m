@@ -43,9 +43,10 @@ rp = regionprops(cc,'Centroid');
 
 imR = ImProc.Resize(im2uint8(im),reductions,[],'mean');
 
-R = linspace(startCoords_rcz(1),maxExtent_rc(1),size(imR,1));
-C = linspace(startCoords_rcz(2),maxExtent_rc(2),size(imR,2));
-Z = linspace(startCoords_rcz(3),maxExtent_rc(3),size(imR,3));
+endCoords_rcz = startCoords_rcz + floor((maxExtent_rc - startCoords_rcz).*reductions)./reductions;
+R = linspace(startCoords_rcz(1),endCoords_rcz(1),size(imR,1));
+C = linspace(startCoords_rcz(2),endCoords_rcz(2),size(imR,2));
+Z = linspace(startCoords_rcz(3),endCoords_rcz(3),size(imR,3));
 [x,y,z] = meshgrid(C,R,Z);
 
 [faces, v_xy] = isosurface(x,y,z,imR,128);
