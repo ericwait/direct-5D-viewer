@@ -11,7 +11,12 @@ if (~ischar(label))
     error('label needs to be a string!');
 end
 if (~exist('reductions','var') || isempty(reductions))
-    reductions = ones(1,size(pixelList_xy,2));
+    maxExtent_rc = Utils.SwapXY_RC(max(pixelList_xy,[],1));
+    smallSide = min(maxExtent_rc);
+    reduc = 10/smallSide;
+    reduc = max(reduc,0.125);
+    reduc = min(reduc,1.0);
+    reductions = repmat(reduc,1,size(pixelList_xy,2));
 end
 if (length(reductions)==1)
     reductions = repmat(reductions,1,size(pixelList_xy,2));
