@@ -50,7 +50,7 @@ if (isempty(v_xy))
 end
 
 % center the vert in the middle of the voxel
-verts_xy = v_xy - 0.5;
+verts_xy = v_xy + 0.5;
 
 com = rp.Centroid + startCoords_xy -1;
 
