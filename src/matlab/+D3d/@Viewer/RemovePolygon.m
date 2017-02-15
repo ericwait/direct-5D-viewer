@@ -1,4 +1,4 @@
-% RemovePolygon - RemovePolygon() This removes all polygons from the directX viewer
-function RemovePolygon()
-    D3d.Viewer.Mex('RemovePolygon');
+% RemovePolygon - RemovePolygon(index) This removes all polygons from the directX viewer
+function RemovePolygon(index)
+    D3d.Viewer.Mex('RemovePolygon',index);
 end
