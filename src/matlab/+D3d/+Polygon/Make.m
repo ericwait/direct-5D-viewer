@@ -28,7 +28,7 @@ end
 polygon = D3d.Polygon.MakeEmptyStruct();
 
 % padd the subimage to get some room to blur
-PADDING = ceil(3*1./reductions);
+PADDING = ceil(5*1./reductions);
 
 maxExtent_rc = Utils.SwapXY_RC(max(pixelList_xy,[],1)) + PADDING;
 indList = Utils.CoordToInd(maxExtent_rc,Utils.SwapXY_RC(pixelList_xy));
