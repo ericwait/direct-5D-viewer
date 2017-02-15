@@ -58,7 +58,7 @@ float maxIntensity = 0;
 		float intensity = g_txDiffuse[i].Sample( g_samLinear[i], input.TextureUV );
 		intensity = clamp(intensity,ranges[i][0],ranges[i][1]);
 		intensity = transferFunctions[i][0]*intensity*intensity+transferFunctions[i][1]*intensity+transferFunctions[i][2];
-		if (intensity < 0.2f || channelColor[i].a < 0.01f)
+		if (intensity < 0.01f || channelColor[i].a < 0.01f)
 		{
 			intensity = 0;
 		}
