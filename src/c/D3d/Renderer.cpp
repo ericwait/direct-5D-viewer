@@ -1772,7 +1772,7 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize, BITMAPINFOHEADER& bi)
 	if(!hdcMemDC)
 	{
 		MessageBox(gWindowHandle,"CreateCompatibleDC has failed","Failed",MB_OK);
-		return lpbitmap;
+		return NULL;
 	}
 
 	// Get the client area for size calculation
@@ -1788,7 +1788,7 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize, BITMAPINFOHEADER& bi)
 	if(!hbmScreen)
 	{
 		MessageBox(gWindowHandle,"CreateCompatibleBitmap Failed","Failed",MB_OK);
-		return lpbitmap;
+		return NULL;
 	}
 
 	// Select the compatible bitmap into the compatible memory DC.
@@ -1803,7 +1803,10 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize, BITMAPINFOHEADER& bi)
 		SRCCOPY))
 	{
 		MessageBox(gWindowHandle,"BitBlt has failed","Failed",MB_OK);
-		return lpbitmap;
+
+		DeleteObject(hbmScreen);
+
+		return NULL;
 	}
 
 	// Get the BITMAP from the HBITMAP
@@ -1842,6 +1845,8 @@ unsigned char* Renderer::captureWindow(DWORD& dwBmpSize, BITMAPINFOHEADER& bi)
 	//Unlock and Free the DIB from the heap
 	GlobalUnlock(hDIB);
 	GlobalFree(hDIB);
+
+	DeleteObject(hbmScreen);
 
 	bool bSuccess = DeleteDC(hdcMemDC);
 	if(!bSuccess)
