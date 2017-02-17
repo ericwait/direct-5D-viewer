@@ -130,7 +130,7 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		else
 		{
-			gCameraDefaultMesh->move(Vec<float>(0.0f, 0.0f, 0.6f*alpha*wheelTicks));
+			gCameraDefaultMesh->move(Vec<float>(0.0f, 0.0f, 0.3f*alpha*wheelTicks));
 		}
 		gRenderer->forceUpdate();
 		break;
@@ -183,22 +183,22 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	case WM_KEYDOWN:
 		if(VK_LEFT==wParam)
 		{
-			gCameraDefaultMesh->move(Vec<float>(-0.3f, 0.0f, 0.0f));
+			gCameraDefaultMesh->move(Vec<float>(-0.05f, 0.0f, 0.0f));
 			gRenderer->forceUpdate();
 		}
 		else if(VK_RIGHT==wParam)
 		{
-			gCameraDefaultMesh->move(Vec<float>(0.3f, 0.0f, 0.0f));
+			gCameraDefaultMesh->move(Vec<float>(0.05f, 0.0f, 0.0f));
 			gRenderer->forceUpdate();
 		}
 		else if(VK_UP==wParam)
 		{
-			gCameraDefaultMesh->move(Vec<float>(0.0f, -0.3f, 0.0f));
+			gCameraDefaultMesh->move(Vec<float>(0.0f, -0.05f, 0.0f));
 			gRenderer->forceUpdate();
 		}
 		else if(VK_DOWN==wParam)
 		{
-			gCameraDefaultMesh->move(Vec<float>(0.0f, 0.3f, 0.0f));
+			gCameraDefaultMesh->move(Vec<float>(0.0f, 0.05f, 0.0f));
 			gRenderer->forceUpdate();
 		}
 		else if(VK_PRIOR==wParam) //Page Up key
