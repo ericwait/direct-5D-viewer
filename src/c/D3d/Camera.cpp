@@ -35,8 +35,8 @@ void Camera::move(Vec<float> delta)
 	// TODO: Should this be in here?
 	const float panFactor = 0.03;
 
-	cameraPosition += delta * panFactor;
-	lookPosition += delta * panFactor;
+    cameraPosition += delta;// *panFactor;
+    lookPosition += delta;// *panFactor;
 
 	updateViewTransform();
 }
