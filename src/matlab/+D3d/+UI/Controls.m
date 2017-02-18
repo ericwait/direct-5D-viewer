@@ -21,7 +21,7 @@
 
 % Edit the above text to modify the response to help ViewerControls
 
-% Last Modified by GUIDE v2.5 08-Oct-2015 11:46:00
+% Last Modified by GUIDE v2.5 18-Feb-2017 10:25:29
 
 % Begin initialization code - DO NOT EDIT
 
@@ -378,6 +378,16 @@ function cb_ShowLabels_Callback(hObject, eventdata, handles)
 on = get(handles.cb_ShowLabels,'Value');
 D3d.Viewer.ShowLabels(on);
 D3d.Update();
+end
+
+% --- Executes on button press in pb_saveSettings.
+function pb_saveSettings_Callback(hObject, eventdata, handles)
+D3d.SaveTransferFunction();
+end
+
+% --- Executes on button press in pb_loadSettings.
+function pb_loadSettings_Callback(hObject, eventdata, handles)
+D3d.LoadTransferFunction();
 end
 
 %% Create Functions

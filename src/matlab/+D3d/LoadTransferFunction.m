@@ -13,7 +13,7 @@ function LoadTransferFunction(path)
     end
         
     while(isempty(path))
-        [fileName,pathName,filterIndex] = uigetfile('.json','Load Transfer Function...',[imageData.DatasetName,'_transfer','.json']);
+        [fileName,pathName,filterIndex] = uigetfile('.json','Load Transfer Function...',fullfile(imageData.imageDir,[imageData.DatasetName,'_transfer','.json']));
         
         if (filterIndex==0)
             return

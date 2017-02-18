@@ -1,11 +1,18 @@
-function SaveTransferFunction()
-    [imageData, colors, channelData] = D3d.UI.Ctrl.GetUserData();
+function SaveTransferFunction(pathName,fileName)
+    [imageData, ~, channelData] = D3d.UI.Ctrl.GetUserData();
 
-    [fileName,pathName,filterIndex] = uiputfile('.json','Save Transfer Function To...',[imageData.DatasetName,'_transfer','.json']);
-
-    if (filterIndex==0)
-        return
+    if (~exist('fileName','var') || isempty(fileName))
+        fileName = [imageData.DatasetName,'_transfer','.json'];
     end
+    
+    if (~exist('pathName','var'))
+        pathName = imageData.imageDir;
+        [fileName,pathName,filterIndex] = uiputfile('.json','Save Transfer Function To...',fullfile(pathName,fileName));
+        if (filterIndex==0)
+            return
+        end
+    end
+
     [~,fName,ext] = fileparts(fileName);
     if (isempty(ext) || ~strcmp(ext,'.json'))
         ext = '.json';
