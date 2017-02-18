@@ -1018,13 +1018,14 @@ void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node, 
 	DirectX::XMVECTOR v2D={0.,0.,0.,0.};
 	int x,y;
 
-	DirectX::XMFLOAT4 color = node->material->getColor();
+	DirectX::XMFLOAT4 boxColor = node->material->getColor();
+	Vec<float> colr = Vec<float>(boxColor.x, boxColor.y, boxColor.z);
+	
+	COLORREF textHex = RGB(255, 255, 255);
+	if (colr.sum()>=1.5)
+		textHex = RGB(0, 0, 0);
 
-	COLORREF hexColor = (unsigned int) (255*color.z);
-	hexColor = hexColor << 8;
-	hexColor |=  (unsigned int) (255*color.y);
-	hexColor = hexColor << 8;
-	hexColor |=  (unsigned int) (255*color.x);
+	COLORREF boxHex = RGB(boxColor.x*255, boxColor.y*255, boxColor.z*255);
 
 	Vec<float> centerOfmassVec = node->mesh->getCenterOfMass();
 	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
@@ -1037,8 +1038,9 @@ void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node, 
 	y=(int)DirectX::XMVectorGetY(v2D);
 
 	SelectObject(hdc, gFont);
-	SetTextColor(hdc,hexColor);
-	SetBkMode(hdc,TRANSPARENT);
+	SetTextColor(hdc, textHex);
+	SetBkColor(hdc, boxHex);
+	SetBkMode(hdc, OPAQUE);
 
 	TextOutA(hdc,x,y,node->getLabel().c_str(),(int)node->getLabel().length());
 }
