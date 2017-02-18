@@ -58,13 +58,8 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         end
     end
 
-    %% open the missing image if it is small enough
-    if (all(imData.Dimensions<=2048) && isempty(im))
-        [im,imData] = MicroscopeData.Reader('imageData',imData,'verbose',true);
-            if (isempty(im))
-                    return
-            end        
-    elseif (isempty(im) || any(imData.Dimensions>2048))
+    %% open the region chooser if the image is too big
+    if (any(imData.Dimensions>2048))
         D3d.UI.InitializeMipFigure(im,imData,imData.imageDir,true);
         imData = [];
         im = [];
@@ -88,24 +83,40 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     end
 
     D3d.Viewer.InitVolume([imData.Dimensions([2,1,3]),imData.NumberOfChannels,imData.NumberOfFrames],imData.PixelPhysicalSize([2,1,3]));
-    
-    if (size(im,4)<imData.NumberOfChannels)
-        error('You must pass in all of the channels when opening!');
-    end
-    if (size(im,5)<imData.NumberOfFrames)
-        D3d.LoadImage(im(:,:,:,:,1),1,1);
-        D3d.Viewer.UpdateRender();
-        for t=2:size(im,5)
-            D3d.LoadImage(im(:,:,:,:,t),1,t);
-        end
-    else
-        D3d.LoadImage(im);
-        D3d.Update();
-    end
     D3d.UI.Controls(imData);
     
-    D3d.UI.AutoTransferFunction(im);
-    
+    if (~isempty(im))
+        if (size(im,4)<imData.NumberOfChannels)
+            error('You must pass in all of the channels when opening!');
+        end
+        
+        if (size(im,5)<imData.NumberOfFrames)
+            D3d.LoadImage(im(:,:,:,:,1),1,1);
+            D3d.Update();
+            loadTransFunc(imData,im);
+            for t=2:size(im,5)
+                D3d.LoadImage(im(:,:,:,:,t),1,t);
+            end
+        else
+            D3d.LoadImage(im);
+            D3d.Update();
+        end
+    else
+        im = MicroscopeData.Reader('path',imData.imageDir,'timeRange',[1,1]);
+        D3d.LoadImage(im,1,1);
+        D3d.Update();
+        loadTransFunc(imData,im);
+        
+        disp('Only the first image was loaded, please wait while I load the others...');
+        im = MicroscopeData.Reader('path',imData.imageDir,'imageData',imData,'verbose',true);
+        
+        prgs = Utils.CmdlnProgress(imData.NumberOfFrames,true,'Loading images in viewer');
+        for t=2:imData.NumberOfFrames
+            D3d.LoadImage(im(:,:,:,:,t),1,t);
+            prgs.PrintProgress(t);
+        end
+        prgs.ClearProgress(true);
+    end
     
     %% start a timer that will check for any messages that the viewer might want to return
     D3d.Messaging.StartTimer();
@@ -117,4 +128,12 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     if (nargout>0)
         varargout{1} = im;
     end
+end
+
+function loadTransFunc(imData,im)
+    if (exist(fullfile(imData.imageDir,[imData.DatasetName,'_transfer','.json']),'file'))
+        D3d.LoadTransferFunction(fullfile(imData.imageDir,[imData.DatasetName,'_transfer','.json']));
+    else
+        D3d.UI.AutoTransferFunction(im);
+    end 
 end
