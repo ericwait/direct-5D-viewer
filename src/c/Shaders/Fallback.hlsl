@@ -10,7 +10,6 @@ cbuffer VSConstantBuffer : register( b0 )
 struct VS_OUTPUT
 {
 	float4 Pos : SV_POSITION;
-	float3 TextureUV : TEXCOORD0;
 	float3 Normal : NORMAL;
 };
 
@@ -20,11 +19,43 @@ struct PS_OUTPUT
 	float depth : SV_DEPTH;
 };
 
-VS_OUTPUT FallbackVertexShader( float4 Pos : POSITION,  float3 TextureUV : TEXCOORD, float3 Normal : NORMAL )
+VS_OUTPUT FallbackVS_P( float4 Pos : POSITION )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
-	output.TextureUV = TextureUV;
+	output.Pos = mul( Pos, World );
+	output.Pos = mul( output.Pos, View );
+	output.Pos = mul( output.Pos, Projection );
+
+	return output;
+}
+
+VS_OUTPUT FallbackVS_PT( float4 Pos : POSITION )
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
+
+	output.Pos = mul( Pos, World );
+	output.Pos = mul( output.Pos, View );
+	output.Pos = mul( output.Pos, Projection );
+
+	return output;
+}
+
+VS_OUTPUT FallbackVS_PTC( float4 Pos : POSITION )
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
+
+	output.Pos = mul( Pos, World );
+	output.Pos = mul( output.Pos, View );
+	output.Pos = mul( output.Pos, Projection );
+
+	return output;
+}
+
+
+VS_OUTPUT FallbackVS_PN( float4 Pos : POSITION, float3 Normal : NORMAL )
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
 
 	output.Pos = mul( Pos, World );
 	output.Pos = mul( output.Pos, View );
@@ -35,7 +66,46 @@ VS_OUTPUT FallbackVertexShader( float4 Pos : POSITION,  float3 TextureUV : TEXCO
 	return output;
 }
 
-PS_OUTPUT FallbackPixelShader( VS_OUTPUT input )
+VS_OUTPUT FallbackVS_PNT( float4 Pos : POSITION, float3 Normal : NORMAL )
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
+
+	output.Pos = mul( Pos, World );
+	output.Pos = mul( output.Pos, View );
+	output.Pos = mul( output.Pos, Projection );
+
+	output.Normal = mul( Normal, World );
+
+	return output;
+}
+
+VS_OUTPUT FallbackVS_PNC( float4 Pos : POSITION, float3 Normal : NORMAL )
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
+
+	output.Pos = mul( Pos, World );
+	output.Pos = mul( output.Pos, View );
+	output.Pos = mul( output.Pos, Projection );
+
+	output.Normal = mul( Normal, World );
+
+	return output;
+}
+
+VS_OUTPUT FallbackVS_PNTC( float4 Pos : POSITION, float3 Normal : NORMAL )
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
+
+	output.Pos = mul( Pos, World );
+	output.Pos = mul( output.Pos, View );
+	output.Pos = mul( output.Pos, Projection );
+
+	output.Normal = mul( Normal, World );
+
+	return output;
+}
+
+PS_OUTPUT FallbackPS( VS_OUTPUT input )
 {
 	PS_OUTPUT output;
 

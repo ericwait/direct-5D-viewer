@@ -1,19 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
-// Copyright 2014 Andrew Cohen, Eric Wait, and Mark Winter
-// This file is part of LEVER 3-D - the tool for 5-D stem cell segmentation,
-// tracking, and lineaging. See http://bioimage.coe.drexel.edu 'software' section
-// for details. LEVER 3-D is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by the Free
-// Software Foundation, either version 3 of the License, or (at your option) any
-// later version.
-// LEVER 3-D is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-// A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with
-// LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
-///////////////////////////////////////////////////////////////////////////////
-
-cbuffer ConstantPSBuffer : register( b1 )
+cbuffer PSConstantBuffer : register( b1 )
 {
 	float4 flags;
 	float4 transferFunctions[$NUM_CHAN];
@@ -22,24 +7,20 @@ cbuffer ConstantPSBuffer : register( b1 )
 	float4 gradientSampleDirection[3];
 };
 
-struct PixelOutputType
-{
-	float4 color : SV_TARGET;
-	float depth : SV_DEPTH;
-};
-
 Texture3D    g_txDiffuse[$NUM_CHAN] : register( t0 );
 SamplerState g_samLinear[$NUM_CHAN] : register( s0 );
+
 
 struct VS_OUTPUT
 {
 	float4 Pos : SV_POSITION;
 	float3 TextureUV : TEXCOORD0;
-	float3 Normal : NORMAL;
 	float3 Dpth : TEXCOORD1;
+	float4 clipPlane[2] : SV_ClipDistance;
 };
 
-float4 MultiChanVolumePixelShader( VS_OUTPUT input ) : SV_TARGET
+
+float4 ViewAlignedVolumePS( VS_OUTPUT input ) : SV_TARGET
 {
 	float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float alpha = 0.0f;
@@ -51,7 +32,7 @@ float4 MultiChanVolumePixelShader( VS_OUTPUT input ) : SV_TARGET
 	int numAlpha = 0;
 	float3 grad;
 
-float maxIntensity = 0;
+	float maxIntensity = 0;
 
 	[unroll($NUM_CHAN)] for (int i=0; i<$NUM_CHAN; ++i)
 	{

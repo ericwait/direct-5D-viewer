@@ -16,16 +16,14 @@ cbuffer PSConstantBuffer : register( b1 )
 struct VS_OUTPUT
 {
 	float4 Pos : SV_POSITION;
-	float3 TextureUV : TEXCOORD0;
 	float3 Normal : NORMAL;
+	float4 Color : COLOR;
 	float4 clipPlane[2] : SV_ClipDistance;
 };
 
-VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TEXCOORD, float3 Normal : NORMAL )
+VS_OUTPUT StaticColorVS_PNC( float4 Pos : POSITION, float3 Normal : NORMAL, float4 Color : COLOR )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
-
-	output.TextureUV = TextureUV;
 
 	output.Pos = mul( Pos, World );
 
@@ -36,14 +34,15 @@ VS_OUTPUT DefaultMeshVertexShader( float4 Pos : POSITION,  float3 TextureUV : TE
 	output.Pos = mul( output.Pos, Projection );
 
 	output.Normal = mul( Normal, World );
+	output.Color = Color;
 
 	return output;
 }
 
-float4 DefaultMeshPixelShader( VS_OUTPUT input ) : SV_TARGET
+float4 StaticColorPS( VS_OUTPUT input ) : SV_TARGET
 {
 	float4 mainLightDir = float4(-0.5774,-0.5774,0.5774,0);
-	float3 cval = color;
+	float3 cval = input.Color;
 
 	if(flags.x>0)
 	{
@@ -52,5 +51,5 @@ float4 DefaultMeshPixelShader( VS_OUTPUT input ) : SV_TARGET
 		cval *= lightInt;
 	}
 
-	return float4(cval.x, cval.y, cval.z, color.w) * colorModifier;
+	return float4(cval.x, cval.y, cval.z, input.Color.w) * colorModifier;
 }
