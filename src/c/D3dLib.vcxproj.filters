@@ -123,6 +123,9 @@
     <ClInclude Include="D3d\VolumeInfo.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3d\VertexLayouts.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp">
@@ -204,6 +207,9 @@
       <Filter>Messaging\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3d\VolumeInfo.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\VertexLayouts.cpp">
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

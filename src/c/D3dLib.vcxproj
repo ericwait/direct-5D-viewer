@@ -34,6 +34,7 @@
     <ClInclude Include="D3d\Texture.h" />
     <ClInclude Include="D3d\TextureLightingObj.h" />
     <ClInclude Include="D3d\Timer.h" />
+    <ClInclude Include="D3d\VertexLayouts.h" />
     <ClInclude Include="D3d\VolumeInfo.h" />
     <ClInclude Include="Global\Defines.h" />
     <ClInclude Include="Global\Globals.h" />
@@ -65,6 +66,7 @@
     <ClCompile Include="D3d\SceneNode.cpp" />
     <ClCompile Include="D3d\Texture.cpp" />
     <ClCompile Include="D3d\TextureLightingObj.cpp" />
+    <ClCompile Include="D3d\VertexLayouts.cpp" />
     <ClCompile Include="D3d\VolumeInfo.cpp" />
     <ClCompile Include="Global\ModuleInfo.cpp" />
     <ClCompile Include="Global\WidgetData.cpp" />
