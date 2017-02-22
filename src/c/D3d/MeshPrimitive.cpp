@@ -19,6 +19,25 @@
 
 #include <limits>
 
+
+const Vec<uint32_t> MeshPrimitive::unitQuadIdx[2] =
+		{Vec<uint32_t>(0,2,1),
+		Vec<uint32_t>(1,2,3)};
+
+const Vec<float> MeshPrimitive::unitQuadVerts[4] =
+		{Vec<float>(-0.5f, -0.5f, 0.0f),
+		Vec<float>(-0.5f, 0.5f, 0.0f),
+		Vec<float>(0.5f, -0.5f, 0.0f),
+		Vec<float>(0.5f, 0.5f, 0.0f)};
+
+const Vec<float> MeshPrimitive::unitQuadNorms[4] =
+		{Vec<float>(0.0f, 0.0f, -1.0f),
+		Vec<float>(0.0f, 0.0f, -1.0f),
+		Vec<float>(0.0f, 0.0f, -1.0f),
+		Vec<float>(0.0f, 0.0f, -1.0f)};
+
+
+
 MeshPrimitive::MeshPrimitive(Renderer* rendererIn, VertexLayout::Types layoutType, const std::string& shaderFile, const std::string& shaderFunc)
 	: renderer(rendererIn), layout(layoutType), vertShaderIdx(-1), vertexBuffer(NULL), indexBuffer(NULL)
 {
@@ -27,7 +46,7 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn, VertexLayout::Types layoutTyp
 
 
 MeshPrimitive::MeshPrimitive(Renderer* rendererIn,
-	const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	const std::vector<Vec<uint32_t>>& faces, const std::vector<Vec<float>>& vertices,
 	const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV, const std::vector<Color>& colors)
 	: MeshPrimitive(rendererIn)
 {
@@ -35,7 +54,7 @@ MeshPrimitive::MeshPrimitive(Renderer* rendererIn,
 	initializeResources();
 }
 
-void MeshPrimitive::setupMesh(const std::vector<Vec<unsigned int>>& facesIn, const std::vector<Vec<float>>& verticesIn,
+void MeshPrimitive::setupMesh(const std::vector<Vec<uint32_t>>& facesIn, const std::vector<Vec<float>>& verticesIn,
 	const std::vector<Vec<float>>& normalsIn, const std::vector<Vec<float>>& texUVsIn, const std::vector<Color>& colorsIn)
 {
 	faces = facesIn;
@@ -100,7 +119,7 @@ void MeshPrimitive::updateCenterOfMass()
 	centerOfMass = centerOfMass / vertices.size();
 }
 
-bool MeshPrimitive::intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord)
+bool MeshPrimitive::intersectTriangle(Vec<uint32_t> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord)
 {
 	// Find vectors for two edges sharing vert0
 	Vec<float> edge1(vertices[face.y]-vertices[face.x]);
@@ -151,7 +170,7 @@ bool MeshPrimitive::checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, f
 	bool found = false;
 	depthOut = std::numeric_limits<float>::max();
 
-	for (unsigned int i=0; i < faces.size(); ++i){
+	for (uint32_t i=0; i < faces.size(); ++i){
 		Vec<float> triCoord;
 
 		if ( intersectTriangle(faces[i],lclPntVec,lclDirVec,triCoord) )
@@ -177,7 +196,7 @@ MeshPrimitive::~MeshPrimitive()
 
 
 
-StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsigned int>>& faces,
+StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint32_t>>& faces,
 	const std::vector<Vec<float>>& vertices, const std::vector<Vec<float>>& normals, const Color& color)
 	: MeshPrimitive(renderer, VertexLayout::Types::PNC, "StaticColorShader", "StaticColorVS_PNC")
 {
@@ -191,7 +210,7 @@ StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsig
 	initializeResources();
 }
 
-StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint32_t>>& faces, const std::vector<Vec<float>>& vertices,
 	const std::vector<Vec<float>>& normals, const std::vector<Color>& colors)
 	: MeshPrimitive(renderer, VertexLayout::Types::PNC, "StaticColorShader", "StaticColorVS_PNC")
 {
@@ -200,19 +219,6 @@ StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsig
 }
 
 
-
-const Vec<unsigned int> ViewAlignedPlanes::planeIndices[2] = 
-{
-	Vec<unsigned int>(0,2,1),
-	Vec<unsigned int>(1,2,3)
-};
-const Vec<float> ViewAlignedPlanes::planeVertices[4] = 
-{
-	Vec<float>( -1.0f, -1.0f, 1.0f ), 
-	Vec<float>( -1.0f, 1.0f, 1.0f), 
-	Vec<float>( 1.0f, -1.0f, 1.0f), 
-	Vec<float>( 1.0f, 1.0f, 1.0f)
-};
 
 ViewAlignedPlanes::ViewAlignedPlanes(Renderer* renderer, Vec<size_t> volDims, Vec<float> scaleDims)
 	: MeshPrimitive(renderer, VertexLayout::Types::PT, "ViewAlignedVS","ViewAlignedVS_PT"),
@@ -247,7 +253,7 @@ DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX paren
 	return ConvertMatrix(compute.matrix());
 }
 
-void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
+void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<uint32_t>>& faces,
 	std::vector<Vec<float>>& vertices,std::vector<Vec<float>>& textureUV)
 {
 	//3.0 is to reduce moire
@@ -272,14 +278,14 @@ void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<
 		//i is making each plane
 		for (int i=0; i<4; i++)
 		{
-			vertices[planesFirstVert+i] = planeVertices[i] * 2.0f * Renderer::cornerVolumeDist;
+			vertices[planesFirstVert+i] = 2.0f * unitQuadVerts[i] * 2.0f * Renderer::cornerVolumeDist;
 			vertices[planesFirstVert+i].z = zPosition * Renderer::cornerVolumeDist;
 
 			textureUV[planesFirstVert+i] = vertices[planesFirstVert+i] * 0.5f + 0.5f;
 		}
 
 		for (int i=0; i<2; ++i)
-			faces[2*(numPlanes-planeIdx-1) + i] = planeIndices[i] + planesFirstVert;
+			faces[2*(numPlanes-planeIdx-1) + i] = unitQuadIdx[i] + planesFirstVert;
 
 		planesFirstVert += 4;
 	}

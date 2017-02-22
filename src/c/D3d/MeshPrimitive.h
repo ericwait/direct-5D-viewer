@@ -21,6 +21,7 @@
 #include "Global/Color.h"
 
 #include <d3d11.h>
+#include <cstdint>
 #include <vector>
 #include <string>
 
@@ -30,6 +31,10 @@ class MeshPrimitive
 	friend class GraphicObjectNode;
 
 public:
+	static const Vec<uint32_t> unitQuadIdx[2];
+	static const Vec<float> unitQuadVerts[4];
+	static const Vec<float> unitQuadNorms[4];
+
 	bool checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
 
 	~MeshPrimitive();
@@ -38,12 +43,12 @@ protected:
 		const std::string& shaderFile = "DefaultMeshShaders", const std::string& shaderFunc = "DefaultMeshVertexShader");
 
 	MeshPrimitive(Renderer* rendererIn,
-		const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+		const std::vector<Vec<uint32_t>>& faces, const std::vector<Vec<float>>& vertices,
 		const std::vector<Vec<float>>& normals = std::vector<Vec<float>>(),
 		const std::vector<Vec<float>>& textureUV = std::vector<Vec<float>>(),
 		const std::vector<Color>& colors = std::vector<Color>());	
 
-	void setupMesh(const std::vector<Vec<unsigned int>>& facesIn, const std::vector<Vec<float>>& verticesIn,
+	void setupMesh(const std::vector<Vec<uint32_t>>& facesIn, const std::vector<Vec<float>>& verticesIn,
 		const std::vector<Vec<float>>& normalsIn = std::vector<Vec<float>>(),
 		const std::vector<Vec<float>>& texUVsIn = std::vector<Vec<float>>(),
 		const std::vector<Color>& colorsIn = std::vector<Color>());
@@ -55,7 +60,7 @@ protected:
 	void updateCenterOfMass();
 
 	Vec<float> getCenterOfMass() const {return centerOfMass;}
-	bool intersectTriangle(Vec<unsigned int> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord);
+	bool intersectTriangle(Vec<uint32_t> face, Vec<float> lclPntVec, Vec<float> lclDirVec, Vec<float>& triCoord);
 
 	// TODO: This really should probably be part of the material system
 	// Overloaded to change the way transforms get passed to the vertex shader
@@ -65,6 +70,7 @@ private:
 	MeshPrimitive():layout(VertexLayout::Types::P){}
 
 protected:
+
 	Renderer* renderer;
 
 	size_t numFaces;
@@ -72,7 +78,7 @@ protected:
 	Vec<float> centerOfMass;
 
 	// Triangle resources
-	std::vector<Vec<unsigned int>> faces;
+	std::vector<Vec<uint32_t>> faces;
 	std::vector<Vec<float>> vertices;
 	std::vector<Vec<float>> normals;
 	std::vector<Vec<float>> texUVs;
@@ -91,10 +97,10 @@ protected:
 class StaticColorMesh : public MeshPrimitive
 {
 public:
-	StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint32_t>>& faces, const std::vector<Vec<float>>& vertices,
 		const std::vector<Vec<float>>& normals, const Color& color);
 
-	StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint32_t>>& faces, const std::vector<Vec<float>>& vertices,
 		const std::vector<Vec<float>>& normals, const std::vector<Color>& colors);
 };
 
@@ -102,9 +108,6 @@ public:
 class ViewAlignedPlanes : public MeshPrimitive
 {
 public:
-	// Static indices/verts for planes
-	static const Vec<unsigned int> planeIndices[2];
-	static const Vec<float> planeVertices[4];
 
 	ViewAlignedPlanes(Renderer* renderer, Vec<size_t> volDims, Vec<float> scaleDims);
 
@@ -112,7 +115,7 @@ protected:
 	virtual DirectX::XMMATRIX computeLocalToWorld(DirectX::XMMATRIX parentToWorld);
 
 private:
-	void buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
+	void buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<uint32_t>>& faces,
 		std::vector<Vec<float>>& vertices, std::vector<Vec<float>>& textureUV);
 
 	// Need to keep these around for transforms

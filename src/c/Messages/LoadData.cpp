@@ -67,63 +67,58 @@ HRESULT createBorder(Vec<float> &scale)
 
 	for (int i = 0; i < 6; ++i)
 	{
-		faces[2 * i] = ViewAlignedPlanes::planeIndices[0] + 4 * i;
-		faces[2 * i + 1] = ViewAlignedPlanes::planeIndices[1] + 4 * i;
+		faces[2 * i] = MeshPrimitive::unitQuadIdx[0] + 4 * i;
+		faces[2 * i + 1] = MeshPrimitive::unitQuadIdx[1] + 4 * i;
 	}
 
-	DirectX::XMMATRIX scl = DirectX::XMMatrixScaling(scale.y, scale.x, scale.z);
-	DirectX::XMMATRIX xRot = DirectX::XMMatrixRotationX(DirectX::XM_PI / 2.0f);
-	DirectX::XMMATRIX start = DirectX::XMMatrixIdentity();
+	Eigen::Affine3f placeTfm(Eigen::Translation3f(0.0f, 0.0f, -0.5f));
+	Eigen::Affine3f rotXTfm(Eigen::AngleAxisf(M_PI / 2.0f, Eigen::Vector3f::UnitX()));
+	Eigen::Affine3f scaleTfm(Eigen::Scaling(scale.y, scale.x, scale.z) * 2.0f);
 
+	// Use rotation about x-axis to get plane vertices for 4 sides of the cube
+	Eigen::Affine3f orientTfm = Eigen::Affine3f::Identity();
 	for (int i = 0; i < 16; ++i)
 	{
-		DirectX::XMFLOAT4 curF4(ViewAlignedPlanes::planeVertices[i % 4].x, ViewAlignedPlanes::planeVertices[i % 4].y,
-			ViewAlignedPlanes::planeVertices[i % 4].z, 1.0f);
+		Eigen::Vector4f vert(MeshPrimitive::unitQuadVerts[i % 4].x, MeshPrimitive::unitQuadVerts[i % 4].y, MeshPrimitive::unitQuadVerts[i % 4].z, 1.0f);
 
-		DirectX::XMVECTOR curVec = DirectX::XMLoadFloat4(&curF4);
-		DirectX::XMVECTOR rotVec = DirectX::XMVector3TransformCoord(DirectX::XMVector3TransformCoord(curVec, start), scl);
-		vertices[i] = Vec<float>(DirectX::XMVectorGetX(rotVec), DirectX::XMVectorGetY(rotVec), DirectX::XMVectorGetZ(rotVec));
-		if (i % 4 == 3)
-			start = start*xRot;
+		vert = scaleTfm * orientTfm * placeTfm * vert;
+		vertices[i] = Vec<float>(vert[0], vert[1], vert[2]);
+
+		if ( i % 4 == 3 )
+			orientTfm = rotXTfm * orientTfm;
 	}
 
-	DirectX::XMMATRIX yRot1 = DirectX::XMMatrixRotationY(DirectX::XM_PI / 2.0f);
-	DirectX::XMMATRIX yRot2 = DirectX::XMMatrixRotationY(3 * DirectX::XM_PI / 2.0f);
-
+	// Positive rotation about y-axis for the 5th side
+	orientTfm = Eigen::AngleAxisf(M_PI / 2.0f, Eigen::Vector3f::UnitY());
 	for (int i = 16; i < 20; ++i)
 	{
-		DirectX::XMFLOAT4 curF4(ViewAlignedPlanes::planeVertices[i % 4].x, ViewAlignedPlanes::planeVertices[i % 4].y,
-			ViewAlignedPlanes::planeVertices[i % 4].z, 1.0f);
+		Eigen::Vector4f vert(MeshPrimitive::unitQuadVerts[i % 4].x, MeshPrimitive::unitQuadVerts[i % 4].y, MeshPrimitive::unitQuadVerts[i % 4].z, 1.0f);
 
-		DirectX::XMVECTOR curVec = DirectX::XMLoadFloat4(&curF4);
-		DirectX::XMVECTOR rotVec = DirectX::XMVector3TransformCoord(DirectX::XMVector3TransformCoord(curVec, yRot1), scl);
-		vertices[i] = Vec<float>(DirectX::XMVectorGetX(rotVec), DirectX::XMVectorGetY(rotVec), DirectX::XMVectorGetZ(rotVec));
+		vert = scaleTfm * orientTfm * placeTfm * vert;
+		vertices[i] = Vec<float>(vert[0], vert[1], vert[2]);
 	}
 
+
+	// Negative rotation about y-axis for the 5th side
+	orientTfm = Eigen::AngleAxisf(-M_PI / 2.0f, Eigen::Vector3f::UnitY());
 	for (int i = 20; i < 24; ++i)
 	{
-		DirectX::XMFLOAT4 curF4(ViewAlignedPlanes::planeVertices[i % 4].x, ViewAlignedPlanes::planeVertices[i % 4].y,
-			ViewAlignedPlanes::planeVertices[i % 4].z, 1.0f);
+		Eigen::Vector4f vert(MeshPrimitive::unitQuadVerts[i % 4].x, MeshPrimitive::unitQuadVerts[i % 4].y, MeshPrimitive::unitQuadVerts[i % 4].z, 1.0f);
 
-		DirectX::XMVECTOR curVec = DirectX::XMLoadFloat4(&curF4);
-		DirectX::XMVECTOR rotVec = DirectX::XMVector3TransformCoord(DirectX::XMVector3TransformCoord(curVec, yRot2), scl);
-		vertices[i] = Vec<float>(DirectX::XMVectorGetX(rotVec), DirectX::XMVectorGetY(rotVec), DirectX::XMVectorGetZ(rotVec));
+		vert = scaleTfm * orientTfm * placeTfm * vert;
+		vertices[i] = Vec<float>(vert[0], vert[1], vert[2]);
 	}
 
 	for (int i = 0; i < 6; ++i)
 	{
 		Vec<float> edge1, edge2;
-		Vec<float> norm;
 
-		edge1 = vertices[faces[2 * i].y] - vertices[faces[2 * i].x];
-		edge2 = vertices[faces[2 * i].z] - vertices[faces[2 * i].x];
+		edge1 = vertices[faces[2 * i].e[1]] - vertices[faces[2 * i].e[0]];
+		edge2 = vertices[faces[2 * i].e[2]] - vertices[faces[2 * i].e[0]];
 
 		Vec<float> triDir = Vec<float>::cross(edge1,edge2);
-
-		norm = triDir.normal();
-
 		for (int j = 0; j < 4; ++j)
-			normals[faces[2 * i].x + j] = norm;
+			normals[faces[2 * i].e[0] + j] = triDir.normal();
 	}
 
 	std::shared_ptr<MeshPrimitive> borderMesh = std::make_shared<StaticColorMesh>(gRenderer, faces, vertices, normals, Color(0.0f,0.0f,0.0f,1.0f));
