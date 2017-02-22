@@ -207,7 +207,9 @@ bool MessageLoadPolys::process()
 		// TODO: Can we build this into the local to parent without screwing up normals?
 		info->imageToModelSpace(poly->getvertData(), poly->getNumVerts());
 
-		std::shared_ptr<MeshPrimitive> polyMesh = createPolygonMesh(poly->getfaceData(), poly->getNumFaces(), poly->getvertData(), poly->getNumVerts(), poly->getnormData(), poly->getNumNormals());
+		Color polyColor(color[0], color[1], color[2], color[3]);
+
+		std::shared_ptr<MeshPrimitive> polyMesh = createPolygonMesh(poly->getfaceData(), poly->getNumFaces(), poly->getvertData(), poly->getNumVerts(), poly->getnormData(), poly->getNumNormals(), polyColor);
 		std::shared_ptr<SingleColoredMaterial> polyMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), 1.0f);
 
 		GraphicObjectNode* polyNode = new GraphicObjectNode(index, GraphicObjectTypes::Polygons, polyMesh, polyMat);

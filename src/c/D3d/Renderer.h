@@ -15,6 +15,7 @@
 
 #pragma once
 #include "Global/Vec.h"
+#include "VertexLayouts.h"
 
 #include <d3d11.h>
 #include <DXGI1_2.h>
@@ -40,13 +41,6 @@ class RenderTarget;
 class DepthTarget;
 class SwapChainTarget;
 class VolumeInfo;
-
-struct Vertex
-{
-	Vec<float> pos;
-	Vec<float> texUV;
-	Vec<float> normal;
-};
 
 enum GraphicObjectTypes
 {
@@ -151,8 +145,11 @@ public:
 
 //Getters
 	int updateRegisteredShaders();
-	int registerVertexShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
-	int registerPixelShader(const std::string& filename, const std::string& entrypoint, const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
+	int registerVertexShader(const std::string& filename, const std::string& entrypoint, VertexLayout layout,
+		const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
+
+	int registerPixelShader(const std::string& filename, const std::string& entrypoint,
+		const std::map<std::string,std::string>& variables = std::map<std::string,std::string>());
 
 	VolumeInfo* getVolumeInfo(){ return volInfo; }
 	DirectX::XMMATRIX getRootWorldRotation();
@@ -190,8 +187,8 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // Resource setup for external classes
 //////////////////////////////////////////////////////////////////////////
-	HRESULT createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut);
-	HRESULT createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
+	HRESULT createVertexBuffer(UINT accessFlags, size_t numVerts, const void* initData, ID3D11Buffer** vertexBufferOut);
+	HRESULT createIndexBuffer(const std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
 
 	IDXGISwapChain1* createSwapChain(HWND hWnd, Vec<size_t> dims, bool stereo, DXGI_FORMAT format, UINT flags);
@@ -239,11 +236,15 @@ private:
 	void setRasterizerState(ID3D11RasterizerState* rasterState);
 	void setPixelShader(ID3D11PixelShader* shader);
 	void setDepthStencilState(ID3D11DepthStencilState* depthStencilState);
-	void setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer);
+	void setGeometry(VertexLayout layoutInfo, ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer);
 	void drawTriangles(size_t numFaces);
 
-	HRESULT compileVertexShader(const std::string& filename, const std::string& functionName, const std::map<std::string, std::string>& variables, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
-	HRESULT compilePixelShader(const std::string& filename, const std::string& functionName, const std::map<std::string, std::string>& variables, ID3D11PixelShader** pixelShaderOut);
+	HRESULT compileVertexShader(const std::string& filename, const std::string& functionName,
+		const std::map<std::string, std::string>& variables, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layoutDesc,
+		ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut);
+
+	HRESULT compilePixelShader(const std::string& filename, const std::string& functionName,
+		const std::map<std::string, std::string>& variables, ID3D11PixelShader** pixelShaderOut);
 
 	std::string preprocessShader(const std::string& shader, const std::map<std::string, std::string>& repVars);
 	ID3DBlob* compileShaderFile(const std::string& filename, const std::string& entryFunction, const std::string& shaderModel, const std::map<std::string, std::string>& repVars);
@@ -289,6 +290,8 @@ private:
 		std::string entryFunc;
 		std::map<std::string,std::string> vars;
 
+		VertexLayout layoutInfo;
+
 		ID3D11VertexShader* shader;
 		ID3D11InputLayout* layout;
 	};
@@ -309,9 +312,9 @@ private:
 	std::vector<VertexShaderEntry> vertexShaderRegistry;
 	std::vector<PixelShaderEntry> pixelShaderRegistry;
 
+	std::map<VertexLayout::Types, ID3D11VertexShader*> fallbackVSs;
+	std::map<VertexLayout::Types, ID3D11InputLayout*> fallbackLayouts;
 	ID3D11PixelShader* fallbackPS;
-	ID3D11VertexShader* fallbackVS;
-	ID3D11InputLayout* fallbackLayout;
 
 	// Scene objects
 	//TODO: Should probably put cameras in the scene

@@ -19,29 +19,32 @@
 
 #include <limits>
 
-MeshPrimitive::MeshPrimitive(Renderer* rendererIn, const std::string& shaderFile, const std::string& shaderFunc)
-	: renderer(rendererIn), vertShaderIdx(-1), vertexBuffer(NULL), indexBuffer(NULL)
+MeshPrimitive::MeshPrimitive(Renderer* rendererIn, VertexLayout::Types layoutType, const std::string& shaderFile, const std::string& shaderFunc)
+	: renderer(rendererIn), layout(layoutType), vertShaderIdx(-1), vertexBuffer(NULL), indexBuffer(NULL)
 {
 	loadShader(shaderFile,shaderFunc);
 }
 
-MeshPrimitive::MeshPrimitive(Renderer * rendererIn, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
-	const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV)
+
+MeshPrimitive::MeshPrimitive(Renderer* rendererIn,
+	const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	const std::vector<Vec<float>>& normals, const std::vector<Vec<float>>& textureUV, const std::vector<Color>& colors)
 	: MeshPrimitive(rendererIn)
 {
-	setupMesh(faces, vertices, normals, textureUV);
+	setupMesh(faces, vertices, normals, textureUV, colors);
+	initializeResources();
 }
 
 void MeshPrimitive::setupMesh(const std::vector<Vec<unsigned int>>& facesIn, const std::vector<Vec<float>>& verticesIn,
-	const std::vector<Vec<float>>& normalsIn, const std::vector<Vec<float>>& textureUVIn)
+	const std::vector<Vec<float>>& normalsIn, const std::vector<Vec<float>>& texUVsIn, const std::vector<Color>& colorsIn)
 {
 	faces = facesIn;
 	vertices = verticesIn;
 	normals = normalsIn;
+	texUVs = texUVsIn;
+	colors = colorsIn;
 
 	updateCenterOfMass();
-
-	initializeResources(textureUVIn);
 }
 
 void MeshPrimitive::cleanupMesh()
@@ -54,27 +57,31 @@ void MeshPrimitive::cleanupMesh()
 
 void MeshPrimitive::loadShader(const std::string& shaderFile, const std::string& shaderFunc)
 {
-	vertShaderIdx = renderer->registerVertexShader(shaderFile,shaderFunc);
+	vertShaderIdx = renderer->registerVertexShader(shaderFile,shaderFunc, layout);
 }
 
-void MeshPrimitive::initializeResources(const std::vector<Vec<float>>& textureUV)
+void MeshPrimitive::initializeResources()
 {
 	cleanupMesh();
 
 	numFaces = faces.size();
-	std::vector<Vertex> vertBuffer;
+	numVerts = vertices.size();
 
-	vertBuffer.resize(vertices.size());
-	for (int i=0; i<vertices.size(); ++i)
-	{
-		vertBuffer[i].pos = vertices[i];
-		vertBuffer[i].normal = normals[i];
-	}
+	void* initData = layout.allocLayout(numVerts);
 
-	for ( int i=0; i < textureUV.size(); ++i )
-		vertBuffer[i].texUV = textureUV[i];
+	layout.sliceIntoLayout(initData, VertexLayout::Attributes::Position, numVerts, (float*)(vertices.data()));
 
-	HRESULT hr = renderer->createVertexBuffer(vertBuffer, &vertexBuffer);
+	if ( layout.validAttribute(VertexLayout::Attributes::Normal) && normals.size() > 0 )
+		layout.sliceIntoLayout(initData, VertexLayout::Attributes::Normal, numVerts, (float*)(normals.data()));
+
+	if ( layout.validAttribute(VertexLayout::Attributes::TextureUV) && texUVs.size() > 0 )
+		layout.sliceIntoLayout(initData, VertexLayout::Attributes::TextureUV, numVerts, (float*)(texUVs.data()));
+
+	if ( layout.validAttribute(VertexLayout::Attributes::Color) && colors.size() > 0 )
+		layout.sliceIntoLayout(initData, VertexLayout::Attributes::Color, numVerts, (float*)(colors.data()));
+
+	size_t bufferSize = numVerts * layout.getVertSize();
+	HRESULT hr = renderer->createVertexBuffer(0, bufferSize, initData, &vertexBuffer);
 	if (FAILED(hr))
 		sendHrErrMessage(hr);
 
@@ -169,6 +176,31 @@ MeshPrimitive::~MeshPrimitive()
 }
 
 
+
+StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsigned int>>& faces,
+	const std::vector<Vec<float>>& vertices, const std::vector<Vec<float>>& normals, const Color& color)
+	: MeshPrimitive(renderer, VertexLayout::Types::PNC, "StaticColorShader", "StaticColorVS_PNC")
+{
+	setupMesh(faces, vertices, normals);
+
+	// Make a per-vertex color property
+	colors.resize(vertices.size());
+	for ( int i=0; i < vertices.size(); ++i )
+		colors[i] = color;
+
+	initializeResources();
+}
+
+StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<unsigned int>>& faces, const std::vector<Vec<float>>& vertices,
+	const std::vector<Vec<float>>& normals, const std::vector<Color>& colors)
+	: MeshPrimitive(renderer, VertexLayout::Types::PNC, "StaticColorShader", "StaticColorVS_PNC")
+{
+	setupMesh(faces, vertices, normals, std::vector<Vec<float>>(), colors);
+	initializeResources();
+}
+
+
+
 const Vec<unsigned int> ViewAlignedPlanes::planeIndices[2] = 
 {
 	Vec<unsigned int>(0,2,1),
@@ -182,13 +214,13 @@ const Vec<float> ViewAlignedPlanes::planeVertices[4] =
 	Vec<float>( 1.0f, 1.0f, 1.0f)
 };
 
-ViewAlignedPlanes::ViewAlignedPlanes(Renderer * renderer, Vec<size_t> volDims, Vec<float> scaleDims)
-	: dims(volDims), physicalSize(scaleDims), MeshPrimitive(renderer, "ViewAlignedVertexShader","ViewAlignedVertexShader")
+ViewAlignedPlanes::ViewAlignedPlanes(Renderer* renderer, Vec<size_t> volDims, Vec<float> scaleDims)
+	: MeshPrimitive(renderer, VertexLayout::Types::PT, "ViewAlignedVS","ViewAlignedVS_PT"),
+	dims(volDims), physicalSize(scaleDims)
 {
-	std::vector<Vec<float>> texUVs;
-	buildViewAlignedPlanes(dims, faces, vertices, normals, texUVs);
+	buildViewAlignedPlanes(dims, faces, vertices, texUVs);
 
-	initializeResources(texUVs);
+	initializeResources();
 }
 
 DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX parentToWorld_dx)
@@ -216,14 +248,13 @@ DirectX::XMMATRIX ViewAlignedPlanes::computeLocalToWorld(DirectX::XMMATRIX paren
 }
 
 void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<Vec<unsigned int>>& faces,
-	std::vector<Vec<float>>& vertices,std::vector<Vec<float>>& normals, std::vector<Vec<float>>& textureUV)
+	std::vector<Vec<float>>& vertices,std::vector<Vec<float>>& textureUV)
 {
 	//3.0 is to reduce moire
 	const float samplePadding = 3.0/2.0;
 
 	faces.clear();
 	vertices.clear();
-	normals.clear();
 	textureUV.clear();
 
 	int numPlanes = int(volDims.maxValue() * 2.0f * Renderer::cornerVolumeDist * samplePadding);
@@ -231,7 +262,6 @@ void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<
 
 	vertices.resize(4*numPlanes);
 	faces.resize(2*numPlanes);
-	normals.resize(4*numPlanes);
 	textureUV.resize(4*numPlanes);
 
 	int planesFirstVert = 0;
@@ -245,27 +275,11 @@ void ViewAlignedPlanes::buildViewAlignedPlanes(Vec<size_t> volDims, std::vector<
 			vertices[planesFirstVert+i] = planeVertices[i] * 2.0f * Renderer::cornerVolumeDist;
 			vertices[planesFirstVert+i].z = zPosition * Renderer::cornerVolumeDist;
 
-			//Vec<float> temp(vertices[planesFirstVert+i].y,vertices[planesFirstVert+i].x,vertices[planesFirstVert+i].z);
-			//textureUVs[planesFirstVert+i] = temp * 0.5f + 0.5f;
-
 			textureUV[planesFirstVert+i] = vertices[planesFirstVert+i] * 0.5f + 0.5f;
 		}
 
 		for (int i=0; i<2; ++i)
 			faces[2*(numPlanes-planeIdx-1) + i] = planeIndices[i] + planesFirstVert;
-
-		Vec<float> edge1, edge2;
-		Vec<double> norm;
-
-		edge1 = vertices[faces[2*planeIdx].y] - vertices[faces[2*planeIdx].x];
-		edge2 = vertices[faces[2*planeIdx].z] - vertices[faces[2*planeIdx].x];
-
-		Vec<float> triDir = Vec<float>::cross(edge1,edge2);
-
-		norm = triDir.normal();
-
-		for (int i=0; i<4 ; ++i)
-			normals[planesFirstVert+i] = Vec<float>(norm);
 
 		planesFirstVert += 4;
 	}

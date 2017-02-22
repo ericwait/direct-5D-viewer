@@ -111,7 +111,7 @@ SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> co
 	params = std::make_shared<SingleColorParams>(rendererIn, colorIn, alpha);
 
 	std::string root = renderer->getDllDir();
-	setShader("DefaultMeshShaders","DefaultMeshPixelShader");
+	setShader("StaticColorShader","StaticColorPS");
 }
 
 SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn)
@@ -154,7 +154,7 @@ StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, i
 	vars["NUM_CHAN"] = cBuffer;
 
 	std::string root = renderer->getDllDir();
-	setShader("StaticVolumePixelShader", "MultiChanVolumePixelShader", vars);
+	setShader("ViewAlignedVolumePS", "ViewAlignedVolumePS", vars);
 }
 
 void StaticVolumeTextureMaterial::updateTransformParams(DirectX::XMMATRIX localToWorld, DirectX::XMMATRIX view, DirectX::XMMATRIX projection)

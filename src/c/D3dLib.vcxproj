@@ -36,6 +36,7 @@
     <ClInclude Include="D3d\Timer.h" />
     <ClInclude Include="D3d\VertexLayouts.h" />
     <ClInclude Include="D3d\VolumeInfo.h" />
+    <ClInclude Include="Global\Color.h" />
     <ClInclude Include="Global\Defines.h" />
     <ClInclude Include="Global\Globals.h" />
     <ClInclude Include="Global\ModuleInfo.h" />

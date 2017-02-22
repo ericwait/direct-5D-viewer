@@ -126,6 +126,9 @@
     <ClInclude Include="D3d\VertexLayouts.h">
       <Filter>D3d\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Global\Color.h">
+      <Filter>Global\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp">

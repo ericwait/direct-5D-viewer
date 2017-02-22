@@ -14,6 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "Color.h"
+#include "Vec.h"
 #include "D3d/Renderer.h"
 #include "D3d/Camera.h"
 #include "D3d/SceneNode.h"

@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 
-std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals);
+std::shared_ptr<MeshPrimitive> createPolygonMesh(double* faceData, size_t numFaces, double* vertData, size_t numVerts, double* normData, size_t numNormals, const Color& color);
 
 void clearTextureFrame(int frame, GraphicObjectTypes typ);
 void clearAllTextures(GraphicObjectTypes type);

@@ -230,24 +230,24 @@ void Renderer::releaseMaterialStates()
 	rasterStates.clear();
 }
 
-HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** vertexBufferOut)
+HRESULT Renderer::createVertexBuffer(UINT accessFlags, size_t bufferSize, const void* initData, ID3D11Buffer** vertexBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 
-	if ( verts.size() == 0 )
+	if ( bufferSize == 0 )
 		return E_FAIL;
 
 	D3D11_BUFFER_DESC vertBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertData;
 
 	vertBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertBufferDesc.ByteWidth = (unsigned int)(sizeof(Vertex) * verts.size());
+	vertBufferDesc.ByteWidth = (unsigned int)bufferSize;
 	vertBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertBufferDesc.CPUAccessFlags = 0;
+	vertBufferDesc.CPUAccessFlags = accessFlags;
 	vertBufferDesc.MiscFlags = 0;
 	vertBufferDesc.StructureByteStride = 0;
 
-	vertData.pSysMem = verts.data();
+	vertData.pSysMem = initData;
 	vertData.SysMemPitch = 0;
 	vertData.SysMemSlicePitch = 0;
 
@@ -260,7 +260,7 @@ HRESULT Renderer::createVertexBuffer(std::vector<Vertex>& verts, ID3D11Buffer** 
 	return result;
 }
 
-HRESULT Renderer::createIndexBuffer(std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut)
+HRESULT Renderer::createIndexBuffer(const std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 	if (faces.size()==0)
@@ -365,13 +365,14 @@ FILETIME getFileUpdateTime(const std::string& filePath)
 	return lastUpdate;
 }
 
-int Renderer::registerVertexShader(const std::string & filename, const std::string & entrypoint, const std::map<std::string, std::string>& variables)
+int Renderer::registerVertexShader(const std::string& filename, const std::string& entrypoint,
+		VertexLayout layoutInfo, const std::map<std::string, std::string>& variables)
 {
 	std::string rootDir = getDllDir();
 
 	std::string paramStr = makeVariableString(variables);
 
-	std::string shaderLookupName = filename + ":" + entrypoint + ":" + paramStr;
+	std::string shaderLookupName = filename + ":" + entrypoint + "_" + layoutInfo.getName() + ":" + paramStr;
 	if ( 0 != vertexShaderMap.count(shaderLookupName) )
 	{
 		return vertexShaderMap[shaderLookupName];
@@ -387,18 +388,19 @@ int Renderer::registerVertexShader(const std::string & filename, const std::stri
 	newEntry.entryFunc = entrypoint;
 	newEntry.vars = variables;
 	newEntry.update = getFileUpdateTime(shaderPath);
+	newEntry.layoutInfo = layoutInfo;
 
 	// Assume an error case
 	newEntry.error = true;
-	newEntry.shader = fallbackVS;
-	newEntry.layout = fallbackLayout;
+	newEntry.shader = fallbackVSs[layoutInfo.getType()];
+	newEntry.layout = fallbackLayouts[layoutInfo.getType()];
 
 	vertexShaderRegistry.push_back(newEntry);
 	vertexShaderMap.insert(std::pair<std::string,int>(shaderLookupName,entryIdx));
 
 	ID3D11VertexShader* newShader;
 	ID3D11InputLayout* newLayout;
-	if ( FAILED(compileVertexShader(shaderPath, entrypoint, variables, &newShader, &newLayout)) )
+	if ( FAILED(compileVertexShader(shaderPath, entrypoint, variables, layoutInfo.getLayoutDesc(), &newShader, &newLayout)) )
 	{
 		return entryIdx;
 	}
@@ -463,17 +465,31 @@ void Renderer::initFallbackShaders()
 	if ( !vertexShaderRegistry.empty() )
 		clearPixelShaderList();
 
-	std::string vertexFunc = "FallbackVertexShader";
-	std::string pixelFunc = "FallbackPixelShader";
-	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/Fallback.hlsl";
-	std::map<std::string,std::string> emptyVar;
 
-	ID3D11VertexShader* newVertShader;
-	ID3D11InputLayout* newVertLayout;
-	if ( FAILED(compileVertexShader(shaderPath, vertexFunc, emptyVar, &newVertShader, &newVertLayout)) )
+	std::map<std::string, std::string> emptyVar;
+
+	std::string vertexFuncPrefix = "FallbackVS";
+	std::string shaderPath = rootDir + "/" + SHADER_DIR + "/Fallback.hlsl";
+
+	for ( const auto& it : VertexLayout::layoutInfo )
 	{
-		throw std::runtime_error("Unable to create default fallback vertex shader!");
+		std::string vertexFunc = vertexFuncPrefix + "_" + it.second.name;
+
+		const std::vector<D3D11_INPUT_ELEMENT_DESC>& layoutDesc = it.second.inputLayout;
+
+		ID3D11VertexShader* newVertShader;
+		ID3D11InputLayout* newVertLayout;
+		if ( FAILED(compileVertexShader(shaderPath, vertexFunc, emptyVar, layoutDesc, &newVertShader, &newVertLayout)) )
+		{
+			throw std::runtime_error("Unable to create default fallback vertex shader!");
+		}
+
+
+		fallbackVSs.insert(std::make_pair(it.first,newVertShader));
+		fallbackLayouts.insert(std::make_pair(it.first, newVertLayout));
 	}
+	
+	std::string pixelFunc = "FallbackPS";
 
 	ID3D11PixelShader* newPixelShader;
 	if ( FAILED(compilePixelShader(shaderPath, pixelFunc, emptyVar, &newPixelShader)) )
@@ -481,8 +497,6 @@ void Renderer::initFallbackShaders()
 		throw std::runtime_error("Unable to create default fallback pixel shader!");
 	}
 
-	fallbackLayout = newVertLayout;
-	fallbackVS = newVertShader;
 	fallbackPS = newPixelShader;
 }
 
@@ -543,12 +557,12 @@ void Renderer::updateVertexShader(int entryIdx)
 
 	// Set up shader entry for the error case
 	vsEntry.error = true;
-	vsEntry.shader = fallbackVS;
-	vsEntry.layout = fallbackLayout;
+	vsEntry.shader = fallbackVSs[vsEntry.layoutInfo.getType()];
+	vsEntry.layout = fallbackLayouts[vsEntry.layoutInfo.getType()];
 
 	ID3D11VertexShader* newShader;
 	ID3D11InputLayout* newLayout;
-	if ( FAILED(compileVertexShader(shaderPath, vsEntry.entryFunc, vsEntry.vars, &newShader, &newLayout)) )
+	if ( FAILED(compileVertexShader(shaderPath, vsEntry.entryFunc, vsEntry.vars, vsEntry.layoutInfo.getLayoutDesc(), &newShader, &newLayout)) )
 	{
 		return;
 	}
@@ -819,7 +833,9 @@ void Renderer::endRender()
 	getSwapChain()->present(0,0);
 }
 
-HRESULT Renderer::compileVertexShader(const std::string& filename, const std::string& functionName, const std::map<std::string,std::string>& variables, ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut)
+HRESULT Renderer::compileVertexShader(const std::string& filename, const std::string& functionName, 
+	const std::map<std::string,std::string>& variables, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layoutDesc,
+	ID3D11VertexShader** vertexShaderOut, ID3D11InputLayout** vertexLayoutOut)
 {
 	HRESULT hr = E_FAIL;
 	ID3DBlob* shaderBlob = compileShaderFile(filename, functionName, "vs_4_0", variables);
@@ -836,16 +852,7 @@ HRESULT Renderer::compileVertexShader(const std::string& filename, const std::st
 		return hr;
 	}
 
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	UINT numElements = ARRAYSIZE(layout);
-
-	hr = renderDevice->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), vertexLayoutOut);
+	hr = renderDevice->CreateInputLayout(layoutDesc.data(), layoutDesc.size(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), vertexLayoutOut);
 
 	shaderBlob->Release();
 	return hr;
@@ -987,7 +994,7 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 		previousVertexShader = vertShader;
 	}
 
-	setGeometry(node->mesh->vertexBuffer, node->mesh->indexBuffer);
+	setGeometry(node->mesh->layout, node->mesh->vertexBuffer, node->mesh->indexBuffer);
 
 
 	// Material and pixel shader setup
@@ -1292,9 +1299,9 @@ void Renderer::setDepthStencilState(ID3D11DepthStencilState* depthStencilState)
 	renderContext->OMSetDepthStencilState(depthStencilState,NULL);
 }
 
-void Renderer::setGeometry(ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer)
+void Renderer::setGeometry(VertexLayout layout, ID3D11Buffer* vertexBuffer, ID3D11Buffer* indexBuffer)
 {
-	UINT stride = sizeof(Vertex);
+	UINT stride = layout.getVertSize();
 	UINT offset = 0;
 
 	renderContext->IASetIndexBuffer(indexBuffer,DXGI_FORMAT_R32_UINT,0);
