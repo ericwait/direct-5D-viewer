@@ -63,6 +63,7 @@ enum RenderTargetTypes
 {
 	NoneRT = -1,
 	SwapChain = 0,
+	Capture = 1,
 	NumRT
 };
 
@@ -162,6 +163,8 @@ public:
 	HRESULT captureWindow(std::string filePathIn, std::string fileNameIn, std::string& filenameOut);
 	unsigned char* captureWindow(DWORD& dwBmpSize,BITMAPINFOHEADER& bi);
 
+	unsigned char* captureWindow(Vec<size_t>& dims);
+
 	std::string getDllDir() { return dllRoot; }
 
 //////////////////////////////////////////////////////////////////////////
@@ -199,6 +202,9 @@ public:
 	ID3D11DepthStencilView* createDepthTargetView(ID3D11Resource* textureResource);
 	ID3D11Texture2D* createTexture2D(D3D11_TEXTURE2D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData = NULL);
 	ID3D11Texture3D* createTexture3D(D3D11_TEXTURE3D_DESC* desc, D3D11_SUBRESOURCE_DATA* initData = NULL);
+
+	void stageResource(ID3D11Texture2D* stageTexture, ID3D11Texture2D* renderTexture);
+	void readSurface(unsigned char* outBuffer, ID3D11Texture2D* texture, Vec<size_t> dims, size_t pixelSize);
 
 	ID3D11RasterizerState* getRasterizerState(bool wireframe, D3D11_CULL_MODE cullFaces);
 	ID3D11DepthStencilState* getDepthStencilState(bool depthTest);

@@ -68,11 +68,98 @@ void SwapChainTarget::present(UINT syncInterval, UINT flags) const
 	swapChain->Present(syncInterval, flags);
 }
 
-
-
 SwapChainTarget::~SwapChainTarget()
 {
 	SAFE_RELEASE(renderTarget);
 	SAFE_RELEASE(backBufferSurface);
 	SAFE_RELEASE(swapChain);
+}
+
+
+
+ReadbackRenderTarget::ReadbackRenderTarget(Renderer* rendererIn, size_t width, size_t height)
+	: renderer(rendererIn), dims(Vec<size_t>(width, height, 1)), renderSurface(NULL), stagingSurface(NULL), renderTarget(NULL)
+{
+	bool created = createBuffers();
+	if ( !created )
+		std::runtime_error("Unable to create readback texture!");
+}
+
+ReadbackRenderTarget::~ReadbackRenderTarget()
+{
+	clearBuffers();
+}
+
+bool ReadbackRenderTarget::clearBuffers()
+{
+	SAFE_RELEASE(renderSurface);
+	SAFE_RELEASE(renderSurface);
+
+	SAFE_RELEASE(renderTarget);
+
+	return true;
+}
+
+bool ReadbackRenderTarget::createBuffers()
+{
+	UINT iMipCount = 1;
+	UINT BitSize = 0;
+
+	// Shared description info
+	D3D11_TEXTURE2D_DESC desc;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.Width = (unsigned int)dims.x;
+	desc.Height = (unsigned int)dims.y;
+	desc.MipLevels = iMipCount;
+	desc.ArraySize = 1;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = 0;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	// Render-texture descriptor
+	D3D11_TEXTURE2D_DESC renderDesc(desc);
+	renderDesc.Usage = D3D11_USAGE_DEFAULT;
+	renderDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+	renderDesc.CPUAccessFlags = 0;
+
+	// Readback staging texture descriptor
+	D3D11_TEXTURE2D_DESC stagingDesc(desc);
+	stagingDesc.Usage = D3D11_USAGE_STAGING;
+	stagingDesc.BindFlags = 0;
+	stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+
+	renderSurface = renderer->createTexture2D(&renderDesc, NULL);
+	if ( !renderSurface )
+		return false;
+
+	renderTarget = renderer->createRenderTargetView(renderSurface);
+	if ( !renderTarget )
+		return false;
+
+	stagingSurface = renderer->createTexture2D(&stagingDesc, NULL);
+	if ( !stagingSurface )
+		return false;
+
+	return true;
+}
+
+void ReadbackRenderTarget::resizeTarget(size_t width, size_t height)
+{
+	dims = Vec<size_t>(width, height, 1);
+	clearBuffers();
+	createBuffers();
+}
+
+unsigned char* ReadbackRenderTarget::capture()
+{
+	unsigned char* outData = new unsigned char[4*dims.product()];
+
+	renderer->stageResource(stagingSurface, renderSurface);
+	renderer->readSurface(outData, stagingSurface, dims, 4);
+
+	return outData;
 }

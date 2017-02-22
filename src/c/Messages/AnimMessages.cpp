@@ -36,10 +36,16 @@ bool MessageCaptureWindow::process()
 		DWORD bmpDataSize = 0;
 		BITMAPINFOHEADER bmpInfo;
 
-		outData->data = gRenderer->captureWindow(bmpDataSize, bmpInfo);
+		//outData->data = gRenderer->captureWindow(bmpDataSize, bmpInfo);
 
-		outData->width = bmpInfo.biWidth;
-		outData->height = bmpInfo.biHeight;
+		//outData->width = bmpInfo.biWidth;
+		//outData->height = bmpInfo.biHeight;
+
+		Vec<size_t> dims;
+		outData->data = gRenderer->captureWindow(dims);
+
+		outData->width = dims.x;
+		outData->height = dims.y;
 	}
 	else
 		gRenderer->captureWindow(NULL);

@@ -187,6 +187,7 @@ void Renderer::releaseDevice()
 HRESULT Renderer::initRenderTargets()
 {
 	renderTargets[RenderTargetTypes::SwapChain] = std::make_shared<SwapChainTarget>(this, gWindowHandle, gWindowWidth, gWindowHeight);
+	renderTargets[RenderTargetTypes::Capture] = std::make_shared<ReadbackRenderTarget>(this, gWindowWidth, gWindowHeight);
 
 	return S_OK;
 }
@@ -1428,6 +1429,31 @@ ID3D11Texture3D* Renderer::createTexture3D(D3D11_TEXTURE3D_DESC* desc, D3D11_SUB
 }
 
 
+void Renderer::stageResource(ID3D11Texture2D* stageTexture, ID3D11Texture2D* renderTexture)
+{
+	renderContext->CopyResource(stageTexture, renderTexture);
+}
+
+void Renderer::readSurface(unsigned char* outBuffer, ID3D11Texture2D* texture, Vec<size_t> dims, size_t pixelSize)
+{
+	D3D11_MAPPED_SUBRESOURCE resource;
+	renderContext->Map(texture, 0, D3D11_MAP_READ, 0, &resource);
+
+	size_t outPitch = pixelSize * dims.x;
+
+	unsigned char* outLine = outBuffer;
+	unsigned char* inLine = (unsigned char*) resource.pData;
+	for ( int i=0; i < dims.y; ++i )
+	{
+		memcpy(outLine, inLine, outPitch);
+		inLine += resource.RowPitch;
+		outLine += outPitch;
+	}
+
+	renderContext->Unmap(texture, 0);
+}
+
+
 
 ID3D11RasterizerState* Renderer::getRasterizerState(bool wireframe, D3D11_CULL_MODE cullFaces)
 {
@@ -1654,6 +1680,36 @@ void Renderer::setWorldOrigin(Vec<float> org)
 void Renderer::setWorldRotation(DirectX::XMMATRIX rotation)
 {
 	rootScene->updateRotation(rotation);
+}
+
+
+unsigned char* Renderer::captureWindow(Vec<size_t>& dims)
+{
+	// For testing run a full re-render
+	attachTargets(RenderTargetTypes::Capture, DepthTargetTypes::Default);
+
+	clearRenderTarget(RenderTargetTypes::Capture, backgroundColor);
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+
+	renderBackground();
+
+	// Clear depth target before rendering polygons and volume data
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+
+	renderPolygons();
+	renderVolume();
+
+	// And again before rendering the widget
+	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+
+	renderWidget();
+
+	detachTargets();
+
+	std::shared_ptr<ReadbackRenderTarget> readback = std::static_pointer_cast<ReadbackRenderTarget>(renderTargets[RenderTargetTypes::Capture]);
+
+	dims = readback->getDims();
+	return readback->capture();
 }
 
 HRESULT Renderer::captureWindow(std::string* filenameOut)
