@@ -30,7 +30,7 @@ VS_OUTPUT FallbackVS_P( float4 Pos : POSITION )
 	return output;
 }
 
-VS_OUTPUT FallbackVS_PT( float4 Pos : POSITION )
+VS_OUTPUT FallbackVS_PT( float4 Pos : POSITION, float3 TexUV : TEXCOORD )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
@@ -41,7 +41,7 @@ VS_OUTPUT FallbackVS_PT( float4 Pos : POSITION )
 	return output;
 }
 
-VS_OUTPUT FallbackVS_PTC( float4 Pos : POSITION )
+VS_OUTPUT FallbackVS_PTC( float4 Pos : POSITION, float3 TexUV : TEXCOORD, float4 Color : COLOR )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
@@ -66,7 +66,7 @@ VS_OUTPUT FallbackVS_PN( float4 Pos : POSITION, float3 Normal : NORMAL )
 	return output;
 }
 
-VS_OUTPUT FallbackVS_PNT( float4 Pos : POSITION, float3 Normal : NORMAL )
+VS_OUTPUT FallbackVS_PNT( float4 Pos : POSITION, float3 Normal : NORMAL, float3 TexUV : TEXCOORD )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
@@ -79,7 +79,7 @@ VS_OUTPUT FallbackVS_PNT( float4 Pos : POSITION, float3 Normal : NORMAL )
 	return output;
 }
 
-VS_OUTPUT FallbackVS_PNC( float4 Pos : POSITION, float3 Normal : NORMAL )
+VS_OUTPUT FallbackVS_PNC( float4 Pos : POSITION, float3 Normal : NORMAL, float4 Color : COLOR )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
@@ -92,7 +92,7 @@ VS_OUTPUT FallbackVS_PNC( float4 Pos : POSITION, float3 Normal : NORMAL )
 	return output;
 }
 
-VS_OUTPUT FallbackVS_PNTC( float4 Pos : POSITION, float3 Normal : NORMAL )
+VS_OUTPUT FallbackVS_PNTC( float4 Pos : POSITION, float3 Normal : NORMAL, float3 TexUV : TEXCOORD, float4 Color : COLOR )
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 

@@ -105,37 +105,23 @@ void Material::updateRasterState()
 
 
 
-SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn, Vec<float> colorIn, float alpha)
+PolygonMaterial::PolygonMaterial(Renderer* rendererIn)
 	: Material(rendererIn)
 {
-	params = std::make_shared<SingleColorParams>(rendererIn, colorIn, alpha);
+	params = std::make_shared<PolygonParams>(rendererIn);
 
 	std::string root = renderer->getDllDir();
 	setShader("StaticColorShader","StaticColorPS");
 }
 
-SingleColoredMaterial::SingleColoredMaterial(Renderer* rendererIn)
-	: SingleColoredMaterial(rendererIn, Vec<float>(1.0f,1.0f,1.0f), 1.0f)
-{}
-
-void SingleColoredMaterial::setColor(Vec<float> colorIn, float alpha)
+void PolygonMaterial::setColorModifier(Vec<float> colorMod, float alphaMod)
 {
-	static_cast<SingleColorParams*>(params.get())->setColor(colorIn, alpha);
+	static_cast<PolygonParams*>(params.get())->setColorModifier(colorMod, alphaMod);
 }
 
-void SingleColoredMaterial::setColorModifier(Vec<float> colorMod, float alphaMod)
+void PolygonMaterial::setLightOn(bool on)
 {
-	static_cast<SingleColorParams*>(params.get())->setColorModifier(colorMod, alphaMod);
-}
-
-void SingleColoredMaterial::setLightOn(bool on)
-{
-	static_cast<SingleColorParams*>(params.get())->setLightOn(on);
-}
-
-DirectX::XMFLOAT4 SingleColoredMaterial::getColor()
-{
-	return params->getColor();
+	static_cast<PolygonParams*>(params.get())->setLightOn(on);
 }
 
 

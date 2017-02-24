@@ -60,32 +60,32 @@ bool MessageLoadTextureFrame::process()
 
 
 MessageClearTextureFrame::MessageClearTextureFrame(GraphicObjectTypes type, int frame)
-    : textureType(type), frame(frame)
+	: textureType(type), frame(frame)
 {}
 
 bool MessageClearTextureFrame::process()
 {
-    if(!gRenderer)
-        return false;
+	if(!gRenderer)
+		return false;
 
-    clearTextureFrame(frame, textureType);
-    return true;
+	clearTextureFrame(frame, textureType);
+	return true;
 }
 
 
 
 MessageClearAllTexture::MessageClearAllTexture(GraphicObjectTypes inType)
-    : textureType(inType)
+	: textureType(inType)
 {}
 
 
 bool MessageClearAllTexture::process()
 {
-    if(!gRenderer)
-        return false;
+	if(!gRenderer)
+		return false;
 
-    clearAllTextures(textureType);
-    return true;
+	clearAllTextures(textureType);
+	return true;
 }
 
 
@@ -203,14 +203,13 @@ bool MessageLoadPolys::process()
 		}
 
 		double* color = poly->getcolorData();
+		Color polyColor(color[0], color[1], color[2], color[3]);
 
 		// TODO: Can we build this into the local to parent without screwing up normals?
 		info->imageToModelSpace(poly->getvertData(), poly->getNumVerts());
 
-		Color polyColor(color[0], color[1], color[2], color[3]);
-
 		std::shared_ptr<MeshPrimitive> polyMesh = createPolygonMesh(poly->getfaceData(), poly->getNumFaces(), poly->getvertData(), poly->getNumVerts(), poly->getnormData(), poly->getNumNormals(), polyColor);
-		std::shared_ptr<SingleColoredMaterial> polyMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>((float)(color[0]), (float)(color[1]), (float)(color[2])), 1.0f);
+		std::shared_ptr<PolygonMaterial> polyMat = std::make_shared<PolygonMaterial>(gRenderer);
 
 		GraphicObjectNode* polyNode = new GraphicObjectNode(index, GraphicObjectTypes::Polygons, polyMesh, polyMat);
 		polyNode->setLabel(poly->getLabel());

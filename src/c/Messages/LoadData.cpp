@@ -122,7 +122,7 @@ HRESULT createBorder(Vec<float> &scale)
 	}
 
 	std::shared_ptr<MeshPrimitive> borderMesh = std::make_shared<StaticColorMesh>(gRenderer, faces, vertices, normals, Color(0.0f,0.0f,0.0f,1.0f));
-	std::shared_ptr<SingleColoredMaterial> borderMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.0f, 0.0f, 0.0f), 1.0f);
+	std::shared_ptr<PolygonMaterial> borderMat = std::make_shared<PolygonMaterial>(gRenderer);
 	GraphicObjectNode* borderNode = new GraphicObjectNode(0, GraphicObjectTypes::Border, borderMesh, borderMat);
 	
 	borderNode->setLightOn(false);
@@ -218,23 +218,20 @@ void attachWidget(double* arrowFaces, size_t numArrowFaces, double* arrowVerts, 
 	std::shared_ptr<MeshPrimitive> arrowMeshZ = createPolygonMesh(arrowFaces, numArrowFaces, arrowVerts, numArrowVerts, arrowNorms, numArrowNorms, Color(0.4f, 0.4f, 1.0f, 1.0f));
 	std::shared_ptr<MeshPrimitive> sphereMesh = createPolygonMesh(sphereFaces, numSphereFaces, sphereVerts, numSphereVerts, sphereNorms, numSphereNorms, Color(0.9f, 0.9f, 0.9f, 1.0f));
 
-	std::shared_ptr<SingleColoredMaterial> arrowXMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(1.0f, 0.2f, 0.2f), 1.0f);
-	std::shared_ptr<SingleColoredMaterial> arrowYMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.1f, 1.0f, 0.1f), 1.0f);
-	std::shared_ptr<SingleColoredMaterial> arrowZMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.4f, 0.4f, 1.0f), 1.0f);
-	std::shared_ptr<SingleColoredMaterial> sphereMat = std::make_shared<SingleColoredMaterial>(gRenderer, Vec<float>(0.9f, 0.9f, 0.9f), 1.0f);
+	std::shared_ptr<PolygonMaterial> arrowMat = std::make_shared<PolygonMaterial>(gRenderer);
 
-	GraphicObjectNode* arrowXnode = new GraphicObjectNode(0, GraphicObjectTypes::Widget, arrowMeshX, arrowXMat);
+	GraphicObjectNode* arrowXnode = new GraphicObjectNode(0, GraphicObjectTypes::Widget, arrowMeshX, arrowMat);
 	arrowXnode->setLocalToParent(DirectX::XMMatrixRotationY(DirectX::XM_PI / 2.0f));
 	arrowXnode->attachToParentNode(widgetScene);
 
-	GraphicObjectNode* arrowYnode = new GraphicObjectNode(1, GraphicObjectTypes::Widget, arrowMeshY, arrowYMat);
+	GraphicObjectNode* arrowYnode = new GraphicObjectNode(1, GraphicObjectTypes::Widget, arrowMeshY, arrowMat);
 	arrowYnode->setLocalToParent(DirectX::XMMatrixRotationX(-DirectX::XM_PI / 2.0f));
 	arrowYnode->attachToParentNode(widgetScene);
 
-	GraphicObjectNode* arrowZnode = new GraphicObjectNode(2, GraphicObjectTypes::Widget, arrowMeshZ, arrowZMat);
+	GraphicObjectNode* arrowZnode = new GraphicObjectNode(2, GraphicObjectTypes::Widget, arrowMeshZ, arrowMat);
 	arrowZnode->attachToParentNode(widgetScene);
 
-	GraphicObjectNode* sphereNode = new GraphicObjectNode(3, GraphicObjectTypes::Widget, sphereMesh, sphereMat);
+	GraphicObjectNode* sphereNode = new GraphicObjectNode(3, GraphicObjectTypes::Widget, sphereMesh, arrowMat);
 	sphereNode->attachToParentNode(widgetScene);
 }
 

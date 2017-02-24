@@ -116,18 +116,14 @@ protected:
 	std::vector<byte> constMemory;
 };
 
-class SingleColorParams: public MaterialParameters
+class PolygonParams: public MaterialParameters
 {
 public:
-	SingleColorParams(Renderer* rendererIn);
-	SingleColorParams(Renderer* rendererIn, Vec<float> colorIn, float alpha);
+	PolygonParams(Renderer* rendererIn);
 
-	void setColor(Vec<float> colorIn, float alpha);
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
-
-	virtual DirectX::XMFLOAT4 getColor();
 private:
-	SingleColorParams() : MaterialParameters(NULL){};
+	PolygonParams() : MaterialParameters(NULL){};
 };
 
 // Intermediate parameter class for any volume renderer,

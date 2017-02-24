@@ -90,21 +90,17 @@ private:
 };
 
 
-class SingleColoredMaterial : public Material
+class PolygonMaterial : public Material
 {
-	typedef SingleColorParams ParamType;
+	typedef PolygonParams ParamType;
 public:
-	SingleColoredMaterial(Renderer* renderer);
-	SingleColoredMaterial(Renderer* renderer, Vec<float> colorIn, float alpha = 1.0f);
+	PolygonMaterial(Renderer* renderer);
 
 	void setColorModifier(Vec<float> colorMod, float alphaMod);
 
 	void setLightOn(bool on);
-
-	virtual void setColor(Vec<float> colorIn, float alpha);
-	virtual DirectX::XMFLOAT4 getColor();
 private:
-	SingleColoredMaterial(){}
+	PolygonMaterial(){}
 };
 
 

@@ -33,32 +33,16 @@ void MaterialParameters::setAttenuationOn(bool on)
 
 
 // Material parameters for a single color polygon
-SingleColorParams::SingleColorParams(Renderer* rendererIn, Vec<float> colorIn, float alpha)
+PolygonParams::PolygonParams(Renderer* rendererIn)
 	: MaterialParameters(rendererIn)
 {
-	addParam<DirectX::XMFLOAT4>("color", DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,alpha), "Color all vertices");
-	addParam<DirectX::XMFLOAT4>("colorModifier", DirectX::XMFLOAT4(1.0f,1.0f,1.0f,1.0f), "Multiplier on color");
+	addParam<DirectX::XMFLOAT4>("colorModifier", DirectX::XMFLOAT4(1.0f,1.0f,1.0f,1.0f), "Multiplier on vertex color");
 }
 
-SingleColorParams::SingleColorParams(Renderer* rendererIn)
-	: SingleColorParams(rendererIn, Vec<float>(1.0f,1.0f,1.0f), 1.0f)
-{}
-
-void SingleColorParams::setColor(Vec<float> colorIn, float alpha)
-{
-	ref<DirectX::XMFLOAT4>("color") = DirectX::XMFLOAT4(colorIn.x,colorIn.y,colorIn.z,alpha);
-}
-
-void SingleColorParams::setColorModifier(Vec<float> colorMod, float alphaMod)
+void PolygonParams::setColorModifier(Vec<float> colorMod, float alphaMod)
 {
 	ref<DirectX::XMFLOAT4>("colorModifier") = DirectX::XMFLOAT4(colorMod.x,colorMod.y,colorMod.z,alphaMod);
 }
-
-DirectX::XMFLOAT4 SingleColorParams::getColor()
-{
-	return ref<DirectX::XMFLOAT4>("color");
-}
-
 
 
 // Material parameters for any volume renderer
