@@ -152,7 +152,7 @@ HRESULT initVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> 
 		return hr;
 
 	// Clear out old texture graphic object nodes
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 		clearAllTextures((GraphicObjectTypes)i);
 
 	return S_OK;

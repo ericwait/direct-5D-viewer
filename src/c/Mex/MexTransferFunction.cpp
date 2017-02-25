@@ -8,7 +8,7 @@ void MexTransferFunction::execute(int nlhs, mxArray* plhs[], int nrhs, const mxA
 	char bufferType[256];
 	mxGetString(prhs[1], bufferType, 256);
 
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 	{
 		size_t numChannels = mxGetNumberOfElements(prhs[0]);
 		for ( int c=0; c < numChannels; ++c )

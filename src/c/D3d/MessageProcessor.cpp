@@ -523,7 +523,7 @@ void stopThreadQueue()
 DWORD WINAPI messageLoop(LPVOID lpParam)
 {
 	std::string* rootDir = (std::string*)lpParam;
-	HRESULT hr;
+	HRESULT hr = E_FAIL;
 	try
 	{
 		hr = windowInit(ModuleInfo::getInstance(),true,*rootDir);
@@ -609,7 +609,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		// TODO: Just let this cleanup in the renderer destructor?
 		if ( gRenderer != NULL )
 		{
-			for ( int i = 0; i < GraphicObjectTypes::VTend; ++i )
+			for ( int i = 0; i < GraphicObjectTypes::NumGO; ++i )
 			{
 				gRenderer->removeSceneObjects((GraphicObjectTypes)i);
 			}

@@ -8,7 +8,7 @@ void MexTextureLighting::execute(int nlhs, mxArray* plhs[], int nrhs, const mxAr
 {
 	bool texLightOn = (mxGetScalar(prhs[0]) != 0.0);
 
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 		gMsgQueueToDirectX.pushMessage(new MessageSetTextureLighting((GraphicObjectTypes)i, texLightOn));
 }
 

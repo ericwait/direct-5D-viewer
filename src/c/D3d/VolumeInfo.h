@@ -107,7 +107,7 @@ private:
 	Eigen::Matrix4f imToModel;
 
 	// Shared parameters (transfer function, etc.) for rendering volume frames
-	std::shared_ptr<VolumeParams> sharedParams[GraphicObjectTypes::VTend - GraphicObjectTypes::OriginalVolume];
+	std::shared_ptr<VolumeParams> sharedParams[GraphicObjectTypes::NumGO - GraphicObjectTypes::OriginalVolume];
 
 	// Shared volume mesh for rendering
 	std::shared_ptr<MeshPrimitive> volumeMesh;

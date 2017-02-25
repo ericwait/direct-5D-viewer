@@ -15,7 +15,7 @@ void MexShowTexture::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray*
 	else if ( _strcmpi("processed", buff) == 0 )
 		showType = GraphicObjectTypes::ProcessedVolume;
 
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 		gMsgQueueToDirectX.pushMessage(new MessageShowObjectType((GraphicObjectTypes)i, (showType == i)));
 }
 

@@ -794,7 +794,7 @@ void Renderer::renderVolume()
 	if ( !mainRoot )
 		return;
 
-	for ( int i = GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i = GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 	{
 		RenderFilter filt(mainRoot, (GraphicObjectTypes)i);
 		for (GraphicObjectNode* node = filt.first() ; node != NULL; node = filt.next() )

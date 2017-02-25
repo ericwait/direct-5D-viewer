@@ -7,7 +7,7 @@ void MexTextureAttenuation::execute(int nlhs, mxArray* plhs[], int nrhs, const m
 {
 	bool attenuateOn = (mxGetScalar(prhs[0]) != 0.0);
 
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 		gMsgQueueToDirectX.pushMessage(new MessageSetTextureAttenuation((GraphicObjectTypes)i, attenuateOn));
 }
 

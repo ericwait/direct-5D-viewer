@@ -50,7 +50,7 @@ enum GraphicObjectTypes
 	Border,
 	OriginalVolume,
 	ProcessedVolume,
-	VTend
+	NumGO
 };
 
 enum RenderTargetTypes

@@ -13,7 +13,7 @@ VolumeInfo::VolumeInfo(Renderer* renderer, int numFrames, int numChannels, Vec<s
 
 	volumeMesh = createMesh<ViewAlignedPlanes>();
 
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 		createParams<StaticVolumeParams>((GraphicObjectTypes)i, numChannels);
 }
 

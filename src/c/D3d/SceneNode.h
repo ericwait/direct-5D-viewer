@@ -32,7 +32,7 @@ class SceneNode
 {
 protected:
 	typedef std::map<int, GraphicObjectNode*> NodeRegistry;
-	typedef Eigen::Matrix<size_t, GraphicObjectTypes::VTend, 1> Histogram;
+	typedef Eigen::Matrix<size_t, GraphicObjectTypes::NumGO, 1> Histogram;
 
 public:
 	friend class RootSceneNode;
@@ -202,7 +202,7 @@ private:
 	Vec<float> origin;
 	DirectX::XMMATRIX rootRotationMatrix;
 
-	NodeRegistry registry[GraphicObjectTypes::VTend];
+	NodeRegistry registry[GraphicObjectTypes::NumGO];
 
 	std::vector<SceneNode*> rootChildrenNodes[Renderer::Section::SectionEnd];
 };

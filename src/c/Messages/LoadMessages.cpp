@@ -115,7 +115,7 @@ bool MessageLoadTexture::process()
 	}
 
 	// Reset visibility for all volume types (assumes they are at the end of the list
-	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::VTend; ++i )
+	for ( int i=GraphicObjectTypes::OriginalVolume; i < GraphicObjectTypes::NumGO; ++i )
 		setObjectTypeVisibility((GraphicObjectTypes)i, (i == textureType));
 
 	return true;
