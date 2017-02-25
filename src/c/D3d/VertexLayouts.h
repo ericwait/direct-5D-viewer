@@ -21,6 +21,7 @@ public:
 		Normal = 1,
 		TextureUV = 2,
 		Color = 3,
+		ColorBack = 4,
 
 		ATTR_END
 	};
@@ -34,7 +35,9 @@ public:
 		PNT	= LAYOUT_ELEM(Attributes::Position)	| LAYOUT_ELEM(Attributes::Normal)	| LAYOUT_ELEM(Attributes::TextureUV),
 		PNC	= LAYOUT_ELEM(Attributes::Position)	| LAYOUT_ELEM(Attributes::Normal)	| LAYOUT_ELEM(Attributes::Color),
 		PTC	= LAYOUT_ELEM(Attributes::Position)	| LAYOUT_ELEM(Attributes::TextureUV)| LAYOUT_ELEM(Attributes::Color),
-		PNTC = LAYOUT_ELEM(Attributes::Position) | LAYOUT_ELEM(Attributes::Normal)	| LAYOUT_ELEM(Attributes::TextureUV) | LAYOUT_ELEM(Attributes::Color),
+		PTCC = LAYOUT_ELEM(Attributes::Position)| LAYOUT_ELEM(Attributes::TextureUV)| LAYOUT_ELEM(Attributes::Color)	| LAYOUT_ELEM(Attributes::ColorBack),
+		PNTC = LAYOUT_ELEM(Attributes::Position) | LAYOUT_ELEM(Attributes::Normal)	| LAYOUT_ELEM(Attributes::TextureUV)| LAYOUT_ELEM(Attributes::Color),
+		PNTCC = LAYOUT_ELEM(Attributes::Position) | LAYOUT_ELEM(Attributes::Normal)	| LAYOUT_ELEM(Attributes::TextureUV)| LAYOUT_ELEM(Attributes::Color) | LAYOUT_ELEM(Attributes::ColorBack)
 	};
 
 public:
@@ -64,10 +67,12 @@ private:
 	};
 
 	static const std::string semantic[Attributes::ATTR_END];
+	static const uint32_t semanticIdx[Attributes::ATTR_END];
+
 	static const DXGI_FORMAT format[Attributes::ATTR_END];
 
-	static const int elemSize = sizeof(float);
-	static const int elems[Attributes::ATTR_END];
+	static const uint32_t elemSize = sizeof(float);
+	static const uint32_t elems[Attributes::ATTR_END];
 
 	static const std::map<Types, Info> layoutInfo;
 
