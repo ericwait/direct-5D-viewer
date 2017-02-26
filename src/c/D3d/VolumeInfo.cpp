@@ -37,7 +37,7 @@ GraphicObjectNode* VolumeInfo::createNode(GraphicObjectTypes type, int frame, co
 	for ( int c=0; c < numChannels; ++c )
 	{
 		const unsigned char* imChan = imageData + c*dims.product();
-		node->getMaterial()->attachTexture(c, std::make_shared<ConstTexture>(renderer, dims, imChan));
+		node->getMaterial()->attachTexture(c, std::make_shared<Const3DTexture>(renderer, dims, imChan));
 	}
 
 	return node;
