@@ -32,6 +32,13 @@ void MaterialParameters::setAttenuationOn(bool on)
 
 
 
+// Just has the default flags material parameters
+DefaultParams::DefaultParams(Renderer* rendererIn)
+	: MaterialParameters(rendererIn)
+{}
+
+
+
 // Material parameters for a single color polygon
 PolygonParams::PolygonParams(Renderer* rendererIn)
 	: MaterialParameters(rendererIn)

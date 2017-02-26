@@ -104,6 +104,14 @@ private:
 };
 
 
+class TextMaterial : public Material
+{
+	typedef DefaultParams ParamType;
+public:
+	TextMaterial(Renderer* renderer);
+};
+
+
 class StaticVolumeTextureMaterial : public Material
 {
 	typedef StaticVolumeParams ParamType;

@@ -22,6 +22,7 @@
 #include "RenderTarget.h"
 #include "DepthTarget.h"
 #include "VolumeInfo.h"
+#include "TextRenderer.h"
 
 #include "Global/Defines.h"
 #include "Global/Globals.h"
@@ -42,7 +43,11 @@ const float Renderer::cornerVolumeDist = 1.75f;
 
 Renderer::Renderer()
 {
+	textRenderer = NULL;
 	volInfo = NULL;
+
+	fallbackPS = NULL;
+
 	isDirty = true;
 	isRendering = false;
 	backgroundColor = Vec<float>(0.25f, 0.25f, 0.25f);
@@ -79,9 +84,12 @@ Renderer::~Renderer()
 {
 	SAFE_DELETE(volInfo);
 	SAFE_DELETE(rootScene);
+	SAFE_DELETE(textRenderer);
 
 	clearVertexShaderList();
 	clearPixelShaderList();
+
+	clearFallbackShaders();
 
 	SAFE_RELEASE(vertexShaderConstBuffer);
 	SAFE_RELEASE(blendState);
@@ -121,6 +129,9 @@ HRESULT Renderer::init(std::string rootDir)
 	initFallbackShaders();
 
 	resetViewPort();
+
+	// Make sure this is initialized after fallback renderers and viewports
+	textRenderer = new TextRenderer(this, gWindowHandle, "Consolas", 20);
 
 	setRendering(true);
 
@@ -668,6 +679,8 @@ void Renderer::renderUpdate()
 
 void Renderer::renderAll()
 {
+	static int counter = 0;
+
 	UINT64 frameTime = GetTimeMs64();
 	//rootScene->updateRenderableList();
 
@@ -693,6 +706,11 @@ void Renderer::renderAll()
 	UINT64 postTime = GetTimeMs64();
 	renderWidget();
 	postTimes[curTimeIdx] = GetTimeMs64()-postTime;
+
+	textRenderer->drawString(std::to_string(counter), Vec<int>(0,0,0));
+	textRenderer->render();
+
+	counter += 1;
 
 	UINT64 gdiTime = GetTimeMs64();
 	renderGDIOverlay();
@@ -1633,6 +1651,8 @@ void Renderer::resizeViewPort()
 		depthTargets[i]->resizeDepth(gWindowWidth, gWindowHeight);
 
 	resetViewPort();
+
+	gCameraText->updateProjectionTransform();
 	gCameraWidget->updateProjectionTransform();
 	gCameraDefaultMesh->updateProjectionTransform();
 }
@@ -1746,6 +1766,9 @@ unsigned char* Renderer::captureWindow(Vec<size_t>& dims)
 	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
 
 	renderWidget();
+
+	textRenderer->drawString("CAPTURE!!!!!!", Vec<int>(0, 0, 0));
+	textRenderer->render();
 
 	detachTargets();
 

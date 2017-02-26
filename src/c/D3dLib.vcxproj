@@ -31,6 +31,7 @@
     <ClInclude Include="D3d\Renderer.h" />
     <ClInclude Include="D3d\RenderTarget.h" />
     <ClInclude Include="D3d\SceneNode.h" />
+    <ClInclude Include="D3d\TextRenderer.h" />
     <ClInclude Include="D3d\Texture.h" />
     <ClInclude Include="D3d\TextureLightingObj.h" />
     <ClInclude Include="D3d\Timer.h" />
@@ -65,6 +66,7 @@
     <ClCompile Include="D3d\Renderer.cpp" />
     <ClCompile Include="D3d\RenderTarget.cpp" />
     <ClCompile Include="D3d\SceneNode.cpp" />
+    <ClCompile Include="D3d\TextRenderer.cpp" />
     <ClCompile Include="D3d\Texture.cpp" />
     <ClCompile Include="D3d\TextureLightingObj.cpp" />
     <ClCompile Include="D3d\VertexLayouts.cpp" />

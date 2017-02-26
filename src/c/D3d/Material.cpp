@@ -126,6 +126,17 @@ void PolygonMaterial::setLightOn(bool on)
 
 
 
+TextMaterial::TextMaterial(Renderer* renderer)
+	: Material(renderer)
+{
+	params = std::make_shared<DefaultParams>(renderer);
+	textures.resize(1);
+
+	setShader("TextShader", "TextQuadPS");
+}
+
+
+
 StaticVolumeTextureMaterial::StaticVolumeTextureMaterial(Renderer* rendererIn, int numChannelsIn, Vec<size_t> dims, std::shared_ptr<StaticVolumeParams> paramsIn)
 	: Material(rendererIn, paramsIn), numChannels(numChannelsIn), dims(dims)
 {

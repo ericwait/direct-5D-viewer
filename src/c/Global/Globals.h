@@ -39,8 +39,9 @@ extern volatile bool gRendererInit;
 extern unsigned int gWindowWidth;
 extern unsigned int gWindowHeight;
 extern Renderer* gRenderer;
-extern OrthoCamera* gCameraWidget;
 extern Camera* gCameraDefaultMesh;
+extern OrthoCamera* gCameraWidget;
+extern TextCamera* gCameraText;
 
 //Implemented in MessageProcessor.cpp
 extern bool gUpdateShaders;

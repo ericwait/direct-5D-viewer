@@ -21,14 +21,14 @@
 
 
 const Vec<uint32_t> MeshPrimitive::unitQuadIdx[2] =
-		{Vec<uint32_t>(0,2,1),
+		{Vec<uint32_t>(0,1,3),
 		Vec<uint32_t>(1,2,3)};
 
 const Vec<float> MeshPrimitive::unitQuadVerts[4] =
 		{Vec<float>(-0.5f, -0.5f, 0.0f),
 		Vec<float>(-0.5f, 0.5f, 0.0f),
-		Vec<float>(0.5f, -0.5f, 0.0f),
-		Vec<float>(0.5f, 0.5f, 0.0f)};
+		Vec<float>(0.5f, 0.5f, 0.0f),
+		Vec<float>(0.5f, -0.5f, 0.0f)};
 
 const Vec<float> MeshPrimitive::unitQuadNorms[4] =
 		{Vec<float>(0.0f, 0.0f, -1.0f),
@@ -261,7 +261,7 @@ void TextQuads::clearQuads()
 	backColors.reserve(4*maxQuads);
 }
 
-bool TextQuads::addQuad(const Vec<float>* pos, const Vec<float>* uv, const Color& color, const Color& backColor)
+bool TextQuads::addQuad(const Vec<float> pos[4], const Vec<float> uv[4], const Color& color, const Color& backColor)
 {
 	assert(vertices.size() <= 4*maxQuads);
 
@@ -292,10 +292,10 @@ void TextQuads::updateResources()
 	D3D11_MAPPED_SUBRESOURCE res;
 	gRenderer->lockBuffer(vertexBuffer, D3D11_MAP_WRITE_DISCARD, res);
 
-	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::Position, numVerts, (float*)vertices.data(), res.RowPitch);
-	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::TextureUV, numVerts, (float*)texUVs.data(), res.RowPitch);
-	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::Color, numVerts, (float*)colors.data(), res.RowPitch);
-	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::ColorBack, numVerts, (float*)backColors.data(), res.RowPitch);
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::Position, numVerts, (float*)vertices.data());
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::TextureUV, numVerts, (float*)texUVs.data());
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::Color, numVerts, (float*)colors.data());
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::ColorBack, numVerts, (float*)backColors.data());
 
 	gRenderer->releaseBuffer(vertexBuffer);
 }

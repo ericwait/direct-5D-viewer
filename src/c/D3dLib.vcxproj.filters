@@ -129,6 +129,9 @@
     <ClInclude Include="Global\Color.h">
       <Filter>Global\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3d\TextRenderer.h">
+      <Filter>D3d\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d\Camera.cpp">
@@ -213,6 +216,9 @@
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3d\VertexLayouts.cpp">
+      <Filter>D3d\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3d\TextRenderer.cpp">
       <Filter>D3d\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

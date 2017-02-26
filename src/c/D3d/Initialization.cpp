@@ -27,8 +27,11 @@ unsigned int gWindowWidth = 1280;
 
 HFONT gFont = NULL;
 Renderer* gRenderer = NULL;
+
 Camera* gCameraDefaultMesh = NULL;
 OrthoCamera* gCameraWidget = NULL;
+TextCamera* gCameraText = NULL;
+
 std::vector<Vec<unsigned int>> gFacesDebug;
 std::vector<Vec<float>> gVertsDebug;
 std::vector<Vec<float>> gNormsDebug;
@@ -100,6 +103,7 @@ HRESULT createRenderResources(std::string rootDir)
 
 	gCameraDefaultMesh = new Camera(eye,look,up);//delete on message loop exit
 	gCameraWidget = new OrthoCamera(eye,look,up);//delete on message loop exit
+	gCameraText = new TextCamera(eye,look,up);
 
 	return S_OK;
 }

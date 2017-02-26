@@ -50,8 +50,11 @@ private:
 };
 
 
+class TextRenderer;
+
 class TextAtlasTexture : public ConstTextureBase
 {
+	friend class TextRenderer;
 public:
 	TextAtlasTexture(Renderer* rendererIn, HWND hwnd, const std::string& fontFace, int textHeight, const std::string& charList);
 

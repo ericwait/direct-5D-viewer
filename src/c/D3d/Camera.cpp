@@ -16,15 +16,17 @@
 #include "Camera.h"
 #include "Global/Globals.h"
 
+const float Camera::fovY = DirectX::XM_PI / 4.0f;
+const float Camera::farPlane = 25.0f;
+const float Camera::defNearPlane = 0.1f;
+
 Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
 {
 	cameraPosition = defaultCameraPosition = cameraPositionIn;
 	lookPosition = defaultLookPosition = lookPositionIn;
 	upDirection = defaultUpDirection = upDirectionIn;
 
-	nearZ = 0.1f;
-
-	zoomFactor = 25;
+	nearZ = defNearPlane;
 
 	updateViewTransform();
 	updateProjectionTransform();
@@ -49,7 +51,7 @@ void Camera::resetCamera()
 	cameraPosition = defaultCameraPosition;
 	lookPosition = defaultLookPosition;
 	upDirection = defaultUpDirection;
-	nearZ = 0.1f;
+	nearZ = defNearPlane;
 
 	updateViewTransform();
 	updateProjectionTransform();
@@ -75,7 +77,7 @@ void Camera::setUpDirection(Vec<float> upDirectionIn)
 
 void Camera::updateProjectionTransform()
 {
-	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(DirectX::XM_PI/4.0f, (float)gWindowWidth/gWindowHeight, nearZ, 25.0f));
+	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(fovY, (float)gWindowWidth/gWindowHeight, nearZ, farPlane));
 }
 
 
@@ -187,4 +189,35 @@ void OrthoCamera::updateProjectionTransform()
 
 	projectionTransform = ConvertMatrix(DirectX::XMMatrixOrthographicRH(aspectRatio*orthoHeight, orthoHeight, 0.01f, 100.0f)
 		* DirectX::XMMatrixScaling(widgetScale, widgetScale, 1.0f) * DirectX::XMMatrixTranslation(ctrX, ctrY, 0.0f));
+}
+
+
+
+TextCamera::TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVec)
+	: Camera(cameraPos, lookPos, upVec)
+{
+	updateViewTransform();
+	updateProjectionTransform();
+}
+
+void TextCamera::updateViewTransform()
+{
+	float ar = (float)gWindowWidth / gWindowHeight;
+
+	float nearY = 2*nearZ*tan(fovY/2.0f);
+	float nearX = ar * nearY;
+
+	Vec<float> pixScale(nearX/gWindowWidth, nearY/gWindowHeight, 1.0f);
+	Vec<float> offset(-nearX/2.0f, nearY/2.0f, -nearZ);
+
+	Eigen::Affine3f newTransform = Eigen::Translation3f(offset.x, offset.y, offset.z)
+								* Eigen::Scaling(pixScale.x, -pixScale.y, pixScale.z);
+
+	viewTransform = newTransform.matrix();
+}
+
+void TextCamera::updateProjectionTransform()
+{
+	updateViewTransform();
+	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(fovY, (float)gWindowWidth/gWindowHeight, nearZ, farPlane));
 }

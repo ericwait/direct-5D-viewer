@@ -112,7 +112,7 @@ public:
 	TextQuads(Renderer* renderer, size_t maxQuads);
 
 	void clearQuads();
-	bool addQuad(const Vec<float>* pos, const Vec<float>* uv, const Color& color, const Color& backColor);
+	bool addQuad(const Vec<float> pos[4], const Vec<float> uv[4], const Color& color, const Color& backColor);
 
 	void updateResources();
 

@@ -116,6 +116,16 @@ protected:
 	std::vector<byte> constMemory;
 };
 
+
+class DefaultParams: public MaterialParameters
+{
+public:
+	DefaultParams(Renderer* rendererIn);
+
+private:
+	DefaultParams(): MaterialParameters(NULL) {};
+};
+
 class PolygonParams: public MaterialParameters
 {
 public:
@@ -125,6 +135,7 @@ public:
 private:
 	PolygonParams() : MaterialParameters(NULL){};
 };
+
 
 // Intermediate parameter class for any volume renderer,
 // Handles channel colors and transfer functions.

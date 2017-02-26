@@ -45,17 +45,23 @@ public:
 protected:
 	Camera(){}
 
+	static const float fovY;
+	static const float farPlane;
+	static const float defNearPlane;
+
 	virtual void updateViewTransform();
 	Vec<float> cameraPosition;
 	Vec<float> lookPosition;
 	Vec<float> upDirection;
+
 	Vec<float> defaultCameraPosition;
 	Vec<float> defaultLookPosition;
 	Vec<float> defaultUpDirection;
+
 	float nearZ;
+
 	Eigen::Matrix4f viewTransform;
 	Eigen::Matrix4f projectionTransform;
-	float zoomFactor;
 };
 
 
@@ -67,5 +73,18 @@ public:
 	void updateProjectionTransform();
 
 private:
-	OrthoCamera();
+	OrthoCamera(){}
+};
+
+class TextCamera : public Camera
+{
+public:
+	TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVec);
+
+	virtual void updateProjectionTransform();
+
+private:
+	TextCamera(){}
+
+	virtual void updateViewTransform();
 };

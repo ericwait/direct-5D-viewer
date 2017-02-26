@@ -625,6 +625,7 @@ DWORD WINAPI messageLoop(LPVOID lpParam)
 		SAFE_DELETE(gRenderer);
 		SAFE_DELETE(gCameraDefaultMesh);
 		SAFE_DELETE(gCameraWidget);
+		SAFE_DELETE(gCameraText);
 
 		DestroyWindow(gWindowHandle);
 		UnregisterClass(szWndClassName,ModuleInfo::getInstance());

@@ -235,6 +235,8 @@ GraphicObjectNode::GraphicObjectNode(int index, GraphicObjectTypes type, std::sh
 	: SceneNode(index, type), mesh(mesh), material(material)
 {
 	renderable = true;
+
+	updateTransforms(parentToWorld);
 }
 
 void GraphicObjectNode::releaseRenderResources()

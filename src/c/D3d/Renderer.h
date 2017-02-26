@@ -48,6 +48,7 @@ enum GraphicObjectTypes
 	Widget,
 	Polygons,
 	Border,
+	Text,
 	OriginalVolume,
 	ProcessedVolume,
 	NumGO
@@ -76,6 +77,7 @@ enum InterpTypes
 
 class Renderer
 {
+	friend class TextRenderer;
 public:
 	enum Section
 	{
@@ -330,6 +332,7 @@ private:
 	// Scene objects
 	//TODO: Should probably put cameras in the scene
 	RootSceneNode* rootScene;
+	TextRenderer* textRenderer;
 
 	unsigned int currentFrame;
 	float clipChunkPercent;

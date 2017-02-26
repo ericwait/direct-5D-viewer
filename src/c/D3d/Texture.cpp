@@ -59,7 +59,7 @@ TextAtlasTexture::TextAtlasTexture(Renderer* rendererIn, HWND hwnd, const std::s
 	UINT BitSize = 0;
 
 	D3D11_TEXTURE2D_DESC desc;
-	desc.Format = DXGI_FORMAT_A8_UNORM;
+	desc.Format = DXGI_FORMAT_R8_UNORM;
 	desc.Width = atlasDims.x;
 	desc.Height = atlasDims.y;
 	desc.MipLevels = iMipCount;
@@ -132,9 +132,9 @@ size_t TextAtlasTexture::createTextAtlas(HWND hwnd, const std::string& fontFace,
 {
 	HDC windowDC = GetDC(hwnd);
 
-	// Use a fixed-width font to that it is simple to layout the characters (also non-antialiased since it's going to be texture sampled)
+	// Use a fixed-width font to that it is simple to layout the characters
 	HFONT hFont = CreateFont(textHeight, 0,	0, 0, FW_NORMAL, false, false, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH|FF_DONTCARE, fontFace.c_str());
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH|FF_DONTCARE, fontFace.c_str());
 
 	HDC hdcMem = CreateCompatibleDC(windowDC);
 	if ( !hdcMem )
