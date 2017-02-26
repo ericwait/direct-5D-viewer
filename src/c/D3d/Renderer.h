@@ -111,6 +111,8 @@ public:
 
 	void clearVertexShaderList();
 	void clearPixelShaderList();
+	void clearFallbackShaders();
+
 	void resizeViewPort();
 	void flushContext();
 

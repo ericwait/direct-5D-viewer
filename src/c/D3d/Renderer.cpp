@@ -603,8 +603,12 @@ void Renderer::updatePixelShader(int entryIdx)
 
 void Renderer::clearVertexShaderList()
 {
-	for (int i = 0; i<vertexShaderRegistry.size(); ++i)
+	for ( int i = 0; i<vertexShaderRegistry.size(); ++i )
 	{
+		// Don't delete fallbacks (handled separately)
+		if ( vertexShaderRegistry[i].error )
+			continue;
+
 		SAFE_RELEASE(vertexShaderRegistry[i].shader);
 		SAFE_RELEASE(vertexShaderRegistry[i].layout);
 	}
@@ -615,11 +619,31 @@ void Renderer::clearVertexShaderList()
 
 void Renderer::clearPixelShaderList()
 {
-	for (int i = 0; i<pixelShaderRegistry.size(); ++i)
+	for ( int i = 0; i<pixelShaderRegistry.size(); ++i )
+	{
+		// Don't delete fallbacks (handled separately)
+		if ( pixelShaderRegistry[i].error )
+			continue;
+
 		SAFE_RELEASE(pixelShaderRegistry[i].shader);
+	}
 
 	pixelShaderRegistry.clear();
 	pixelShaderMap.clear();
+}
+
+void Renderer::clearFallbackShaders()
+{
+	for ( auto& it : fallbackVSs )
+		SAFE_RELEASE(it.second);
+
+	for ( auto& it : fallbackLayouts )
+		SAFE_RELEASE(it.second);
+
+	fallbackVSs.clear();
+	fallbackLayouts.clear();
+
+	SAFE_RELEASE(fallbackPS);
 }
 
 void Renderer::renderUpdate()
