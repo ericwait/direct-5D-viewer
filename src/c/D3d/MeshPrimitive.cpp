@@ -79,12 +79,15 @@ void MeshPrimitive::loadShader(const std::string& shaderFile, const std::string&
 	vertShaderIdx = renderer->registerVertexShader(shaderFile,shaderFunc, layout);
 }
 
-void MeshPrimitive::initializeResources()
+void MeshPrimitive::initializeResources(UINT vertAccessFlags, UINT indexAccessFlags)
 {
 	cleanupMesh();
 
 	numFaces = faces.size();
 	numVerts = vertices.size();
+
+	D3D11_USAGE vertUsage = (( vertAccessFlags != 0 ) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE);
+	D3D11_USAGE indexUsage = (( indexAccessFlags != 0 ) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE);
 
 	void* initData = layout.allocLayout(numVerts);
 
@@ -100,11 +103,11 @@ void MeshPrimitive::initializeResources()
 		layout.sliceIntoLayout(initData, VertexLayout::Attributes::Color, numVerts, (float*)(colors.data()));
 
 	size_t bufferSize = numVerts * layout.getVertSize();
-	HRESULT hr = renderer->createVertexBuffer(0, bufferSize, initData, &vertexBuffer);
+	HRESULT hr = renderer->createVertexBuffer(vertAccessFlags, vertUsage, bufferSize, initData, &vertexBuffer);
 	if (FAILED(hr))
 		sendHrErrMessage(hr);
 
-	hr = renderer->createIndexBuffer(faces, &indexBuffer);
+	hr = renderer->createIndexBuffer(indexAccessFlags, indexUsage, faces, &indexBuffer);
 	if (FAILED(hr))
 		sendHrErrMessage(hr);
 }
@@ -216,6 +219,85 @@ StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint3
 {
 	setupMesh(faces, vertices, normals, std::vector<Vec<float>>(), colors);
 	initializeResources();
+}
+
+
+
+TextQuads::TextQuads(Renderer* renderer, size_t maxQuads)
+	: MeshPrimitive(renderer, VertexLayout::Types::PTCC, "TextShader", "TextQuadVS_PTCC"), maxQuads(maxQuads)
+{
+	maxFaces = 2*maxQuads;
+
+	faces.resize(maxFaces);
+	vertices.resize(4*maxQuads);
+
+	for ( int i=0; i < maxQuads; ++i )
+	{
+		faces[2 * i] = unitQuadIdx[0] + 4 * i;
+		faces[2 * i + 1] = unitQuadIdx[1] + 4 * i;
+	}
+
+	initializeResources(D3D11_CPU_ACCESS_WRITE);
+
+	// Will dyanmically update the quads later
+	clearQuads();
+}
+
+void TextQuads::clearQuads()
+{
+	numFaces = 0;
+	numVerts = 0;
+
+	faces.clear();
+	vertices.clear();
+	texUVs.clear();
+	colors.clear();
+	backColors.clear();
+
+	// allocate memory for the quads
+	vertices.reserve(4*maxQuads);
+	texUVs.reserve(4*maxQuads);
+	colors.reserve(4*maxQuads);
+	backColors.reserve(4*maxQuads);
+}
+
+bool TextQuads::addQuad(const Vec<float>* pos, const Vec<float>* uv, const Color& color, const Color& backColor)
+{
+	assert(vertices.size() <= 4*maxQuads);
+
+	if ( numFaces == maxFaces )
+		return false;
+
+	for ( int i=0; i < 4; ++i )
+	{
+		vertices.push_back(pos[i]);
+		texUVs.push_back(uv[i]);
+
+		colors.push_back(color);
+		backColors.push_back(backColor);
+	}
+
+	numVerts = vertices.size();
+	numFaces += 2;
+
+	return true;
+}
+
+void TextQuads::updateResources()
+{
+	if ( numFaces == 0 )
+		return;
+
+
+	D3D11_MAPPED_SUBRESOURCE res;
+	gRenderer->lockBuffer(vertexBuffer, D3D11_MAP_WRITE_DISCARD, res);
+
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::Position, numVerts, (float*)vertices.data(), res.RowPitch);
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::TextureUV, numVerts, (float*)texUVs.data(), res.RowPitch);
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::Color, numVerts, (float*)colors.data(), res.RowPitch);
+	layout.sliceIntoLayout(res.pData, VertexLayout::Attributes::ColorBack, numVerts, (float*)backColors.data(), res.RowPitch);
+
+	gRenderer->releaseBuffer(vertexBuffer);
 }
 
 

@@ -68,6 +68,12 @@ enum DepthTargetTypes
 	NumDT
 };
 
+enum InterpTypes
+{
+	Nearest = 0,
+	Linear = 1
+};
+
 class Renderer
 {
 public:
@@ -189,13 +195,16 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // Resource setup for external classes
 //////////////////////////////////////////////////////////////////////////
-	HRESULT createVertexBuffer(UINT accessFlags, size_t numVerts, const void* initData, ID3D11Buffer** vertexBufferOut);
-	HRESULT createIndexBuffer(const std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
+	HRESULT createVertexBuffer(UINT accessFlags, D3D11_USAGE usage, size_t bufferSize, const void* initData, ID3D11Buffer** vertexBufferOut);
+	HRESULT createIndexBuffer(UINT accessFlags, D3D11_USAGE usage, const std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut);
 	HRESULT createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut);
+
+	HRESULT lockBuffer(ID3D11Buffer* buffer, D3D11_MAP mapType, D3D11_MAPPED_SUBRESOURCE& outResource);
+	void releaseBuffer(ID3D11Buffer* buffer);
 
 	IDXGISwapChain1* createSwapChain(HWND hWnd, Vec<size_t> dims, bool stereo, DXGI_FORMAT format, UINT flags);
 
-	ID3D11SamplerState* createSamplerState();
+	ID3D11SamplerState* createSamplerState(InterpTypes interpType);
 	ID3D11ShaderResourceView* createShaderResourceView(ID3D11Resource* textureResource);
 	ID3D11RenderTargetView* createRenderTargetView(ID3D11Resource* textureResource);
 	ID3D11DepthStencilView* createDepthTargetView(ID3D11Resource* textureResource);

@@ -230,7 +230,7 @@ void Renderer::releaseMaterialStates()
 	rasterStates.clear();
 }
 
-HRESULT Renderer::createVertexBuffer(UINT accessFlags, size_t bufferSize, const void* initData, ID3D11Buffer** vertexBufferOut)
+HRESULT Renderer::createVertexBuffer(UINT accessFlags, D3D11_USAGE usage, size_t bufferSize, const void* initData, ID3D11Buffer** vertexBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 
@@ -240,7 +240,7 @@ HRESULT Renderer::createVertexBuffer(UINT accessFlags, size_t bufferSize, const 
 	D3D11_BUFFER_DESC vertBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertData;
 
-	vertBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertBufferDesc.Usage = usage;
 	vertBufferDesc.ByteWidth = (unsigned int)bufferSize;
 	vertBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertBufferDesc.CPUAccessFlags = accessFlags;
@@ -260,7 +260,7 @@ HRESULT Renderer::createVertexBuffer(UINT accessFlags, size_t bufferSize, const 
 	return result;
 }
 
-HRESULT Renderer::createIndexBuffer(const std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut)
+HRESULT Renderer::createIndexBuffer(UINT accessFlags, D3D11_USAGE usage, const std::vector<Vec<unsigned int>>& faces, ID3D11Buffer** indexBufferOut)
 {
 	//WaitForSingleObject(mutexDevice,INFINITE);
 	if (faces.size()==0)
@@ -269,10 +269,10 @@ HRESULT Renderer::createIndexBuffer(const std::vector<Vec<unsigned int>>& faces,
 	D3D11_BUFFER_DESC indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA indexData;
 
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.Usage = usage;
 	indexBufferDesc.ByteWidth = (unsigned int)(sizeof(Vec<unsigned int>) * faces.size());
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.CPUAccessFlags = accessFlags;
 	indexBufferDesc.MiscFlags = 0;
 	indexBufferDesc.StructureByteStride = 0;
 
@@ -287,26 +287,6 @@ HRESULT Renderer::createIndexBuffer(const std::vector<Vec<unsigned int>>& faces,
 	//ReleaseMutex(mutexDevice);
 
 	return result;
-}
-
-float Renderer::FrontClipPos() const
-{
-	return frontClipPos;
-}
-
-void Renderer::FrontClipPos(float val)
-{
-	frontClipPos = val;
-}
-
-float Renderer::BackClipPos() const
-{
-	return backClipPos;
-}
-
-void Renderer::BackClipPos(float val)
-{
-	backClipPos = val;
 }
 
 HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOut)
@@ -325,6 +305,16 @@ HRESULT Renderer::createConstantBuffer(size_t size, ID3D11Buffer** constBufferOu
 	//ReleaseMutex(mutexDevice);
 
 	return hr;
+}
+
+HRESULT Renderer::lockBuffer(ID3D11Buffer* buffer, D3D11_MAP mapType, D3D11_MAPPED_SUBRESOURCE& outResource)
+{
+	return renderContext->Map(buffer, 0, mapType, 0, &outResource);
+}
+
+void Renderer::releaseBuffer(ID3D11Buffer* buffer)
+{
+	renderContext->Unmap(buffer, 0);
 }
 
 void Renderer::updateShaderParams(const void* params, ID3D11Buffer* buffer)
@@ -644,6 +634,26 @@ void Renderer::clearFallbackShaders()
 	fallbackLayouts.clear();
 
 	SAFE_RELEASE(fallbackPS);
+}
+
+float Renderer::FrontClipPos() const
+{
+	return frontClipPos;
+}
+
+void Renderer::FrontClipPos(float val)
+{
+	frontClipPos = val;
+}
+
+float Renderer::BackClipPos() const
+{
+	return backClipPos;
+}
+
+void Renderer::BackClipPos(float val)
+{
+	backClipPos = val;
 }
 
 void Renderer::renderUpdate()
@@ -1377,11 +1387,13 @@ IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, bool ste
 	return swapChain;
 }
 
-ID3D11SamplerState* Renderer::createSamplerState()
+ID3D11SamplerState* Renderer::createSamplerState(InterpTypes interpType)
 {
 	D3D11_SAMPLER_DESC samplerDesc;
 
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	if ( interpType == InterpTypes::Linear )
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;

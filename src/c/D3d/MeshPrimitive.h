@@ -56,7 +56,7 @@ protected:
 	void cleanupMesh();
 
 	void loadShader(const std::string& shaderFile, const std::string& shaderFunc);
-	void initializeResources();
+	void initializeResources(UINT vertAccessFlags = 0, UINT indexAccessFlags = 0);
 	void updateCenterOfMass();
 
 	Vec<float> getCenterOfMass() const {return centerOfMass;}
@@ -83,6 +83,7 @@ protected:
 	std::vector<Vec<float>> normals;
 	std::vector<Vec<float>> texUVs;
 	std::vector<Color> colors;
+	std::vector<Color> backColors;
 
 	// Render resources
 	int vertShaderIdx;
@@ -105,10 +106,26 @@ public:
 };
 
 
+class TextQuads : public MeshPrimitive
+{
+public:
+	TextQuads(Renderer* renderer, size_t maxQuads);
+
+	void clearQuads();
+	bool addQuad(const Vec<float>* pos, const Vec<float>* uv, const Color& color, const Color& backColor);
+
+	void updateResources();
+
+private:
+
+	int maxQuads;
+	int maxFaces;
+};
+
+
 class ViewAlignedPlanes : public MeshPrimitive
 {
 public:
-
 	ViewAlignedPlanes(Renderer* renderer, Vec<size_t> volDims, Vec<float> scaleDims);
 
 protected:
