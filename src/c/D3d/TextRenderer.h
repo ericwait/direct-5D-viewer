@@ -19,6 +19,7 @@ public:
 	TextRenderer(Renderer* rendererIn, HWND hwnd, const std::string& fontFace, int textHeight);
 
 	void drawString(const std::string text, Vec<int> screenPos, Color fg = Color(1.0f,1.0f,1.0f,1.0f), Color bg = Color(0.0f,0.0f,0.0f,0.0f));
+	void drawRect(Vec<int> topLeft, Vec<int> size, Color color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	void render();
 
 	~TextRenderer();

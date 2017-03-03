@@ -707,13 +707,8 @@ void Renderer::renderAll()
 	renderWidget();
 	postTimes[curTimeIdx] = GetTimeMs64()-postTime;
 
-	textRenderer->drawString(std::to_string(counter), Vec<int>(0,0,0));
-	textRenderer->render();
-
-	counter += 1;
-
 	UINT64 gdiTime = GetTimeMs64();
-	renderGDIOverlay();
+	renderTextOverlays();
 	gdiTimes[curTimeIdx] = GetTimeMs64()-gdiTime;
 
 	UINT64 endTime = GetTimeMs64();
@@ -843,33 +838,31 @@ void Renderer::renderWidget()
 		renderNode(gCameraWidget, node);
 }
 
-void Renderer::renderGDIOverlay()
+void Renderer::renderTextOverlays()
 {
-	SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
-	if ( !mainRoot )
-		return;
-
-	detachTargets();
-
-	HDC hdc = getSwapChain()->getDC();
-
 	if ( labelsOn )
 	{
+		SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
+		if ( !mainRoot )
+			return;
+
 		RenderFilter renderFilter(mainRoot, GraphicObjectTypes::Polygons);
 
 		GraphicObjectNode* node = renderFilter.first();
 		for ( ; node != NULL; node = renderFilter.next() )
-			renderLabel(gCameraDefaultMesh, node, hdc);
+			renderLabel(gCameraDefaultMesh, node);
 	}
 
-	if (scaleBarOn)
-		renderScaleValue(gCameraDefaultMesh, hdc);
-	if (frameNumOn)
-		renderFrameNum(hdc);
-	if(fpsOn)
-		renderFPS(hdc);
+	if ( scaleBarOn )
+		renderScaleValue(gCameraDefaultMesh);
 
-	getSwapChain()->releaseDC();
+	if ( frameNumOn )
+		renderFrameNum();
+
+	if ( fpsOn )
+		renderFPS();
+
+	textRenderer->render();
 }
 
 void Renderer::startRender()
@@ -1071,21 +1064,20 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 }
 
 
-void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node, HDC hdc)
+void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node)
 {
-	if ( node->getLabel().length() == 0 ) return;
+	if ( node->getLabel().length() == 0 )
+		return;
 
 	DirectX::XMVECTOR v2D={0.,0.,0.,0.};
-	int x,y;
+	Vec<int> pos(0,0,0);
 
 	DirectX::XMFLOAT4 boxColor = node->material->getColor();
-	Vec<float> colr = Vec<float>(boxColor.x, boxColor.y, boxColor.z);
-	
-	COLORREF textHex = RGB(255, 255, 255);
-	if (colr.sum()>=1.5)
-		textHex = RGB(0, 0, 0);
+	Color bgColor(boxColor.x, boxColor.y, boxColor.z, 1.0f);
+	Color fgColor(1.0f,1.0f,1.0f,1.0f);
 
-	COLORREF boxHex = RGB(boxColor.x*255, boxColor.y*255, boxColor.z*255);
+	if ( bgColor.r + bgColor.g + bgColor.b > 1.5f )
+		fgColor = Color(0.0f,0.0f,0.0f,1.0f);
 
 	Vec<float> centerOfmassVec = node->mesh->getCenterOfMass();
 	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
@@ -1094,18 +1086,18 @@ void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node, 
 	v2D = DirectX::XMVector3Project(com,0.0f,0.0f,(float)gWindowWidth,(float)gWindowHeight,0.0f,1.0f,
 		camera->getProjectionTransform(),camera->getViewTransform(),node->getLocalToWorld());
 
-	x=(int)DirectX::XMVectorGetX(v2D);
-	y=(int)DirectX::XMVectorGetY(v2D);
+	pos.x = (int)DirectX::XMVectorGetX(v2D);
+	pos.y = (int)DirectX::XMVectorGetY(v2D);
 
-	SelectObject(hdc, gFont);
-	SetTextColor(hdc, textHex);
-	SetBkColor(hdc, boxHex);
-	SetBkMode(hdc, OPAQUE);
-
-	TextOutA(hdc,x,y,node->getLabel().c_str(),(int)node->getLabel().length());
+	textRenderer->drawString(node->getLabel(), pos, fgColor, bgColor);
 }
 
-void Renderer::renderScaleValue(const Camera* camera, HDC hdc)
+float clamp(float x, float minVal, float maxVal)
+{
+	return (x > minVal) ? ((x < maxVal) ? (x) : (maxVal)) : (minVal);
+}
+
+void Renderer::renderScaleValue(const Camera* camera)
 {
 	if ( !volInfo )
 		return;
@@ -1113,117 +1105,74 @@ void Renderer::renderScaleValue(const Camera* camera, HDC hdc)
 	float sz = camera->getVolUnitsPerPix();
 
 	Vec<size_t> dims = volInfo->getDims();
-
-	//sz *= dims.maxValue()/2.0;
 	Vec<float> volSize = volInfo->getPhysSize();
 	sz *= volSize.maxValue()/2.0f;
 
-	float numUnits = 100.0f;
-	float barSize = numUnits/sz; // how many pixels to show 100 units
-	
-	float delta = 10.0f;
-	while(barSize>120.0f)
+	const float maxBar = 120.0f;
+	const float bestBar = 100.0f;
+	const float minBar = 40.0f;
+
+	const float checkUnits[] = {1.0f,2.0f,3.0f,4.0f,5.0f};
+	const int numCheck = ARRAY_SIZE(checkUnits);
+
+	float maxUnits = maxBar * sz;
+	float bestUnits = bestBar * sz;
+	float minUnits = minBar * sz;
+
+	const float infty = std::numeric_limits<float>::infinity();
+
+	int minPow = (int)floor(log10f(minUnits));
+	int maxPow = (int)floor(log10f(maxUnits));
+
+	float bestDist = infty;
+	float closestUnits = 0.0f;
+	for ( int i=minPow; i <= maxPow; ++i )
 	{
-		numUnits -= delta;
-		if(numUnits<=0.5f)
-			delta = 0.1f;
-		else if(numUnits<=1.0f)
-			delta = 0.5f;
-		else if(numUnits<=5.0f)
-			delta = 1.0f;
-		else if(numUnits<=10.0f)
-			delta = 5.0f;
-		else if(numUnits<=100.0f)
-			delta = 10.0f;
-		else if (numUnits<=500.0f)
-			delta = 50.0f;
-		else if(numUnits<=1000.0f)
-			delta = 100.0f;
-		else
-			delta = 1000.0f;
+		for ( int j=0; j < numCheck; ++j )
+		{
+			float units = checkUnits[j] * pow(10.0f,i);
+			float dist = abs(units - bestUnits);
 
-		barSize = numUnits/sz;
-	}
-
-	while(barSize<40.0f)
-	{
-		numUnits += delta;
-		if(numUnits>=1000.0f)
-			delta = 1000.0f;
-		else if(numUnits>=500.0f)
-			delta = 100.0f;
-		else if(numUnits>=100.0f)
-			delta = 50.0f;
-		else if(numUnits>=10.0f)
-			delta = 10.0f;
-		else if(numUnits>=5.0f)
-			delta = 5.0f;
-		else if(numUnits>=1.0f)
-			delta = 1.0f;
-		else if(numUnits>=0.5f)
-			delta = 0.5f;
-		else
-			delta = 0.1f;
-
-		barSize = numUnits/sz;
+			if ( dist < bestDist )
+			{
+				closestUnits = units;
+				bestDist = dist;
+			}
+		}
 	}
 
 	if(scaleTextOn)
 	{
-		DirectX::XMFLOAT4 color(1, 1, 1, 1);
-
-		COLORREF hexColor = (unsigned int)(255*color.z);
-		hexColor = hexColor<<8;
-		hexColor |= (unsigned int)(255*color.y);
-		hexColor = hexColor<<8;
-		hexColor |= (unsigned int)(255*color.x);
-
-		SelectObject(hdc, gFont);
-		SetTextColor(hdc, hexColor);
-		SetBkMode(hdc, TRANSPARENT);
 		char buff[36];
-		if(numUnits>=1.0f)
-			sprintf(buff, "%.0f%cm", numUnits, 0xb5);
-		else if(numUnits>=0.1f)
-			sprintf(buff, "%.1f%cm", numUnits, 0xb5);
+		if( closestUnits >= 1.0f )
+			sprintf(buff, "%.0f%cm", closestUnits, 0xb5);
+		else if( closestUnits >= 0.1f)
+			sprintf(buff, "%.1f%cm", closestUnits, 0xb5);
 		else
-			sprintf(buff, "%.2f%cm", numUnits, 0xb5);
+			sprintf(buff, "%.2f%cm", closestUnits, 0xb5);
 
-		std::string length(buff);
-		TextOutA(hdc, (float)gWindowWidth-100, (float)gWindowHeight-25, length.c_str(), (int)length.length());
+		Vec<int> textPos(gWindowWidth-100,gWindowHeight-25,0);
+		textRenderer->drawString(buff, textPos);
 	}
 
-	// Define the rectangle.
-	int x = gWindowWidth-85-barSize/2;
-	int y = gWindowHeight-35;
-	int width = round(barSize);
-	int height = 10;
+	int barWidth = round(closestUnits / sz);
 
-	// Fill the rectangle.
-	Rectangle(hdc, x, y, x+width, y+height);
+	Vec<int> tl(gWindowWidth-85-barWidth/2, gWindowHeight-35, 0);
+	Vec<int> size(barWidth, 10, 0);
+
+	textRenderer->drawRect(tl, size, Color(1.0f,1.0f,1.0f,1.0f));
 }
 
-void Renderer::renderFrameNum(HDC hdc)
+void Renderer::renderFrameNum()
 {
-	DirectX::XMFLOAT4 color(1, 1, 1, 1);
-
-	COLORREF hexColor = (unsigned int)(255*color.z);
-	hexColor = hexColor<<8;
-	hexColor |= (unsigned int)(255*color.y);
-	hexColor = hexColor<<8;
-	hexColor |= (unsigned int)(255*color.x);
-
-	SelectObject(hdc, gFont);
-	SetTextColor(hdc, hexColor);
-	SetBkMode(hdc, TRANSPARENT);
 	char buff[36];
 	sprintf(buff, "Frame:%d", currentFrame+1);
 
-	std::string length(buff);
-	TextOutA(hdc, (float)gWindowWidth-120, 10, length.c_str(), (int)length.length());
+	Vec<int> screenPos(gWindowWidth-120, 10, 0);
+	textRenderer->drawString(buff, screenPos);
 }
 
-void Renderer::renderFPS(HDC hdc)
+void Renderer::renderFPS()
 {
 	UINT64 totalTimes = 0;
 	UINT64 startTime  = 0;
@@ -1266,17 +1215,6 @@ void Renderer::renderFPS(HDC hdc)
 		avgEnd = double(endTime)/NUM_TIMES;
 	}
 
-	DirectX::XMFLOAT4 color(1, 1, 1, 1);
-
-	COLORREF hexColor = (unsigned int)(255*color.z);
-	hexColor = hexColor<<8;
-	hexColor |= (unsigned int)(255*color.y);
-	hexColor = hexColor<<8;
-	hexColor |= (unsigned int)(255*color.x);
-
-	SelectObject(hdc, gFont);
-	SetTextColor(hdc, hexColor);
-	SetBkMode(hdc, TRANSPARENT);
 	char buff[36];
 	double fps = 1000.0/avgFrame;
 	if (0.01<fps)
@@ -1288,38 +1226,30 @@ void Renderer::renderFPS(HDC hdc)
 	else
 		sprintf(buff, "FPS:%.0f", fps);
 
-	std::string buff_str(buff);
-	TextOutA(hdc, 20, 10, buff_str.c_str(), (int)buff_str.length());
+	textRenderer->drawString(buff, Vec<int>(20,10,0));
 
 	if(statsOn)
 	{
-		sprintf(buff, "Start:  %.3fms", avgStart);
-		buff_str = buff;
-		TextOutA(hdc, 20, 40, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Start:   %.3fms", avgStart);
+		textRenderer->drawString(buff, Vec<int>(20, 40, 0));
 
-		sprintf(buff, "Pre:    %.3fms", avgPre);
-		buff_str = buff;
-		TextOutA(hdc, 20, 60, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Pre:     %.3fms", avgPre);
+		textRenderer->drawString(buff, Vec<int>(20, 60, 0));
 
-		sprintf(buff, "Main:  %.3fms", avgMain);
-		buff_str = buff;
-		TextOutA(hdc, 20, 80, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Main:    %.3fms", avgMain);
+		textRenderer->drawString(buff, Vec<int>(20, 80, 0));
 
-		sprintf(buff, "Post:   %.3fms", avgPost);
-		buff_str = buff;
-		TextOutA(hdc, 20, 100, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Post:    %.3fms", avgPost);
+		textRenderer->drawString(buff, Vec<int>(20, 100, 0));
 
-		sprintf(buff, "GDI:    %.3fms", avgGdi);
-		buff_str = buff;
-		TextOutA(hdc, 20, 120, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Overlay: %.3fms", avgGdi);
+		textRenderer->drawString(buff, Vec<int>(20, 120, 0));
 
-		sprintf(buff, "Full:   %.3fms", avgFrame);
-		buff_str = buff;
-		TextOutA(hdc, 20, 140, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Full:    %.3fms", avgFrame);
+		textRenderer->drawString(buff, Vec<int>(20, 140, 0));
 
-		sprintf(buff, "Present:%.3fms", avgEnd);
-		buff_str = buff;
-		TextOutA(hdc, 20, 165, buff_str.c_str(), (int)buff_str.length());
+		sprintf(buff, "Present: %.3fms", avgEnd);
+		textRenderer->drawString(buff, Vec<int>(20, 165, 0));
 	}
 }
 

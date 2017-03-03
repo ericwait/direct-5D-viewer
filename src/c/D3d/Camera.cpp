@@ -124,11 +124,13 @@ void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& 
 
 float Camera::getVolUnitsPerPix() const
 {
-	DirectX::XMFLOAT3 distOrig_f(0, 0, 0);
-	DirectX::XMVECTOR distOrig_v = DirectX::XMLoadFloat3(&distOrig_f);
-	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, ConvertMatrix(viewTransform));
-	distOrig_v = DirectX::XMVector3TransformCoord(distOrig_v, ConvertMatrix(projectionTransform));
-	float z = DirectX::XMVectorGetZ(distOrig_v);
+	Eigen::Vector4f volOrg(0.0f,0.0f,0.0f,1.0f);
+	Eigen::Vector4f projOrg = projectionTransform * viewTransform * volOrg;
+
+	// If the volume center is behind the near clipping plane, use the near-clipping plane instead
+	float z = projOrg.z() / projOrg.w();
+	if ( z < 0.0f || projOrg.w() < 0.0f )
+		z = 0.0f;
 
 	DirectX::XMFLOAT3 unitOutPt_f(2.0f/gWindowWidth, 0, z);
 	DirectX::XMFLOAT3 unitOrigPt_f(0, 0, z);

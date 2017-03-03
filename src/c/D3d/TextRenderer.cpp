@@ -4,7 +4,7 @@
 #include "Global/Globals.h"
 
 const int TextRenderer::maxQuads = 512;
-const std::string TextRenderer::printable = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+const std::string TextRenderer::printable = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~µ";
 const std::map<char, int> TextRenderer::asciiIdxMap = buildIdxMap();
 
 std::map<char,int> TextRenderer::buildIdxMap()
@@ -84,6 +84,29 @@ void TextRenderer::drawString(const std::string text, Vec<int> screenPos, Color 
 		cursor += posOffset[3] + Vec<float>(0.0f,0.0f,0.0f);
 	}
 
+}
+
+void TextRenderer::drawRect(Vec<int> topLeft, Vec<int> size, Color color)
+{
+	Vec<float> uvQuad[4] = {Vec<float>(0.0f),Vec<float>(0.0f),
+							Vec<float>(0.0f),Vec<float>(0.0f)};
+
+	Vec<float> posQuad[4];
+
+	Color bgTrnspt(0.0f, 0.0f, 0.0f, 0.0f);
+
+	posQuad[0] = Vec<float>(topLeft.x, topLeft.y, 0.0f);
+	posQuad[1] = Vec<float>(topLeft.x, topLeft.y+size.y, 0.0f);
+	posQuad[2] = Vec<float>(topLeft.x+size.x, topLeft.y+size.y, 0.0f);
+	posQuad[3] = Vec<float>(topLeft.x+size.x, topLeft.y, 0.0f);
+
+	// Flip the fg/bg colors, lets us use the text shader for rendering color quads
+	bool added = textMesh->addQuad(posQuad, uvQuad, bgTrnspt, color);
+	if ( !added )
+	{
+		render();
+		added = textMesh->addQuad(posQuad, uvQuad, bgTrnspt, color);
+	}
 }
 
 void TextRenderer::render()

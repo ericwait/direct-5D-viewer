@@ -189,8 +189,7 @@ public:
 	void renderPolygons();
 	void renderVolume();
 	void renderWidget();
-
-	void renderGDIOverlay();
+	void renderTextOverlays();
 
 	void endRender();
 
@@ -263,11 +262,11 @@ private:
 	ID3DBlob* compileShaderFile(const std::string& filename, const std::string& entryFunction, const std::string& shaderModel, const std::map<std::string, std::string>& repVars);
 
 	void renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip=-10, float backClip=10);
-	void renderLabel(const Camera* camera, const GraphicObjectNode* node, HDC hdc);
-	void renderScaleValue(const Camera* camera, HDC hdc);
 
-	void renderFrameNum(HDC hdc);
-	void renderFPS(HDC hdc);
+	void renderLabel(const Camera* camera, const GraphicObjectNode* node);
+	void renderScaleValue(const Camera* camera);
+	void renderFrameNum();
+	void renderFPS();
 
 	const SwapChainTarget* getSwapChain() const;
 
