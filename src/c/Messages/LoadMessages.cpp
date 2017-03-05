@@ -203,7 +203,7 @@ bool MessageLoadPolys::process()
 		}
 
 		double* color = poly->getcolorData();
-		Color polyColor(color[0], color[1], color[2], color[3]);
+		Color polyColor(color[0], color[1], color[2], 1.0f);
 
 		// TODO: Can we build this into the local to parent without screwing up normals?
 		info->imageToModelSpace(poly->getvertData(), poly->getNumVerts());

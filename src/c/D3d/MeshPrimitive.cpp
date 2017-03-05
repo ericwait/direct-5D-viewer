@@ -221,6 +221,14 @@ StaticColorMesh::StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint3
 	initializeResources();
 }
 
+Color StaticColorMesh::getColor()
+{
+	if ( colors.size() > 0 )
+		return colors[0];
+
+	return Color(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 
 
 TextQuads::TextQuads(Renderer* renderer, size_t maxQuads)

@@ -35,6 +35,8 @@ public:
 	static const Vec<float> unitQuadVerts[4];
 	static const Vec<float> unitQuadNorms[4];
 
+	virtual Color getColor(){return Color(1.0f,1.0f,1.0f,1.0f);};
+
 	bool checkIntersect(Vec<float> lclPntVec, Vec<float> lclDirVec, float& depthOut);
 
 	~MeshPrimitive();
@@ -97,6 +99,8 @@ protected:
 
 class StaticColorMesh : public MeshPrimitive
 {
+	virtual Color getColor();
+
 public:
 	StaticColorMesh(Renderer* renderer, const std::vector<Vec<uint32_t>>& faces, const std::vector<Vec<float>>& vertices,
 		const std::vector<Vec<float>>& normals, const Color& color);

@@ -1096,8 +1096,7 @@ void Renderer::renderLabel(TargetChains chain, const Camera* camera, const Graph
 	DirectX::XMVECTOR v2D={0.,0.,0.,0.};
 	Vec<int> pos(0,0,0);
 
-	DirectX::XMFLOAT4 boxColor = node->material->getColor();
-	Color bgColor(boxColor.x, boxColor.y, boxColor.z, 1.0f);
+	Color bgColor = node->mesh->getColor();
 	Color fgColor(1.0f,1.0f,1.0f,1.0f);
 
 	if ( bgColor.r + bgColor.g + bgColor.b > 1.5f )
