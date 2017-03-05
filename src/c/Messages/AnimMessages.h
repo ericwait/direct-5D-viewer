@@ -103,6 +103,19 @@ private:
 };
 
 
+class MessageSetCaptureSize: public Message
+{
+public:
+	MessageSetCaptureSize(int width, int height) : captureSize(width,height,1){}
+
+protected:
+	virtual bool process();
+
+private:
+	Vec<int> captureSize;
+};
+
+
 class MessageCaptureWindow: public Message
 {
 public:

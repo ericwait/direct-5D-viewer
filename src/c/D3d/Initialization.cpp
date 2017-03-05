@@ -89,21 +89,21 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	return S_OK;
 }
 
-HRESULT createRenderResources(std::string rootDir)
+HRESULT createRenderResources(std::string rootDir, Vec<int> viewportSize)
 {
 	Vec<float> eye = Vec<float>(0.0f,0.0f,-3.0f);
 	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	
 	gRenderer = new Renderer();//delete on message loop exit
-	HRESULT hr = gRenderer->init(rootDir);
+	HRESULT hr = gRenderer->init(rootDir, viewportSize);
 
 	if (FAILED(hr))
 		return hr;
 
-	gCameraDefaultMesh = new Camera(eye,look,up);//delete on message loop exit
-	gCameraWidget = new OrthoCamera(eye,look,up);//delete on message loop exit
-	gCameraText = new TextCamera(eye,look,up);
+	gCameraDefaultMesh = new Camera(eye,look,up,viewportSize);//delete on message loop exit
+	gCameraWidget = new OrthoCamera(eye,look,up,viewportSize);//delete on message loop exit
+	gCameraText = new TextCamera(eye,look,up,viewportSize);
 
 	return S_OK;
 }
@@ -129,5 +129,7 @@ HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir)
 		DEFAULT_PITCH|FF_DONTCARE, //Pitch and Family
 		"Arial");
 
-	return createRenderResources(rootDir);
+
+	Vec<int> viewportSize(gWindowWidth,gWindowHeight,1);
+	return createRenderResources(rootDir, viewportSize);
 }

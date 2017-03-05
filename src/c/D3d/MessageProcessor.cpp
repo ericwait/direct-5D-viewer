@@ -56,6 +56,8 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 	int iMouseY = (short)HIWORD(lParam);
 	HMENU hmenu = GetMenu(hWnd);
 
+	Vec<int> viewSize;
+
 	static bool leftButtonDown = false;
 	static bool shiftDown = false;
 	static bool ctrlDown = false;
@@ -97,11 +99,13 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 			minimized = false;
 		}
 
-		gWindowWidth = LOWORD(lParam);
-		gWindowHeight = HIWORD(lParam);
+		viewSize = Vec<int>(LOWORD(lParam), HIWORD(lParam), 1);
+
+		gWindowWidth = viewSize.x;
+		gWindowHeight = viewSize.y;
 		if(gRenderer != NULL)
 		{
-			gRenderer->resizeViewPort();
+			gRenderer->resizeViewPort(viewSize);
 			gRenderer->forceUpdate();
 		}
 		break;

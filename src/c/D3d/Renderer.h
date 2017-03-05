@@ -54,18 +54,24 @@ enum GraphicObjectTypes
 	NumGO
 };
 
+enum TargetChains
+{
+	Screen = 0,
+	Capture = 1,
+	NumTC
+};
+
 enum RenderTargetTypes
 {
 	NoneRT = -1,
-	SwapChain = 0,
-	Capture = 1,
+	DefaultRT = 0,
 	NumRT
 };
 
 enum DepthTargetTypes
 {
 	NoneDT = -1,
-	Default = 0,
+	DefaultDT = 0,
 	NumDT
 };
 
@@ -103,7 +109,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // Class setup including getters and setters
 //////////////////////////////////////////////////////////////////////////
-	HRESULT init(std::string rootDir);
+	HRESULT init(std::string rootDir, Vec<int> viewportSizeIn);
 
 //Setters	
 	void setRendering(bool rendering){isRendering = rendering;}
@@ -121,7 +127,7 @@ public:
 	void clearPixelShaderList();
 	void clearFallbackShaders();
 
-	void resizeViewPort();
+	void resizeViewPort(Vec<int> sizeIn, TargetChains selectChain = TargetChains::Screen);
 	void flushContext();
 
 	void updateShaderParams(const void* params, ID3D11Buffer* buffer);
@@ -182,16 +188,16 @@ public:
 
 	void renderUpdate();
 
-	void renderAll();
-	void startRender();
+	void renderAll(TargetChains renderChain);
+	void startRender(TargetChains renderChain);
 
-	void renderBackground();
-	void renderPolygons();
-	void renderVolume();
-	void renderWidget();
-	void renderTextOverlays();
+	void renderBackground(TargetChains renderChain);
+	void renderPolygons(TargetChains renderChain);
+	void renderVolume(TargetChains renderChain);
+	void renderWidget(TargetChains renderChain);
+	void renderTextOverlays(TargetChains renderChain);
 
-	void endRender();
+	void endRender(TargetChains renderChain);
 
 //////////////////////////////////////////////////////////////////////////
 // Resource setup for external classes
@@ -219,10 +225,10 @@ public:
 	ID3D11DepthStencilState* getDepthStencilState(bool depthTest);
 
 	void detachTargets();
-	void attachTargets(RenderTargetTypes rt, DepthTargetTypes dt);
+	void attachTargets(TargetChains chain, RenderTargetTypes rt, DepthTargetTypes dt);
 
-	void clearRenderTarget(RenderTargetTypes rt, Vec<float> clearColor);
-	void clearDepthTarget(DepthTargetTypes dt, float clearDepth);
+	void clearRenderTarget(TargetChains chain, RenderTargetTypes rt, Vec<float> clearColor);
+	void clearDepthTarget(TargetChains chain, DepthTargetTypes dt, float clearDepth);
 
 	float FrontClipPos() const;
 	void FrontClipPos(float val);
@@ -232,11 +238,11 @@ private:
 	HRESULT initDevice();
 	HRESULT initDepthStencils();
 	HRESULT initRenderTargets();
-	HRESULT resetViewPort();
+	HRESULT resetViewPort(TargetChains selectChain);
 	void createBlendState();
 	
 	void releaseDepthStencils();
-	void releaseRenderTarget();
+	void releaseRenderTargets();
 	void releaseMaterialStates();
 	void releaseDevice();
 
@@ -263,10 +269,10 @@ private:
 
 	void renderNode(const Camera* camera, const GraphicObjectNode* node, float frontClip=-10, float backClip=10);
 
-	void renderLabel(const Camera* camera, const GraphicObjectNode* node);
-	void renderScaleValue(const Camera* camera);
-	void renderFrameNum();
-	void renderFPS();
+	void renderLabel(TargetChains chain, const Camera* camera, const GraphicObjectNode* node);
+	void renderScaleValue(TargetChains chain, const Camera* camera);
+	void renderFrameNum(TargetChains chain);
+	void renderFPS(TargetChains chain);
 
 	const SwapChainTarget* getSwapChain() const;
 
@@ -274,6 +280,9 @@ private:
 	//Member variables 
 	bool isDirty;
 	bool isRendering;
+
+	TargetChains lastChain;
+	Vec<int> viewportSize[TargetChains::NumTC];
 
 	Vec<float> backgroundColor;
 
@@ -359,8 +368,8 @@ private:
 	int curTimeIdx;
 
 private:
-	std::shared_ptr<RenderTarget> renderTargets[RenderTargetTypes::NumRT];
-	std::shared_ptr<DepthTarget> depthTargets[DepthTargetTypes::NumDT];
+	std::shared_ptr<RenderTarget> renderChains[TargetChains::NumTC][RenderTargetTypes::NumRT];
+	std::shared_ptr<DepthTarget> depthChains[TargetChains::NumTC][DepthTargetTypes::NumDT];
 
 	std::map<unsigned int,ID3D11DepthStencilState*> depthStencilStates;
 	std::map<unsigned int,ID3D11RasterizerState*> rasterStates;

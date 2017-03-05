@@ -160,6 +160,9 @@
     <ClCompile Include="Mex\MexUpdateRender.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexSetCaptureSize.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexCommand.h">

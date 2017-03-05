@@ -24,7 +24,7 @@
 class Camera
 {
 public:
-	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
+	Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn, Vec<int> viewportSizeIn);
 	virtual ~Camera() {}
 
 	void move(Vec<float> delta);
@@ -36,6 +36,7 @@ public:
 	void setUpDirection(Vec<float> upDirectionIn);
 	void setCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn);
 	virtual void updateProjectionTransform();
+	virtual void setViewportSize(Vec<int> viewportSizeIn);
 
 	DirectX::XMMATRIX getProjectionTransform() const {return ConvertMatrix(projectionTransform);}
 	DirectX::XMMATRIX getViewTransform() const {return ConvertMatrix(viewTransform);}
@@ -59,6 +60,7 @@ protected:
 	Vec<float> defaultUpDirection;
 
 	float nearZ;
+	Vec<int> viewportSize;
 
 	Eigen::Matrix4f viewTransform;
 	Eigen::Matrix4f projectionTransform;
@@ -68,7 +70,7 @@ protected:
 class OrthoCamera : public Camera
 {
 public:
-	OrthoCamera(Vec<float> cameraPostionIn, Vec<float> lookPostionIn, Vec<float> upDirectionIn);
+	OrthoCamera(Vec<float> cameraPostionIn, Vec<float> lookPostionIn, Vec<float> upDirectionIn, Vec<int> viewportSizeIn);
 
 	void updateProjectionTransform();
 
@@ -79,7 +81,7 @@ private:
 class TextCamera : public Camera
 {
 public:
-	TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVec);
+	TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVec, Vec<int> vpSize);
 
 	virtual void updateProjectionTransform();
 

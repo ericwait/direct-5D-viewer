@@ -96,13 +96,16 @@ Renderer::~Renderer()
 
 	releaseMaterialStates();
 	releaseDepthStencils();
-	releaseRenderTarget();
+	releaseRenderTargets();
 	releaseDevice();
 }
 
-HRESULT Renderer::init(std::string rootDir)
+HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn)
 {
 	dllRoot = rootDir;
+
+	for ( int i=0; i < TargetChains::NumTC; ++i )
+		viewportSize[i] = viewportSizeIn;
 
 	HRESULT hr = initDevice();
 	if (FAILED(hr))
@@ -128,7 +131,7 @@ HRESULT Renderer::init(std::string rootDir)
 
 	initFallbackShaders();
 
-	resetViewPort();
+	resetViewPort(TargetChains::Screen);
 
 	// Make sure this is initialized after fallback renderers and viewports
 	textRenderer = new TextRenderer(this, gWindowHandle, "Consolas", 20);
@@ -197,22 +200,29 @@ void Renderer::releaseDevice()
 
 HRESULT Renderer::initRenderTargets()
 {
-	renderTargets[RenderTargetTypes::SwapChain] = std::make_shared<SwapChainTarget>(this, gWindowHandle, gWindowWidth, gWindowHeight);
-	renderTargets[RenderTargetTypes::Capture] = std::make_shared<ReadbackRenderTarget>(this, gWindowWidth, gWindowHeight);
+	Vec<int> size = viewportSize[TargetChains::Screen];
+	renderChains[TargetChains::Screen][RenderTargetTypes::DefaultRT] = std::make_shared<SwapChainTarget>(this, gWindowHandle, size.x, size.y);
+	renderChains[TargetChains::Capture][RenderTargetTypes::DefaultRT] = std::make_shared<ReadbackRenderTarget>(this, size.x, size.y);
 
 	return S_OK;
 }
 
-void Renderer::releaseRenderTarget()
+void Renderer::releaseRenderTargets()
 {
 	// Assign null (these are shared pointers, so it'll clear the render targets)
-	for ( int i=0; i < RenderTargetTypes::NumRT; ++i )
-		renderTargets[i] = nullptr;
+	for ( int i=0; i < TargetChains::NumTC; ++i )
+	{
+		for ( int j=0; j < RenderTargetTypes::NumRT; ++j )
+			renderChains[i][j] = nullptr;
+	}
 }
 
 HRESULT Renderer::initDepthStencils()
 {
-	depthTargets[DepthTargetTypes::Default] = std::make_shared<RenderDepthTarget>(this, gWindowWidth, gWindowHeight);
+	Vec<int> size = viewportSize[TargetChains::Screen];
+	depthChains[TargetChains::Screen][DepthTargetTypes::DefaultDT] = std::make_shared<RenderDepthTarget>(this, size.x, size.y);
+	depthChains[TargetChains::Capture][DepthTargetTypes::DefaultDT] = std::make_shared<RenderDepthTarget>(this, size.x, size.y);
+
 
 	return S_OK;
 }
@@ -220,8 +230,11 @@ HRESULT Renderer::initDepthStencils()
 void Renderer::releaseDepthStencils()
 {
 	// Assign null (these are shared pointers, so it'll clear the depth targets)
-	for ( int i=0; i < DepthTargetTypes::NumDT; ++i )
-		depthTargets[i] = nullptr;
+	for ( int i=0; i < TargetChains::NumTC; ++i )
+	{
+		for ( int j=0; j < DepthTargetTypes::NumDT; ++j )
+			depthChains[i][j] = nullptr;
+	}
 }
 
 void Renderer::releaseMaterialStates()
@@ -671,13 +684,13 @@ void Renderer::renderUpdate()
 {
 	if ( needsUpdate() )
 	{
-		renderAll();
+		renderAll(TargetChains::Screen);
 
 		isDirty = false;
 	}
 }
 
-void Renderer::renderAll()
+void Renderer::renderAll(TargetChains renderChain)
 {
 	static int counter = 0;
 
@@ -685,34 +698,34 @@ void Renderer::renderAll()
 	//rootScene->updateRenderableList();
 
 	UINT64 startTime = GetTimeMs64();
-	startRender();
+	startRender(renderChain);
 	startTimes[curTimeIdx] = GetTimeMs64()-startTime;
 
 	UINT64 preTime = GetTimeMs64();
-	renderBackground();
+	renderBackground(renderChain);
 	preTimes[curTimeIdx] = GetTimeMs64()-preTime;
 
 	// Clear depth target before rendering polygons and volume data
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	clearDepthTarget(renderChain, DepthTargetTypes::DefaultDT, 1.0f);
 
 	UINT64 mainTime = GetTimeMs64();
-	renderPolygons();
-	renderVolume();
+	renderPolygons(renderChain);
+	renderVolume(renderChain);
 	mainTimes[curTimeIdx] = GetTimeMs64()-mainTime;
 
 	// And again before rendering the widget
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	clearDepthTarget(renderChain, DepthTargetTypes::DefaultDT, 1.0f);
 
 	UINT64 postTime = GetTimeMs64();
-	renderWidget();
+	renderWidget(renderChain);
 	postTimes[curTimeIdx] = GetTimeMs64()-postTime;
 
 	UINT64 gdiTime = GetTimeMs64();
-	renderTextOverlays();
+	renderTextOverlays(renderChain);
 	gdiTimes[curTimeIdx] = GetTimeMs64()-gdiTime;
 
 	UINT64 endTime = GetTimeMs64();
-	endRender();
+	endRender(renderChain);
 	endTimes[curTimeIdx] = GetTimeMs64()-endTime;
 
 	frameTimes[curTimeIdx] = GetTimeMs64()-frameTime;
@@ -747,7 +760,7 @@ std::map<int, GraphicObjectNode*>& Renderer::allSceneObjects(GraphicObjectTypes 
 }
 
 
-void Renderer::attachTargets(RenderTargetTypes rt, DepthTargetTypes dt)
+void Renderer::attachTargets(TargetChains chain, RenderTargetTypes rt, DepthTargetTypes dt)
 {
 	int numRT = 0;
 	ID3D11RenderTargetView*	renderTarget = NULL;
@@ -755,11 +768,11 @@ void Renderer::attachTargets(RenderTargetTypes rt, DepthTargetTypes dt)
 	if ( rt > RenderTargetTypes::NoneRT )
 	{
 		numRT = 1;
-		renderTarget = renderTargets[rt]->getRenderTarget();
+		renderTarget = renderChains[chain][rt]->getRenderTarget();
 	}
 	
 	if ( dt > DepthTargetTypes::NoneDT )
-		depthTarget = depthTargets[dt]->getDepthTarget();
+		depthTarget = depthChains[chain][dt]->getDepthTarget();
 
 	renderContext->OMSetRenderTargets(numRT, &renderTarget, depthTarget);
 }
@@ -769,23 +782,23 @@ void Renderer::detachTargets()
 	renderContext->OMSetRenderTargets(0, NULL, NULL);
 }
 
-void Renderer::clearRenderTarget(RenderTargetTypes rt, Vec<float> clearColor)
+void Renderer::clearRenderTarget(TargetChains chain, RenderTargetTypes rt, Vec<float> clearColor)
 {
-	ID3D11RenderTargetView*	renderTarget = renderTargets[rt]->getRenderTarget();
+	ID3D11RenderTargetView*	renderTarget = renderChains[chain][rt]->getRenderTarget();
 	float color[4] = {clearColor.x, clearColor.y, clearColor.z, 1.0f};
 
 	renderContext->ClearRenderTargetView(renderTarget, color);
 }
 
-void Renderer::clearDepthTarget(DepthTargetTypes dt, float clearDepth)
+void Renderer::clearDepthTarget(TargetChains chain, DepthTargetTypes dt, float clearDepth)
 {
-	ID3D11DepthStencilView*	depthTarget = depthTargets[dt]->getDepthTarget();
+	ID3D11DepthStencilView*	depthTarget = depthChains[chain][dt]->getDepthTarget();
 
 	renderContext->ClearDepthStencilView(depthTarget, D3D11_CLEAR_DEPTH, clearDepth, 0);
 }
 
 
-void Renderer::renderBackground()
+void Renderer::renderBackground(TargetChains chain)
 {
 	SceneNode* preRoot = rootScene->getRenderSectionNode(Renderer::Section::Pre, 0);
 	if ( !preRoot )
@@ -798,7 +811,7 @@ void Renderer::renderBackground()
 		renderNode(gCameraDefaultMesh, node);
 }
 
-void Renderer::renderPolygons()
+void Renderer::renderPolygons(TargetChains chain)
 {
 	SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
 	if ( !mainRoot )
@@ -811,7 +824,7 @@ void Renderer::renderPolygons()
 		renderNode(gCameraDefaultMesh, node, FrontClipPos(), BackClipPos());
 }
 
-void Renderer::renderVolume()
+void Renderer::renderVolume(TargetChains chain)
 {
 	SceneNode* mainRoot = rootScene->getRenderSectionNode(Renderer::Section::Main, currentFrame);
 	if ( !mainRoot )
@@ -825,7 +838,7 @@ void Renderer::renderVolume()
 	}
 }
 
-void Renderer::renderWidget()
+void Renderer::renderWidget(TargetChains chain)
 {
 	SceneNode* postRoot = rootScene->getRenderSectionNode(Renderer::Section::Post, 0);
 	if ( !postRoot )
@@ -838,7 +851,7 @@ void Renderer::renderWidget()
 		renderNode(gCameraWidget, node);
 }
 
-void Renderer::renderTextOverlays()
+void Renderer::renderTextOverlays(TargetChains chain)
 {
 	if ( labelsOn )
 	{
@@ -850,32 +863,43 @@ void Renderer::renderTextOverlays()
 
 		GraphicObjectNode* node = renderFilter.first();
 		for ( ; node != NULL; node = renderFilter.next() )
-			renderLabel(gCameraDefaultMesh, node);
+			renderLabel(chain, gCameraDefaultMesh, node);
 	}
 
 	if ( scaleBarOn )
-		renderScaleValue(gCameraDefaultMesh);
+		renderScaleValue(chain, gCameraDefaultMesh);
 
 	if ( frameNumOn )
-		renderFrameNum();
+		renderFrameNum(chain);
 
 	if ( fpsOn )
-		renderFPS();
+		renderFPS(chain);
 
 	textRenderer->render();
 }
 
-void Renderer::startRender()
+void Renderer::startRender(TargetChains chain)
 {
-	attachTargets(RenderTargetTypes::SwapChain, DepthTargetTypes::Default);
+	if ( lastChain != chain )
+		resetViewPort(chain);
 
-	clearRenderTarget(RenderTargetTypes::SwapChain, backgroundColor);
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
+	// Set up the camera projections
+	gCameraText->setViewportSize(viewportSize[chain]);
+	gCameraWidget->setViewportSize(viewportSize[chain]);
+	gCameraDefaultMesh->setViewportSize(viewportSize[chain]);
+
+	attachTargets(chain, RenderTargetTypes::DefaultRT, DepthTargetTypes::DefaultDT);
+
+	clearRenderTarget(chain, RenderTargetTypes::DefaultRT, backgroundColor);
+	clearDepthTarget(chain, DepthTargetTypes::DefaultDT, 1.0f);
 }
 
-void Renderer::endRender()
+void Renderer::endRender(TargetChains chain)
 {
-	getSwapChain()->present(0,0);
+	if ( chain == TargetChains::Screen )
+		getSwapChain()->present(0,0);
+
+	detachTargets();
 }
 
 HRESULT Renderer::compileVertexShader(const std::string& filename, const std::string& functionName, 
@@ -1064,7 +1088,7 @@ void Renderer::renderNode(const Camera* camera, const GraphicObjectNode* node, f
 }
 
 
-void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node)
+void Renderer::renderLabel(TargetChains chain, const Camera* camera, const GraphicObjectNode* node)
 {
 	if ( node->getLabel().length() == 0 )
 		return;
@@ -1083,7 +1107,9 @@ void Renderer::renderLabel(const Camera* camera, const GraphicObjectNode* node)
 	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
 	DirectX::XMVECTOR com = DirectX::XMLoadFloat3(&centerOfmass);
 
-	v2D = DirectX::XMVector3Project(com,0.0f,0.0f,(float)gWindowWidth,(float)gWindowHeight,0.0f,1.0f,
+	const Vec<int>& size = viewportSize[chain];
+
+	v2D = DirectX::XMVector3Project(com,0.0f,0.0f,(float)size.x,(float)size.y,0.0f,1.0f,
 		camera->getProjectionTransform(),camera->getViewTransform(),node->getLocalToWorld());
 
 	pos.x = (int)DirectX::XMVectorGetX(v2D);
@@ -1097,10 +1123,12 @@ float clamp(float x, float minVal, float maxVal)
 	return (x > minVal) ? ((x < maxVal) ? (x) : (maxVal)) : (minVal);
 }
 
-void Renderer::renderScaleValue(const Camera* camera)
+void Renderer::renderScaleValue(TargetChains chain, const Camera* camera)
 {
 	if ( !volInfo )
 		return;
+
+	Vec<int>& viewSize = viewportSize[chain];
 
 	float sz = camera->getVolUnitsPerPix();
 
@@ -1151,28 +1179,29 @@ void Renderer::renderScaleValue(const Camera* camera)
 		else
 			sprintf(buff, "%.2f%cm", closestUnits, 0xb5);
 
-		Vec<int> textPos(gWindowWidth-100,gWindowHeight-25,0);
+		Vec<int> textPos(viewSize.x-100, viewSize.y-25,0);
 		textRenderer->drawString(buff, textPos);
 	}
 
 	int barWidth = round(closestUnits / sz);
 
-	Vec<int> tl(gWindowWidth-85-barWidth/2, gWindowHeight-35, 0);
+	Vec<int> tl(viewSize.x-85-barWidth/2, viewSize.y-35, 0);
 	Vec<int> size(barWidth, 10, 0);
 
 	textRenderer->drawRect(tl, size, Color(1.0f,1.0f,1.0f,1.0f));
 }
 
-void Renderer::renderFrameNum()
+void Renderer::renderFrameNum(TargetChains chain)
 {
 	char buff[36];
 	sprintf(buff, "Frame:%d", currentFrame+1);
 
-	Vec<int> screenPos(gWindowWidth-120, 10, 0);
+	Vec<int>& viewSize = viewportSize[chain];
+	Vec<int> screenPos(viewSize.x-120, 10, 0);
 	textRenderer->drawString(buff, screenPos);
 }
 
-void Renderer::renderFPS()
+void Renderer::renderFPS(TargetChains chain)
 {
 	UINT64 totalTimes = 0;
 	UINT64 startTime  = 0;
@@ -1255,7 +1284,7 @@ void Renderer::renderFPS()
 
 const SwapChainTarget* Renderer::getSwapChain() const
 {
-	return static_cast<SwapChainTarget*>(renderTargets[RenderTargetTypes::SwapChain].get());
+	return static_cast<SwapChainTarget*>(renderChains[TargetChains::Screen][RenderTargetTypes::DefaultRT].get());
 }
 
 void Renderer::setVertexShader(ID3D11VertexShader* shader, ID3D11InputLayout* layout)
@@ -1572,19 +1601,17 @@ int Renderer::getPolygon(Vec<float> pnt, Vec<float> direction)
 	return node->getIndex();
 }
 
-void Renderer::resizeViewPort()
+void Renderer::resizeViewPort(Vec<int> sizeIn, TargetChains selectChain)
 {
+	viewportSize[selectChain] = sizeIn;
+
 	for ( int i=0; i < RenderTargetTypes::NumRT; ++i )
-		renderTargets[i]->resizeTarget(gWindowWidth, gWindowHeight);
+		renderChains[selectChain][i]->resizeTarget(viewportSize[selectChain].x, viewportSize[selectChain].y);
 
 	for ( int i=0; i < DepthTargetTypes::NumDT; ++i )
-		depthTargets[i]->resizeDepth(gWindowWidth, gWindowHeight);
+		depthChains[selectChain][i]->resizeDepth(viewportSize[selectChain].x, viewportSize[selectChain].y);
 
-	resetViewPort();
-
-	gCameraText->updateProjectionTransform();
-	gCameraWidget->updateProjectionTransform();
-	gCameraDefaultMesh->updateProjectionTransform();
+	resetViewPort(selectChain);
 }
 
 void Renderer::flushContext()
@@ -1593,17 +1620,19 @@ void Renderer::flushContext()
 	renderContext->Flush();
 }
 
-HRESULT Renderer::resetViewPort()
+HRESULT Renderer::resetViewPort(TargetChains selectChain)
 {
 	D3D11_VIEWPORT vp;
-	vp.Width = (float)gWindowWidth;
-	vp.Height = (float)gWindowHeight;
+	vp.Width = (float)viewportSize[selectChain].x;
+	vp.Height = (float)viewportSize[selectChain].y;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 
 	renderContext->RSSetViewports( 1, &vp );
+
+	lastChain = selectChain;
 
 	return S_OK;
 }
@@ -1678,31 +1707,10 @@ void Renderer::setWorldRotation(DirectX::XMMATRIX rotation)
 
 unsigned char* Renderer::captureWindow(Vec<size_t>& dims)
 {
-	// For testing run a full re-render
-	attachTargets(RenderTargetTypes::Capture, DepthTargetTypes::Default);
+	// Run a full render to capture render target chain
+	renderAll(TargetChains::Capture);
 
-	clearRenderTarget(RenderTargetTypes::Capture, backgroundColor);
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
-
-	renderBackground();
-
-	// Clear depth target before rendering polygons and volume data
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
-
-	renderPolygons();
-	renderVolume();
-
-	// And again before rendering the widget
-	clearDepthTarget(DepthTargetTypes::Default, 1.0f);
-
-	renderWidget();
-
-	textRenderer->drawString("CAPTURE!!!!!!", Vec<int>(0, 0, 0));
-	textRenderer->render();
-
-	detachTargets();
-
-	std::shared_ptr<ReadbackRenderTarget> readback = std::static_pointer_cast<ReadbackRenderTarget>(renderTargets[RenderTargetTypes::Capture]);
+	std::shared_ptr<ReadbackRenderTarget> readback = std::static_pointer_cast<ReadbackRenderTarget>(renderChains[TargetChains::Capture][RenderTargetTypes::DefaultRT]);
 
 	dims = readback->getDims();
 	return readback->capture();

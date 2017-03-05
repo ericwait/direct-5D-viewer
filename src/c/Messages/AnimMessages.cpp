@@ -25,6 +25,17 @@ bool MessageSetCapturePath::process()
 }
 
 
+bool MessageSetCaptureSize::process()
+{
+	if ( !gRenderer )
+		return false;
+
+	gRenderer->resizeViewPort(captureSize, TargetChains::Capture);
+
+	return true;
+}
+
+
 
 bool MessageCaptureWindow::process()
 {

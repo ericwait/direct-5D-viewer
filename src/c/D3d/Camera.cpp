@@ -20,8 +20,10 @@ const float Camera::fovY = DirectX::XM_PI / 4.0f;
 const float Camera::farPlane = 25.0f;
 const float Camera::defNearPlane = 0.1f;
 
-Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
+Camera::Camera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn, Vec<int> viewportSizeIn)
 {
+	viewportSize = viewportSizeIn;
+
 	cameraPosition = defaultCameraPosition = cameraPositionIn;
 	lookPosition = defaultLookPosition = lookPositionIn;
 	upDirection = defaultUpDirection = upDirectionIn;
@@ -77,7 +79,15 @@ void Camera::setUpDirection(Vec<float> upDirectionIn)
 
 void Camera::updateProjectionTransform()
 {
-	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(fovY, (float)gWindowWidth/gWindowHeight, nearZ, farPlane));
+	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(fovY, (float)viewportSize.x/viewportSize.y, nearZ, farPlane));
+}
+
+void Camera::setViewportSize(Vec<int> viewportSizeIn)
+{
+	viewportSize = viewportSizeIn;
+
+	updateViewTransform();
+	updateProjectionTransform();
 }
 
 
@@ -103,8 +113,8 @@ void Camera::getRay(int iMouseX, int iMouseY, Vec<float>& pointOut, Vec<float>& 
 	float heightDiv = DirectX::XMVectorGetY(vals);
 
 	DirectX::XMFLOAT3 v;
-	v.x = ( ( ( 2.0f * iMouseX ) / gWindowWidth ) - 1 ) / widthDiv;
-	v.y = -( ( ( 2.0f * iMouseY ) / gWindowHeight ) - 1 ) / heightDiv;
+	v.x = ( ( ( 2.0f * iMouseX ) / viewportSize.x ) - 1 ) / widthDiv;
+	v.y = -( ( ( 2.0f * iMouseY ) / viewportSize.y ) - 1 ) / heightDiv;
 	v.z = -1.0f;
 
 	DirectX::XMVECTOR Det;
@@ -132,8 +142,8 @@ float Camera::getVolUnitsPerPix() const
 	if ( z < 0.0f || projOrg.w() < 0.0f )
 		z = 0.0f;
 
-	DirectX::XMFLOAT3 unitOutPt_f(2.0f/gWindowWidth, 0, z);
-	DirectX::XMFLOAT3 unitOrigPt_f(0, 0, z);
+	DirectX::XMFLOAT3 unitOutPt_f(2.0f/viewportSize.x, 0.0f, z);
+	DirectX::XMFLOAT3 unitOrigPt_f(0.0f, 0.0f, z);
 	DirectX::XMVECTOR unitOutPt_v = DirectX::XMLoadFloat3(&unitOutPt_f);
 	DirectX::XMVECTOR unitOrigPt_v = DirectX::XMLoadFloat3(&unitOrigPt_f);
 
@@ -170,8 +180,8 @@ void Camera::updateViewTransform()
 
 
 
-OrthoCamera::OrthoCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn)
-	: Camera(cameraPositionIn,lookPositionIn,upDirectionIn)
+OrthoCamera::OrthoCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn, Vec<float> upDirectionIn, Vec<int> viewportSizeIn)
+	: Camera(cameraPositionIn,lookPositionIn,upDirectionIn,viewportSizeIn)
 {
 	updateViewTransform();
 	updateProjectionTransform();
@@ -180,14 +190,14 @@ OrthoCamera::OrthoCamera(Vec<float> cameraPositionIn, Vec<float> lookPositionIn,
 void OrthoCamera::updateProjectionTransform()
 {
 	float orthoHeight = 2.0;
-	float aspectRatio = ((FLOAT)gWindowWidth/(FLOAT)gWindowHeight);
+	float aspectRatio = ((FLOAT)viewportSize.x/(FLOAT)viewportSize.y);
 
 	float widgetPixSize = 40.0;
 	float widgetPixSpacing = 5.0;
 
-	float widgetScale = widgetPixSize / ((float)gWindowHeight / 2.0f);
-	float ctrY = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowHeight / 2.0f)) - 1.0f;
-	float ctrX = ((widgetPixSize + widgetPixSpacing) / ((float)gWindowWidth / 2.0f)) - 1.0f;
+	float widgetScale = widgetPixSize / ((float)viewportSize.y / 2.0f);
+	float ctrY = ((widgetPixSize + widgetPixSpacing) / ((float)viewportSize.y / 2.0f)) - 1.0f;
+	float ctrX = ((widgetPixSize + widgetPixSpacing) / ((float)viewportSize.x / 2.0f)) - 1.0f;
 
 	projectionTransform = ConvertMatrix(DirectX::XMMatrixOrthographicRH(aspectRatio*orthoHeight, orthoHeight, 0.01f, 100.0f)
 		* DirectX::XMMatrixScaling(widgetScale, widgetScale, 1.0f) * DirectX::XMMatrixTranslation(ctrX, ctrY, 0.0f));
@@ -195,8 +205,8 @@ void OrthoCamera::updateProjectionTransform()
 
 
 
-TextCamera::TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVec)
-	: Camera(cameraPos, lookPos, upVec)
+TextCamera::TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVec, Vec<int> vpSize)
+	: Camera(cameraPos, lookPos, upVec, vpSize)
 {
 	updateViewTransform();
 	updateProjectionTransform();
@@ -204,12 +214,12 @@ TextCamera::TextCamera(Vec<float> cameraPos, Vec<float> lookPos, Vec<float> upVe
 
 void TextCamera::updateViewTransform()
 {
-	float ar = (float)gWindowWidth / gWindowHeight;
+	float ar = (float)viewportSize.x / viewportSize.y;
 
 	float nearY = 2*nearZ*tan(fovY/2.0f);
 	float nearX = ar * nearY;
 
-	Vec<float> pixScale(nearX/gWindowWidth, nearY/gWindowHeight, 1.0f);
+	Vec<float> pixScale(nearX/viewportSize.x, nearY/viewportSize.y, 1.0f);
 	Vec<float> offset(-nearX/2.0f, nearY/2.0f, -nearZ);
 
 	Eigen::Affine3f newTransform = Eigen::Translation3f(offset.x, offset.y, offset.z)
@@ -221,5 +231,5 @@ void TextCamera::updateViewTransform()
 void TextCamera::updateProjectionTransform()
 {
 	updateViewTransform();
-	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(fovY, (float)gWindowWidth/gWindowHeight, nearZ, farPlane));
+	projectionTransform = ConvertMatrix(DirectX::XMMatrixPerspectiveFovRH(fovY, (float)viewportSize.x/viewportSize.y, nearZ, farPlane));
 }
