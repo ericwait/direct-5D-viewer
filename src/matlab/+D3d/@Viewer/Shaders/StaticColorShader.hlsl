@@ -9,7 +9,6 @@ cbuffer VSConstantBuffer : register( b0 )
 cbuffer PSConstantBuffer : register( b1 )
 {
 	float4 flags;
-	float4 color;
 	float4 colorModifier;
 };
 
