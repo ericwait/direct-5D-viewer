@@ -73,6 +73,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         if (nargout>0)
             varargout{1} = im;
         end
+        return
     end
 
     %% start the viewer
