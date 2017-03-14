@@ -75,6 +75,16 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         end
         return
     end
+    
+    %% if the data is 2D put time on the third dimension
+    if (imData.Dimensions(3)==1)
+        imData.Dimensions(3) = imData.NumberOfFrames;
+        imData.NumberOfFrames = 1;
+        
+        imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]))*10;
+        
+        im = permute(im,[1,2,5,4,3]);
+    end
 
     %% start the viewer
     if (~D3dIsOpen)
