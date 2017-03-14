@@ -110,6 +110,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             end
         else
             D3d.LoadImage(im);
+            loadTransFunc(imData,im);
             D3d.Update();
         end
     else
