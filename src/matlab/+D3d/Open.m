@@ -44,7 +44,6 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             if (isempty(imData))
                 return
             end
-            imagePath = imData.imageDir;
         else
             % there is an image to load just no metadata to go with it
             % assume that the voxels are isomorphic
@@ -56,13 +55,6 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             imData.PixelPhysicalSize = [1.0,1.0,1.0];
             imData.imageDir = '.';
         end
-    end
-
-    %% open the region chooser if the image is too big
-    if (any(imData.Dimensions>2048))
-        D3d.UI.InitializeMipFigure(im,imData,imData.imageDir,true);
-        imData = [];
-        im = [];
     end
     
     %% if there is no metadata, get out without starting anything
@@ -77,13 +69,25 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     end
     
     %% if the data is 2D put time on the third dimension
-    if (imData.Dimensions(3)==1)
+    if (imData.Dimensions(3)==1 && ~isempty(im))
         imData.Dimensions(3) = imData.NumberOfFrames;
         imData.NumberOfFrames = 1;
         
         imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]))*10;
         
         im = permute(im,[1,2,5,4,3]);
+    end
+    
+    %% open the region chooser if the image is too big
+    if (any(imData.Dimensions>2048))
+        D3d.UI.InitializeMipFigure(im,imData,imData.imageDir,true);
+        if (nargout>1)
+            varargout{2} = [];
+        end
+        if (nargout>0)
+            varargout{1} = [];
+        end
+        return
     end
 
     %% start the viewer
