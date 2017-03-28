@@ -66,7 +66,7 @@ end
 
 norms = D3d.Polygon.CalcNorms(verts_xy,faces);
 
-polygon.index = polyIdx;
+polygon(1).index = polyIdx;
 polygon.frame = frame;
 polygon.label = label;
 polygon.color = color;
