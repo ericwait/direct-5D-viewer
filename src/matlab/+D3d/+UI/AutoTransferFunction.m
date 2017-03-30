@@ -5,15 +5,30 @@ function AutoTransferFunction(im)
     
     for c=1:size(im,4)
         curIm = imC(:,:,:,c,:);
+        if (nnz(curIm(:))==0)
+            lb(c) = 0;
+            ub(c) = 255;
+            continue
+        end
         N = histcounts(curIm(curIm>0),255);
         
         forwardSum = cumsum(N);
         lowerBound = forwardSum > sum(N)*0.05;
-        lb(c) = find(lowerBound,1,'first');
+        l = find(lowerBound,1,'first');
+        if (isempty(l))
+            lb(c) = 0;
+        else
+            lb(c) = l;
+        end
         
         reverseSum = cumsum(N,'reverse');
         upperBound = reverseSum < sum(N)*0.005;
-        ub(c) = find(upperBound,1,'first');
+        u = find(upperBound,1,'first');
+        if (isempty(u))
+            ub(c) = 255;
+        else
+            ub(c) = u;
+        end
     end
 
     [imageData, ucolors, channelData] = D3d.UI.Ctrl.GetUserData();
