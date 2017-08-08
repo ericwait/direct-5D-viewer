@@ -147,7 +147,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
 end
 
 function loadTransFunc(imData,im)
-    if (exist(fullfile(imData.imageDir,[imData.DatasetName,'_transfer','.json']),'file'))
+    if (isfield(imData,'imageDir') && exist(fullfile(imData.imageDir,[imData.DatasetName,'_transfer','.json']),'file'))
         D3d.LoadTransferFunction(fullfile(imData.imageDir,[imData.DatasetName,'_transfer','.json']));
     else
         D3d.UI.AutoTransferFunction(im);
