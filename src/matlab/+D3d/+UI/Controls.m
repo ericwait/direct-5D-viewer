@@ -299,13 +299,7 @@ end
 
 % --- Executes on button press in cb_visible.
 function cb_visible_Callback(hObject, eventdata, handles)
-[imageData, colors, channelData] = D3d.UI.Ctrl.GetUserData();
-
-chan = get(handles.m_channelPicker,'Value');
-channelData(chan).visible = get(handles.cb_visible,'Value');
-
-D3d.UI.Ctrl.SetUserData(imageData,colors,channelData);
-D3d.UI.Ctrl.PlotTransferFunctions();
+    D3d.UI.ToggleChannel(get(handles.m_channelPicker,'Value'),get(handles.cb_visible,'Value'));
 end
 
 % --- Executes on button press in cb_textureLighting.
