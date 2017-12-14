@@ -357,6 +357,7 @@ end
 % --- Executes on button press in pb_ResetView.
 function pb_ResetView_Callback(hObject, eventdata, handles)
 D3d.Viewer.ResetView();
+D3d.UI.Ctrl.ResetTransferFunctions();
 D3d.Update();
 end
 
