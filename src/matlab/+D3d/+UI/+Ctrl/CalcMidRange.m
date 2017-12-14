@@ -13,4 +13,10 @@ b = ((y2-y1) - a*(x2.^2-x1.^2)) ./ (x2-x1);
 mm = (2*a*x1+b>=0)&(2*a*x3+b>=0);
 ymin = y2(find(mm,1,'first'));
 ymax = y2(find(mm,1,'last'));
+if (isempty(ymin))
+    ymin = 0;
+end
+if (isempty(ymax))
+    ymax = 1;
+end
 end
