@@ -25,7 +25,7 @@ if (~exist('quiet','var') || isempty(quiet))
     quiet = false;
 end
 
-reductions = [1,1,1];
+%reductions = [1,1,1];
 
 polygon = D3d.Polygon.MakeEmptyStruct();
 
