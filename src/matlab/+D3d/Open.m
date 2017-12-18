@@ -69,11 +69,10 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     end
     
     %% if the data is 2D put time on the third dimension
-    if (imData.Dimensions(3)==1 && ~isempty(im))
+    if (imData.Dimensions(3)==1 && ~isempty(im))        
+        imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]))*imData.NumberOfFrames/max(imData.Dimensions([1,2]))*10;
         imData.Dimensions(3) = imData.NumberOfFrames;
         imData.NumberOfFrames = 1;
-        
-        imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]))*10;
         
         im = permute(im,[1,2,5,4,3]);
     end
