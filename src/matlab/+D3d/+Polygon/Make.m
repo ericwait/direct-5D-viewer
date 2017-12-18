@@ -38,7 +38,7 @@ endCoords_rcz = Utils.SwapXY_RC(max(pixelList_xy,[],1));
 startPadded = startCoords_rcz-PADDING;
 endPadded = endCoords_rcz+PADDING;
 
-roiIm = false(endPadded-startPadded+1);
+roiIm = false(ceil(endPadded-startPadded+1));
 
 paddedPixelList_rcz = Utils.SwapXY_RC(pixelList_xy)-startPadded+1;
 indList = Utils.CoordToInd(size(roiIm),paddedPixelList_rcz);
