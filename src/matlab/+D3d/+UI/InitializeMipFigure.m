@@ -23,7 +23,7 @@ if (~exist('im','var') || isempty(im))
         imMIP = max(MipFullIm,[],3);
     else
         MipFullIm = [];
-        imMIP = MicroscopeData.ReaderMIP(imD,[],[],[],[],[],true);
+        imMIP = MicroscopeData.Reader('imageData',imD,'getMIP',true);
     end
 else
     MipFullIm = im;
