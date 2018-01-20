@@ -25,6 +25,19 @@ if (~exist('quiet','var') || isempty(quiet))
     quiet = false;
 end
 
+if (size(pixelList_xy,2)==3)
+    is3D = true;
+else
+    % this is done because the view must be a 3D kymograph
+    frames = vertcat(...
+        repmat(frame-0.5,size(pixelList_xy,1),1),...
+        repmat(frame+0.5,size(pixelList_xy,1),1));
+    pixelList_xy = repmat(pixelList_xy,2,1);
+    pixelList_xy = horzcat(pixelList_xy,frames);
+    frame = 1;
+    is3D = false;
+end
+
 %reductions = [1,1,1];
 
 polygon = D3d.Polygon.MakeEmptyStruct();
@@ -65,6 +78,12 @@ end
 
 % center the vert in the middle of the voxel
 verts_xy = v_xy + 0.5;
+if (~is3D)
+    minVal = min(verts_xy(:,3));
+    minMask = verts_xy(:,3)==minVal;
+    verts_xy(minMask,3) = verts_xy(minMask,3) + 0.45;
+    verts_xy(~minMask,3) = verts_xy(~minMask,3) - 0.45;
+end
 
 com = rp.Centroid + startPadded -1;
 
