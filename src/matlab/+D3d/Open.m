@@ -74,6 +74,8 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         imData.Dimensions(3) = imData.NumberOfFrames;
         imData.NumberOfFrames = 1;
         
+        imData.PixelPhysicalSize(3) = max(imData.PixelPhysicalSize([1,2]))*2;
+        
         im = permute(im,[1,2,5,4,3]);
     end
     
@@ -112,7 +114,9 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
                 D3d.LoadImage(im(:,:,:,:,t),1,t);
             end
         else
-            D3d.LoadImage(im);
+            for t=1:size(im,5)
+                D3d.LoadImage(im(:,:,:,:,t),1,t);
+            end
             loadTransFunc(imData,im);
             D3d.Update();
         end
@@ -123,12 +127,26 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         loadTransFunc(imData,im);
         
         disp('Only the first image was loaded, please wait while I load the others...');
-        im = MicroscopeData.Reader('path',imData.imageDir,'imageData',imData,'verbose',true);
+        if (nargout>0)
+            fullIm = zeros([Utils.SwapXY_RC(imData.Dimensions),imData.NumberOfChannels,imData.NumberOfFrames],class(im));
+        else
+            fullIm = [];
+        end
         
         prgs = Utils.CmdlnProgress(imData.NumberOfFrames,true,'Loading images in viewer');
         for t=2:imData.NumberOfFrames
-            D3d.LoadImage(im(:,:,:,:,t),1,t);
+            im = MicroscopeData.Reader('path',fullfile(imData.imageDir,[imData.DatasetName,'.json']),'imageData',imData,'timeRange',[t,t]);
+            if (~D3dIsOpen)
+                return
+            end
+            D3d.LoadImage(im,1,t);
+            
+            if (~isempty(fullIm))
+                fullIm(:,:,:,:,t) = im;
+            end
             prgs.PrintProgress(t);
+            
+            drawnow % let the control window send messages
         end
         prgs.ClearProgress(true);
     end
