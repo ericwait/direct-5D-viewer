@@ -30,9 +30,10 @@ if (size(pixelList_xy,2)==3)
 else
     % this is done because the view must be a 3D kymograph
     frames = vertcat(...
-        repmat(frame-0.5,size(pixelList_xy,1),1),...
-        repmat(frame+0.5,size(pixelList_xy,1),1));
-    pixelList_xy = repmat(pixelList_xy,2,1);
+        repmat(max(0,frame-1),size(pixelList_xy,1),1),...
+        repmat(frame,size(pixelList_xy,1),1),...
+        repmat(frame+1,size(pixelList_xy,1),1));
+    pixelList_xy = repmat(pixelList_xy,3,1);
     pixelList_xy = horzcat(pixelList_xy,frames);
     frame = 1;
     is3D = false;
@@ -45,8 +46,8 @@ polygon = D3d.Polygon.MakeEmptyStruct();
 % padd the subimage to get some room to blur
 PADDING = ceil(5*1./reductions);
 
-startCoords_rcz = Utils.SwapXY_RC(min(pixelList_xy,[],1));
-endCoords_rcz = Utils.SwapXY_RC(max(pixelList_xy,[],1));
+startCoords_rcz = Utils.SwapXY_RC(min(round(pixelList_xy),[],1));
+endCoords_rcz = Utils.SwapXY_RC(max(round(pixelList_xy),[],1));
 
 startPadded = startCoords_rcz-PADDING;
 endPadded = endCoords_rcz+PADDING;
@@ -63,14 +64,15 @@ cc.NumObjects = 1;
 cc.PixelIdxList = {indList};
 rp = regionprops(cc,'Centroid');
 
-imR = ImProc.Resize(im2uint8(roiIm),reductions,[],'mean');
+%imR = ImProc.Resize(im2uint8(roiIm),reductions,[],'mean');
+imR = roiIm;
 
 R = linspace(startPadded(1),endPadded(1),size(imR,1));
 C = linspace(startPadded(2),endPadded(2),size(imR,2));
 Z = linspace(startPadded(3),endPadded(3),size(imR,3));
 [x,y,z] = meshgrid(C,R,Z);
 
-[faces, v_xy] = isosurface(x,y,z,imR,1);
+[faces, v_xy] = isosurface(x,y,z,imR,0.75);
 
 if (isempty(v_xy))
     return
