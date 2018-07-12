@@ -13,7 +13,7 @@ function AutoTransferFunction(im)
         N = histcounts(curIm(curIm>0),255);
         
         forwardSum = cumsum(N);
-        lowerBound = forwardSum > sum(N)*0.05;
+        lowerBound = forwardSum > sum(N)*0.1;
         l = find(lowerBound,1,'first');
         if (isempty(l))
             lb(c) = 0;
@@ -36,7 +36,7 @@ function AutoTransferFunction(im)
     for c=1:size(im,4)
         channelData(c).minVal = lb(c)/255;
         channelData(c).maxVal = ub(c)/255;
-        channelData(c).alphaMod = 0.1;
+        channelData(c).alphaMod = 0.5;
     end
     D3d.UI.Ctrl.SetUserData(imageData,ucolors,channelData);
     D3d.UI.Ctrl.UpdateCurrentState();

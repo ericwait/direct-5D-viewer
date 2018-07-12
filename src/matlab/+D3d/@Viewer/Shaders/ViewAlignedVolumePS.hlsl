@@ -61,7 +61,7 @@ float4 ViewAlignedVolumePS( VS_OUTPUT input ) : SV_TARGET
 
 		color.rgb += (lightMod*intensity*channelColor[i].rgb);
 		unlitComposite += intensity*channelColor[i].rgb;
-		alphaComposite += intensity*channelColor[i].rgb*channelColor[i].a;
+		alphaComposite += intensity*channelColor[i].rgb*channelColor[i].a/2.0f;
 	}
 
 	float maxComponent = max(max(unlitComposite.r,unlitComposite.g),unlitComposite.b);

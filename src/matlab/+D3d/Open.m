@@ -81,7 +81,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     
     %% open the region chooser if the image is too big
     if (any(imData.Dimensions>2048))
-        D3d.UI.InitializeMipFigure(im,imData,imData.imageDir,true);
+        D3d.UI.InitializeMipFigure(im,imData);
         if (nargout>1)
             varargout{2} = [];
         end
@@ -107,17 +107,17 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
         end
         
         if (size(im,5)<imData.NumberOfFrames)
-            D3d.LoadImage(im(:,:,:,:,1),1,1);
+            im8 = D3d.LoadImage(im(:,:,:,:,1),1,1);
             D3d.Update();
-            loadTransFunc(imData,im);
+            loadTransFunc(imData,im8);
             for t=2:size(im,5)
                 D3d.LoadImage(im(:,:,:,:,t),1,t);
             end
         else
             for t=1:size(im,5)
-                D3d.LoadImage(im(:,:,:,:,t),1,t);
+                im8 = D3d.LoadImage(im(:,:,:,:,t),1,t);
             end
-            loadTransFunc(imData,im);
+            loadTransFunc(imData,im8);
             D3d.Update();
         end
     else
