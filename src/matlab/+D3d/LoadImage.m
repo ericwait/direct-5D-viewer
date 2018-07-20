@@ -1,6 +1,6 @@
 %LOADIMAGE D3d.LoadImage( im, bufferNum, frameNumber, nonNormalized)
 
-function im8 = LoadImage( im, bufferNum, frameNumber, dontNormalized )
+function im8 = LoadImage( im, bufferNum, frameNumber, normalize )
     global D3dIsOpen
     if (isempty(D3dIsOpen) || ~D3dIsOpen)
         error('You need to open the viewer before you can load images! Call D3d.Open first.');
@@ -20,8 +20,8 @@ function im8 = LoadImage( im, bufferNum, frameNumber, dontNormalized )
         error('You can only load one frame at a time!');
     end
     
-    if (~exist('nonNormalized','var') || isempty(dontNormalized))
-        dontNormalized = false;
+    if (~exist('nonNormalized','var') || isempty(normalize))
+        normalize = true;
     end
 
     bufferType = 'original';
@@ -34,8 +34,8 @@ function im8 = LoadImage( im, bufferNum, frameNumber, dontNormalized )
         im = permute(im,[1,2,5,4,3]);
     end
     
-    if (dontNormalized)
-        im8 = ImUtils.ConvertType(im,'uint8');
+    if (~normalize)
+        im8 = ImUtils.ConvertType(im,'uint8',false);
     else
         im8 = ImUtils.BrightenImages(im,'uint8');
     end
