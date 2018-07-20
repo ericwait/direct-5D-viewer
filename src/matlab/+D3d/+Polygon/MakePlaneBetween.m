@@ -13,7 +13,7 @@ function [polygon] = MakePlaneBetween(pt1_xy,pt2_xy,polygonListIndex,strLabel,fr
 
 	[ inds, verts] = D3d.Polygon.CreatePlane(normVec, centerPoint, sideLength, sideLength);
 
-	polygon.faces = inds;
+	polygon(1).faces = inds;
 	polygon.verts = verts;
 	polygon.norms = repmat(normVec,size(verts,1),1);
 
