@@ -1,6 +1,6 @@
 %LOADIMAGE D3d.LoadImage( im, bufferNum, frameNumber, nonNormalized)
 
-function im8 = LoadImage( im, bufferNum, frameNumber, normalize )
+function im8 = LoadImage( im, bufferNum, frameNumber, normalize, prctSat )
     global D3dIsOpen
     if (isempty(D3dIsOpen) || ~D3dIsOpen)
         error('You need to open the viewer before you can load images! Call D3d.Open first.');
@@ -23,7 +23,10 @@ function im8 = LoadImage( im, bufferNum, frameNumber, normalize )
     if (~exist('nonNormalized','var') || isempty(normalize))
         normalize = true;
     end
-
+    if (~exist('prctSat','var'))
+        prctSat = [];
+    end
+    
     bufferType = 'original';
     if (bufferNum==2)
         bufferType = 'processed';
@@ -37,7 +40,7 @@ function im8 = LoadImage( im, bufferNum, frameNumber, normalize )
     if (~normalize)
         im8 = ImUtils.ConvertType(im,'uint8',false);
     else
-        im8 = ImUtils.BrightenImages(im,'uint8');
+        im8 = ImUtils.BrightenImages(im,'uint8',prctSat);
     end
     if (isempty(frameNumber))
         D3d.Viewer.LoadTexture(im8,bufferType);
