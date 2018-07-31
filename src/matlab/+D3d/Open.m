@@ -48,7 +48,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             % there is an image to load just no metadata to go with it
             % assume that the voxels are isomorphic
             imData.DatasetName = sprintf('%d-D image',ndims(im));
-            imSz = size(im);
+            imSz = ImUtils.Size(im);
             imData.Dimensions = Utils.SwapXY_RC(imSz(1:3));
             imData.NumberOfChannels = size(im,4);
             imData.NumberOfFrames = size(im,5);
