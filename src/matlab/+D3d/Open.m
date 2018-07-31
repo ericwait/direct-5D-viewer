@@ -120,7 +120,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             loadTransFunc(imData,im8);
             D3d.Update();
         end
-    else
+    elseif (false)
         im = MicroscopeData.Reader('path',fullfile(imData.imageDir,[imData.DatasetName,'.json']),'timeRange',[1,1]);
         D3d.LoadImage(im,1,1);
         D3d.Update();
