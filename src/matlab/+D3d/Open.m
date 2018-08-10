@@ -36,6 +36,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     end
     
     %% check for missing data that we might need and load
+    openedMetadata = false;
     if (isempty(imData))
         % there is no image data passed in to load
         if (isempty(im))
@@ -44,6 +45,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             if (isempty(imData))
                 return
             end
+            openedMetadata = true;
         else
             % there is an image to load just no metadata to go with it
             % assume that the voxels are isomorphic
@@ -120,7 +122,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
             loadTransFunc(imData,im8);
             D3d.Update();
         end
-    elseif (false)
+    elseif (openedMetadata)
         im = MicroscopeData.Reader('path',fullfile(imData.imageDir,[imData.DatasetName,'.json']),'timeRange',[1,1]);
         D3d.LoadImage(im,1,1);
         D3d.Update();
