@@ -39,3 +39,5 @@ src/c/d3dViewer.VC.opendb
 *.h5
 *.json
 *.bmp
+
+*.ipch
