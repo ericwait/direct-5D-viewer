@@ -39,6 +39,8 @@ function im8 = LoadImage( im, bufferNum, frameNumber, normalize, prctSat )
     
     if (~normalize)
         im8 = ImUtils.ConvertType(im,'uint8',false);
+    elseif (isa(im,'uint8'))
+        im8 = im;
     else
         im8 = ImUtils.BrightenImages(im,'uint8',prctSat);
     end
