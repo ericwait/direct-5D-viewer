@@ -31,9 +31,8 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     else
         EXT_MESAGE_FUNC = mesagePkgStr;
     end
-    if (isempty(D3dIsOpen))
-        D3dIsOpen = false;
-    end
+    
+    D3dIsOpen = D3d.IsOpen();
     
     %% check for missing data that we might need and load
     openedMetadata = false;
