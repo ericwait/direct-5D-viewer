@@ -181,4 +181,9 @@
       <Filter>Messaging\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="D3d.def">
+      <Filter>Messaging\Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
