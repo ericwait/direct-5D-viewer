@@ -27,7 +27,7 @@ if (~exist('im','var') || isempty(im))
     end
 else
     MipFullIm = im;
-    imMIP = max(MipFullIm,[],3);
+    imMIP = max(ImUtils.BrightenImages(MipFullIm),[],3);
 end
 
 colors = MicroscopeData.Colors.GetChannelColors(imD);
