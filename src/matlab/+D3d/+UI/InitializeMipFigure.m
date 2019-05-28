@@ -1,4 +1,4 @@
-function InitializeMipFigure(im, imD, metadataPath, prompt)
+function InitializeMipFigure(im, imD)
 %InitializeMipFigure( metadataPath, prompt)
 
 global MipFigureHandle MipAxesHandle MipPrevRectangleHandle MipDragRectangleHandle MipTextHandle MipDragLineHandle MipFullIm
@@ -10,7 +10,7 @@ if (~exist('imD','var') || isempty(imD))
     if (~exist('metadataPath','var') || isempty(metadataPat))
         error('No image or metadata to read!');
     end
-    imD = MicroscopeData.ReadMetadata(metadataPath,prompt);
+    %imD = MicroscopeData.ReadMetadata(metadataPath,prompt);
 end
 
 [~, imInfo] = MicroscopeData.GetImageClass(imD);
