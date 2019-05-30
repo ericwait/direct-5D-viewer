@@ -20,7 +20,7 @@ function im8 = LoadImage( im, bufferNum, frameNumber, normalize, prctSat )
         error('You can only load one frame at a time!');
     end
     
-    if (~exist('nonNormalized','var') || isempty(normalize))
+    if (~exist('normalize','var') || isempty(normalize))
         normalize = true;
     end
     if (~exist('prctSat','var'))
