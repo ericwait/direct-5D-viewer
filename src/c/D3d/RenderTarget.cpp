@@ -93,7 +93,7 @@ ReadbackRenderTarget::~ReadbackRenderTarget()
 bool ReadbackRenderTarget::clearBuffers()
 {
 	SAFE_RELEASE(renderSurface);
-	SAFE_RELEASE(renderSurface);
+	SAFE_RELEASE(stagingSurface);
 
 	SAFE_RELEASE(renderTarget);
 
