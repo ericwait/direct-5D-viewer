@@ -104,8 +104,14 @@ HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn)
 {
 	dllRoot = rootDir;
 
-	for ( int i=0; i < TargetChains::NumTC; ++i )
-		viewportSize[i] = viewportSizeIn;
+	// Default scaling is 100% except
+	for (int i = 0; i < TargetChains::NumTC; ++i)
+		dpiScale[i] = 100;
+	// Main backbuffer scale is 150% to improve render speed
+	dpiScale[TargetChains::Screen] = 150;
+
+	for (int i = 0; i < TargetChains::NumTC; ++i)
+		setViewportSize(viewportSizeIn, (TargetChains)i);
 
 	HRESULT hr = initDevice();
 	if (FAILED(hr))
@@ -200,7 +206,7 @@ void Renderer::releaseDevice()
 
 HRESULT Renderer::initRenderTargets()
 {
-	Vec<int> size = viewportSize[TargetChains::Screen];
+	Vec<int> size = getViewportSize(TargetChains::Screen);
 	renderChains[TargetChains::Screen][RenderTargetTypes::DefaultRT] = std::make_shared<SwapChainTarget>(this, gWindowHandle, size.x, size.y);
 	renderChains[TargetChains::Capture][RenderTargetTypes::DefaultRT] = std::make_shared<ReadbackRenderTarget>(this, size.x, size.y);
 
@@ -884,9 +890,9 @@ void Renderer::startRender(TargetChains chain)
 		resetViewPort(chain);
 
 	// Set up the camera projections
-	gCameraText->setViewportSize(viewportSize[chain]);
-	gCameraWidget->setViewportSize(viewportSize[chain]);
-	gCameraDefaultMesh->setViewportSize(viewportSize[chain]);
+	gCameraText->setViewportSize(getViewportSize(chain));
+	gCameraWidget->setViewportSize(getViewportSize(chain));
+	gCameraDefaultMesh->setViewportSize(getViewportSize(chain));
 
 	attachTargets(chain, RenderTargetTypes::DefaultRT, DepthTargetTypes::DefaultDT);
 
@@ -1106,7 +1112,8 @@ void Renderer::renderLabel(TargetChains chain, const Camera* camera, const Graph
 	DirectX::XMFLOAT3 centerOfmass(centerOfmassVec.x,centerOfmassVec.y,centerOfmassVec.z);
 	DirectX::XMVECTOR com = DirectX::XMLoadFloat3(&centerOfmass);
 
-	const Vec<int>& size = viewportSize[chain];
+	const Vec<int>& size = getViewportSize(chain);
+	//const Vec<int>& size = viewportSize[chain];
 
 	v2D = DirectX::XMVector3Project(com,0.0f,0.0f,(float)size.x,(float)size.y,0.0f,1.0f,
 		camera->getProjectionTransform(),camera->getViewTransform(),node->getLocalToWorld());
@@ -1127,7 +1134,8 @@ void Renderer::renderScaleValue(TargetChains chain, const Camera* camera)
 	if ( !volInfo )
 		return;
 
-	Vec<int>& viewSize = viewportSize[chain];
+	const Vec<int>& viewSize = getViewportSize(chain);
+	//const Vec<int>& viewSize = viewportSize[chain];
 
 	float sz = camera->getVolUnitsPerPix();
 
@@ -1195,7 +1203,9 @@ void Renderer::renderFrameNum(TargetChains chain)
 	char buff[36];
 	sprintf(buff, "Frame:%d", currentFrame+1);
 
-	Vec<int>& viewSize = viewportSize[chain];
+	const Vec<int>& viewSize = getViewportSize(chain);
+	//const Vec<int>& viewSize = viewportSize[chain];
+
 	Vec<int> screenPos(viewSize.x-120, 10, 0);
 	textRenderer->drawString(buff, screenPos);
 }
@@ -1600,15 +1610,26 @@ int Renderer::getPolygon(Vec<float> pnt, Vec<float> direction)
 	return node->getIndex();
 }
 
-void Renderer::resizeViewPort(Vec<int> sizeIn, TargetChains selectChain)
+void Renderer::setViewportSize(Vec<int> sizeIn, TargetChains selectChain)
 {
 	viewportSize[selectChain] = sizeIn;
+	scaledViewSize[selectChain] = (sizeIn * 100) / dpiScale[selectChain];
+}
+
+const Vec<int>& Renderer::getViewportSize(TargetChains selectChain) const
+{
+	return scaledViewSize[selectChain];
+}
+
+void Renderer::resizeViewPort(Vec<int> sizeIn, TargetChains selectChain)
+{
+	setViewportSize(sizeIn, selectChain);
 
 	for ( int i=0; i < RenderTargetTypes::NumRT; ++i )
-		renderChains[selectChain][i]->resizeTarget(viewportSize[selectChain].x, viewportSize[selectChain].y);
+		renderChains[selectChain][i]->resizeTarget(getViewportSize(selectChain).x, getViewportSize(selectChain).y);
 
 	for ( int i=0; i < DepthTargetTypes::NumDT; ++i )
-		depthChains[selectChain][i]->resizeDepth(viewportSize[selectChain].x, viewportSize[selectChain].y);
+		depthChains[selectChain][i]->resizeDepth(getViewportSize(selectChain).x, getViewportSize(selectChain).y);
 
 	resetViewPort(selectChain);
 }
@@ -1622,8 +1643,8 @@ void Renderer::flushContext()
 HRESULT Renderer::resetViewPort(TargetChains selectChain)
 {
 	D3D11_VIEWPORT vp;
-	vp.Width = (float)viewportSize[selectChain].x;
-	vp.Height = (float)viewportSize[selectChain].y;
+	vp.Width = (float)getViewportSize(selectChain).x;
+	vp.Height = (float)getViewportSize(selectChain).y;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
@@ -1701,6 +1722,13 @@ void Renderer::setWorldOrigin(Vec<float> org)
 void Renderer::setWorldRotation(DirectX::XMMATRIX rotation)
 {
 	rootScene->updateRotation(rotation);
+}
+
+void Renderer::setDpiScale(int scale, TargetChains selectChain)
+{
+	dpiScale[selectChain] = scale;
+
+	resizeViewPort(viewportSize[selectChain], selectChain);
 }
 
 

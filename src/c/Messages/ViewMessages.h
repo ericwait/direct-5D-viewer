@@ -20,6 +20,19 @@ private:
 	int height;
 };
 
+class MessageSetDpiScale : public Message
+{
+public:
+
+	MessageSetDpiScale(int scale) : scale(scale) {}
+
+protected:
+	virtual bool process();
+
+private:
+	int scale;
+};
+
 
 class MessageResetView: public Message
 {

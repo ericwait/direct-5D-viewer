@@ -18,6 +18,18 @@ bool MessageSetWindowSize::process()
 }
 
 
+bool MessageSetDpiScale::process()
+{
+	if ( !gRenderer )
+		return false;
+
+	gRenderer->setDpiScale(scale, TargetChains::Screen);
+	gRenderer->forceUpdate();
+
+	return true;
+}
+
+
 
 bool MessageResetView::process()
 {

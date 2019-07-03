@@ -163,6 +163,9 @@
     <ClCompile Include="Mex\MexSetCaptureSize.cpp">
       <Filter>Mex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mex\MexSetDpiScale.cpp">
+      <Filter>Mex\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mex\MexCommand.h">

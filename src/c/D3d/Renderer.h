@@ -111,7 +111,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 	HRESULT init(std::string rootDir, Vec<int> viewportSizeIn);
 
-//Setters	
+//Setters
 	void setRendering(bool rendering){isRendering = rendering;}
 	void setCurrentFrame(int frame);
 	void incrementFrame();
@@ -141,6 +141,7 @@ public:
 	void setWorldRotation(DirectX::XMMATRIX rotation);
 	void resetRootWorldTransform();
 	
+	void setDpiScale(int scale, TargetChains selectChain);
 	void setClipChunkPercent(float ccp);
 	void setNumPlanes(int numPlanes); //TODO this could be changed to be smarter about where to peel from
 	void setLabels(bool on){labelsOn=on;}
@@ -276,13 +277,20 @@ private:
 
 	const SwapChainTarget* getSwapChain() const;
 
+	// Used internally by resizeViewport and init to set dpiScaled size of viewport
+	void setViewportSize(Vec<int> sizeIn, TargetChains selectChain);
+	const Vec<int>& getViewportSize(TargetChains selectChain) const;
+
 
 	//Member variables 
 	bool isDirty;
 	bool isRendering;
 
 	TargetChains lastChain;
+	// Percentage of resolution reduction relative to pixel size of window (e.g. 200% => 1920x1080 / 2.0 = 960x540)
+	int dpiScale[TargetChains::NumTC];
 	Vec<int> viewportSize[TargetChains::NumTC];
+	Vec<int> scaledViewSize[TargetChains::NumTC];
 
 	Vec<float> backgroundColor;
 
