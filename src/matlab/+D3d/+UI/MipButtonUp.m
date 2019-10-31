@@ -68,7 +68,7 @@ if (~isempty(answer))
         
         [~,~,maxVal] = Utils.GetClassBits(MipROIim);
         
-        goodZ = squeeze(max(max(max(MipROIim,[],1),[],2),[],4));
+        goodZ = squeeze(max(MipROIim,[],[1,2,4,5]));
         zStart = find(goodZ>maxVal*0.04,1,'first');
         if (isempty(zStart))
             zStart = 1;
