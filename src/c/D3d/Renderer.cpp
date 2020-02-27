@@ -108,7 +108,7 @@ HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn)
 	for (int i = 0; i < TargetChains::NumTC; ++i)
 		dpiScale[i] = 100;
 	// Main backbuffer scale is 150% to improve render speed
-	dpiScale[TargetChains::Screen] = 150;
+	dpiScale[TargetChains::Screen] = 100;
 
 	for (int i = 0; i < TargetChains::NumTC; ++i)
 		setViewportSize(viewportSizeIn, (TargetChains)i);
