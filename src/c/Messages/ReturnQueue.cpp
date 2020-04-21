@@ -15,6 +15,7 @@
 
 #include "ReturnQueue.h"
 #include "comdef.h"
+#include <stdexcept>
 
 ReturnQueue::ReturnQueue()
 {

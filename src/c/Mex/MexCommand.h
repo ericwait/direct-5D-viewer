@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <exception>
+#include <stdexcept>
 
 #include "Global/ModuleInfo.h"
 
