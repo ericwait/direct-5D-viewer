@@ -13,8 +13,9 @@
 %LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function vertNormals = CalcNorms(vertList, faceList)
+function [vertNormals, faceNormals] = CalcNorms(vertList, faceList)
     vertNormals = zeros(size(vertList,1),3);
+    faceNormals = zeros(size(faceList,1),3);
     for i=1:size(faceList,1)
         face = faceList(i,:);
         edges = [vertList(face(2),:)-vertList(face(1),:);
@@ -31,10 +32,10 @@ function vertNormals = CalcNorms(vertList, faceList)
         faceAngles = acos(faceDir);
         
         faceVec = cross(edges(1,:), edges(2,:));
-        faceNorm = faceVec / norm(faceVec);
+        faceNormals(i,:) = faceVec / norm(faceVec);
         
         for k=1:3
-            vertNormals(face(k),:) = vertNormals(face(k),:) + faceAngles(k)*faceNorm;
+            vertNormals(face(k),:) = vertNormals(face(k),:) + faceAngles(k)*faceNormals(i,:);
         end
     end
     vertLengths = sqrt(sum(vertNormals.^2,2));
