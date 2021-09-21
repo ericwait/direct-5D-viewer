@@ -100,7 +100,7 @@ function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
     end
 
     D3d.Viewer.InitVolume([imData.Dimensions([2,1,3]),imData.NumberOfChannels,imData.NumberOfFrames],imData.PixelPhysicalSize([2,1,3]));
-    D3d.UI.Controls(imData);
+    D3d.UI.Controls_App(imData);
     
     if (~isempty(im))
         if (size(im,4)<imData.NumberOfChannels)
