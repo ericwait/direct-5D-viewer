@@ -17,6 +17,8 @@ function polygons = MakeBW(imBW, colors, minVol, maxVol, verbose)
     
     if (verbose)
         prgs = Utils.CmdlnProgress(size(imBW,5),true,'Making Polygons',false);
+    else
+        prgs = [];
     end
     
     parfor t=1:size(imBW,5)
