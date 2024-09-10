@@ -1,3 +1,0 @@
-LIBRARY	"D3d"
-EXPORTS DllMain
-EXPORTS mexFunction

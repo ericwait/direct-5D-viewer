@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "Global/ModuleInfo.h"
+#include "ModuleInfo.h"
 
 // Abstract base class for mex commands
 class MexCommand

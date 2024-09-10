@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
+#include "Globals.h"
 
-#include "Messages/AnimMessages.h"
+#include "AnimMessages.h"
 
 void MexCaptureSpinMovie::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

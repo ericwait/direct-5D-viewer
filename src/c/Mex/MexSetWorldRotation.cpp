@@ -1,8 +1,8 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
-#include "Global/Vec.h"
+#include "Globals.h"
+#include "Vec.h"
 
-#include "Messages/ViewMessages.h"
+#include "ViewMessages.h"
 
 void MexSetWorldRotation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

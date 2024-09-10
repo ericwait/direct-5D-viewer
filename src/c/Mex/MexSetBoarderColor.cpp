@@ -1,15 +1,13 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
+#include "Globals.h"
+#include "ViewMessages.h"
 
 void MexSetBorderColor::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {
     double* bc = (double*)mxGetData(prhs[0]);
-    Vec<float>* background = new Vec<float>;
-    background->x = (float)(bc[0]);
-    background->y = (float)(bc[1]);
-    background->z = (float)(bc[2]);
+    Vec<float> background(bc);
 
-    gMsgQueueToDirectX.writeMessage("setBorderColor", (void*)background);
+    gMsgQueueToDirectX.pushMessage(new MessageSetBorderColor(background));
 }
 
 std::string MexSetBorderColor::check(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

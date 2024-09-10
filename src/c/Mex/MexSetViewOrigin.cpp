@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
+#include "Globals.h"
 
-#include "Messages/ViewMessages.h"
+#include "ViewMessages.h"
 
 void MexSetViewOrigin::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

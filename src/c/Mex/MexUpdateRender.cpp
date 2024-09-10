@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
+#include "Globals.h"
 
-#include "Messages/RenderMessages.h"
+#include "RenderMessages.h"
 
 void MexUpdateRender::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

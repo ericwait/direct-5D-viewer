@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
+#include "Globals.h"
 
-#include "Messages/LoadMessages.h"
+#include "LoadMessages.h"
 
 void MexLoadTextureFrame::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

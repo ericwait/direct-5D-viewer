@@ -1,5 +1,5 @@
 #include "MexCommand.h"
-#include "Global/Globals.h"
+#include "Globals.h"
 
 void MexPoll::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

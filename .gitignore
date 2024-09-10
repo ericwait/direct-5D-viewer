@@ -41,3 +41,4 @@ src/c/d3dViewer.VC.opendb
 *.bmp
 
 *.ipch
+build
