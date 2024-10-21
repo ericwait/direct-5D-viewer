@@ -37,12 +37,10 @@ function im8 = LoadImage( im, bufferNum, frameNumber, normalize, prctSat )
         im = permute(im,[1,2,5,4,3]);
     end
     
-    if (~normalize)
-        im8 = ImUtils.ConvertType(im,'uint8',false);
-    elseif (isa(im,'uint8'))
+    if (isa(im,'uint8'))
         im8 = im;
     else
-        im8 = ImUtils.BrightenImages(im,'uint8',prctSat);
+        im8 = ImUtils.ConvertType(im,'uint8',normalize);
     end
     if (isempty(frameNumber))
         D3d.Viewer.LoadTexture(im8,bufferType);
