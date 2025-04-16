@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Renderer.h"
+#include "stb_truetype.h"
+
+#include <vector>
 
 class Texture
 {
@@ -56,27 +59,21 @@ class TextAtlasTexture : public ConstTextureBase
 {
 	friend class TextRenderer;
 public:
-	TextAtlasTexture(Renderer* rendererIn, HWND hwnd, const std::string& fontFace, int textHeight, const std::string& charList);
+	TextAtlasTexture(Renderer* rendererIn, const std::string& fontFace, int textHeightPx, int charStart, int charCount);
 
-	//TESTING!
-	virtual ~TextAtlasTexture(){delete[] atlas;}
+	bool getWhitespaceOffset(int c, float lineStart, Vec<float>& cursor);
+	bool getCharQuad(int c, Vec<float>& cursor, Vec<float> quadPos[4], Vec<float> quadUVs[4]);
 
 private:
-	bool computeAtlasSize();
-	size_t createTextAtlas(HWND hwnd, const std::string& fontFace, int textHeight, const std::string& charList, uint8_t** atlasOut);
+	bool computeAtlasSize(int numChars, Vec<int> charBox);
+	size_t bakeTextAtlas(const std::string& fontFace, int textHeightPx, int charStart, int charCount);
 
-	//TESTING
-	uint8_t* atlas;
-
-
-	int numChars;
 	// Total texture dimensions in pixels
 	Vec<size_t> atlasDims;
-	// Total number of character boxes in atlas
-	Vec<size_t> atlasBoxes;
-	// Box dimensions of a character in the atlas
-	Vec<size_t> charBox;
+	std::vector<uint8_t> atlas;
 
-	// Actual character size for layout
-	Vec<size_t> charSize;
+	int atlasStart;
+	Vec<int> maxCharBox;
+	Vec<float> wsOffset;
+	std::vector<stbtt_bakedchar> charInfo;
 };

@@ -1,5 +1,11 @@
 #include "Texture.h"
 
+#include <stdint.h>
+#include <fstream>
+#include <iterator>
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
 
 ConstTextureBase::ConstTextureBase(Renderer* rendererIn)
 	: renderer(rendererIn), resourceView(NULL), samplerState(NULL)
@@ -45,12 +51,12 @@ Const3DTexture::Const3DTexture(Renderer* rendererIn, Vec<size_t> dims, const uns
 
 
 
-TextAtlasTexture::TextAtlasTexture(Renderer* rendererIn, HWND hwnd, const std::string& fontFace, int textHeight, const std::string& charList)
+TextAtlasTexture::TextAtlasTexture(Renderer* rendererIn, const std::string& fontFace, int textHeight, int char_start, int char_count)
 	: ConstTextureBase(rendererIn)
 {
 	// Use GDI to render the character list to a memory buffer.
 	//uint8_t* atlas = NULL;
-	size_t atlasSize = createTextAtlas(hwnd, fontFace, textHeight, charList, &atlas);
+	size_t atlasSize = bakeTextAtlas(fontFace, textHeight, char_start, char_count);
 	if ( atlasSize == 0 )
 		std::runtime_error("Unable to create atlas for font!");
 
@@ -74,7 +80,7 @@ TextAtlasTexture::TextAtlasTexture(Renderer* rendererIn, HWND hwnd, const std::s
 	D3D11_SUBRESOURCE_DATA initData;
 	initData.SysMemPitch = atlasDims.x;
 	initData.SysMemSlicePitch = atlasDims.y;
-	initData.pSysMem = (void*)atlas;
+	initData.pSysMem = (void*)atlas.data();
 
 	ID3D11Resource* texture2D = renderer->createTexture2D(&desc, &initData);
 
@@ -82,13 +88,65 @@ TextAtlasTexture::TextAtlasTexture(Renderer* rendererIn, HWND hwnd, const std::s
 	samplerState = rendererIn->createSamplerState(InterpTypes::Nearest);
 
 	SAFE_RELEASE(texture2D);
-	//delete[] atlas;
 };
+
+bool TextAtlasTexture::getWhitespaceOffset(int c, float lineStart, Vec<float>& cursor)
+{
+	float pad = 0.0f;
+	if (c == '\n')
+	{
+		cursor.x = lineStart;
+		cursor.y += pad + wsOffset.y;
+		return true;
+	}
+
+	if (c == ' ')
+	{
+		cursor += Vec<float>(pad + wsOffset.x, 0.0f, 0.0f);
+		return true;
+	}
+
+	return false;
+}
+
+bool TextAtlasTexture::getCharQuad(int c, Vec<float>& cursor, Vec<float> quadPos[4], Vec<float> quadUVs[4])
+{
+	int atlasIdx = c - atlasStart;
+
+	// TODO: Changed this from old method, don't advance for unrecognized char
+	if (atlasIdx < 0 || atlasIdx >= charInfo.size())
+		return false;
+
+	stbtt_aligned_quad q;
+	stbtt_GetBakedQuad(charInfo.data(), atlasDims.x, atlasDims.y, atlasIdx, &cursor.x, &cursor.y, &q, 1);
+	
+	quadPos[0].x = q.x0;
+	quadPos[0].y = q.y0;
+	quadUVs[0].x = q.s0;
+	quadUVs[0].y = q.t0;
+
+	quadPos[1].x = q.x0;
+	quadPos[1].y = q.y1;
+	quadUVs[1].x = q.s0;
+	quadUVs[1].y = q.t1;
+
+	quadPos[2].x = q.x1;
+	quadPos[2].y = q.y1;
+	quadUVs[2].x = q.s1;
+	quadUVs[2].y = q.t1;
+
+	quadPos[3].x = q.x1;
+	quadPos[3].y = q.y0;
+	quadUVs[3].x = q.s1;
+	quadUVs[3].y = q.t0;
+
+	return true;
+}
 
 #define CEIL_DIV(n,d) (((n)+(d)-1)/(d))
 #define ROUND_DIV(n,d) (((n)+(n)+(d))/((d)+(d)))
 
-bool TextAtlasTexture::computeAtlasSize()
+bool TextAtlasTexture::computeAtlasSize(int numChars, Vec<int> charBox)
 {
 	const int minDim = 32;
 	const int maxDim = 2048;
@@ -123,127 +181,55 @@ bool TextAtlasTexture::computeAtlasSize()
 	}
 
 	atlasDims = Vec<size_t>(width,height,1);
-	atlasBoxes = atlasDims / charBox;
 
 	return true;
 }
 
-size_t TextAtlasTexture::createTextAtlas(HWND hwnd, const std::string& fontFace, int textHeight, const std::string& charList, uint8_t** atlasOut)
+#pragma optimize("",off)
+size_t TextAtlasTexture::bakeTextAtlas(const std::string& fontFace, int textHeightPx, int charStart, int charCount)
 {
-	HDC windowDC = GetDC(hwnd);
+	// NOTE: We are assuming we are using only ascii characters 
+	atlasStart = charStart;
 
-	// Use a fixed-width font to that it is simple to layout the characters
-	HFONT hFont = CreateFont(textHeight, 0,	0, 0, FW_NORMAL, false, false, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH|FF_DONTCARE, fontFace.c_str());
+	std::ifstream fontStream(fontFace, std::ios::binary);
+	std::vector<uint8_t> fontData{std::istreambuf_iterator<char>(fontStream), std::istreambuf_iterator<char>()};
 
-	HDC hdcMem = CreateCompatibleDC(windowDC);
-	if ( !hdcMem )
-		return 0;
+	stbtt_fontinfo fontInfo;
+	stbtt_InitFont(&fontInfo, fontData.data(), 0);
 
-	// Select font into DC to get preliminary text metrics so we can correctly size the texture
-	SelectObject(hdcMem, (HGDIOBJ)hFont);
+	// Compute scale for codepoint metrics
+	float scale = stbtt_ScaleForPixelHeight(&fontInfo, textHeightPx);
 
-	TEXTMETRIC metrics;
-	GetTextMetrics(hdcMem, &metrics);
+	// TODO: Figure out actual widest char or do more generalized font bake/packing
+	// Assume 'W' is widest char
+	int maxAdvance;
+	stbtt_GetCodepointHMetrics(&fontInfo, 'W', &maxAdvance, nullptr);
 
-	// Compute total atlas dimensions from the character box size
-	numChars = charList.length();
-	charBox = Vec<size_t>(metrics.tmMaxCharWidth, metrics.tmHeight, 1);
-	if ( !computeAtlasSize() )
+	maxCharBox.x = static_cast<int>(maxAdvance*scale + 1.0f);
+	maxCharBox.y = textHeightPx;
+	if (!computeAtlasSize(charCount, maxCharBox))
 	{
-		ReleaseDC(hwnd, windowDC);
-		DeleteDC(hdcMem);
-		DeleteObject(hFont);
 		return 0;
 	}
 
-	// Set tight character dimensions (for quad coords and UVs)
-	charSize = Vec<size_t>(metrics.tmAveCharWidth, metrics.tmHeight, 1);
+	charInfo.resize(charCount);
+	atlas.resize(atlasDims.product());
 
-	HBITMAP hBMP = CreateCompatibleBitmap(windowDC, atlasDims.x, atlasDims.y);
-	SelectObject(hdcMem, hBMP);
+	// Compute the x/y offset for white-space (i.e. ' ' / '\n')
+	int advance;
+	stbtt_GetCodepointHMetrics(&fontInfo, ' ', &advance, nullptr);
 
-	// Only needed the window device for creating a compatible bitmap
-	ReleaseDC(hwnd, windowDC);
+	int ascent;
+	int descent;
+	int lineGap;
+	stbtt_GetFontVMetrics(&fontInfo, &ascent, &descent, &lineGap);
 
+	wsOffset.x = advance * scale;
+	wsOffset.y = (ascent - descent + lineGap) * scale;
 
-	// Clear background to black
-	HBRUSH hbr = CreateSolidBrush(0x00000000);
-	RECT rc ={0,0, atlasDims.x,atlasDims.y};
-	FillRect(hdcMem, &rc, hbr);
+	stbtt_BakeFontBitmap(fontData.data(), 0, textHeightPx,
+						atlas.data(), atlasDims.x, atlasDims.y,
+						charStart, charCount, charInfo.data());
 
-	// Prepare to draw each character
-	SetMapMode(hdcMem, MM_TEXT);
-	SetTextColor(hdcMem, 0x00FFFFFF);
-	SetBkMode(hdcMem, TRANSPARENT);
-	SetTextAlign(hdcMem, TA_TOP | TA_LEFT);
-
-	char charStr[2] = {'\0','\0'};
-
-	// Render the characters individually to guarantee box-spacing
-	SelectObject(hdcMem, (HGDIOBJ)hFont);
-	for ( int i=0; i < charList.length(); ++i )
-	{
-		int idxX = i % atlasBoxes.x;
-		int idxY = i / atlasBoxes.x;
-
-		charStr[0] = charList[i];
-		TextOut(hdcMem, charBox.x * idxX, charBox.y * idxY, charStr, 1);
-	}
-
-	BITMAPINFOHEADER bi;
-	bi.biSize = sizeof(BITMAPINFOHEADER);
-	bi.biWidth = atlasDims.x;
-	bi.biHeight = -atlasDims.y;
-	bi.biPlanes = 1;
-	bi.biBitCount = 24;
-	bi.biCompression = BI_RGB;
-	bi.biSizeImage = 0;
-	bi.biXPelsPerMeter = 0;
-	bi.biYPelsPerMeter = 0;
-	bi.biClrUsed = 0;
-	bi.biClrImportant = 0;
-
-	size_t pixelSize = bi.biBitCount / 8;
-
-	size_t pixelRow = atlasDims.x * pixelSize;
-	size_t rowPad = ((~(pixelRow & 0x03) + 1) & 0x03);
-	size_t rowSize = ((pixelRow >> 2) + (rowPad > 0)) << 2;
-
-	size_t bmpSize = rowSize * atlasDims.y;
-
-	// Load device independent bitmap data into memory
-	uint8_t* bmpData = new uint8_t[bmpSize];
-	GetDIBits(hdcMem, hBMP, 0, (UINT)atlasDims.y, bmpData, (BITMAPINFO*) &bi, DIB_RGB_COLORS);
-
-	// Can dump all the surface and graphic objects now
-	DeleteDC(hdcMem);
-	DeleteObject(hFont);
-	DeleteObject(hBMP);
-	DeleteObject(hbr);
-
-
-	// Create a single channel version of the texture using averaging (in case we change to antialiased fonts)
-	uint8_t* outData = new uint8_t[atlasDims.product()];
-	memset(outData, 0, atlasDims.product());
-
-	for ( int y = 0; y < atlasDims.y; ++y )
-	{
-		for ( int x=0; x < atlasDims.x; ++x )
-		{
-			size_t outIdx = x + y*atlasDims.x;
-			size_t pixelStart = x*pixelSize + y*rowSize;
-
-			int accum = 0;
-			for ( int c=0; c < 3; ++c )
-				accum += bmpData[pixelStart + c];
-
-			outData[outIdx] = (uint8_t) ROUND_DIV(accum,3);
-		}
-	}
-
-	delete[] bmpData;
-
-	*atlasOut = outData;
-	return atlasDims.product();
+	return charInfo.size();
 }

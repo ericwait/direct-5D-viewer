@@ -23,6 +23,7 @@ set(D3d_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/c/D3dLib/D3d)
 set(Global_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/c/D3dLib/Global)
 set(Messages_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/c/D3dLib/Messages)
 set(Shaders_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/c/D3dLib/Shaders)
+set(Thirdparty_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/c/Thirdparty)
 
 add_subdirectory(src/c/D3dLib)
 add_subdirectory(src/c/Standalone)

@@ -114,22 +114,6 @@ HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir)
 	if ( FAILED(hr) )
 		return hr;
 
-	gFont = CreateFont(18,//Height
-		0,          //Width
-		0,          //Escapement
-		0,          //Orientation
-		FW_NORMAL,  //Weight
-		false,      //Italic
-		false,      //Underline
-		false,      //Strikeout
-		DEFAULT_CHARSET,//Charset 
-		OUT_DEFAULT_PRECIS,  //Output Precision
-		CLIP_DEFAULT_PRECIS, //Clipping Precision
-		DEFAULT_QUALITY,     //Quality
-		DEFAULT_PITCH|FF_DONTCARE, //Pitch and Family
-		"Arial");
-
-
 	Vec<int> viewportSize(gWindowWidth,gWindowHeight,1);
 	return createRenderResources(rootDir, viewportSize);
 }

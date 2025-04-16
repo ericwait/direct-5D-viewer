@@ -16,10 +16,14 @@ class TextRenderer
 {
 	friend class Renderer;
 public:
-	TextRenderer(Renderer* rendererIn, HWND hwnd, const std::string& fontFace, int textHeight);
+	TextRenderer(Renderer* rendererIn, const std::string& fontFace, int textHeight);
 
-	void drawString(const std::string text, Vec<int> screenPos, Color fg = Color(1.0f,1.0f,1.0f,1.0f), Color bg = Color(0.0f,0.0f,0.0f,0.0f));
-	void drawRect(Vec<int> topLeft, Vec<int> size, Color color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	void drawString(const std::string text, Vec<int> baselinePos, Color fg = Color(1.0f,1.0f,1.0f,1.0f), Color bg = Color(0.0f,0.0f,0.0f,0.0f));
+	void drawRect(Vec<int> bottomLeft, Vec<int> size, Color color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+
+	int getFontHeight();
+	int getFontWidth();
+
 	void render();
 
 	~TextRenderer();
@@ -28,9 +32,6 @@ private:
 	TextRenderer(){}
 
 	static std::map<char, int> buildIdxMap();
-
-	void computePos(const Vec<float> start, const Vec<float> offsets[4], Vec<float> posQuad[4]);
-	bool computeUV(const char code, Vec<float> uvQuad[4]);
 
 	static const int maxQuads;
 	static const std::string printable;

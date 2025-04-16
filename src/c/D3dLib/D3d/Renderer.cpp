@@ -140,7 +140,7 @@ HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn)
 	resetViewPort(TargetChains::Screen);
 
 	// Make sure this is initialized after fallback renderers and viewports
-	textRenderer = new TextRenderer(this, gWindowHandle, "Consolas", 20);
+	textRenderer = new TextRenderer(this, "C:/Windows/Fonts/consola.ttf", 20);
 
 	setRendering(true);
 
@@ -1176,24 +1176,27 @@ void Renderer::renderScaleValue(TargetChains chain, const Camera* camera)
 		}
 	}
 
+	int charOffY = textRenderer->getFontHeight();
 	if(scaleTextOn)
 	{
+		// TODO: Can make generalized utf-8 char if we use the a more general atlas bake
 		char buff[36];
 		if( closestUnits >= 1.0f )
-			sprintf(buff, "%.0f%cm", closestUnits, 0xb5);
+			sprintf(buff, "%.0f%cm", closestUnits, 'u');
 		else if( closestUnits >= 0.1f)
-			sprintf(buff, "%.1f%cm", closestUnits, 0xb5);
+			sprintf(buff, "%.1f%cm", closestUnits, 'u');
 		else
-			sprintf(buff, "%.2f%cm", closestUnits, 0xb5);
+			sprintf(buff, "%.2f%cm", closestUnits, 'u');
 
-		Vec<int> textPos(viewSize.x-100, viewSize.y-25,0);
+		Vec<int> textPos(viewSize.x-110, viewSize.y-5,0);
 		textRenderer->drawString(buff, textPos);
 	}
 
 	int barWidth = round(closestUnits / sz);
+	int barheight = 10;
 
-	Vec<int> tl(viewSize.x-85-barWidth/2, viewSize.y-35, 0);
-	Vec<int> size(barWidth, 10, 0);
+	Vec<int> tl(viewSize.x-85-barWidth/2, viewSize.y-charOffY-5, 0);
+	Vec<int> size(barWidth, barheight, 0);
 
 	textRenderer->drawRect(tl, size, Color(1.0f,1.0f,1.0f,1.0f));
 }
@@ -1206,7 +1209,8 @@ void Renderer::renderFrameNum(TargetChains chain)
 	const Vec<int>& viewSize = getViewportSize(chain);
 	//const Vec<int>& viewSize = viewportSize[chain];
 
-	Vec<int> screenPos(viewSize.x-120, 10, 0);
+	int charOffY = textRenderer->getFontHeight();
+	Vec<int> screenPos(viewSize.x-120, charOffY+3, 0);
 	textRenderer->drawString(buff, screenPos);
 }
 
@@ -1264,30 +1268,31 @@ void Renderer::renderFPS(TargetChains chain)
 	else
 		sprintf(buff, "FPS:%.0f", fps);
 
-	textRenderer->drawString(buff, Vec<int>(20,10,0));
+	int charOffY = textRenderer->getFontHeight();
+	textRenderer->drawString(buff, Vec<int>(20,charOffY+5,0));
 
 	if(statsOn)
 	{
 		sprintf(buff, "Start:   %.3fms", avgStart);
-		textRenderer->drawString(buff, Vec<int>(20, 40, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 2*charOffY+5, 0));
 
 		sprintf(buff, "Pre:     %.3fms", avgPre);
-		textRenderer->drawString(buff, Vec<int>(20, 60, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 3*charOffY+5, 0));
 
 		sprintf(buff, "Main:    %.3fms", avgMain);
-		textRenderer->drawString(buff, Vec<int>(20, 80, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 4*charOffY+5, 0));
 
 		sprintf(buff, "Post:    %.3fms", avgPost);
-		textRenderer->drawString(buff, Vec<int>(20, 100, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 5*charOffY+5, 0));
 
 		sprintf(buff, "Overlay: %.3fms", avgGdi);
-		textRenderer->drawString(buff, Vec<int>(20, 120, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 6*charOffY+5, 0));
 
 		sprintf(buff, "Full:    %.3fms", avgFrame);
-		textRenderer->drawString(buff, Vec<int>(20, 140, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 7*charOffY+5, 0));
 
 		sprintf(buff, "Present: %.3fms", avgEnd);
-		textRenderer->drawString(buff, Vec<int>(20, 165, 0));
+		textRenderer->drawString(buff, Vec<int>(20, 8*charOffY+5, 0));
 	}
 }
 

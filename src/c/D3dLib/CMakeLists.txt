@@ -44,6 +44,7 @@ target_include_directories(D3dLib PUBLIC
     ${D3d_DIR}
     ${Global_DIR}
     ${Messages_DIR}
+    ${Thirdparty_DIR}
 )
 
 # Link necessary libraries
