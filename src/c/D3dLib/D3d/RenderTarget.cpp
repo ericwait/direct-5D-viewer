@@ -2,8 +2,7 @@
 
 
 const DXGI_FORMAT SwapChainTarget::format = DXGI_FORMAT_B8G8R8A8_UNORM;
-const UINT SwapChainTarget::chainFlags = DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE
-										| DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+const UINT SwapChainTarget::chainFlags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 
 SwapChainTarget::SwapChainTarget(Renderer* rendererIn, HWND hWnd, size_t width, size_t height)
