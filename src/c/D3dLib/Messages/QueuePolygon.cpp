@@ -1,6 +1,5 @@
 #include "QueuePolygon.h"
 #include "Globals.h"
-#include "MessageProcessor.h"
 #include "VolumeInfo.h"
 
 QueuePolygon::QueuePolygon(size_t numFaces, size_t numVerts, size_t numNormals, int frame, int index, std::string label)

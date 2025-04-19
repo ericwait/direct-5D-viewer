@@ -7,19 +7,6 @@
 #include <set>
 
 // Basic view messages
-class MessageSetWindowSize: public Message
-{
-public:
-	MessageSetWindowSize(int width, int height) : width(width), height(height){}
-
-protected:
-	virtual bool process();
-
-private:
-	int width;
-	int height;
-};
-
 class MessageSetDpiScale : public Message
 {
 public:

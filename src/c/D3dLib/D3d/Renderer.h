@@ -127,6 +127,7 @@ public:
 	void clearPixelShaderList();
 	void clearFallbackShaders();
 
+	const Vec<int>& viewPortSize(TargetChains selectChain = TargetChains::Screen) const;
 	void resizeViewPort(Vec<int> sizeIn, TargetChains selectChain = TargetChains::Screen);
 	void flushContext();
 

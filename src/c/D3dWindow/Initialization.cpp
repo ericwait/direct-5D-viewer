@@ -14,23 +14,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Globals.h"
-#include "Initialization.h"
-#include "MessageProcessor.h"
 #include "Renderer.h"
 #include "SceneNode.h"
+
+#include "Initialization.h"
+#include "MessageProcessor.h"
+
+#include "RenderInit.h"
 
 HWND gWindowHandle = NULL;
 const TCHAR szWndClassName[] = TEXT("LEVER 3-D");
 
-unsigned int gWindowHeight = 720;
-unsigned int gWindowWidth = 1280;
-
-HFONT gFont = NULL;
-Renderer* gRenderer = NULL;
-
-Camera* gCameraDefaultMesh = NULL;
-OrthoCamera* gCameraWidget = NULL;
-TextCamera* gCameraText = NULL;
+const unsigned int initWindowHeight = 720;
+const unsigned int initWindowWidth = 1280;
 
 std::vector<Vec<unsigned int>> gFacesDebug;
 std::vector<Vec<float>> gVertsDebug;
@@ -68,7 +64,7 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// Create window
-	RECT rc = { 0, 0, gWindowWidth, gWindowHeight};
+	RECT rc = { 0, 0, initWindowWidth, initWindowHeight};
 	AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 	gWindowHandle = CreateWindow(szWndClassName, "LEVer 3D viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left,
 		rc.bottom - rc.top,NULL,NULL,hInstance,NULL);
@@ -89,31 +85,12 @@ HRESULT registerWindowClass(HINSTANCE hInstance, int nCmdShow)
 	return S_OK;
 }
 
-HRESULT createRenderResources(std::string rootDir, Vec<int> viewportSize)
-{
-	Vec<float> eye = Vec<float>(0.0f,0.0f,-3.0f);
-	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
-	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
-	
-	gRenderer = new Renderer();//delete on message loop exit
-	HRESULT hr = gRenderer->init(rootDir, viewportSize);
-
-	if (FAILED(hr))
-		return hr;
-
-	gCameraDefaultMesh = new Camera(eye,look,up,viewportSize);//delete on message loop exit
-	gCameraWidget = new OrthoCamera(eye,look,up,viewportSize);//delete on message loop exit
-	gCameraText = new TextCamera(eye,look,up,viewportSize);
-
-	return S_OK;
-}
-
 HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir)
 {
 	HRESULT hr = registerWindowClass(hInstance,nCmdShow);
 	if ( FAILED(hr) )
 		return hr;
 
-	Vec<int> viewportSize(gWindowWidth,gWindowHeight,1);
+	Vec<int> viewportSize(initWindowWidth,initWindowHeight,1);
 	return createRenderResources(rootDir, viewportSize);
 }

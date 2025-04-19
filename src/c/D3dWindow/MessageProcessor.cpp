@@ -100,9 +100,6 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 
 		viewSize = Vec<int>(LOWORD(lParam), HIWORD(lParam), 1);
-
-		gWindowWidth = viewSize.x;
-		gWindowHeight = viewSize.y;
 		if(gRenderer != NULL)
 		{
 			gRenderer->resizeViewPort(viewSize);
@@ -142,15 +139,16 @@ LRESULT CALLBACK wndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)
 		if(leftButtonDown)
 		{
 			DirectX::XMMATRIX rotX,rotY;
+			const Vec<int>& viewSize = gRenderer->viewPortSize(TargetChains::Screen);
 			if(shiftDown)
 				rotX = DirectX::XMMatrixIdentity();
 			else
-				rotX = DirectX::XMMatrixRotationY(((float)(iMouseX - previousMouseX) / gWindowWidth)*DirectX::XM_2PI*alpha);
+				rotX = DirectX::XMMatrixRotationY(((float)(iMouseX - previousMouseX) / viewSize.x)*DirectX::XM_2PI*alpha);
 
 			if(ctrlDown)
 				rotY = DirectX::XMMatrixIdentity();
 			else
-				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / gWindowHeight)*DirectX::XM_2PI*alpha);
+				rotY = DirectX::XMMatrixRotationX((-(float)(iMouseY - previousMouseY) / viewSize.y)*DirectX::XM_2PI*alpha);
 
 			gRenderer->setWorldRotation(previousWorldRotation*rotX*rotY);
 			gRenderer->forceUpdate();

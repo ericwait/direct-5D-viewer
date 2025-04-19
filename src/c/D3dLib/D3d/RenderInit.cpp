@@ -1,0 +1,24 @@
+#include "RenderInit.h"
+#include "Renderer.h"
+#include "Globals.h"
+
+#include <Windows.h>
+
+long createRenderResources(std::string rootDir, Vec<int> viewportSize)
+{
+	Vec<float> eye = Vec<float>(0.0f,0.0f,-3.0f);
+	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
+	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
+	
+	gRenderer = new Renderer();//delete on message loop exit
+	HRESULT hr = gRenderer->init(rootDir, viewportSize);
+
+	if (FAILED(hr))
+		return hr;
+
+	gCameraDefaultMesh = new Camera(eye,look,up,viewportSize);//delete on message loop exit
+	gCameraWidget = new OrthoCamera(eye,look,up,viewportSize);//delete on message loop exit
+	gCameraText = new TextCamera(eye,look,up,viewportSize);
+
+	return S_OK;
+}

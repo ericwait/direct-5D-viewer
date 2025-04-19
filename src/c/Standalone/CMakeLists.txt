@@ -1,11 +1,18 @@
+set(Window_SOURCES
+    ${Window_DIR}/Initialization.cpp
+    ${Window_DIR}/MessageProcessor.cpp
+    ${Window_DIR}/ModuleInfo.cpp
+)
+
 # Create an executable from Standalone.cpp
-add_executable(StandaloneApp Standalone.cpp)
+add_executable(StandaloneApp Standalone.cpp ${Window_SOURCES})
 
 # Include directories from the root CMakeLists.txt for headers
 target_include_directories(StandaloneApp PRIVATE
     ${D3d_DIR}
     ${Global_DIR}
     ${Messages_DIR}
+    ${Window_DIR}
 )
 
 target_link_libraries(StandaloneApp PRIVATE D3dLib d3dcompiler d3d11)

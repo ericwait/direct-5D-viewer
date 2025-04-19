@@ -41,6 +41,14 @@
 #include <string>
 #include <fstream>
 
+// Render-related globals
+Renderer* gRenderer = NULL;
+
+Camera* gCameraDefaultMesh = NULL;
+OrthoCamera* gCameraWidget = NULL;
+TextCamera* gCameraText = NULL;
+
+
 const std::string SHADER_DIR = "Shaders";
 const float Renderer::cornerVolumeDist = 1.75f;
 
@@ -1370,13 +1378,21 @@ IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, bool ste
 	// TODO: Which alpha mode is desired?
 	swapDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
-	// TODO: We should look into GDI alternatives, and may not need mode-switch capability
-	swapDesc.Flags = flags;
-
-	IDXGISwapChain1* swapChain;
-	HRESULT hr = renderFactory->CreateSwapChainForHwnd(renderDevice, hWnd, &swapDesc, NULL, NULL, &swapChain);
-	if ( FAILED(hr) )
-		sendHrErrMessage(hr);
+	IDXGISwapChain1* swapChain = nullptr;
+	if (hWnd != nullptr)
+	{
+		// TODO: We may not need mode-switch capability
+		swapDesc.Flags = flags;
+		HRESULT hr = renderFactory->CreateSwapChainForHwnd(renderDevice, hWnd, &swapDesc, NULL, NULL, &swapChain);
+		if ( FAILED(hr) )
+			sendHrErrMessage(hr);
+	}
+	else
+	{
+		HRESULT hr = renderFactory->CreateSwapChainForComposition(renderDevice, &swapDesc, nullptr, &swapChain);
+		if ( FAILED(hr) )
+			sendHrErrMessage(hr);
+	}
 
 	return swapChain;
 }
@@ -1627,6 +1643,11 @@ void Renderer::setViewportSize(Vec<int> sizeIn, TargetChains selectChain)
 const Vec<int>& Renderer::getViewportSize(TargetChains selectChain) const
 {
 	return scaledViewSize[selectChain];
+}
+
+const Vec<int>& Renderer::viewPortSize(TargetChains selectChain) const
+{
+	return getViewportSize(selectChain);
 }
 
 void Renderer::resizeViewPort(Vec<int> sizeIn, TargetChains selectChain)

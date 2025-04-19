@@ -31,13 +31,12 @@
 
 //Implemented in lever-3d_mex.cpp
 extern HANDLE gTermEvent;
-extern HWND gWindowHandle;
-extern HFONT gFont;
 extern volatile bool gRendererInit;
 
-//Implemented in Initialization.cpp
-extern unsigned int gWindowWidth;
-extern unsigned int gWindowHeight;
+// Implemented in Initialization.cpp
+extern HWND gWindowHandle;
+
+//Implemented in Renderer.cpp
 extern Renderer* gRenderer;
 extern Camera* gCameraDefaultMesh;
 extern OrthoCamera* gCameraWidget;

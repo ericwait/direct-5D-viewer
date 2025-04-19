@@ -2,12 +2,11 @@ set(D3dLib_SOURCES
     ${D3d_DIR}/Camera.cpp
     ${D3d_DIR}/DepthTarget.cpp
     ${D3d_DIR}/EigenToFromDirectX.cpp
-    ${D3d_DIR}/Initialization.cpp
     ${D3d_DIR}/Material.cpp
     ${D3d_DIR}/MaterialParams.cpp
     ${D3d_DIR}/MeshPrimitive.cpp
-    ${D3d_DIR}/MessageProcessor.cpp
     ${D3d_DIR}/Renderer.cpp
+    ${D3d_DIR}/RenderInit.cpp
     ${D3d_DIR}/RenderTarget.cpp
     ${D3d_DIR}/SceneNode.cpp
     ${D3d_DIR}/TextRenderer.cpp
@@ -17,7 +16,6 @@ set(D3dLib_SOURCES
     ${D3d_DIR}/VolumeInfo.cpp
 )
 set(Global_SOURCES
-    ${Global_DIR}/ModuleInfo.cpp
     ${Global_DIR}/WidgetData.cpp
 )
 set(Messages_SOURCES

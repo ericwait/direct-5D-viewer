@@ -2,20 +2,11 @@
 #include "MessageHelpers.h"
 
 #include "Globals.h"
-#include "MessageProcessor.h"
 #include "VolumeInfo.h"
 
 #include "EigenHelpers.h"
 
 #include <cmath>
-
-
-bool MessageSetWindowSize::process()
-{
-	ClientResize(gWindowHandle, width, height);
-
-	return true;
-}
 
 
 bool MessageSetDpiScale::process()
