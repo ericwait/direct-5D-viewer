@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Renderer.h"
-#include "Texture.h"
+#include "D3d/Renderer.h"
+#include "D3d/Texture.h"
 
 class DepthTarget
 {

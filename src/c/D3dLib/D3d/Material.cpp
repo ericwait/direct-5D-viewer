@@ -13,7 +13,7 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Material.h"
+#include "D3d/Material.h"
 
 Material::Material(Renderer* rendererIn)
 	: renderer(rendererIn), shaderIdx(-1), rasterState(NULL)

@@ -13,21 +13,21 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Renderer.h"
-#include "MeshPrimitive.h"
-#include "Material.h"
-#include "MaterialParams.h"
-#include "Camera.h"
-#include "Timer.h"
-#include "RenderTarget.h"
-#include "DepthTarget.h"
-#include "VolumeInfo.h"
-#include "TextRenderer.h"
+#include "D3d/Renderer.h"
+#include "D3d/MeshPrimitive.h"
+#include "D3d/Material.h"
+#include "D3d/MaterialParams.h"
+#include "D3d/Camera.h"
+#include "D3d/Timer.h"
+#include "D3d/RenderTarget.h"
+#include "D3d/DepthTarget.h"
+#include "D3d/VolumeInfo.h"
+#include "D3d/TextRenderer.h"
 
-#include "Defines.h"
-#include "Globals.h"
+#include "Global/Defines.h"
+#include "Global/Globals.h"
 
-#include "ErrorMsg.h"
+#include "Global/ErrorMsg.h"
 
 #include <d3dcompiler.h>
 #include <Windows.h>

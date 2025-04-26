@@ -1,4 +1,4 @@
-#include "DepthTarget.h"
+#include "D3d/DepthTarget.h"
 
 RenderDepthTarget::RenderDepthTarget(Renderer* renderer, size_t width, size_t height)
 	: renderer(renderer), dims(Vec<size_t>(width,height,1)), depthTarget(NULL)

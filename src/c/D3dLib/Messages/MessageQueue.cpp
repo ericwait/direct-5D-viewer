@@ -1,5 +1,5 @@
-#include "MessageQueue.h"
-#include "ErrorMsg.h"
+#include "Messages/MessageQueue.h"
+#include "Global/ErrorMsg.h"
 
 #include "comdef.h"
 

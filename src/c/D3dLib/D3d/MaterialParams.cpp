@@ -1,4 +1,4 @@
-#include "MaterialParams.h"
+#include "D3d/MaterialParams.h"
 
 // Base material parameter functions
 MaterialParameters::MaterialParameters(Renderer* rendererIn)

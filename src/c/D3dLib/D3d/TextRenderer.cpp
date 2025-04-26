@@ -1,7 +1,7 @@
-#include "TextRenderer.h"
-#include "SceneNode.h"
+#include "D3d/TextRenderer.h"
+#include "D3d/SceneNode.h"
 
-#include "Globals.h"
+#include "Global/Globals.h"
 
 const int TextRenderer::maxQuads = 512;
 

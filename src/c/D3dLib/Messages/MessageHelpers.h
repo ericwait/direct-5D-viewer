@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer.h"
+#include "D3d/Renderer.h"
 
 // A few helper functions that Messages and MessageProcessor use
 void setObjectTypeVisibility(GraphicObjectTypes type, bool visible);

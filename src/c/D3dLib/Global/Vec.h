@@ -16,7 +16,7 @@
 #ifndef INCLUDE_VEC
 #define INCLUDE_VEC
 
-#include "Defines.h"
+#include "Global/Defines.h"
 
 #include <type_traits>
 #include <stdexcept>

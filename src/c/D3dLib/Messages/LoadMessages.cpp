@@ -1,11 +1,11 @@
-#include "LoadMessages.h"
-#include "LoadData.h"
-#include "MessageHelpers.h"
+#include "Messages/LoadMessages.h"
+#include "Messages/LoadData.h"
+#include "Messages/MessageHelpers.h"
 
-#include "VolumeInfo.h"
+#include "D3d/VolumeInfo.h"
 
-#include "Globals.h"
-#include "ErrorMsg.h"
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
 
 
 MessageInitVolume::MessageInitVolume(int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physSize, bool columnMajor)

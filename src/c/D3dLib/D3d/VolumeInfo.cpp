@@ -1,9 +1,9 @@
-#include "VolumeInfo.h"
+#include "D3d/VolumeInfo.h"
 
-#include "SceneNode.h"
-#include "MeshPrimitive.h"
-#include "Material.h"
-#include "MaterialParams.h"
+#include "D3d/SceneNode.h"
+#include "D3d/MeshPrimitive.h"
+#include "D3d/Material.h"
+#include "D3d/MaterialParams.h"
 
 
 VolumeInfo::VolumeInfo(Renderer* renderer, int numFrames, int numChannels, Vec<size_t> dims, Vec<float> physSize, bool columnMajor)

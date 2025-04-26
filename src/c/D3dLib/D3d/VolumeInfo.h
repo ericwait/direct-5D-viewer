@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Vec.h"
-#include "Renderer.h"
-#include "MaterialParams.h"
+#include "Global/Vec.h"
+#include "D3d/Renderer.h"
+#include "D3d/MaterialParams.h"
 
 #include <Eigen/Core>
 #include <Eigen/Dense>

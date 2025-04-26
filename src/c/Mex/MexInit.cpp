@@ -1,7 +1,7 @@
 #include "MexGlobals.h"
 #include "MexCommand.h"
-#include "Widget.h"
-#include "Globals.h"
+#include "Global/Widget.h"
+#include "Global/Globals.h"
 #include "Threads.h"
 
 void MexInit::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const

@@ -52,19 +52,17 @@ set(MexLib_SOURCES
 )
 
 set(Window_SOURCES
-    ${Window_DIR}/Initialization.cpp
-    ${Window_DIR}/MessageProcessor.cpp
-    ${Window_DIR}/ModuleInfo.cpp
+    ${D3dWindow_DIR}/Initialization.cpp
+    ${D3dWindow_DIR}/MessageProcessor.cpp
+    ${D3dWindow_DIR}/ModuleInfo.cpp
 )
 
 add_library(D3dMexLib SHARED ${MexLib_SOURCES} ${Window_SOURCES})
 
 target_include_directories(D3dMexLib PUBLIC 
     ${Mex_DIR}
-    ${D3d_DIR}
-    ${Global_DIR}
-    ${Messages_DIR}
-    ${Window_DIR}
+    ${D3dLib_DIR}
+    ${D3dWindow_DIR}
     ${Matlab_INCLUDE_DIRS}
 )
 

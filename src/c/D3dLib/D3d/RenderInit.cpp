@@ -1,6 +1,6 @@
 #include "RenderInit.h"
-#include "Renderer.h"
-#include "Globals.h"
+#include "D3d/Renderer.h"
+#include "Global/Globals.h"
 
 #include <Windows.h>
 

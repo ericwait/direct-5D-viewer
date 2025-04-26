@@ -1,10 +1,10 @@
-#include "Vec.h"
-#include "Globals.h"
-#include "LoadData.h"
-#include "MessageQueue.h"
+#include "Global/Vec.h"
+#include "Global/Globals.h"
+#include "Messages/LoadData.h"
+#include "Messages/MessageQueue.h"
 
 #include "mex.h"
-#include <windows.h>
+#include <Windows.h>
 
 #include <set>
 

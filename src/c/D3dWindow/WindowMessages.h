@@ -1,5 +1,5 @@
 #pragma once
-#include "Message.h"
+#include "Messages/Message.h"
 
 // Messages that require direct windowing system access (HWND)
 class MessageSetWindowSize: public Message

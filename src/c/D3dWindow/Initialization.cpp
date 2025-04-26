@@ -13,14 +13,14 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Globals.h"
-#include "Renderer.h"
-#include "SceneNode.h"
+#include "Global/Globals.h"
+#include "D3d/Renderer.h"
+#include "D3d/SceneNode.h"
 
 #include "Initialization.h"
 #include "MessageProcessor.h"
 
-#include "RenderInit.h"
+#include "D3d/RenderInit.h"
 
 HWND gWindowHandle = NULL;
 const TCHAR szWndClassName[] = TEXT("LEVER 3-D");

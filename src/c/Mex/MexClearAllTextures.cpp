@@ -1,8 +1,8 @@
 #include "MexCommand.h"
-#include "Globals.h"
+#include "Global/Globals.h"
 
-#include "LoadMessages.h"
-#include "RenderMessages.h"
+#include "Messages/Messages/LoadMessages.h"
+#include "Messages/Messages/RenderMessages.h"
 
 void MexClearAllTextures::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

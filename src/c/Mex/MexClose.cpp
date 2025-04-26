@@ -1,8 +1,8 @@
 #include "MexCommand.h"
-#include "Globals.h"
+#include "Global/Globals.h"
 #include "Threads.h"
 
-#include "LoadMessages.h"
+#include "Messages/Messages/LoadMessages.h"
 
 void MexClose::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

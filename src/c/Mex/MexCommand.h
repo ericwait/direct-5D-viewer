@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mex.h"
-#include "windows.h"
+#include <Windows.h>
 #undef min
 #undef max
 

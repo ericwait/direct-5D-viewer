@@ -14,17 +14,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "Color.h"
-#include "Vec.h"
-#include "Renderer.h"
-#include "Camera.h"
-#include "SceneNode.h"
+#include "Global/Color.h"
+#include "Global/Vec.h"
+#include "D3d/Renderer.h"
+#include "D3d/Camera.h"
+#include "D3d/SceneNode.h"
 
-#include "Defines.h"
-#include "MessageQueue.h"
-#include "ReturnQueue.h"
+#include "Global/Defines.h"
+#include "Messages/MessageQueue.h"
+#include "Messages/ReturnQueue.h"
 
-#include "windows.h"
+#include <Windows.h>
 
 #undef max
 #undef min

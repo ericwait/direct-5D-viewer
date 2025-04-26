@@ -14,12 +14,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "Vec.h"
-#include "Renderer.h"
+#include "Global/Vec.h"
+#include "D3d/Renderer.h"
 
 #include <DirectXMath.h>
 #include <Eigen/Dense>
-#include "EigenToFromDirectX.h"
+#include "D3d/EigenToFromDirectX.h"
 
 class Camera
 {

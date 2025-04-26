@@ -14,11 +14,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "VertexLayouts.h"
-#include "Renderer.h"
+#include "D3d/VertexLayouts.h"
+#include "D3d/Renderer.h"
 
-#include "Vec.h"
-#include "Color.h"
+#include "Global/Vec.h"
+#include "Global/Color.h"
 
 #include <d3d11.h>
 #include <cstdint>

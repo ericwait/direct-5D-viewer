@@ -14,11 +14,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "Vec.h"
-#include "Renderer.h"
+#include "Global/Vec.h"
+#include "D3d/Renderer.h"
 
-#include "MeshPrimitive.h"
-#include "Material.h"
+#include "D3d/MeshPrimitive.h"
+#include "D3d/Material.h"
 
 #include "Eigen/Eigen"
 

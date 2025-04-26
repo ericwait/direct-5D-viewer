@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vec.h"
+#include "Global/Vec.h"
 
 struct Color
 {

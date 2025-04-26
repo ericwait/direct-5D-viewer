@@ -1,4 +1,4 @@
-#include "TextureLightingObj.h"
+#include "D3d/TextureLightingObj.h"
 
 TextureLightingObj::TextureLightingObj(bool value, int index){
 	this->value = value;

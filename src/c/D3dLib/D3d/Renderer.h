@@ -14,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "Vec.h"
-#include "VertexLayouts.h"
+#include "Global/Vec.h"
+#include "D3d/VertexLayouts.h"
 
 #include <d3d11.h>
 #include <DXGI1_2.h>

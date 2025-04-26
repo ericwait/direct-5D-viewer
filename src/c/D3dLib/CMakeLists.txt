@@ -1,35 +1,35 @@
 set(D3dLib_SOURCES
-    ${D3d_DIR}/Camera.cpp
-    ${D3d_DIR}/DepthTarget.cpp
-    ${D3d_DIR}/EigenToFromDirectX.cpp
-    ${D3d_DIR}/Material.cpp
-    ${D3d_DIR}/MaterialParams.cpp
-    ${D3d_DIR}/MeshPrimitive.cpp
-    ${D3d_DIR}/Renderer.cpp
-    ${D3d_DIR}/RenderInit.cpp
-    ${D3d_DIR}/RenderTarget.cpp
-    ${D3d_DIR}/SceneNode.cpp
-    ${D3d_DIR}/TextRenderer.cpp
-    ${D3d_DIR}/Texture.cpp
-    ${D3d_DIR}/TextureLightingObj.cpp
-    ${D3d_DIR}/VertexLayouts.cpp
-    ${D3d_DIR}/VolumeInfo.cpp
+    ${D3dLib_DIR}/D3d/Camera.cpp
+    ${D3dLib_DIR}/D3d/DepthTarget.cpp
+    ${D3dLib_DIR}/D3d/EigenToFromDirectX.cpp
+    ${D3dLib_DIR}/D3d/Material.cpp
+    ${D3dLib_DIR}/D3d/MaterialParams.cpp
+    ${D3dLib_DIR}/D3d/MeshPrimitive.cpp
+    ${D3dLib_DIR}/D3d/Renderer.cpp
+    ${D3dLib_DIR}/D3d/RenderInit.cpp
+    ${D3dLib_DIR}/D3d/RenderTarget.cpp
+    ${D3dLib_DIR}/D3d/SceneNode.cpp
+    ${D3dLib_DIR}/D3d/TextRenderer.cpp
+    ${D3dLib_DIR}/D3d/Texture.cpp
+    ${D3dLib_DIR}/D3d/TextureLightingObj.cpp
+    ${D3dLib_DIR}/D3d/VertexLayouts.cpp
+    ${D3dLib_DIR}/D3d/VolumeInfo.cpp
 )
 set(Global_SOURCES
-    ${Global_DIR}/WidgetData.cpp
+    ${D3dLib_DIR}/Global/WidgetData.cpp
 )
 set(Messages_SOURCES
-    ${Messages_DIR}/AnimMessages.cpp
-    ${Messages_DIR}/ErrorMsg.cpp
-    ${Messages_DIR}/LoadData.cpp
-    ${Messages_DIR}/LoadMessages.cpp
-    ${Messages_DIR}/MessageHelpers.cpp
-    ${Messages_DIR}/MessageQueue.cpp
-    ${Messages_DIR}/QueuePolygon.cpp
-    ${Messages_DIR}/RenderMessages.cpp
-    ${Messages_DIR}/ReturnQueue.cpp
-    ${Messages_DIR}/ViewMessages.cpp
-    ${Messages_DIR}/ViewerGlobals.cpp
+    ${D3dLib_DIR}/Messages/AnimMessages.cpp
+    ${D3dLib_DIR}/Messages/ErrorMsg.cpp
+    ${D3dLib_DIR}/Messages/LoadData.cpp
+    ${D3dLib_DIR}/Messages/LoadMessages.cpp
+    ${D3dLib_DIR}/Messages/MessageHelpers.cpp
+    ${D3dLib_DIR}/Messages/MessageQueue.cpp
+    ${D3dLib_DIR}/Messages/QueuePolygon.cpp
+    ${D3dLib_DIR}/Messages/RenderMessages.cpp
+    ${D3dLib_DIR}/Messages/ReturnQueue.cpp
+    ${D3dLib_DIR}/Messages/ViewMessages.cpp
+    ${D3dLib_DIR}/Messages/ViewerGlobals.cpp
 )
 
 find_package(Eigen3 3.4 CONFIG REQUIRED)
@@ -39,9 +39,7 @@ add_library(D3dLib STATIC ${D3dLib_SOURCES} ${Global_SOURCES} ${Messages_SOURCES
 
 # Include directories
 target_include_directories(D3dLib PUBLIC 
-    ${D3d_DIR}
-    ${Global_DIR}
-    ${Messages_DIR}
+    ${D3dLib_DIR}
     ${Thirdparty_DIR}
 )
 

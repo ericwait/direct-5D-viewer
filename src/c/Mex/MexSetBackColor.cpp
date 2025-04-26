@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Globals.h"
+#include "Global/Globals.h"
 
-#include "ViewMessages.h"
+#include "Messages/Messages/ViewMessages.h"
 
 void MexSetBackgroundColor::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

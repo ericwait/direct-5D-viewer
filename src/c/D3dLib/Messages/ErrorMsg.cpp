@@ -1,6 +1,6 @@
-#include "ErrorMsg.h"
-#include "Globals.h"
-#include "MessageQueue.h"
+#include "Global/ErrorMsg.h"
+#include "Global/Globals.h"
+#include "Messages/MessageQueue.h"
 
 #include <comdef.h>
 

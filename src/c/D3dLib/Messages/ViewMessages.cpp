@@ -1,10 +1,10 @@
-#include "ViewMessages.h"
+#include "Messages/ViewMessages.h"
 #include "MessageHelpers.h"
 
-#include "Globals.h"
-#include "VolumeInfo.h"
+#include "Global/Globals.h"
+#include "D3d/VolumeInfo.h"
 
-#include "EigenHelpers.h"
+#include "D3d/EigenHelpers.h"
 
 #include <cmath>
 

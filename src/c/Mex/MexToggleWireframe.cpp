@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Globals.h"
+#include "Global/Globals.h"
 
-#include "ViewMessages.h"
+#include "Messages/ViewMessages.h"
 
 void MexToggleWireframe::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

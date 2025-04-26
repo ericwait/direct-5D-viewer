@@ -13,9 +13,9 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "MeshPrimitive.h"
-#include "Globals.h"
-#include "ErrorMsg.h"
+#include "D3d/MeshPrimitive.h"
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
 
 #include <limits>
 

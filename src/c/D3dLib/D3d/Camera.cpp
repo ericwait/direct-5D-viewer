@@ -13,8 +13,8 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Camera.h"
-#include "Globals.h"
+#include "D3d/Camera.h"
+#include "Global/Globals.h"
 
 const float Camera::fovY = DirectX::XM_PI / 4.0f;
 const float Camera::farPlane = 25.0f;

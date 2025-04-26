@@ -1,4 +1,4 @@
-#include "VertexLayouts.h"
+#include "D3d/VertexLayouts.h"
 
 const std::string VertexLayout::semantic[Attributes::ATTR_END] = {"POSITION","NORMAL","TEXCOORD","COLOR","COLOR"};
 const uint32_t VertexLayout::semanticIdx[Attributes::ATTR_END] ={0,0,0,0,1};

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vec.h"
+#include "Global/Vec.h"
 
 #include <d3d11.h>
 

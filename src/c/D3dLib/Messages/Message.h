@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Vec.h"
-#include "Renderer.h"
+#include "Global/Vec.h"
+#include "D3d/Renderer.h"
 
 class Message
 {

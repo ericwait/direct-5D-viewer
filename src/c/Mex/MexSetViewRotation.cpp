@@ -1,9 +1,9 @@
 #include "MexCommand.h"
-#include "Globals.h"
+#include "Global/Globals.h"
 
-#include "Vec.h"
+#include "Global/Vec.h"
 
-#include "ViewMessages.h"
+#include "Messages/ViewMessages.h"
 
 void MexSetViewRotation::execute(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) const
 {

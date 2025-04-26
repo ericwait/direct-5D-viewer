@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "windows.h"
+#include <Windows.h>
 
 #define sendErrMessage(ans) { errMessage((ans), __FILE__, __LINE__); }
 #define sendHrErrMessage(ans) { hrErrMessage((ans), __FILE__, __LINE__); }

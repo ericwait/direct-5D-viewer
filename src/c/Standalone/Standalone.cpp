@@ -1,9 +1,9 @@
-#include "Globals.h"
+#include "Global/Globals.h"
 #include "ModuleInfo.h"
 #include "MessageProcessor.h"
-#include "LoadMessages.h"
-#include "ViewMessages.h"
-#include "ErrorMsg.h"
+#include "Messages/LoadMessages.h"
+#include "Messages/ViewMessages.h"
+#include "Global/ErrorMsg.h"
 
 #include <random>
 #include <windows.h>

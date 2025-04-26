@@ -1,6 +1,6 @@
-#include "RenderMessages.h"
+#include "Messages/RenderMessages.h"
 
-#include "Globals.h"
+#include "Global/Globals.h"
 
 bool MessageUpdateRender::process()
 {

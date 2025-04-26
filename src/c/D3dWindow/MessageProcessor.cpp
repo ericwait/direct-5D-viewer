@@ -15,12 +15,12 @@
 
 #include "MessageProcessor.h"
 #include "Initialization.h"
-#include "Globals.h"
-#include "ErrorMsg.h"
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
 #include "ModuleInfo.h"
-#include "WidgetData.h"
-#include "LoadData.h"
-#include "MessageHelpers.h"
+#include "Global/WidgetData.h"
+#include "Messages/LoadData.h"
+#include "Messages/MessageHelpers.h"
 
 #include <time.h>
 #include <thread>

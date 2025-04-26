@@ -14,11 +14,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "Vec.h"
-#include "Renderer.h"
+#include "Global/Vec.h"
+#include "D3d/Renderer.h"
 
-#include "MaterialParams.h"
-#include "Texture.h"
+#include "D3d/MaterialParams.h"
+#include "D3d/Texture.h"
 
 #include <DirectXMath.h>
 #include <memory>

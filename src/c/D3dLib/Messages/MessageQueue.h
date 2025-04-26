@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Message.h"
+#include "Messages/Message.h"
 
-#include <windows.h>
+#include <Windows.h>
 #include <queue>
 
 class MessageQueue

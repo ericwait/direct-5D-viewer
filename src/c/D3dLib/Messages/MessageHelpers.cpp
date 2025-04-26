@@ -1,6 +1,6 @@
-#include "MessageHelpers.h"
+#include "Messages/MessageHelpers.h"
 
-#include "Globals.h"
+#include "Global/Globals.h"
 
 // Called from mex messages and from window proc
 void setObjectTypeVisibility(GraphicObjectTypes type, bool visible)

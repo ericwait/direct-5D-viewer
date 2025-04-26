@@ -1,6 +1,6 @@
 #pragma once
-#include "SceneNode.h"
-#include "MeshPrimitive.h"
+#include "D3d/SceneNode.h"
+#include "D3d/MeshPrimitive.h"
 
 #include <vector>
 #include <set>

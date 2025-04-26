@@ -1,8 +1,8 @@
 #pragma once
-#include "Message.h"
-#include "RenderMessages.h"
+#include "Messages/Message.h"
+#include "Messages/RenderMessages.h"
 
-#include "Renderer.h"
+#include "D3d/Renderer.h"
 
 #include <set>
 

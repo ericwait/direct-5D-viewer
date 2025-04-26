@@ -13,13 +13,13 @@
 //LEVer in file "gnu gpl v3.txt".  If not, see  <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Vec.h"
-#include "MessageQueue.h"
-#include "Globals.h"
-#include "ErrorMsg.h"
-#include "LoadData.h"
+#include "Global/Vec.h"
+#include "Global/Globals.h"
+#include "Global/ErrorMsg.h"
+#include "Messages/MessageQueue.h"
+#include "Messages/LoadData.h"
 
-#include "windows.h"
+#include <Windows.h>
 
 #include <set>
 

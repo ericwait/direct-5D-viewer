@@ -1,10 +1,10 @@
-#include "Globals.h"
-#include "Vec.h"
-#include "VolumeInfo.h"
-#include "QueuePolygon.h"
-#include "MessageQueue.h"
+#include "Global/Globals.h"
+#include "Global/Vec.h"
+#include "D3d/VolumeInfo.h"
+#include "Messages/QueuePolygon.h"
+#include "Messages/MessageQueue.h"
 
-#include "windows.h"
+#include <Windows.h>
 
 #include <set>
 #include <vector>

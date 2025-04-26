@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Message.h"
+#include "Messages/Message.h"
 
 // This message forces a render update
 class MessageUpdateRender: public Message

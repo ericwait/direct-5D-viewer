@@ -1,7 +1,7 @@
 #include "MexCommand.h"
-#include "Globals.h"
+#include "Global/Globals.h"
 
-#include "AnimMessages.h"
+#include "Messages/Messages/AnimMessages.h"
 
 #include <chrono>
 #include <thread>

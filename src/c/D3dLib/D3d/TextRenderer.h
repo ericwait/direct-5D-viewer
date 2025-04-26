@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Renderer.h"
-#include "Texture.h"
-#include "Material.h"
-#include "MeshPrimitive.h"
-#include "Camera.h"
+#include "D3d/Renderer.h"
+#include "D3d/Texture.h"
+#include "D3d/Material.h"
+#include "D3d/MeshPrimitive.h"
+#include "D3d/Camera.h"
 
-#include "Color.h"
+#include "Global/Color.h"
 
 #include <map>
 #include <string>
