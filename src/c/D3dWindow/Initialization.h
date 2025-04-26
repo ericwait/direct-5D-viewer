@@ -18,5 +18,8 @@
 
 #include <string>
 
+// Implemented in Initialization.cpp
+extern HWND gWindowHandle;
+
 HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir);
 extern const TCHAR szWndClassName[];

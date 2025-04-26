@@ -111,7 +111,7 @@ Renderer::~Renderer()
 	releaseDevice();
 }
 
-HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn)
+HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn, HWND hwnd)
 {
 	dllRoot = rootDir;
 
@@ -128,7 +128,7 @@ HRESULT Renderer::init(std::string rootDir, Vec<int> viewportSizeIn)
 	if (FAILED(hr))
 		return hr;
 
-	hr = initRenderTargets();
+	hr = initRenderTargets(hwnd);
 	if (FAILED(hr))
 		return hr;
 
@@ -215,10 +215,10 @@ void Renderer::releaseDevice()
 	SAFE_RELEASE(renderContext);
 }
 
-HRESULT Renderer::initRenderTargets()
+HRESULT Renderer::initRenderTargets(HWND hwnd)
 {
 	Vec<int> size = getViewportSize(TargetChains::Screen);
-	renderChains[TargetChains::Screen][RenderTargetTypes::DefaultRT] = std::make_shared<SwapChainTarget>(this, gWindowHandle, size.x, size.y);
+	renderChains[TargetChains::Screen][RenderTargetTypes::DefaultRT] = std::make_shared<SwapChainTarget>(this, hwnd, size.x, size.y);
 	renderChains[TargetChains::Capture][RenderTargetTypes::DefaultRT] = std::make_shared<ReadbackRenderTarget>(this, size.x, size.y);
 
 	return S_OK;

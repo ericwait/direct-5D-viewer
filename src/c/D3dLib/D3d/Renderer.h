@@ -109,7 +109,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // Class setup including getters and setters
 //////////////////////////////////////////////////////////////////////////
-	HRESULT init(std::string rootDir, Vec<int> viewportSizeIn);
+	HRESULT init(std::string rootDir, Vec<int> viewportSizeIn, HWND hwnd = nullptr);
 
 //Setters
 	void setRendering(bool rendering){isRendering = rendering;}
@@ -240,7 +240,7 @@ public:
 private:
 	HRESULT initDevice();
 	HRESULT initDepthStencils();
-	HRESULT initRenderTargets();
+	HRESULT initRenderTargets(HWND hwnd);
 	HRESULT resetViewPort(TargetChains selectChain);
 	void createBlendState();
 	

@@ -1,6 +1,4 @@
-#include "Global/Globals.h"
-
-
+#include "Initialization.h"
 
 bool MessageSetWindowSize::process()
 {

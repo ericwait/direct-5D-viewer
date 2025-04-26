@@ -92,5 +92,5 @@ HRESULT windowInit(HINSTANCE hInstance,int nCmdShow,std::string rootDir)
 		return hr;
 
 	Vec<int> viewportSize(initWindowWidth,initWindowHeight,1);
-	return createRenderResources(rootDir, viewportSize);
+	return createRenderResources(rootDir, viewportSize, gWindowHandle);
 }

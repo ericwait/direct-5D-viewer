@@ -4,14 +4,14 @@
 
 #include <Windows.h>
 
-long createRenderResources(std::string rootDir, Vec<int> viewportSize)
+long createRenderResources(std::string rootDir, Vec<int> viewportSize, void* hwnd)
 {
 	Vec<float> eye = Vec<float>(0.0f,0.0f,-3.0f);
 	Vec<float> look = Vec<float>(0.0f,0.0f,0.0f);
 	Vec<float> up = Vec<float>(0.0f,1.0f,0.0);
 	
 	gRenderer = new Renderer();//delete on message loop exit
-	HRESULT hr = gRenderer->init(rootDir, viewportSize);
+	HRESULT hr = gRenderer->init(rootDir, viewportSize, (HWND)hwnd);
 
 	if (FAILED(hr))
 		return hr;

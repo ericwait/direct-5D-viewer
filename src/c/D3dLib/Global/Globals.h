@@ -33,9 +33,6 @@
 extern HANDLE gTermEvent;
 extern volatile bool gRendererInit;
 
-// Implemented in Initialization.cpp
-extern HWND gWindowHandle;
-
 //Implemented in Renderer.cpp
 extern Renderer* gRenderer;
 extern Camera* gCameraDefaultMesh;
