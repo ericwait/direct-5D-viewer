@@ -1379,9 +1379,9 @@ IDXGISwapChain1* Renderer::createSwapChain(HWND hWnd, Vec<size_t> dims, bool ste
 
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
-	swapDesc.BufferCount = 1;
+	swapDesc.BufferCount = 2;
 	swapDesc.Scaling = DXGI_SCALING_STRETCH;
-	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 
 	// TODO: Which alpha mode is desired?
 	swapDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
