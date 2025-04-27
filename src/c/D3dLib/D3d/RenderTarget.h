@@ -22,9 +22,6 @@ public:
 	virtual void resizeTarget(size_t width, size_t height);
 	virtual ~SwapChainTarget();
 
-	HDC getDC() const;
-	void releaseDC() const;
-
 	void present(UINT syncInterval, UINT flags) const;
 
 private:
@@ -40,7 +37,6 @@ private:
 	ID3D11RenderTargetView* renderTarget;
 
 	IDXGISwapChain1* swapChain;
-	IDXGISurface1* backBufferSurface;
 };
 
 class ReadbackRenderTarget: public RenderTarget

@@ -21,10 +21,6 @@ void SwapChainTarget::initRenderTarget()
 	if( FAILED(hr) )
 		std::runtime_error("Unable to get swap-chain back buffer!");
 
-	hr = backBuffer->QueryInterface(__uuidof(IDXGISurface1), (LPVOID*)&backBufferSurface);
-	if( FAILED(hr) )
-		std::runtime_error("Could not create GDI compatible backbuffer resource!");
-
 	// Create a render target view using the swapchain's back buffer
 	renderTarget = renderer->createRenderTargetView(backBuffer);
 
@@ -41,25 +37,11 @@ void SwapChainTarget::resizeTarget(size_t width, size_t height)
 
 	// Release all direct and indirect references to backbuffers
 	SAFE_RELEASE(renderTarget);
-	SAFE_RELEASE(backBufferSurface);
 
 	swapChain->ResizeBuffers(2, dims.x, dims.y, format, chainFlags);
 
 	// Reinitialize render target view and backbuffer surface
 	initRenderTarget();
-}
-
-HDC SwapChainTarget::getDC() const
-{
-	HDC hdc;
-	backBufferSurface->GetDC(FALSE, &hdc);
-
-	return hdc;
-}
-
-void SwapChainTarget::releaseDC() const
-{
-	backBufferSurface->ReleaseDC(NULL);
 }
 
 void SwapChainTarget::present(UINT syncInterval, UINT flags) const
@@ -70,7 +52,6 @@ void SwapChainTarget::present(UINT syncInterval, UINT flags) const
 SwapChainTarget::~SwapChainTarget()
 {
 	SAFE_RELEASE(renderTarget);
-	SAFE_RELEASE(backBufferSurface);
 	SAFE_RELEASE(swapChain);
 }
 
