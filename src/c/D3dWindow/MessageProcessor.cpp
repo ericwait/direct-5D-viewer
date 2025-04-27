@@ -25,12 +25,6 @@
 #include <time.h>
 #include <thread>
 
-bool gUpdateShaders = true;
-bool gPlay = false;
-bool gRotate = false;
-bool gCapture = false;
-
-float gFramesPerSec = 5;
 float numAngles = 720.0f;
 
 const DirectX::XMMATRIX ROT_X = DirectX::XMMatrixRotationY(-1.0f/(numAngles)*DirectX::XM_2PI);

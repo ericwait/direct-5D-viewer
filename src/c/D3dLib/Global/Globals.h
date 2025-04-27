@@ -39,7 +39,7 @@ extern Camera* gCameraDefaultMesh;
 extern OrthoCamera* gCameraWidget;
 extern TextCamera* gCameraText;
 
-//Implemented in MessageProcessor.cpp
+//Implemented in Renderer.cpp
 extern bool gUpdateShaders;
 extern bool gPlay;
 extern bool gRotate;

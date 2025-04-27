@@ -48,6 +48,14 @@ Camera* gCameraDefaultMesh = NULL;
 OrthoCamera* gCameraWidget = NULL;
 TextCamera* gCameraText = NULL;
 
+// TODO: Try to get rid of all these globals!
+bool gUpdateShaders = true;
+bool gPlay = false;
+bool gRotate = false;
+bool gCapture = false;
+
+float gFramesPerSec = 5;
+
 
 const std::string SHADER_DIR = "Shaders";
 const float Renderer::cornerVolumeDist = 1.75f;
