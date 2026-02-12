@@ -1,4 +1,10 @@
 function Close()
+%Close Closes the Direct 5D Viewer and cleans up resources.
+%
+%   D3d.Close()
+%
+%   Closes the viewer window, stops the message timer, and clears
+%   global handles and flags.
 global d3dtimer D3dUICtrlHandles D3dIsOpen
 
 if (~isempty(D3dUICtrlHandles))

@@ -1,4 +1,14 @@
 function BuildMexObject(mexFile, objectName)
+%BuildMexObject Wraps a Mex file into a Matlab reference class.
+%   D3d.BuildMexObject(mexFile, objectName)
+%
+%   This function inspects a mex file (which must support the 'Info'
+%   command) and generates a Matlab class wrapper with static methods for
+%   each command supported by the mex file.
+%
+%   Inputs:
+%       mexFile:    Path to the compiled mex file (e.g., 'Mex.mexw64').
+%       objectName: Name of the class to create (e.g., 'Viewer').
     oldPath = pwd();
     cleanupObj = onCleanup(@()(cleanupFunc(oldPath)));
 

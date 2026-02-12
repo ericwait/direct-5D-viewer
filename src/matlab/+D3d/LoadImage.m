@@ -1,4 +1,15 @@
-%LOADIMAGE D3d.LoadImage( im, bufferNum, frameNumber, nonNormalized)
+%LoadImage Loads an image into the D3d Viewer texture buffer.
+%   D3d.LoadImage(im, bufferNum, frameNumber, normalize, prctSat)
+%
+%   Inputs:
+%       im:             Image data (n-D array).
+%       bufferNum:      (Optional) 1 for 'original', 2 for 'processed'. Defaults to 1.
+%       frameNumber:    (Optional) Specific frame index to load.
+%       normalize:      (Optional) Boolean to normalize image data. Defaults to true.
+%       prctSat:        (Optional) Percentage saturation for normalization.
+%
+%   Returns:
+%       im8:            The image data converted to uint8.
 
 function im8 = LoadImage( im, bufferNum, frameNumber, normalize, prctSat )
     global D3dIsOpen

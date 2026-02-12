@@ -1,4 +1,10 @@
 function LoadTransferFunction(path)
+%LoadTransferFunction Loads a transfer function (color mapping) from a JSON file.
+%   D3d.LoadTransferFunction(path)
+%
+%   Inputs:
+%       path:   (Optional) Path to the .json transfer function file.
+%               If omitted, a file selection dialog is shown.
     [imageData, colors, channelData] = D3d.UI.Ctrl.GetUserData();
     
     if (~exist('path','var'))

@@ -1,18 +1,20 @@
 function [varargout] = Open( im, imData, imagePath, mesagePkgStr )
-%OPEN [varargout] = D3d.Open( im, imData, imagePath )
-%Opens the directX 3D-5D viewer with either and image, imData, imagePath,
-%or empty.  Will return the image and image data if requested.
+%Open Opens the directX 3D-5D viewer.
+%   [im, imData] = D3d.Open(im, imData, imagePath, messagePkgStr)
 %
-%IM can be a 3D to 5D image
-%IM_DATA can be the meta data in the format like that returned from
-%   tiffReader
-%IMAGE_PATH can be the path to the metadata file that can be read by
-%   tiffReader
+%   Inputs:
+%       im:             (Optional) A 3D to 5D image matrix.
+%       imData:         (Optional) Metadata structure (e.g., from tiffReader).
+%       imagePath:      (Optional) Path to the metadata file.
+%       messagePkgStr:  (Optional) String for external message function package.
 %
-%*******************************************************************
-% GLOBALS:
-% d3dtimer - makes a timer that will call checkMessage
-%*******************************************************************
+%   Outputs:
+%       im:             The image array (if loaded).
+%       imData:         The metadata structure (if loaded).
+%
+%   globals:
+%       d3dtimer:       Timer for checking messages.
+%       D3dIsOpen:      Flag indicating if the viewer is open.
 
     global EXT_MESAGE_FUNC D3dIsOpen
 

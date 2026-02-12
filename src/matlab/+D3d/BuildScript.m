@@ -1,3 +1,8 @@
+%BuildScript A script to rebuild the D3d.Viewer class from the compiled Mex file.
+%
+%   This script assumes the C++ project has been built and the mex file exists
+%   in the expected relative path. It regenerates the @Viewer class folder.
+
 curPath = pwd();
 D3dPath = fileparts(which('D3d.Open'));
 cd(D3dPath)

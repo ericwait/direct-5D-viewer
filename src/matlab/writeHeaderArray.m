@@ -1,4 +1,11 @@
 function writeHeaderArray(fid,name,val)
+%writeHeaderArray Writes a Matlab array to a C-style header file.
+%   writeHeaderArray(fid, name, val)
+%
+%   Inputs:
+%       fid:    File identifier for the open header file.
+%       name:   Name of the variable to create in the C header.
+%       val:    Numeric array values to write.
     tst = num2str(val(:),'%.9g');
     fieldstr = ['%' num2str(size(tst,2)) '.9g'];
 

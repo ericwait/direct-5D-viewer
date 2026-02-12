@@ -1,4 +1,10 @@
 function SaveTransferFunction(pathName,fileName)
+%SaveTransferFunction Saves the current transfer function (color/alpha) to JSON.
+%   D3d.SaveTransferFunction(pathName, fileName)
+%
+%   Inputs:
+%       pathName:   (Optional) Directory to save to.
+%       fileName:   (Optional) Name of the JSON file.
     [imageData, ~, channelData] = D3d.UI.Ctrl.GetUserData();
 
     if (~exist('fileName','var') || isempty(fileName))
