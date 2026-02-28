@@ -33,3 +33,16 @@ if(Matlab_FOUND)
 else()
     message(WARNING "Matlab not found, skipping src/c/Mex")
 endif()
+
+# Check for PyBind11 and add Python extension if found
+find_package(pybind11 QUIET)
+if (pybind11_FOUND)
+    message(STATUS "PyBind11 found, building Python extension")
+    add_subdirectory(src/c/Python)
+else()
+    message(STATUS "PyBind11 not found, checking environment or vcpkg...")
+    # Fallback or just warn
+    # For now, let's assume if it wasn't found, we skip it to avoid breaking build
+    # But since we are explicitly testing it, let's try to be noisy if it fails
+    message(WARNING "PyBind11 NOT FOUND. Python extension will not be built.")
+endif()
